@@ -4,6 +4,7 @@ import { toFile } from "openai/uploads";
 import { env } from "./env";
 import { db } from "@synoro/db/client";
 import { eventLog } from "@synoro/db/schema";
+import { createId } from "@synoro/db";
 
 const bot = new Bot(env.TELEGRAM_BOT_TOKEN);
 const openai = new OpenAI({ apiKey: env.OPENAI_API_KEY });
@@ -35,7 +36,7 @@ async function logEvent(params: {
 }) {
   try {
     await db.insert(eventLog).values({
-      id: crypto.randomUUID(),
+      id: createId(),
       source: "telegram",
       chatId: params.chatId,
       type: params.type,

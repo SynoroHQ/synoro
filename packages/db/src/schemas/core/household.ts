@@ -1,7 +1,8 @@
 import { pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { createId } from "@paralleldrive/cuid2";
 
 export const household = pgTable("household", {
-  id: text("id").primaryKey(),
+  id: text("id").primaryKey().$defaultFn(createId),
   name: text("name").notNull(),
   // withTimezone helps if you use timestamptz in PG
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

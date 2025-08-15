@@ -1,13 +1,13 @@
-import { pgTable, primaryKey } from "drizzle-orm/pg-core";
+import { pgTable, primaryKey, text, jsonb } from "drizzle-orm/pg-core";
 import { event } from "./event";
 
 export const eventProperty = pgTable(
   "event_property",
-  (t) => ({
-    eventId: t.text().notNull().references(() => event.id, { onDelete: "cascade" }),
-    key: t.text().notNull(),
-    value: t.jsonb().$type<unknown>(),
-  }),
+  {
+    eventId: text("event_id").notNull().references(() => event.id, { onDelete: "cascade" }),
+    key: text("key").notNull(),
+    value: jsonb("value").$type<unknown>(),
+  },
   (table) => ({
     pk: primaryKey({ columns: [table.eventId, table.key] }),
   })
