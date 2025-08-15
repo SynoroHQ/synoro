@@ -57,18 +57,24 @@ bot.command("start", async (ctx: Context) => {
 
 bot.on("message:text", async (ctx: Context) => {
   const text = ctx.message.text ?? "";
-  // TODO: логировать в БД (@synoro/db)
-  const tip = await advise(text);
-  const msg = tip
-    ? `Записал: “${text}”.\nСовет: ${tip}`
-    : `Записал: “${text}”.`;
-  await ctx.reply(msg);
-  await logEvent({
-    chatId: String(ctx.chat?.id ?? "unknown"),
-    type: "text",
-    text,
-    meta: { user: ctx.from?.username ?? ctx.from?.id },
-  });
+  let tip = "";
+  try {
+    tip = await advise(text);
+    const msg = tip
+      ? `Записал: “${text}”.\nСовет: ${tip}`
+      : `Записал: “${text}”.`;
+    await ctx.reply(msg);
+  } catch (err) {
+    console.error("Text handling error:", err);
+    await ctx.reply("Не удалось обработать сообщение. Попробуйте ещё раз позже.");
+  } finally {
+    await logEvent({
+      chatId: String(ctx.chat?.id ?? "unknown"),
+      type: "text",
+      text,
+      meta: { user: ctx.from?.username ?? ctx.from?.id },
+    });
+  }
 });
 
 bot.on(["message:voice", "message:audio"], async (ctx: Context) => {
