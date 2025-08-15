@@ -1,8 +1,9 @@
-import { pgTable } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
-export const household = pgTable("household", (t) => ({
-  id: t.text().primaryKey(),
-  name: t.text().notNull(),
-  createdAt: t.timestamp().notNull(),
-  updatedAt: t.timestamp().notNull(),
-}));
+export const household = pgTable("household", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  // withTimezone helps if you use timestamptz in PG
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
