@@ -18,7 +18,7 @@ export async function handleText(ctx: Context): Promise<void> {
         langfuseTraceId: traceId,
         chatId,
         userId,
-        messageId,
+        ...(messageId ? { messageId } : {}),
         channel: "telegram",
         type: "text",
       },

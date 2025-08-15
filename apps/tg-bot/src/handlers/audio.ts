@@ -1,4 +1,5 @@
 import type { Context } from "grammy";
+import { randomUUID } from "crypto";
 import { env } from "../env";
 import { advise, transcribe } from "../services/openai";
 import { logEvent } from "../services/db";
@@ -11,6 +12,11 @@ export async function handleAudio(ctx: Context): Promise<void> {
   }
 
   try {
+    const traceId = randomUUID();
+    const chatId = String(ctx.chat?.id ?? "unknown");
+    const userId = ctx.from?.id ? String(ctx.from.id) : "unknown";
+    const messageId = ctx.message && "message_id" in ctx.message ? String(ctx.message.message_id) : undefined;
+
     const file = await ctx.api.getFile(fileId);
     if (!file.file_path) throw new Error("Telegram не вернул file_path");
 
@@ -23,7 +29,18 @@ export async function handleAudio(ctx: Context): Promise<void> {
     const parts = file.file_path.split("/");
     const filename = parts[parts.length - 1] || "audio.ogg";
 
-    const text = await transcribe(buffer, filename);
+    const text = await transcribe(buffer, filename, {
+      functionId: "tg-transcribe-audio",
+      metadata: {
+        langfuseTraceId: traceId,
+        chatId,
+        userId,
+        ...(messageId ? { messageId } : {}),
+        channel: "telegram",
+        type: "audio",
+        filename,
+      },
+    });
 
     await logEvent({
       chatId: String(ctx.chat?.id ?? "unknown"),
@@ -37,7 +54,17 @@ export async function handleAudio(ctx: Context): Promise<void> {
       return;
     }
 
-    const tip = await advise(text);
+    const tip = await advise(text, {
+      functionId: "tg-advise-audio",
+      metadata: {
+        langfuseTraceId: traceId,
+        chatId,
+        userId,
+        ...(messageId ? { messageId } : {}),
+        channel: "telegram",
+        type: "audio",
+      },
+    });
     await ctx.reply(tip ? `Распознал: ${text}\nСовет: ${tip}` : `Распознал: ${text}`);
   } catch (err) {
     console.error("Audio handling error:", err);

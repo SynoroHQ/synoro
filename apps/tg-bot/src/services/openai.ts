@@ -2,6 +2,7 @@ import { generateText, experimental_transcribe as aiTranscribe } from "ai";
 import { openai } from "@ai-sdk/openai";
 import { env } from "../env";
 import { getPromptSafe } from "@synoro/prompts";
+import type { AttributeValue } from "@opentelemetry/api";
 
 const oai = openai({ apiKey: env.OPENAI_API_KEY });
 
@@ -9,7 +10,6 @@ const TRANSCRIBE_MODEL = env.OPENAI_TRANSCRIBE_MODEL ?? "whisper-1"; // or "gpt-
 const ADVICE_MODEL = env.OPENAI_ADVICE_MODEL ?? "gpt-4o-mini";
 const ASSISTANT_PROMPT = getPromptSafe(env.PROMPTS_ASSISTANT_KEY);
 
-export type AttributeValue = string | number | boolean | ReadonlyArray<string | number | boolean>;
 export type TelemetryMeta = Record<string, AttributeValue> & {
   langfuseTraceId?: string;
   langfuseUpdateParent?: boolean;

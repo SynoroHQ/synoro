@@ -9,6 +9,9 @@ export const env = createEnv({
     OPENAI_TRANSCRIBE_MODEL: z.string().optional(),
     OPENAI_ADVICE_MODEL: z.string().optional(),
     PROMPTS_ASSISTANT_KEY: z.string().optional(),
+    LANGFUSE_SECRET_KEY: z.string().optional(),
+    LANGFUSE_PUBLIC_KEY: z.string().optional(),
+    LANGFUSE_BASEURL: z.string().url().optional(),
   },
   runtimeEnv: {
     NODE_ENV: process.env.NODE_ENV,
@@ -17,6 +20,9 @@ export const env = createEnv({
     OPENAI_TRANSCRIBE_MODEL: process.env.OPENAI_TRANSCRIBE_MODEL,
     OPENAI_ADVICE_MODEL: process.env.OPENAI_ADVICE_MODEL,
     PROMPTS_ASSISTANT_KEY: process.env.PROMPTS_ASSISTANT_KEY,
+    LANGFUSE_SECRET_KEY: process.env.LANGFUSE_SECRET_KEY,
+    LANGFUSE_PUBLIC_KEY: process.env.LANGFUSE_PUBLIC_KEY,
+    LANGFUSE_BASEURL: process.env.LANGFUSE_BASEURL,
   },
   skipValidation:
     !!process.env.CI ||
