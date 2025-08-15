@@ -1,33 +1,49 @@
-import OpenAI from "openai";
-import { toFile } from "openai/uploads";
+import { generateText, experimental_transcribe as aiTranscribe } from "ai";
+import { openai } from "@ai-sdk/openai";
 import { env } from "../env";
+import { getPromptSafe } from "@synoro/prompts";
 
-const openai = new OpenAI({ apiKey: env.OPENAI_API_KEY });
+const oai = openai({ apiKey: env.OPENAI_API_KEY });
 
-const TRANSCRIBE_MODEL = process.env.OPENAI_TRANSCRIBE_MODEL ?? "whisper-1"; // or "gpt-4o-mini-transcribe"
-const ADVICE_MODEL = process.env.OPENAI_ADVICE_MODEL ?? "gpt-4o-mini";
+const TRANSCRIBE_MODEL = env.OPENAI_TRANSCRIBE_MODEL ?? "whisper-1"; // or "gpt-4o-mini-transcribe"
+const ADVICE_MODEL = env.OPENAI_ADVICE_MODEL ?? "gpt-4o-mini";
+const ASSISTANT_PROMPT = getPromptSafe(env.PROMPTS_ASSISTANT_KEY);
 
-export async function advise(input: string): Promise<string> {
-  const res = await openai.chat.completions.create({
-    model: ADVICE_MODEL,
-    messages: [
-      {
-        role: "system",
-        content:
-          "Ты полезный домашний ассистент. Кратко анализируй событие и давай практичные советы. Отвечай по-русски, до 3 предложений.",
-      },
-      { role: "user", content: input },
-    ],
+export type AttributeValue = string | number | boolean | ReadonlyArray<string | number | boolean>;
+export type TelemetryMeta = Record<string, AttributeValue> & {
+  langfuseTraceId?: string;
+  langfuseUpdateParent?: boolean;
+};
+
+export type Telemetry = {
+  functionId?: string;
+  metadata?: TelemetryMeta;
+};
+
+export async function advise(input: string, telemetry?: Telemetry): Promise<string> {
+  const { text } = await generateText({
+    model: oai(ADVICE_MODEL),
+    system: ASSISTANT_PROMPT,
+    prompt: input,
     temperature: 0.4,
+    experimental_telemetry: {
+      isEnabled: true,
+      functionId: telemetry?.functionId ?? "bot-advise",
+      metadata: telemetry?.metadata,
+    },
   });
-  return res.choices[0]?.message?.content?.trim() ?? "";
+  return text.trim();
 }
 
-export async function transcribe(buffer: Buffer, filename: string): Promise<string> {
-  const transcription = await openai.audio.transcriptions.create({
-    file: await toFile(buffer, filename),
-    model: TRANSCRIBE_MODEL,
-    // language: "ru"
+export async function transcribe(
+  buffer: Buffer,
+  _filename: string,
+  telemetry?: Telemetry,
+): Promise<string> {
+  const { text } = await aiTranscribe({
+    model: oai.transcription(TRANSCRIBE_MODEL),
+    audio: buffer,
+    // mimeType: "audio/mpeg", // можно указать при необходимости
   });
-  return transcription.text ?? "";
+  return text ?? "";
 }

@@ -17,11 +17,16 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "grammy": "^1.32.0",
-    "openai": "^4.58.2",
-    "zod": "4.0.17",
+    "@ai-sdk/openai": "^2.0.15",
+    "@opentelemetry/auto-instrumentations-node": "^0.62.1",
+    "@opentelemetry/sdk-node": "^0.203.0",
+    "@synoro/db": "workspace:*",
+    "@synoro/prompts": "workspace:*",
     "@t3-oss/env-core": "0.13.8",
-    "@synoro/db": "workspace:*"
+    "ai": "^5.0.15",
+    "grammy": "^1.37.1",
+    "langfuse-vercel": "^3.38.4",
+    "zod": "4.0.17"
   },
   "devDependencies": {
     "@synoro/eslint-config": "workspace:*",
@@ -29,7 +34,7 @@
     "@synoro/tsconfig": "workspace:*",
     "@types/node": "24.3.0",
     "dotenv-cli": "10.0.0",
-    "eslint": "9.32.0",
+    "eslint": "9.33.0",
     "prettier": "3.6.2",
     "tsup": "8.5.0",
     "typescript": "5.9.2"

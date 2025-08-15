@@ -8,6 +8,7 @@ export const env = createEnv({
     OPENAI_API_KEY: z.string().min(10, "OPENAI_API_KEY is required"),
     OPENAI_TRANSCRIBE_MODEL: z.string().optional(),
     OPENAI_ADVICE_MODEL: z.string().optional(),
+    PROMPTS_ASSISTANT_KEY: z.string().optional(),
   },
   runtimeEnv: {
     NODE_ENV: process.env.NODE_ENV,
@@ -15,6 +16,7 @@ export const env = createEnv({
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     OPENAI_TRANSCRIBE_MODEL: process.env.OPENAI_TRANSCRIBE_MODEL,
     OPENAI_ADVICE_MODEL: process.env.OPENAI_ADVICE_MODEL,
+    PROMPTS_ASSISTANT_KEY: process.env.PROMPTS_ASSISTANT_KEY,
   },
   skipValidation:
     !!process.env.CI ||
