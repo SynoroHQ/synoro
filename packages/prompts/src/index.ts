@@ -8,7 +8,7 @@ export * from "./core/types";
 export type { PromptDefinition } from "./core/prompt";
 export { getPromptSafeFromRegistry } from "./core/prompt";
 export * from "./publish/langfuse";
-export { assistant } from "./prompts/assistant";
+export { default as assistant } from "./prompts/assistant";
 
 export function getPrompt(key: string): string {
   return registry[key]?.prompt ?? "";

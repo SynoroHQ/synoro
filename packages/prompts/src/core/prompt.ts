@@ -17,6 +17,19 @@ export function getPrompt(def: PromptDefinition): string {
   return def.prompt;
 }
 
+export function compilePrompt(
+  def: PromptDefinition,
+  vars?: Record<string, string>,
+): string {
+  if (!vars) return def.prompt;
+  let output = def.prompt;
+  for (const [k, v] of Object.entries(vars)) {
+    const rx = new RegExp(`\\{\\{\\s*${k}\\s*\\}}`, "g");
+    output = output.replace(rx, v);
+  }
+  return output;
+}
+
 export function getPromptSafeFromRegistry(
   registry: Record<string, PromptDefinition>,
   key?: string,

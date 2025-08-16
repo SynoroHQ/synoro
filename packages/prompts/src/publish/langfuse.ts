@@ -1,7 +1,7 @@
 import type { PromptDefinition } from "../core/prompt";
 import type { LangfuseClientLike } from "../core/types";
 import { createModelConfig, DEFAULT_MODEL } from "../core/models";
-import { assistant } from "../prompts/assistant";
+import assistant from "../prompts/assistant";
 import { registry } from "../registry";
 
 export async function createPromptInCloud(

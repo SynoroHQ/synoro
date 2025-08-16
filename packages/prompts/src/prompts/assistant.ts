@@ -1,4 +1,4 @@
-import type { PromptDefinition } from "../../core/prompt";
+import type { PromptDefinition } from "../core/prompt";
 
 export const assistantTemplate = `
 # ROLE
@@ -11,7 +11,7 @@ export const assistantTemplate = `
 Всегда отвечай по-русски. Длина ответа — до 3 предложений.
 `;
 
-export const assistant: PromptDefinition = {
+const assistant: PromptDefinition = {
   key: "assistant",
   name: "assistant",
   type: "text",
@@ -20,3 +20,5 @@ export const assistant: PromptDefinition = {
   defaultModel: "gpt-4o-mini",
   defaultTemperature: 0.4,
 };
+
+export default assistant;

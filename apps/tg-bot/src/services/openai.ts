@@ -86,3 +86,42 @@ export async function transcribe(
   });
   return text ?? "";
 }
+
+type ParsedTask = {
+  action: string;
+  object: string;
+  confidence?: number;
+};
+
+export async function parseTask(
+  text: string,
+  telemetry?: Telemetry,
+): Promise<ParsedTask | null> {
+  const system = `You extract a concise household maintenance task from Russian text.
+Return ONLY JSON with keys: action, object, confidence (0..1). No explanations.`;
+  try {
+    const { text: out } = await generateText({
+      model: oai(ADVICE_MODEL),
+      system,
+      prompt: `Text: ${text}\nJSON:`,
+      temperature: 0.2,
+      experimental_telemetry: {
+        isEnabled: true,
+        functionId: telemetry?.functionId ?? "bot-parse-task",
+        metadata: telemetry?.metadata,
+      },
+    });
+    const trimmed = out.trim();
+    const jsonStart = trimmed.indexOf("{");
+    const jsonEnd = trimmed.lastIndexOf("}");
+    const payload =
+      jsonStart >= 0 && jsonEnd > jsonStart
+        ? trimmed.slice(jsonStart, jsonEnd + 1)
+        : trimmed;
+    const parsed = JSON.parse(payload) as ParsedTask;
+    if (!parsed.action || !parsed.object) return null;
+    return parsed;
+  } catch (_e) {
+    return null;
+  }
+}

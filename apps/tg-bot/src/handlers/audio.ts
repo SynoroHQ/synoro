@@ -3,7 +3,7 @@ import type { Context } from "grammy";
 
 import { env } from "../env";
 import { logEvent } from "../services/db";
-import { advise, transcribe } from "../services/openai";
+import { advise, parseTask, transcribe } from "../services/openai";
 
 export async function handleAudio(ctx: Context): Promise<void> {
   const fileId = ctx.message?.voice?.file_id ?? ctx.message?.audio?.file_id;
@@ -46,11 +46,24 @@ export async function handleAudio(ctx: Context): Promise<void> {
       },
     });
 
+    const parsed = await parseTask(text, {
+      functionId: "tg-parse-audio",
+      metadata: {
+        langfuseTraceId: traceId,
+        chatId,
+        userId,
+        ...(messageId ? { messageId } : {}),
+        channel: "telegram",
+        type: "audio",
+        filename,
+      },
+    });
+
     await logEvent({
       chatId: String(ctx.chat?.id ?? "unknown"),
       type: "audio",
       text,
-      meta: { file_path: file.file_path },
+      meta: { file_path: file.file_path, parsed },
     });
 
     if (text.trim().length === 0) {

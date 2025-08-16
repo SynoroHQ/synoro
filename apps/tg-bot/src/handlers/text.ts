@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import type { Context } from "grammy";
 
 import { logEvent } from "../services/db";
-import { advise } from "../services/openai";
+import { advise, parseTask } from "../services/openai";
 
 export async function handleText(ctx: Context): Promise<void> {
   const text = ctx.message?.text ?? "";
@@ -16,6 +16,16 @@ export async function handleText(ctx: Context): Promise<void> {
         ? String(ctx.message.message_id)
         : undefined;
 
+    const parsed = await parseTask(text, {
+      functionId: "tg-parse-text",
+      metadata: {
+        langfuseTraceId: traceId,
+        chatId,
+        userId,
+        channel: "telegram",
+        type: "text",
+      },
+    });
     tip = await advise(text, {
       functionId: "tg-handle-text",
       metadata: {
@@ -41,7 +51,7 @@ export async function handleText(ctx: Context): Promise<void> {
       chatId: String(ctx.chat?.id ?? "unknown"),
       type: "text",
       text,
-      meta: { user: ctx.from?.username ?? ctx.from?.id },
+      meta: { user: ctx.from?.username ?? ctx.from?.id, parsed },
     });
   }
 }
