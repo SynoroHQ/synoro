@@ -29,3 +29,13 @@ export function shouldLog(parsed: unknown): boolean {
   // Log only if we could extract a structured task
   return parsed != null;
 }
+
+export function extractTags(text: string): string[] {
+  const t = (text || "").trim();
+  if (!t) return [];
+  const matches = t.match(/#([\p{L}][\p{L}\p{N}_-]*)/gu) || [];
+  return matches
+    .map((m) => m.slice(1))
+    .filter((tag) => tag.length > 0)
+    .slice(0, 20);
+}

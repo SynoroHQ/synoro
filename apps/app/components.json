@@ -1,0 +1,21 @@
+{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "new-york",
+  "rsc": true,
+  "tsx": true,
+  "tailwind": {
+    "config": "node_modules/@synoro/ui/postcss.config.mjs",
+    "css": "src/app/globals.css",
+    "baseColor": "neutral",
+    "cssVariables": true,
+    "prefix": ""
+  },
+  "aliases": {
+    "components": "@/components",
+    "utils": "@/lib/utils",
+    "ui": "@synoro/ui/components",
+    "lib": "@synoro/ui/lib",
+    "hooks": "@synoro/ui/hooks"
+  },
+  "iconLibrary": "lucide"
+}

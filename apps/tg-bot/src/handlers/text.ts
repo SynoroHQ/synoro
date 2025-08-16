@@ -2,7 +2,8 @@ import { randomUUID } from "node:crypto";
 import type { Context } from "grammy";
 
 import { logEvent } from "../services/db";
-import { advise, parseTask, classifyRelevance } from "../services/openai";
+import { advise, classifyRelevance, parseTask } from "../services/openai";
+import { extractTags } from "../services/relevance";
 
 export async function handleText(ctx: Context): Promise<void> {
   const text = ctx.message?.text ?? "";
@@ -50,23 +51,25 @@ export async function handleText(ctx: Context): Promise<void> {
   } finally {
     try {
       const cls = await classifyRelevance(text);
-      const relevant = (cls?.relevant === true) || Boolean(parsed);
+      const relevant = cls?.relevant === true || Boolean(parsed);
       if (relevant) {
+        const tags = extractTags(text);
         await logEvent({
           chatId: String(ctx.chat?.id ?? "unknown"),
           type: "text",
           text,
-          meta: { user: ctx.from?.username ?? ctx.from?.id, parsed },
+          meta: { user: ctx.from?.username ?? ctx.from?.id, parsed, tags },
         });
       }
     } catch (_e) {
       // If classification fails, log only if parsed exists
       if (parsed) {
+        const tags = extractTags(text);
         await logEvent({
           chatId: String(ctx.chat?.id ?? "unknown"),
           type: "text",
           text,
-          meta: { user: ctx.from?.username ?? ctx.from?.id, parsed },
+          meta: { user: ctx.from?.username ?? ctx.from?.id, parsed, tags },
         });
       }
     }
