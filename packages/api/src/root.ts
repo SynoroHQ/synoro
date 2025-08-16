@@ -1,20 +1,22 @@
+import { createTRPCRouter } from "./trpc";
 import { adminsRouter } from "./router/admins";
 import { attachmentsRouter } from "./router/attachments";
 import { authRouter } from "./router/auth";
 import { bannersRouter } from "./router/banners";
 import { blogRouter } from "./router/blog";
-import { brandsRouter } from "./router/brands";
-import { categoriesRouter } from "./router/categories";
-import { customersRouter } from "./router/customers";
-import { dashboardRouter } from "./router/dashboard";
-import { deliverySettingsRouter } from "./router/delivery-settings";
-import { ordersRouter } from "./router/orders";
-import { productAttributeValuesRouter } from "./router/product-attribute-values";
-import { productTypeAttributesRouter } from "./router/product-type-attributes";
-import { productTypesRouter } from "./router/product-types";
-import { productVariantsRouter } from "./router/product-variants";
-import { productsRouter } from "./router/products";
-import { createTRPCRouter } from "./trpc";
+import { 
+  brandsRouter,
+  categoriesRouter,
+  customersRouter,
+  dashboardRouter,
+  deliverySettingsRouter,
+  ordersRouter,
+  productTypesRouter,
+  productTypeAttributesRouter,
+  productAttributeValuesRouter,
+  productsRouter,
+  productVariantsRouter,
+} from "./router/placeholder-routers";
 
 export const appRouter = createTRPCRouter({
   admins: adminsRouter,

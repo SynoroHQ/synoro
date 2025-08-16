@@ -1,9 +1,9 @@
-import baseConfig from "@synoro/eslint-config/base";
+const { base } = require("@synoro/eslint-config");
 
 /** @type {import('typescript-eslint').Config} */
 export default [
   {
     ignores: ["dist/**"],
   },
-  ...baseConfig,
+  ...base,
 ];

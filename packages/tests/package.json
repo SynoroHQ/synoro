@@ -1,5 +1,5 @@
 {
-  "name": "@synoro/validators",
+  "name": "@synoro/tests",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -18,7 +18,7 @@
     "typecheck": "tsc --noEmit --emitDeclarationOnly false"
   },
   "dependencies": {
-    "zod": "4.0.17"
+    "vitest": "3.2.4"
   },
   "devDependencies": {
     "@synoro/eslint-config": "workspace:*",

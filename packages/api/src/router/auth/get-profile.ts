@@ -1,6 +1,6 @@
 import { protectedProcedure } from "../../trpc";
-import { admins } from "@qco/db/schema";
-import { eq } from "@qco/db";
+import { admins } from "@synoro/db/schema";
+import { eq } from "@synoro/db";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
