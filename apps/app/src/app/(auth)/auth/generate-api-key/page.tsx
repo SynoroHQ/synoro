@@ -1,6 +1,6 @@
 import { Suspense } from "react";
-import { GenerateApiKeyPage } from "@/features/auth/pages/generate-api-key-page";
 import { GenerateApiKeySkeleton } from "@/features/auth/components/generate-api-key-skeleton";
+import { GenerateApiKeyPage } from "@/features/auth/pages/generate-api-key-page";
 
 export default function GenerateApiKeyPageServer() {
   return (

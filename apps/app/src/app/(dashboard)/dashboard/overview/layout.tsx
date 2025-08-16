@@ -4,10 +4,15 @@ import {
   AppHeaderContent,
 } from "@/components/nav/app-header";
 import { AppSidebarTrigger } from "@/components/nav/app-sidebar";
-import { NavActions } from "./nav-actions";
 import { NavBreadcrumb } from "@/components/nav/nav-breadcrumb";
 
-export default function OverviewLayout({ children }: { children: React.ReactNode }) {
+import { NavActions } from "./nav-actions";
+
+export default function OverviewLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <div>
       <AppHeader>
@@ -19,7 +24,7 @@ export default function OverviewLayout({ children }: { children: React.ReactNode
           <NavActions />
         </AppHeaderActions>
       </AppHeader>
-      <main className="flex-1 w-full">{children}</main>
+      <main className="w-full flex-1">{children}</main>
     </div>
   );
 }

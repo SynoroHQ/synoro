@@ -4,9 +4,9 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container relative flex min-h-screen flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0">
-        <div className="relative hidden h-full flex-col bg-muted p-10 text-white lg:flex dark:border-r">
+    <div className="bg-background min-h-screen">
+      <div className="relative container flex min-h-screen flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0">
+        <div className="bg-muted relative hidden h-full flex-col p-10 text-white lg:flex dark:border-r">
           <div className="absolute inset-0 bg-zinc-900" />
           <div className="relative z-20 flex items-center text-lg font-medium">
             <svg
@@ -27,7 +27,8 @@ export default function AuthLayout({
           <div className="relative z-20 mt-auto">
             <blockquote className="space-y-2">
               <p className="text-lg">
-                &ldquo;This platform has transformed how we monitor our services and communicate with our users.&rdquo;
+                &ldquo;This platform has transformed how we monitor our services
+                and communicate with our users.&rdquo;
               </p>
               <footer className="text-sm">Sofia Davis, CTO</footer>
             </blockquote>

@@ -5,6 +5,7 @@ This guide explains how to migrate from the old structure to the new route group
 ## What Changed
 
 ### Before (Old Structure)
+
 ```
 app/
 ├── dashboard/
@@ -23,6 +24,7 @@ app/
 ```
 
 ### After (New Structure)
+
 ```
 app/
 ├── (auth)/
@@ -55,11 +57,13 @@ app/
 ### 1. Update Imports
 
 **Old:**
+
 ```tsx
 import { CreateUserDialog } from "@/components/forms/auth/create-user-dialog";
 ```
 
 **New:**
+
 ```tsx
 import { CreateUserDialog } from "@/features/auth/components/create-user-dialog";
 ```
@@ -67,11 +71,13 @@ import { CreateUserDialog } from "@/features/auth/components/create-user-dialog"
 ### 2. Update Route References
 
 **Old:**
+
 ```tsx
 <Link href="/dashboard/auth/users">Users</Link>
 ```
 
 **New:**
+
 ```tsx
 <Link href="/dashboard/auth/users">Users</Link>
 // URL remains the same, but structure is organized better
@@ -80,6 +86,7 @@ import { CreateUserDialog } from "@/features/auth/components/create-user-dialog"
 ### 3. Update Navigation Components
 
 **Old:**
+
 ```tsx
 // In navigation components
 const routes = [
@@ -89,6 +96,7 @@ const routes = [
 ```
 
 **New:**
+
 ```tsx
 // In navigation components
 const routes = [
@@ -101,12 +109,14 @@ const routes = [
 ### 4. Update Layout Imports
 
 **Old:**
+
 ```tsx
 // In dashboard pages
 import { AppSidebar } from "@/components/nav/app-sidebar";
 ```
 
 **New:**
+
 ```tsx
 // In dashboard pages - layout is now handled by route group
 // No need to import AppSidebar in individual pages

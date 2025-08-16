@@ -5,9 +5,11 @@ This project uses Next.js App Router with route groups to organize routes by fun
 ## Route Groups
 
 ### `(auth)` - Authentication Routes
+
 Routes for user authentication and authorization that don't require dashboard layout.
 
 **URL Structure:**
+
 - `/auth/login` - User login page
 - `/auth/register` - User registration page
 - `/auth/forgot-password` - Password recovery page
@@ -41,9 +43,11 @@ Routes for user authentication and authorization that don't require dashboard la
 **Layout:** `app/(auth)/layout.tsx` - Provides authentication-specific layout with branding and quotes.
 
 ### `(dashboard)` - Dashboard Routes
+
 Routes that require the dashboard layout with sidebar and header.
 
 **URL Structure:**
+
 - `/dashboard` - Main dashboard page (redirects to overview)
 - `/dashboard/overview` - Dashboard overview page
 - `/dashboard/auth` - Authentication management (redirects to overview)

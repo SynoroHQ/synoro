@@ -130,7 +130,9 @@ export default function AuthOverviewPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Authentication & Authorization</h1>
+        <h1 className="text-3xl font-bold tracking-tight">
+          Authentication & Authorization
+        </h1>
         <p className="text-muted-foreground">
           Manage users, roles, and security settings for your platform.
         </p>
@@ -147,23 +149,36 @@ export default function AuthOverviewPage() {
           </SectionHeader>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {stats.map((stat) => (
-              <Card key={stat.title} className="hover:shadow-md transition-shadow">
+              <Card
+                key={stat.title}
+                className="transition-shadow hover:shadow-md"
+              >
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
-                  <stat.icon className="h-4 w-4 text-muted-foreground" />
+                  <CardTitle className="text-sm font-medium">
+                    {stat.title}
+                  </CardTitle>
+                  <stat.icon className="text-muted-foreground h-4 w-4" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{stat.value}</div>
                   <div className="flex items-center space-x-2">
-                    <span className={`text-xs ${
-                      stat.changeType === "positive" ? "text-green-600" :
-                      stat.changeType === "negative" ? "text-red-600" : "text-gray-600"
-                    }`}>
+                    <span
+                      className={`text-xs ${
+                        stat.changeType === "positive"
+                          ? "text-green-600"
+                          : stat.changeType === "negative"
+                            ? "text-red-600"
+                            : "text-gray-600"
+                      }`}
+                    >
                       {stat.change}
                     </span>
-                    <TrendingUp className="h-3 w-3 text-muted-foreground" />
+                    <TrendingUp className="text-muted-foreground h-3 w-3" />
                   </div>
-                  <Link href={stat.href} className="text-xs text-blue-600 hover:underline">
+                  <Link
+                    href={stat.href}
+                    className="text-xs text-blue-600 hover:underline"
+                  >
                     View details →
                   </Link>
                 </CardContent>
@@ -190,27 +205,32 @@ export default function AuthOverviewPage() {
             <CardContent>
               <div className="space-y-4">
                 {recentActivity.map((activity) => (
-                  <div key={activity.id} className="flex items-center justify-between p-3 rounded-lg border">
+                  <div
+                    key={activity.id}
+                    className="flex items-center justify-between rounded-lg border p-3"
+                  >
                     <div className="flex items-center space-x-3">
                       {getStatusIcon(activity.status)}
                       <div>
                         <p className="text-sm font-medium">{activity.user}</p>
-                        <p className="text-sm text-muted-foreground">{activity.description}</p>
+                        <p className="text-muted-foreground text-sm">
+                          {activity.description}
+                        </p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Badge className={getStatusColor(activity.status)}>
                         {activity.status}
                       </Badge>
-                      <span className="text-xs text-muted-foreground flex items-center">
-                        <Clock className="h-3 w-3 mr-1" />
+                      <span className="text-muted-foreground flex items-center text-xs">
+                        <Clock className="mr-1 h-3 w-3" />
                         {activity.timestamp}
                       </span>
                     </div>
                   </div>
                 ))}
               </div>
-              <div className="mt-4 pt-4 border-t">
+              <div className="mt-4 border-t pt-4">
                 <Button variant="outline" className="w-full">
                   View Full Activity Log
                 </Button>
@@ -228,7 +248,7 @@ export default function AuthOverviewPage() {
             </SectionDescription>
           </SectionHeader>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            <Card className="hover:shadow-md transition-shadow">
+            <Card className="transition-shadow hover:shadow-md">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <Users className="h-5 w-5" />
@@ -243,7 +263,7 @@ export default function AuthOverviewPage() {
               </CardContent>
             </Card>
 
-            <Card className="hover:shadow-md transition-shadow">
+            <Card className="transition-shadow hover:shadow-md">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <Shield className="h-5 w-5" />
@@ -254,11 +274,13 @@ export default function AuthOverviewPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Button variant="outline" className="w-full">View Roles</Button>
+                <Button variant="outline" className="w-full">
+                  View Roles
+                </Button>
               </CardContent>
             </Card>
 
-            <Card className="hover:shadow-md transition-shadow">
+            <Card className="transition-shadow hover:shadow-md">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <Key className="h-5 w-5" />
@@ -269,7 +291,9 @@ export default function AuthOverviewPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Button variant="outline" className="w-full">Manage Keys</Button>
+                <Button variant="outline" className="w-full">
+                  Manage Keys
+                </Button>
               </CardContent>
             </Card>
           </div>
