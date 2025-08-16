@@ -1,11 +1,11 @@
 import { Suspense } from "react";
-import { OverviewSkeleton } from "@/features/dashboard/components/overview-skeleton";
-import { OverviewPage } from "@/features/dashboard/pages/overview-page";
+import { DashboardSkeleton } from "@/features/dashboard/components/dashboard-skeleton";
+import { DashboardOverview } from "@/features/dashboard/pages/dashboard-overview";
 
-export default function OverviewPageServer() {
+export default function DashboardOverviewPage() {
   return (
-    <Suspense fallback={<OverviewSkeleton />}>
-      <OverviewPage />
+    <Suspense fallback={<DashboardSkeleton />}>
+      <DashboardOverview />
     </Suspense>
   );
 }

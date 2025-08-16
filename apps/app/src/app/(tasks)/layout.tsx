@@ -1,6 +1,6 @@
 import { AppSidebar } from "@/components/nav/app-sidebar";
 
-export default function DashboardLayout({
+export default function TasksLayout({
   children,
 }: {
   children: React.ReactNode;

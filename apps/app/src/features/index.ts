@@ -1,9 +1,5 @@
-// Features exports
+// Features exports for Synoro Personal Dashboard
 export * from "./auth";
 export * from "./dashboard";
-export * from "./monitors";
-export * from "./notifiers";
-export * from "./onboarding";
-export * from "./settings";
-export * from "./status-pages";
-export * from "./common";
+export * from "./tasks";
+export * from "./analytics";

@@ -1,83 +1,120 @@
-# Route Groups Structure
+# Synoro - Личный кабинет пользователя
 
-This project uses Next.js App Router with route groups to organize routes by functionality without affecting the URL structure.
+Этот проект представляет собой личный кабинет пользователя Synoro - платформу для организации задач, событий и аналитики личной жизни.
 
-## Route Groups
+## Структура приложения
 
-### `(auth)` - Authentication Routes
+### Route Groups
 
-Routes for user authentication and authorization that don't require dashboard layout.
+#### `(auth)` - Аутентификация и профиль
+Маршруты для входа, регистрации и управления профилем пользователя.
 
-**URL Structure:**
+**URL структура:**
+- `/auth/login` - Вход по email/паролю, Telegram или Google
+- `/auth/register` - Регистрация нового пользователя
+- `/auth/profile` - Профиль пользователя (имя, аватар, язык, часовой пояс)
+- `/auth/integrations` - Настройки интеграций (Telegram-бот, Google Calendar, email)
+- `/auth/security` - Управление безопасностью (смена пароля, 2FA)
 
-- `/auth/login` - User login page
-- `/auth/register` - User registration page
-- `/auth/forgot-password` - Password recovery page
-- `/auth/reset-password` - Password reset page
-- `/auth/verify-email` - Email verification page
-- `/auth/otp` - One-time password page
-- `/auth/profile` - User profile page
-- `/auth/change-password` - Change password page
-- `/auth/email-change` - Change email page
-- `/auth/email-change-verification` - Email change verification page
-- `/auth/logout` - Logout page
-- `/auth/teams` - Teams management page
-- `/auth/get-teams` - Get teams API page
-- `/auth/get-profile` - Get profile API page
-- `/auth/get-users` - Get users API page
-- `/auth/create-user` - Create user API page
-- `/auth/update-user` - Update user API page
-- `/auth/delete-user` - Delete user API page
-- `/auth/create-role` - Create role API page
-- `/auth/update-role` - Update role API page
-- `/auth/delete-role` - Delete role API page
-- `/auth/generate-api-key` - Generate API key API page
-- `/auth/revoke-api-key` - Revoke API key API page
-- `/auth/list-api-keys` - List API keys API page
-- `/auth/list-roles` - List roles API page
-- `/auth/list-users` - List users API page
-- `/auth/list-teams` - List teams API page
-- `/auth/list-permissions` - List permissions API page
-- `/auth/list-sessions` - List sessions API page
+**Layout:** `app/(auth)/layout.tsx` - Специальный дизайн с брендингом Synoro
 
-**Layout:** `app/(auth)/layout.tsx` - Provides authentication-specific layout with branding and quotes.
+#### `(dashboard)` - Главная страница
+Дашборд с краткой сводкой по пользователю.
 
-### `(dashboard)` - Dashboard Routes
+**URL структура:**
+- `/dashboard` - Главная страница (редирект на overview)
+- `/dashboard/overview` - Обзор дашборда
+- `/dashboard/search` - Поиск по логам
 
-Routes that require the dashboard layout with sidebar and header.
+**Функционал:**
+- Количество задач за день/неделю/месяц
+- Последние выполненные дела
+- Ближайшие напоминания
+- Поиск по логам
+- Виджет "Сегодня" - список задач/логов за текущий день
 
-**URL Structure:**
+**Layout:** `app/(dashboard)/layout.tsx` - С сайдбаром и основным контентом
 
-- `/dashboard` - Main dashboard page (redirects to overview)
-- `/dashboard/overview` - Dashboard overview page
-- `/dashboard/auth` - Authentication management (redirects to overview)
-- `/dashboard/auth/overview` - Auth overview with stats and activity
-- `/dashboard/auth/users` - User management page
-- `/dashboard/auth/roles` - Role management page
-- `/dashboard/auth/api-keys` - API key management page
+#### `(tasks)` - Управление задачами
+Система для создания, редактирования и управления задачами и событиями.
 
-**Layout:** `app/(dashboard)/layout.tsx` - Provides dashboard layout with AppSidebar.
+**URL структура:**
+- `/tasks` - Главная страница задач (редирект на list)
+- `/tasks/list` - Список всех задач
+- `/tasks/create` - Создание новой задачи
+- `/tasks/calendar` - Календарь событий и задач
+- `/tasks/rules` - Настройка автоматических правил
 
-## Benefits of Route Groups
+**Функционал:**
+- Ручное добавление записи (текст/категория/дата/теги)
+- Импорт из Telegram-бота
+- Категоризация (Дом, Авто, Здоровье, Финансы, Покупки)
+- Теги для гибкой фильтрации
+- Редактирование и объединение задач
+- Автоматические правила
+- Настройка напоминаний и повторяющихся задач
 
-1. **Organizational Structure**: Routes are grouped by functionality (auth vs dashboard)
-2. **No URL Impact**: Route groups don't affect the actual URL structure
-3. **Shared Layouts**: Each group can have its own layout without affecting others
-4. **Team Collaboration**: Different teams can work on different route groups
-5. **Code Organization**: Related routes are kept together in the file system
+**Layout:** `app/(tasks)/layout.tsx` - С сайдбаром для управления задачами
 
-## File Naming Convention
+#### `(analytics)` - Аналитика и отчеты
+Система аналитики и генерации отчетов.
 
-- Route groups use parentheses: `(auth)`, `(dashboard)`
-- Each group has its own `layout.tsx` file
-- Pages within groups follow Next.js App Router conventions
-- All pages use Suspense boundaries for loading states
-- Skeleton components provide consistent loading experiences
+**URL структура:**
+- `/analytics` - Главная страница аналитики (редирект на overview)
+- `/analytics/overview` - Обзор аналитики
+- `/analytics/reports` - Отчеты по месяцам
+- `/analytics/receipts` - Анализ чеков
+- `/analytics/export` - Экспорт отчетов
 
-## Migration Notes
+**Функционал:**
+- Графики активности по дням/неделям/месяцам
+- Распределение по категориям (пирог/бар-чарт)
+- Анализ времени и денег по направлениям
+- Отчеты по месяцам
+- Анализ чеков (траты по категориям, регулярные расходы)
+- Прогнозы бюджета
+- Экспорт отчетов (PDF, Excel)
 
-- Old routes in `app/dashboard/` are preserved for backward compatibility
-- New routes use the route group structure
-- All new development should use the route group structure
-- Features are organized in `src/features/` directory
-- UI components are imported from `@synoro/ui` package
+**Layout:** `app/(analytics)/layout.tsx` - С сайдбаром для аналитики
+
+## Архитектура Features
+
+### `src/features/auth/`
+Компоненты, хуки и утилиты для аутентификации и управления профилем.
+
+### `src/features/dashboard/`
+Компоненты, хуки и утилиты для главной страницы и поиска.
+
+### `src/features/tasks/`
+Компоненты, хуки и утилиты для управления задачами и событиями.
+
+### `src/features/analytics/`
+Компоненты, хуки и утилиты для аналитики и отчетов.
+
+## Преимущества структуры
+
+1. **Четкое разделение функционала** - каждый route group отвечает за свою область
+2. **Без влияния на URL** - route groups не меняют структуру URL
+3. **Общие layouts** - каждая группа имеет свой layout
+4. **Легкость разработки** - команды могут работать над разными группами
+5. **Масштабируемость** - легко добавлять новые функции
+6. **Соответствие требованиям** - структура точно соответствует описанному функционалу
+
+## Технологии
+
+- **Next.js 15** с App Router
+- **TypeScript** для типизации
+- **Tailwind CSS** для стилизации
+- **React Hook Form** для форм
+- **Zod** для валидации
+- **Suspense** для загрузки
+- **Skeleton компоненты** для UX
+
+## Разработка
+
+Все новые компоненты должны:
+- Использовать UI компоненты из `@synoro/ui`
+- Следовать структуре features
+- Использовать Suspense boundaries
+- Иметь skeleton-компоненты для загрузки
+- Следовать принципам личного кабинета, а не админки
