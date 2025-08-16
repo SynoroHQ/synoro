@@ -3,7 +3,13 @@ import type { Context } from "grammy";
 
 import { env } from "../env";
 import { logEvent } from "../services/db";
-import { advise, parseTask, transcribe, classifyRelevance } from "../services/openai";
+import {
+  advise,
+  classifyRelevance,
+  parseTask,
+  transcribe,
+} from "../services/openai";
+import { extractTags } from "../services/relevance";
 
 export async function handleAudio(ctx: Context): Promise<void> {
   const fileId = ctx.message?.voice?.file_id ?? ctx.message?.audio?.file_id;
@@ -81,13 +87,14 @@ export async function handleAudio(ctx: Context): Promise<void> {
 
     // Log only if relevant by LLM or if we extracted a structured task
     const cls = await classifyRelevance(text);
-    const relevant = (cls?.relevant === true) || Boolean(parsed);
+    const relevant = cls?.relevant === true || Boolean(parsed);
     if (relevant) {
+      const tags = extractTags(text);
       await logEvent({
         chatId: String(ctx.chat?.id ?? "unknown"),
         type: "audio",
         text,
-        meta: { file_path: file.file_path, parsed },
+        meta: { file_path: file.file_path, parsed, tags },
       });
     }
   } catch (err) {

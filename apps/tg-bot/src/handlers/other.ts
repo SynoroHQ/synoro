@@ -1,4 +1,5 @@
 import type { Context } from "grammy";
+
 import { logEvent } from "../services/db";
 import { classifyRelevance } from "../services/openai";
 
@@ -24,18 +25,25 @@ export async function handleOther(ctx: Context): Promise<void> {
             meta: {
               kind: "caption",
               messageType:
-                "photo" in msg ? "photo" :
-                "video" in msg ? "video" :
-                "document" in msg ? "document" :
-                "animation" in msg ? "animation" :
-                "sticker" in msg ? "sticker" :
-                "location" in msg ? "location" :
-                "contact" in msg ? "contact" :
-                "poll" in msg ? "poll" :
-                "other",
+                "photo" in msg
+                  ? "photo"
+                  : "video" in msg
+                    ? "video"
+                    : "document" in msg
+                      ? "document"
+                      : "animation" in msg
+                        ? "animation"
+                        : "sticker" in msg
+                          ? "sticker"
+                          : "location" in msg
+                            ? "location"
+                            : "contact" in msg
+                              ? "contact"
+                              : "poll" in msg
+                                ? "poll"
+                                : "other",
             },
           });
-        }
         }
       } catch (_e) {
         // ignore classification errors; do not log
