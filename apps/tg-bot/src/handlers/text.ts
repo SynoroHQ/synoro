@@ -7,6 +7,7 @@ import { advise, parseTask } from "../services/openai";
 export async function handleText(ctx: Context): Promise<void> {
   const text = ctx.message?.text ?? "";
   let tip = "";
+  let parsed: unknown = null;
   try {
     const traceId = randomUUID();
     const chatId = String(ctx.chat?.id ?? "unknown");
@@ -16,7 +17,7 @@ export async function handleText(ctx: Context): Promise<void> {
         ? String(ctx.message.message_id)
         : undefined;
 
-    const parsed = await parseTask(text, {
+    parsed = await parseTask(text, {
       functionId: "tg-parse-text",
       metadata: {
         langfuseTraceId: traceId,

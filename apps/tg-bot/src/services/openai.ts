@@ -3,7 +3,7 @@ import { openai } from "@ai-sdk/openai";
 import { experimental_transcribe as aiTranscribe, generateText } from "ai";
 import { Langfuse } from "langfuse";
 
-import { getPromptSafe } from "@synoro/prompts";
+import { DEFAULT_PROMPT_KEY, getPromptSafe } from "@synoro/prompts";
 
 import { env } from "../env";
 
@@ -29,7 +29,7 @@ async function getAssistantSystemPrompt(): Promise<string> {
           baseUrl: env.LANGFUSE_BASEURL,
         });
       }
-      const promptKey = env.PROMPTS_ASSISTANT_KEY ?? "assistant";
+      const promptKey = DEFAULT_PROMPT_KEY;
       const prompt = await lf.getPrompt(promptKey);
       // Compile with empty vars by default; extend if variables are added later
       const compiled = prompt.compile({});
@@ -40,8 +40,8 @@ async function getAssistantSystemPrompt(): Promise<string> {
     }
   }
 
-  // Fallback to local registry prompt
-  cachedSystemPrompt = getPromptSafe(env.PROMPTS_ASSISTANT_KEY).trim();
+  // Fallback to local registry prompt (defaults internally)
+  cachedSystemPrompt = getPromptSafe().trim();
   return cachedSystemPrompt;
 }
 
