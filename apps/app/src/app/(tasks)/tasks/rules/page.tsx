@@ -1,11 +1,8 @@
-import { Suspense } from "react";
-import { TaskRulesSkeleton } from "@/features/tasks/components/task-rules-skeleton";
-import { TaskRulesPage } from "@/features/tasks/pages/task-rules-page";
-
 export default function TaskRulesPageServer() {
   return (
-    <Suspense fallback={<TaskRulesSkeleton />}>
-      <TaskRulesPage />
-    </Suspense>
+    <div className="p-6">
+      <h1 className="mb-4 text-2xl font-bold">Task Rules</h1>
+      <p>Task rules functionality is under construction.</p>
+    </div>
   );
 }
