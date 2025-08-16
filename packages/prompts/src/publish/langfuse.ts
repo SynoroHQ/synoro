@@ -6,11 +6,16 @@ export async function createAssistantPromptInCloud(
   langfuse: LangfuseClientLike,
   model: string = DEFAULT_MODEL,
 ) {
-  await langfuse.createPrompt({
-    name: assistantRuV1.name,
-    type: assistantRuV1.type,
-    prompt: assistantRuV1.prompt,
-    labels: assistantRuV1.labels,
-    config: createModelConfig(model, assistantRuV1.defaultTemperature ?? 0.4),
-  });
+  try {
+    const result = await langfuse.createPrompt({
+      name: assistantRuV1.name,
+      type: assistantRuV1.type,
+      prompt: assistantRuV1.prompt,
+      labels: assistantRuV1.labels,
+      config: createModelConfig(model, assistantRuV1.defaultTemperature ?? 0.4),
+    });
+    return result;
+  } catch (error) {
+    throw new Error(`Failed to create assistant prompt in Langfuse: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
 }
