@@ -30,6 +30,11 @@ const settings = [
     description: "Manage your account information.",
     href: "/dashboard/settings/account",
   },
+  {
+    title: "Auth",
+    description: "Manage authentication and authorization settings.",
+    href: "/dashboard/auth",
+  },
 ];
 export default function Page() {
   return (

@@ -21,7 +21,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Cog, LayoutGrid } from "lucide-react";
+import { Cog, LayoutGrid, Shield } from "lucide-react";
 
 import { NavChecklist } from "./nav-checklist";
 import { NavHelp } from "./nav-help";
@@ -96,6 +96,11 @@ const data = {
       name: "Settings",
       url: "/dashboard/settings/general",
       icon: Cog,
+    },
+    {
+      name: "Auth",
+      url: "/dashboard/auth",
+      icon: Shield,
     },
   ],
 };
