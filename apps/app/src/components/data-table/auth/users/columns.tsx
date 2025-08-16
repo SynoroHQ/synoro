@@ -1,0 +1,140 @@
+"use client";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { ColumnDef } from "@tanstack/react-table";
+import { formatDistanceToNow } from "date-fns";
+import { Edit, MoreHorizontal, Trash2, User } from "lucide-react";
+import { EditUserDialog } from "@/components/forms/auth/edit-user-dialog";
+
+export type User = {
+  id: string;
+  name: string;
+  email: string;
+  role: "super_admin" | "admin" | "moderator" | "editor" | "user";
+  status: "active" | "inactive" | "banned";
+  lastLogin: string;
+  createdAt: string;
+};
+
+const roleColors = {
+  super_admin: "destructive",
+  admin: "default",
+  moderator: "secondary",
+  editor: "outline",
+  user: "outline",
+} as const;
+
+const statusColors = {
+  active: "default",
+  inactive: "secondary",
+  banned: "destructive",
+} as const;
+
+export const columns: ColumnDef<User>[] = [
+  {
+    accessorKey: "name",
+    header: "Name",
+    cell: ({ row }) => {
+      const user = row.original;
+      return (
+        <div className="flex items-center space-x-2">
+          <div className="bg-muted flex h-8 w-8 items-center justify-center rounded-full">
+            {user.name.charAt(0).toUpperCase()}
+          </div>
+          <div>
+            <div className="font-medium">{user.name}</div>
+            <div className="text-muted-foreground text-sm">{user.email}</div>
+          </div>
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "role",
+    header: "Role",
+    cell: ({ row }) => {
+      const role = row.getValue("role") as string;
+      return (
+        <Badge variant={roleColors[role as keyof typeof roleColors]}>
+          {role.replace("_", " ")}
+        </Badge>
+      );
+    },
+  },
+  {
+    accessorKey: "status",
+    header: "Status",
+    cell: ({ row }) => {
+      const status = row.getValue("status") as string;
+      return (
+        <Badge variant={statusColors[status as keyof typeof statusColors]}>
+          {status}
+        </Badge>
+      );
+    },
+  },
+  {
+    accessorKey: "lastLogin",
+    header: "Last Login",
+    cell: ({ row }) => {
+      const date = new Date(row.getValue("lastLogin"));
+      return (
+        <div className="text-muted-foreground text-sm">
+          {formatDistanceToNow(date, { addSuffix: true })}
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "createdAt",
+    header: "Created",
+    cell: ({ row }) => {
+      const date = new Date(row.getValue("createdAt"));
+      return (
+        <div className="text-muted-foreground text-sm">
+          {formatDistanceToNow(date, { addSuffix: true })}
+        </div>
+      );
+    },
+  },
+  {
+    id: "actions",
+    cell: ({ row }) => {
+      const user = row.original;
+
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <span className="sr-only">Open menu</span>
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <EditUserDialog user={user}>
+              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                <Edit className="mr-2 h-4 w-4" />
+                Edit User
+              </DropdownMenuItem>
+            </EditUserDialog>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="text-destructive">
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete User
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    },
+  },
+];

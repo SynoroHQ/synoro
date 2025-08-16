@@ -1,27 +1,12 @@
 import { defineConfig } from "tsup";
 
 export default defineConfig({
-  entry: {
-    index: "src/index.ts",
-    "index.rsc": "src/index.rsc.ts",
-    client: "src/client.ts",
-    middleware: "src/middleware.ts",
-    util: "src/util.ts",
-  },
-  format: ["esm"],
-  dts: false,
+  entry: ["src/index.ts"],
+  format: ["esm", "cjs"],
+  dts: true,
   splitting: false,
-  sourcemap: false,
+  sourcemap: true,
   clean: true,
-  minify: false,
-  external: [
-    "@synoro/db",
-    "@synoro/emails",
-    "@t3-oss/env-nextjs",
-    "better-auth",
-    "next",
-    "react",
-    "react-dom",
-    "zod",
-  ],
+  external: ["react", "react-dom"],
+  treeshake: true,
 });
