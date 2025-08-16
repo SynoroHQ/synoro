@@ -11,5 +11,7 @@ export default defineConfig({
   dts: false,
   minify: false,
   splitting: false,
-  bundle: false,
+  bundle: true,
+  // Оставим внутренние workspace-пакеты внешними (по желанию):
+  external: [/^@synoro\//],
 });
