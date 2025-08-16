@@ -1,11 +1,8 @@
-import { Suspense } from "react";
-import { TasksListSkeleton } from "@/features/tasks/components/tasks-list-skeleton";
-import { TasksListPage } from "@/features/tasks/pages/tasks-list-page";
-
 export default function TasksListPageServer() {
   return (
-    <Suspense fallback={<TasksListSkeleton />}>
-      <TasksListPage />
-    </Suspense>
+    <div className="p-6">
+      <h1 className="mb-4 text-2xl font-bold">Tasks List</h1>
+      <p>Tasks list functionality is under construction.</p>
+    </div>
   );
 }

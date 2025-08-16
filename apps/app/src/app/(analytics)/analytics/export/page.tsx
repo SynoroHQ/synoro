@@ -1,11 +1,8 @@
-import { Suspense } from "react";
-import { ExportSkeleton } from "@/features/analytics/components/export-skeleton";
-import { ExportPage } from "@/features/analytics/pages/export-page";
-
 export default function ExportPageServer() {
   return (
-    <Suspense fallback={<ExportSkeleton />}>
-      <ExportPage />
-    </Suspense>
+    <div className="p-6">
+      <h1 className="mb-4 text-2xl font-bold">Export Analytics</h1>
+      <p>Export functionality is under construction.</p>
+    </div>
   );
 }

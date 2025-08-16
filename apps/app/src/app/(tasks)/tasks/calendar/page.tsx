@@ -1,11 +1,8 @@
-import { Suspense } from "react";
-import { TasksCalendarSkeleton } from "@/features/tasks/components/tasks-calendar-skeleton";
-import { TasksCalendarPage } from "@/features/tasks/pages/tasks-calendar-page";
-
 export default function TasksCalendarPageServer() {
   return (
-    <Suspense fallback={<TasksCalendarSkeleton />}>
-      <TasksCalendarPage />
-    </Suspense>
+    <div className="p-6">
+      <h1 className="mb-4 text-2xl font-bold">Tasks Calendar</h1>
+      <p>Tasks calendar functionality is under construction.</p>
+    </div>
   );
 }

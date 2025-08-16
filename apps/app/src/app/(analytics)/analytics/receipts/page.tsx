@@ -1,11 +1,8 @@
-import { Suspense } from "react";
-import { ReceiptsAnalysisSkeleton } from "@/features/analytics/components/receipts-analysis-skeleton";
-import { ReceiptsAnalysisPage } from "@/features/analytics/pages/receipts-analysis-page";
-
 export default function ReceiptsAnalysisPageServer() {
   return (
-    <Suspense fallback={<ReceiptsAnalysisSkeleton />}>
-      <ReceiptsAnalysisPage />
-    </Suspense>
+    <div className="p-6">
+      <h1 className="mb-4 text-2xl font-bold">Receipts Analysis</h1>
+      <p>Receipts analysis functionality is under construction.</p>
+    </div>
   );
 }

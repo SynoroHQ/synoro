@@ -1,11 +1,8 @@
-import { Suspense } from "react";
-import { CreateTaskSkeleton } from "@/features/tasks/components/create-task-skeleton";
-import { CreateTaskPage } from "@/features/tasks/pages/create-task-page";
-
 export default function CreateTaskPageServer() {
   return (
-    <Suspense fallback={<CreateTaskSkeleton />}>
-      <CreateTaskPage />
-    </Suspense>
+    <div className="p-6">
+      <h1 className="mb-4 text-2xl font-bold">Create Task</h1>
+      <p>Create task functionality is under construction.</p>
+    </div>
   );
 }

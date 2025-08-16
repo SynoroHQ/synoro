@@ -1,11 +1,8 @@
-import { Suspense } from "react";
-import { SearchSkeleton } from "@/features/dashboard/components/search-skeleton";
-import { SearchPage } from "@/features/dashboard/pages/search-page";
-
 export default function SearchPageServer() {
   return (
-    <Suspense fallback={<SearchSkeleton />}>
-      <SearchPage />
-    </Suspense>
+    <div className="p-6">
+      <h1 className="mb-4 text-2xl font-bold">Search</h1>
+      <p>Search functionality is under construction.</p>
+    </div>
   );
 }
