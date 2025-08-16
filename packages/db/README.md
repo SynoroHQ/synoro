@@ -5,9 +5,11 @@
 ## Режимы базы данных
 
 ### 1. NeonDB (по умолчанию)
+
 Используется для serverless окружений (Vercel, Netlify и т.д.)
 
 ### 2. Self-hosted PostgreSQL
+
 Используется для локальной разработки или собственных серверов
 
 ## Конфигурация
@@ -20,12 +22,14 @@
 ### Примеры конфигурации
 
 #### NeonDB
+
 ```bash
 DATABASE_TYPE=neon
 POSTGRES_URL=postgresql://user:pass@host:6543/db
 ```
 
 #### Self-hosted PostgreSQL
+
 ```bash
 DATABASE_TYPE=postgres
 POSTGRES_URL=postgresql://user:pass@localhost:5432/db
@@ -34,6 +38,7 @@ POSTGRES_URL=postgresql://user:pass@localhost:5432/db
 ## Использование
 
 ### Основной клиент (HTTP)
+
 ```typescript
 import { db } from "@synoro/db/client";
 
@@ -42,6 +47,7 @@ const users = await db.select().from(users);
 ```
 
 ### WebSocket клиент (Pool)
+
 ```typescript
 import { db } from "@synoro/db/client-ws";
 
@@ -72,4 +78,4 @@ bun run studio
 
 ## Обратная совместимость
 
-Если `DATABASE_TYPE` не указан, система по умолчанию использует NeonDB, что обеспечивает обратную совместимость с существующим кодом. 
+Если `DATABASE_TYPE` не указан, система по умолчанию использует NeonDB, что обеспечивает обратную совместимость с существующим кодом.

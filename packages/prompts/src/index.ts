@@ -1,5 +1,5 @@
-import { registry } from "./registry";
 import { DEFAULT_PROMPT_KEY } from "./core/prompt";
+import { registry } from "./registry";
 
 export { registry };
 export { DEFAULT_PROMPT_KEY };

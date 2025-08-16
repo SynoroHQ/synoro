@@ -6,7 +6,8 @@ export default defineConfig({
   dts: true,
   splitting: false,
   sourcemap: false,
-  clean: true,
+  clean: false,
   minify: false,
+  outDir: "dist",
   external: [],
 });

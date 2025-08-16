@@ -1,8 +1,9 @@
+import { randomUUID } from "node:crypto";
 import type { Context } from "grammy";
-import { randomUUID } from "crypto";
+
 import { env } from "../env";
-import { advise, transcribe } from "../services/openai";
 import { logEvent } from "../services/db";
+import { advise, transcribe } from "../services/openai";
 
 export async function handleAudio(ctx: Context): Promise<void> {
   const fileId = ctx.message?.voice?.file_id ?? ctx.message?.audio?.file_id;
@@ -15,7 +16,10 @@ export async function handleAudio(ctx: Context): Promise<void> {
     const traceId = randomUUID();
     const chatId = String(ctx.chat?.id ?? "unknown");
     const userId = ctx.from?.id ? String(ctx.from.id) : "unknown";
-    const messageId = ctx.message && "message_id" in ctx.message ? String(ctx.message.message_id) : undefined;
+    const messageId =
+      ctx.message && "message_id" in ctx.message
+        ? String(ctx.message.message_id)
+        : undefined;
 
     const file = await ctx.api.getFile(fileId);
     if (!file.file_path) throw new Error("Telegram не вернул file_path");
@@ -65,7 +69,9 @@ export async function handleAudio(ctx: Context): Promise<void> {
         type: "audio",
       },
     });
-    await ctx.reply(tip ? `Распознал: ${text}\nСовет: ${tip}` : `Распознал: ${text}`);
+    await ctx.reply(
+      tip ? `Распознал: ${text}\nСовет: ${tip}` : `Распознал: ${text}`,
+    );
   } catch (err) {
     console.error("Audio handling error:", err);
     await ctx.reply("Не удалось обработать аудио. Попробуйте ещё раз позже.");

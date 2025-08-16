@@ -1,4 +1,4 @@
-import { fileURLToPath } from "node:url";
+// Shared Prettier config with Tailwind and import sorting
 
 /** @typedef {import("prettier").Config} PrettierConfig */
 /** @typedef {import("prettier-plugin-tailwindcss").PluginOptions} TailwindConfig */
@@ -10,9 +10,7 @@ const config = {
     "@ianvs/prettier-plugin-sort-imports",
     "prettier-plugin-tailwindcss",
   ],
-  tailwindConfig: fileURLToPath(
-    new URL("../../tooling/tailwind/web.ts", import.meta.url),
-  ),
+  // tailwindConfig path removed because shared Tailwind config is not present in this repo
   tailwindFunctions: ["cn", "cva"],
   importOrder: [
     "<TYPES>",

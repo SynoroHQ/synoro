@@ -1,6 +1,6 @@
+import type { PromptDefinition } from "../core/prompt";
 import type { LangfuseClientLike } from "../core/types";
 import { createModelConfig, DEFAULT_MODEL } from "../core/models";
-import type { PromptDefinition } from "../core/prompt";
 import { assistant } from "../prompts/assistant";
 import { registry } from "../registry";
 
@@ -34,7 +34,11 @@ export async function createPromptByKeyInCloud(
   if (!def) {
     throw new Error(`Prompt with key '${key}' not found in registry`);
   }
-  return createPromptInCloud(def, langfuse, model ?? def.defaultModel ?? DEFAULT_MODEL);
+  return createPromptInCloud(
+    def,
+    langfuse,
+    model ?? def.defaultModel ?? DEFAULT_MODEL,
+  );
 }
 
 export async function createAssistantPromptInCloud(

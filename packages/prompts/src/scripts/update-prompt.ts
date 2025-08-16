@@ -1,8 +1,8 @@
 #!/usr/bin/env bun
-
 import { Langfuse } from "langfuse";
-import { createPromptByKeyInCloud } from "../publish/langfuse";
+
 import type { LangfuseClientLike } from "../core/types";
+import { createPromptByKeyInCloud } from "../publish/langfuse";
 import { registry } from "../registry";
 
 function getArg(name: string): string | undefined {
@@ -39,14 +39,18 @@ async function main() {
   });
 
   const client: LangfuseClientLike = {
-    createPrompt: (args) => lf.createPrompt(args as any),
+    createPrompt: (args) => lf.createPrompt(args as unknown as Parameters<Langfuse["createPrompt"]>[0]),
   };
 
   try {
     console.log(
       `[update-prompt] Publishing prompt key='${keyArg}' model='${modelArg ?? "(default)"}'...`,
     );
-    const res = await createPromptByKeyInCloud(keyArg, client, modelArg ?? undefined);
+    const res = await createPromptByKeyInCloud(
+      keyArg,
+      client,
+      modelArg ?? undefined,
+    );
     console.log("[update-prompt] Prompt published successfully:", res);
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);

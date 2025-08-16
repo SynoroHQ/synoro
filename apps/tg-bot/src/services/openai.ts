@@ -1,9 +1,11 @@
-import { generateText, experimental_transcribe as aiTranscribe } from "ai";
-import { openai } from "@ai-sdk/openai";
-import { env } from "../env";
-import { getPromptSafe } from "@synoro/prompts";
 import type { AttributeValue } from "@opentelemetry/api";
+import { openai } from "@ai-sdk/openai";
+import { experimental_transcribe as aiTranscribe, generateText } from "ai";
 import { Langfuse } from "langfuse";
+
+import { getPromptSafe } from "@synoro/prompts";
+
+import { env } from "../env";
 
 const oai = openai; // use default provider instance; it reads OPENAI_API_KEY from env
 
@@ -33,7 +35,7 @@ async function getAssistantSystemPrompt(): Promise<string> {
       const compiled = prompt.compile({});
       cachedSystemPrompt = (compiled as string).trim();
       if (cachedSystemPrompt) return cachedSystemPrompt;
-    } catch (e) {
+    } catch (_e) {
       // Fallback below
     }
   }
@@ -53,7 +55,10 @@ export type Telemetry = {
   metadata?: TelemetryMeta;
 };
 
-export async function advise(input: string, telemetry?: Telemetry): Promise<string> {
+export async function advise(
+  input: string,
+  telemetry?: Telemetry,
+): Promise<string> {
   const systemPrompt = await getAssistantSystemPrompt();
   const { text } = await generateText({
     model: oai(ADVICE_MODEL),
@@ -72,7 +77,7 @@ export async function advise(input: string, telemetry?: Telemetry): Promise<stri
 export async function transcribe(
   buffer: Buffer,
   _filename: string,
-  telemetry?: Telemetry,
+  _telemetry?: Telemetry,
 ): Promise<string> {
   const { text } = await aiTranscribe({
     model: oai.transcription(TRANSCRIBE_MODEL),

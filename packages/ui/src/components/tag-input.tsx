@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { X, AlertCircle } from "lucide-react";
+import { AlertCircle, X } from "lucide-react";
 
 import { cn } from "../lib/utils";
 import { Badge } from "./badge";
@@ -106,11 +106,7 @@ function TagInput({
       if (inputValue.trim()) {
         addTag(inputValue);
       }
-    } else if (
-      e.key === "Backspace" &&
-      inputValue === "" &&
-      value.length > 0
-    ) {
+    } else if (e.key === "Backspace" && inputValue === "" && value.length > 0) {
       const lastTag = value[value.length - 1];
       if (lastTag) {
         removeTag(lastTag);
@@ -143,10 +139,10 @@ function TagInput({
     const pastedText = e.clipboardData.getData("text");
     const tags = pastedText
       .split(/[,\n]/)
-      .map(tag => tag.trim())
-      .filter(tag => tag.length > 0);
+      .map((tag) => tag.trim())
+      .filter((tag) => tag.length > 0);
 
-    tags.forEach(tag => {
+    tags.forEach((tag) => {
       if (maxTags && value.length >= maxTags) return;
       validateAndAddTag(tag);
     });
@@ -204,14 +200,14 @@ function TagInput({
 
       {/* Отображение ошибки */}
       {error && (
-        <div className="flex items-center gap-2 text-sm text-destructive">
+        <div className="text-destructive flex items-center gap-2 text-sm">
           <AlertCircle className="h-4 w-4" />
           <span>{error}</span>
         </div>
       )}
 
       {/* Информация о лимитах */}
-      <div className="flex justify-between text-xs text-muted-foreground">
+      <div className="text-muted-foreground flex justify-between text-xs">
         <span>
           {value.length} {maxTags ? `из ${maxTags}` : ""} тегов
         </span>
