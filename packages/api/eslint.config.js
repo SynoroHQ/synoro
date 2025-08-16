@@ -1,4 +1,4 @@
-import baseConfig from "@qco/eslint-config/base";
+import baseConfig from "@synoro/eslint-config/base";
 
 /** @type {import('typescript-eslint').Config} */
 export default [

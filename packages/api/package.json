@@ -1,5 +1,5 @@
 {
-  "name": "@qco/api",
+  "name": "@synoro/api",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -24,9 +24,9 @@
     "with-env": "dotenv -e ../../.env --"
   },
   "dependencies": {
-    "@qco/auth": "workspace:*",
-    "@qco/db": "workspace:*",
-    "@qco/validators": "workspace:*",
+    "@synoro/auth": "workspace:*",
+    "@synoro/db": "workspace:*",
+    "@synoro/validators": "workspace:*",
     "@sindresorhus/slugify": "2.2.1",
     "@trpc/server": "11.4.4",
     "date-fns": "4.1.0",
@@ -35,15 +35,15 @@
     "zod": "4.0.17"
   },
   "devDependencies": {
-    "@qco/eslint-config": "workspace:*",
-    "@qco/prettier-config": "workspace:*",
-    "@qco/tests": "workspace:*",
-    "@qco/tsconfig": "workspace:*",
+    "@synoro/eslint-config": "workspace:*",
+    "@synoro/prettier-config": "workspace:*",
+    "@synoro/tests": "workspace:*",
+    "@synoro/tsconfig": "workspace:*",
     "eslint": "9.32.0",
     "prettier": "3.6.2",
     "tsup": "8.5.0",
     "typescript": "5.9.2",
     "vitest": "3.2.4"
   },
-  "prettier": "@qco/prettier-config"
+  "prettier": "@synoro/prettier-config"
 }

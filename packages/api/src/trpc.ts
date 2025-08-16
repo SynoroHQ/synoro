@@ -10,10 +10,9 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
-import type { Session } from "@qco/auth";
-import { auth } from "@qco/auth";
-import { db } from "@qco/db/client";
-
+import type { Session } from "@synoro/auth";
+import { auth } from "@synoro/auth";
+import { db } from "@synoro/db/client";
 
 /**
  * 1. CONTEXT
@@ -40,9 +39,6 @@ export const createTRPCContext = async (opts: {
       disableRefresh: source === "rsc",
     },
   });
-
-
-
 
   return {
     session,
@@ -106,7 +102,6 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
   const result = await next();
 
   const end = Date.now();
-
 
   return result;
 });

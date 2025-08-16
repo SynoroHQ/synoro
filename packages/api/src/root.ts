@@ -1,5 +1,5 @@
-import { createTRPCRouter } from "./trpc";
 import { adminsRouter } from "./router/admins";
+import { attachmentsRouter } from "./router/attachments";
 import { authRouter } from "./router/auth";
 import { bannersRouter } from "./router/banners";
 import { blogRouter } from "./router/blog";
@@ -9,12 +9,12 @@ import { customersRouter } from "./router/customers";
 import { dashboardRouter } from "./router/dashboard";
 import { deliverySettingsRouter } from "./router/delivery-settings";
 import { ordersRouter } from "./router/orders";
-import { productTypesRouter } from "./router/product-types";
-import { productTypeAttributesRouter } from "./router/product-type-attributes";
 import { productAttributeValuesRouter } from "./router/product-attribute-values";
-import { productsRouter } from "./router/products";
+import { productTypeAttributesRouter } from "./router/product-type-attributes";
+import { productTypesRouter } from "./router/product-types";
 import { productVariantsRouter } from "./router/product-variants";
-import { attachmentsRouter } from "./router/attachments";
+import { productsRouter } from "./router/products";
+import { createTRPCRouter } from "./trpc";
 
 export const appRouter = createTRPCRouter({
   admins: adminsRouter,

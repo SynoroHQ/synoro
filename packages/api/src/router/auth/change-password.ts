@@ -1,10 +1,10 @@
 import { protectedProcedure } from "../../trpc";
-import { adminChangePasswordSchema } from "@qco/validators";
+import { adminChangePasswordSchema } from "@synoro/validators";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { auth } from "@qco/auth";
-import { accounts } from "@qco/db/schema";
-import { and, eq } from "@qco/db";
+import { auth } from "@synoro/auth";
+import { accounts } from "@synoro/db/schema";
+import { and, eq } from "@synoro/db";
 
 export const changePassword = protectedProcedure
     .input(adminChangePasswordSchema)
