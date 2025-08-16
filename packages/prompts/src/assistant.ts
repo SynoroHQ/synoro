@@ -27,11 +27,16 @@ export async function createAssistantPromptInCloud(
   langfuse: LangfuseClientLike,
   model: AIModel = DEFAULT_MODEL,
 ) {
-  await langfuse.createPrompt({
-    name: "assistant-ru-v1",
-    type: "text",
-    prompt: assistantRuV1Template,
-    labels: ["production", "staging", "latest"],
-    config: createModelConfig(model, 0.4),
-  });
+  try {
+    const result = await langfuse.createPrompt({
+      name: "assistant-ru-v1",
+      type: "text",
+      prompt: assistantRuV1Template,
+      labels: ["production", "staging", "latest"],
+      config: createModelConfig(model, 0.4),
+    });
+    return result;
+  } catch (error) {
+    throw new Error(`Failed to create assistant prompt in cloud: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
 }
