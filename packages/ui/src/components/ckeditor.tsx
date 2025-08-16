@@ -3,6 +3,7 @@
 import React from "react";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import {
+  Base64UploadAdapter,
   BlockQuote,
   Bold,
   ClassicEditor,
@@ -64,6 +65,7 @@ export default function CKEditorField({
             CodeBlock,
             Image,
             ImageUpload,
+            Base64UploadAdapter,
             ImageToolbar,
             Table,
             TableToolbar,

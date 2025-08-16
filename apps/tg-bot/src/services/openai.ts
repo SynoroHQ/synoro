@@ -77,6 +77,12 @@ export type RelevanceResult = {
   category?: "relevant" | "irrelevant" | "spam";
 };
 
+const relevanceSchema = z.object({
+  relevant: z.boolean(),
+  score: z.number().min(0).max(1).optional(),
+  category: z.enum(["relevant", "irrelevant", "spam"]).optional(),
+});
+
 export async function classifyRelevance(
   text: string,
   telemetry?: Telemetry,
@@ -95,14 +101,12 @@ export async function classifyRelevance(
       },
     });
     const trimmed = out.trim();
-    const jsonStart = trimmed.indexOf("{");
-    const jsonEnd = trimmed.lastIndexOf("}");
-    const payload =
-      jsonStart >= 0 && jsonEnd > jsonStart
-        ? trimmed.slice(jsonStart, jsonEnd + 1)
-        : trimmed;
-    const parsed = JSON.parse(payload) as RelevanceResult;
-    if (typeof parsed.relevant === "boolean") return parsed;
+    const candidate = extractFirstJsonObject(trimmed);
+    if (candidate) {
+      const obj = JSON.parse(candidate);
+      const validated = relevanceSchema.safeParse(obj);
+      if (validated.success) return validated.data;
+    }
   } catch (_e) {
     // ignore and fallback below
   }

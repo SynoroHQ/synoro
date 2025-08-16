@@ -1,9 +1,15 @@
 #!/usr/bin/env bun
 import { readdirSync, statSync, writeFileSync } from "node:fs";
-import { basename, extname, join, relative, sep } from "node:path";
+import { basename, dirname, extname, join, relative, sep } from "node:path";
+import { fileURLToPath } from "node:url";
 
-const ROOT = join(import.meta.dirname, "..", "prompts");
-const REGISTRY_FILE = join(import.meta.dirname, "..", "registry.ts");
+const baseDir =
+  typeof (import.meta as any).dir !== "undefined"
+    ? (import.meta as any).dir
+    : dirname(fileURLToPath(import.meta.url));
+
+const ROOT = join(baseDir, "..", "prompts");
+const REGISTRY_FILE = join(baseDir, "..", "registry.ts");
 
 type PromptModule = {
   importPath: string;
@@ -28,9 +34,7 @@ function findPromptModules(dir: string): PromptModule[] {
         statSync(indexTs, { throwIfNoEntry: false }) ||
         statSync(indexTsx, { throwIfNoEntry: false });
       if (hasIndex) {
-        const rel = relative(join(import.meta.dirname, ".."), full)
-          .split(sep)
-          .join("/");
+        const rel = relative(join(baseDir, ".."), full).split(sep).join("/");
         const varName = toVarName(entry);
         result.push({ importPath: `./${rel}`, varName, key: entry });
       }
@@ -40,7 +44,7 @@ function findPromptModules(dir: string): PromptModule[] {
     const ext = extname(full);
     if (ext === ".ts" && !full.endsWith(".d.ts")) {
       const base = basename(full, ext);
-      const rel = relative(join(import.meta.dirname, ".."), full)
+      const rel = relative(join(baseDir, ".."), full)
         .replace(/\\/g, "/")
         .replace(/\.ts$/, "");
       const varName = toVarName(base);
