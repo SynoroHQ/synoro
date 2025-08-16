@@ -8,6 +8,7 @@ import {
   ClassicEditor,
   Code,
   CodeBlock,
+  Essentials,
   Heading,
   Image,
   ImageToolbar,
