@@ -2,8 +2,8 @@ import type { TRPCRouterRecord } from "@trpc/server";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { createPresignedUrl, generateS3Key } from "@qco/lib";
-import { CreatePresignedUrlSchema } from "@qco/validators";
+import { createPresignedUrl, generateS3Key } from "@synoro/lib";
+import { CreatePresignedUrlSchema } from "@synoro/validators";
 
 import { protectedProcedure } from "../trpc";
 

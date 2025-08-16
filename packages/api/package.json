@@ -24,10 +24,11 @@
     "with-env": "dotenv -e ../../.env --"
   },
   "dependencies": {
+    "@sindresorhus/slugify": "2.2.1",
     "@synoro/auth": "workspace:*",
     "@synoro/db": "workspace:*",
+    "@synoro/lib": "workspace:*",
     "@synoro/validators": "workspace:*",
-    "@sindresorhus/slugify": "2.2.1",
     "@trpc/server": "11.4.4",
     "date-fns": "4.1.0",
     "nanoid": "^5.1.5",
@@ -39,7 +40,7 @@
     "@synoro/prettier-config": "workspace:*",
     "@synoro/tests": "workspace:*",
     "@synoro/tsconfig": "workspace:*",
-    "eslint": "9.32.0",
+    "eslint": "9.33.0",
     "prettier": "3.6.2",
     "tsup": "8.5.0",
     "typescript": "5.9.2",

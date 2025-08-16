@@ -1,5 +1,7 @@
 import { TRPCError } from "@trpc/server";
-import { files } from "@qco/db/schema";
+
+import { files } from "@synoro/db/schema";
+
 import type { TRPCContext } from "../trpc";
 
 export async function resolveFileIdOrPath({
@@ -11,11 +13,19 @@ export async function resolveFileIdOrPath({
 }: {
   ctx: TRPCContext;
   fileIdOrPath: string;
-  fileType: "avatar" | "brand" | "brand_logo" | "brand_banner" | "product_image" | "category_image" | "collection_image" | "banner" | "blog_image";
+  fileType:
+    | "avatar"
+    | "brand"
+    | "brand_logo"
+    | "brand_banner"
+    | "product_image"
+    | "category_image"
+    | "collection_image"
+    | "banner"
+    | "blog_image";
   uploadedBy: string;
   meta?: { name?: string; mimeType?: string; size?: number };
 }): Promise<string> {
-
   if (
     /^[a-zA-Z0-9_-]{10,}$/.test(fileIdOrPath) &&
     !fileIdOrPath.includes("/")
@@ -36,7 +46,7 @@ export async function resolveFileIdOrPath({
       uploadedBy,
     })
     .returning()
-    .then((r: typeof files.$inferSelect[]) => r[0]);
+    .then((r: (typeof files.$inferSelect)[]) => r[0]);
   if (!file) {
     throw new TRPCError({
       code: "INTERNAL_SERVER_ERROR",
