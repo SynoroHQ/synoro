@@ -24,7 +24,9 @@ export function compilePrompt(
   if (!vars) return def.prompt;
   let output = def.prompt;
   for (const [k, v] of Object.entries(vars)) {
-    const rx = new RegExp(`\\{\\{\\s*${k}\\s*\\}}`, "g");
+    // Экранируем специальные символы регулярных выражений
+    const escapedKey = k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const rx = new RegExp(`\\{\\{\\s*${escapedKey}\\s*\\}}`, "g");
     output = output.replace(rx, v);
   }
   return output;
