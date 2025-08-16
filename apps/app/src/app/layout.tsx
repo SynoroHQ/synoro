@@ -1,12 +1,15 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+
+import "@synoro/ui/globals.css";
+
 import { TailwindIndicator } from "@/components/tailwind-indicator";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
-import { ogMetadata, twitterMetadata } from "./metadata";
-import { defaultMetadata } from "./metadata";
 import PlausibleProvider from "next-plausible";
+
+import { defaultMetadata, ogMetadata, twitterMetadata } from "./metadata";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
