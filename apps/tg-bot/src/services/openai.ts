@@ -4,7 +4,7 @@ import { env } from "../env";
 import { getPromptSafe } from "@synoro/prompts";
 import type { AttributeValue } from "@opentelemetry/api";
 
-const oai = openai({ apiKey: env.OPENAI_API_KEY });
+const oai = openai; // use default provider instance; it reads OPENAI_API_KEY from env
 
 const TRANSCRIBE_MODEL = env.OPENAI_TRANSCRIBE_MODEL ?? "whisper-1"; // or "gpt-4o-mini-transcribe"
 const ADVICE_MODEL = env.OPENAI_ADVICE_MODEL ?? "gpt-4o-mini";
