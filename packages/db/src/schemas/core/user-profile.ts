@@ -1,4 +1,5 @@
-import { pgTable, text, jsonb, timestamp } from "drizzle-orm/pg-core";
+import { jsonb, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+
 import { user } from "../auth/schema";
 
 export const userProfile = pgTable("user_profile", {
@@ -8,6 +9,11 @@ export const userProfile = pgTable("user_profile", {
   timezone: text("timezone").notNull().default("UTC"),
   locale: text("locale").notNull().default("ru-RU"),
   preferences: jsonb("preferences").$type<Record<string, unknown> | null>(),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow()
+    .$onUpdate(() => new Date()),
 });

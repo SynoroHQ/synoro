@@ -2,11 +2,12 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
 import { admin } from "better-auth/plugins";
+
 import { db } from "@synoro/db/client";
 import {
   accounts,
-  sessions as SessionSchema,
   admins,
+  sessions as SessionSchema,
   verifications,
 } from "@synoro/db/schema";
 
@@ -43,15 +44,16 @@ export const auth = betterAuth({
     },
   },
   secret: env.BETTER_AUTH_SECRET,
-  socialProviders: env.AUTH_GOOGLE_CLIENT_ID && env.AUTH_GOOGLE_CLIENT_SECRET
-    ? {
-      google: {
-        clientId: env.AUTH_GOOGLE_CLIENT_ID,
-        clientSecret: env.AUTH_GOOGLE_CLIENT_SECRET,
-        disableSignUp: true,
-      },
-    }
-    : {},
+  socialProviders:
+    env.AUTH_GOOGLE_CLIENT_ID && env.AUTH_GOOGLE_CLIENT_SECRET
+      ? {
+          google: {
+            clientId: env.AUTH_GOOGLE_CLIENT_ID,
+            clientSecret: env.AUTH_GOOGLE_CLIENT_SECRET,
+            disableSignUp: true,
+          },
+        }
+      : {},
   plugins: [
     nextCookies(),
     admin({
@@ -59,7 +61,8 @@ export const auth = betterAuth({
       adminRoles: ["super_admin", "admin", "moderator", "editor"],
       impersonationSessionDuration: 60 * 60, // 1 hour
       defaultBanReason: "Нарушение правил",
-      bannedUserMessage: "Ваш аккаунт заблокирован. Обратитесь в поддержку, если считаете это ошибкой.",
+      bannedUserMessage:
+        "Ваш аккаунт заблокирован. Обратитесь в поддержку, если считаете это ошибкой.",
     }),
   ],
   advanced: {
@@ -75,7 +78,7 @@ export const auth = betterAuth({
       role: {
         type: "string",
         required: true,
-        enum: ["super_admin", "admin", "moderator", "editor"] as const,
+        enum: ["super_admin", "admin", "moderator", "editor", "user"] as const,
       },
     },
   },

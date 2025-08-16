@@ -1,6 +1,10 @@
 import type { PromptDefinition } from "./core/prompt";
-import { assistantRuV1 } from "./prompts/assistant/ru/v1";
+import assistant from "./prompts/assistant";
+import classifier_relevance from "./prompts/classifier.relevance";
+import parser_task from "./prompts/parser.task";
 
 export const registry: Record<string, PromptDefinition> = {
-  [assistantRuV1.key]: assistantRuV1,
+  [assistant.key]: assistant,
+  [classifier_relevance.key]: classifier_relevance,
+  [parser_task.key]: parser_task,
 };

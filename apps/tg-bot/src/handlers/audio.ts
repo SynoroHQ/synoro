@@ -1,8 +1,9 @@
+import { randomUUID } from "node:crypto";
 import type { Context } from "grammy";
-import { randomUUID } from "crypto";
+
 import { env } from "../env";
-import { advise, transcribe } from "../services/openai";
 import { logEvent } from "../services/db";
+import { advise, parseTask, transcribe, classifyRelevance } from "../services/openai";
 
 export async function handleAudio(ctx: Context): Promise<void> {
   const fileId = ctx.message?.voice?.file_id ?? ctx.message?.audio?.file_id;
@@ -15,7 +16,10 @@ export async function handleAudio(ctx: Context): Promise<void> {
     const traceId = randomUUID();
     const chatId = String(ctx.chat?.id ?? "unknown");
     const userId = ctx.from?.id ? String(ctx.from.id) : "unknown";
-    const messageId = ctx.message && "message_id" in ctx.message ? String(ctx.message.message_id) : undefined;
+    const messageId =
+      ctx.message && "message_id" in ctx.message
+        ? String(ctx.message.message_id)
+        : undefined;
 
     const file = await ctx.api.getFile(fileId);
     if (!file.file_path) throw new Error("Telegram не вернул file_path");
@@ -42,11 +46,17 @@ export async function handleAudio(ctx: Context): Promise<void> {
       },
     });
 
-    await logEvent({
-      chatId: String(ctx.chat?.id ?? "unknown"),
-      type: "audio",
-      text,
-      meta: { file_path: file.file_path },
+    const parsed = await parseTask(text, {
+      functionId: "tg-parse-audio",
+      metadata: {
+        langfuseTraceId: traceId,
+        chatId,
+        userId,
+        ...(messageId ? { messageId } : {}),
+        channel: "telegram",
+        type: "audio",
+        filename,
+      },
     });
 
     if (text.trim().length === 0) {
@@ -65,7 +75,21 @@ export async function handleAudio(ctx: Context): Promise<void> {
         type: "audio",
       },
     });
-    await ctx.reply(tip ? `Распознал: ${text}\nСовет: ${tip}` : `Распознал: ${text}`);
+    await ctx.reply(
+      tip ? `Распознал: ${text}\nСовет: ${tip}` : `Распознал: ${text}`,
+    );
+
+    // Log only if relevant by LLM or if we extracted a structured task
+    const cls = await classifyRelevance(text);
+    const relevant = (cls?.relevant === true) || Boolean(parsed);
+    if (relevant) {
+      await logEvent({
+        chatId: String(ctx.chat?.id ?? "unknown"),
+        type: "audio",
+        text,
+        meta: { file_path: file.file_path, parsed },
+      });
+    }
   } catch (err) {
     console.error("Audio handling error:", err);
     await ctx.reply("Не удалось обработать аудио. Попробуйте ещё раз позже.");

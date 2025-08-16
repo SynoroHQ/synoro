@@ -56,6 +56,11 @@ export default function EmailVerification({ otp, email, url }: EmailVerification
             <Text className="text-[14px] leading-[24px] text-black">
               Или используйте следующий код подтверждения:
             </Text>
+            <Section className="my-[12px] text-center">
+              <Text className="text-[24px] font-bold tracking-widest text-black">
+                {otp}
+              </Text>
+            </Section>
 
             <Text className="text-[14px] leading-[24px] text-black">
               <strong>Важная информация:</strong>

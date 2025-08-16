@@ -25,6 +25,7 @@
     "@t3-oss/env-core": "0.13.8",
     "ai": "^5.0.15",
     "grammy": "^1.38.0",
+    "langfuse": "^3.38.4",
     "langfuse-vercel": "^3.38.4",
     "zod": "4.0.17"
   },

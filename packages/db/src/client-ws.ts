@@ -1,11 +1,11 @@
 import { Pool as NeonPool } from "@neondatabase/serverless";
 import { drizzle as drizzleNeon } from "drizzle-orm/neon-serverless";
-import { Pool } from "pg";
 import { drizzle as drizzlePg } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
 
-import * as schema from "./schemas";
-import { getDatabaseConfig } from "./config";
 import type { Database } from "./types";
+import { getDatabaseConfig } from "./config";
+import * as schema from "./schemas";
 
 const config = getDatabaseConfig();
 

@@ -1,6 +1,7 @@
 import type { SlateElementProps } from "platejs";
 import * as React from "react";
 import { SlateElement } from "platejs";
+
 import { cn } from "../lib/utils";
 
 export function ParagraphElementStatic(props: SlateElementProps) {

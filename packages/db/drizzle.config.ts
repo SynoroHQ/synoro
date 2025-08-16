@@ -1,4 +1,5 @@
 import type { Config } from "drizzle-kit";
+
 import { getDatabaseConfig } from "./src/config";
 
 const config = getDatabaseConfig();

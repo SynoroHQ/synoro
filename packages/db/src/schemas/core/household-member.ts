@@ -1,6 +1,7 @@
 import { pgTable, primaryKey, text, timestamp } from "drizzle-orm/pg-core";
-import { household } from "./household";
+
 import { user } from "../auth/schema";
+import { household } from "./household";
 
 export const householdMember = pgTable(
   "household_member",
@@ -12,10 +13,14 @@ export const householdMember = pgTable(
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
     role: text("role").notNull(), // 'owner' | 'member' | 'viewer'
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
   },
   (table) => ({
     pk: primaryKey({ columns: [table.householdId, table.userId] }),
-  })
+  }),
 );

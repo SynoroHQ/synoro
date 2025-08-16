@@ -1,7 +1,8 @@
-import { pgTable, index, text, timestamp, jsonb } from "drizzle-orm/pg-core";
-import { household } from "../core/household";
-import { user } from "../auth/schema";
 import { createId } from "@paralleldrive/cuid2";
+import { index, jsonb, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+
+import { user } from "../auth/schema";
+import { household } from "../core/household";
 
 export const event = pgTable(
   "event",
@@ -14,7 +15,9 @@ export const event = pgTable(
     source: text("source").notNull(),
     type: text("type").notNull(),
     occurredAt: timestamp("occurred_at", { withTimezone: true }).notNull(),
-    ingestedAt: timestamp("ingested_at", { withTimezone: true }).notNull().defaultNow(),
+    ingestedAt: timestamp("ingested_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
     title: text("title"),
     notes: text("notes"),
     data: jsonb("data").$type<Record<string, unknown> | null>(),
@@ -22,12 +25,12 @@ export const event = pgTable(
   (table) => ({
     byHouseholdOccurred: index("event_household_occurred_idx").on(
       table.householdId,
-      table.occurredAt
+      table.occurredAt,
     ),
     byHouseholdTypeOccurred: index("event_household_type_occurred_idx").on(
       table.householdId,
       table.type,
-      table.occurredAt
+      table.occurredAt,
     ),
-  })
+  }),
 );

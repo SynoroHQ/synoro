@@ -1,6 +1,6 @@
+import { createId } from "@synoro/db";
 import { db } from "@synoro/db/client";
 import { eventLog } from "@synoro/db/schema";
-import { createId } from "@synoro/db";
 
 export async function logEvent(params: {
   chatId: string;

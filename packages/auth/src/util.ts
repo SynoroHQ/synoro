@@ -7,6 +7,6 @@ export const getBaseUrl = () => {
   if (env.VERCEL_URL) {
     return `https://${env.VERCEL_URL}`;
   }
-   
+
   return `http://localhost:${env.PORT ?? 3000}`;
 };
