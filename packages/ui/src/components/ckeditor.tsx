@@ -50,6 +50,7 @@ export default function CKEditorField({
           placeholder,
           licenseKey: "GPL",
           plugins: [
+            Essentials,
             Paragraph,
             Bold,
             Italic,
@@ -57,6 +58,14 @@ export default function CKEditorField({
             List,
             Underline,
             Strikethrough,
+            Link,
+            BlockQuote,
+            Code,
+            CodeBlock,
+            Image,
+            ImageUpload,
+            ImageToolbar,
+            Table,
             TableToolbar,
           ],
           toolbar: [

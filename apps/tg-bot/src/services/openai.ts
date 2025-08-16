@@ -4,11 +4,11 @@ import { experimental_transcribe as aiTranscribe, generateText } from "ai";
 import { Langfuse } from "langfuse";
 import { z } from "zod";
 
+import type { PromptKey } from "@synoro/prompts";
 import {
   DEFAULT_PROMPT_KEY,
   getPromptSafe,
   PROMPT_KEYS,
-  type PromptKey,
 } from "@synoro/prompts";
 
 import { env } from "../env";
@@ -22,7 +22,9 @@ const ADVICE_MODEL = env.OPENAI_ADVICE_MODEL ?? "gpt-4o-mini";
 let lf: Langfuse | null = null;
 const cachedPrompts: Record<string, string> = {};
 
-async function getSystemPrompt(key: PromptKey = DEFAULT_PROMPT_KEY): Promise<string> {
+async function getSystemPrompt(
+  key: PromptKey = DEFAULT_PROMPT_KEY,
+): Promise<string> {
   if (cachedPrompts[key]) return cachedPrompts[key];
 
   // Try Langfuse first if creds are present
@@ -146,6 +148,53 @@ type ParsedTask = {
   confidence?: number;
 };
 
+function extractFirstJsonObject(input: string): string | null {
+  let depth = 0;
+  let startIndex = -1;
+  let inString = false;
+  let escapeNext = false;
+  let quoteChar: '"' | "'" | "" = "";
+
+  for (let i = 0; i < input.length; i++) {
+    const ch = input[i];
+
+    if (inString) {
+      if (escapeNext) {
+        escapeNext = false;
+        continue;
+      }
+      if (ch === "\\") {
+        escapeNext = true;
+        continue;
+      }
+      if (ch === quoteChar) {
+        inString = false;
+        quoteChar = "";
+      }
+      continue;
+    }
+
+    if (ch === '"' || ch === "'") {
+      inString = true;
+      quoteChar = ch as '"' | "'";
+      continue;
+    }
+
+    if (ch === "{") {
+      if (depth === 0) startIndex = i;
+      depth++;
+    } else if (ch === "}") {
+      if (depth > 0) {
+        depth--;
+        if (depth === 0 && startIndex !== -1) {
+          return input.slice(startIndex, i + 1);
+        }
+      }
+    }
+  }
+  return null;
+}
+
 export async function parseTask(
   text: string,
   telemetry?: Telemetry,
@@ -164,16 +213,70 @@ export async function parseTask(
       },
     });
     const trimmed = out.trim();
-    const jsonStart = trimmed.indexOf("{");
-    const jsonEnd = trimmed.lastIndexOf("}");
-    const payload =
-      jsonStart >= 0 && jsonEnd > jsonStart
-        ? trimmed.slice(jsonStart, jsonEnd + 1)
-        : trimmed;
-    const parsed = JSON.parse(payload) as ParsedTask;
-    if (!parsed.action || !parsed.object) return null;
-    return parsed;
-  } catch (_e) {
+    const candidate = extractFirstJsonObject(trimmed);
+    if (!candidate) {
+      console.warn("parseTask: No JSON object found in model output", {
+        functionId: telemetry?.functionId ?? "bot-parse-task",
+        preview: trimmed.slice(0, 200),
+      });
+      return null;
+    }
+
+    let parsedUnknown: unknown;
+    try {
+      parsedUnknown = JSON.parse(candidate);
+    } catch (err) {
+      console.warn("parseTask: JSON.parse failed", {
+        functionId: telemetry?.functionId ?? "bot-parse-task",
+        error: (err as Error)?.message,
+        preview: candidate.slice(0, 200),
+      });
+      return null;
+    }
+
+    const parsed = parsedUnknown as Partial<ParsedTask> &
+      Record<string, unknown>;
+
+    if (
+      typeof parsed.action !== "string" ||
+      parsed.action.trim().length === 0
+    ) {
+      console.warn("parseTask: invalid or missing 'action'", {
+        functionId: telemetry?.functionId ?? "bot-parse-task",
+        valueType: typeof (parsed as any)?.action,
+      });
+      return null;
+    }
+    if (
+      typeof parsed.object !== "string" ||
+      parsed.object.trim().length === 0
+    ) {
+      console.warn("parseTask: invalid or missing 'object'", {
+        functionId: telemetry?.functionId ?? "bot-parse-task",
+        valueType: typeof (parsed as any)?.object,
+      });
+      return null;
+    }
+
+    let confidence: number | undefined = undefined;
+    if (parsed.confidence !== undefined) {
+      const asNumber = Number((parsed as any).confidence);
+      if (!Number.isNaN(asNumber)) {
+        confidence = Math.min(1, Math.max(0, asNumber));
+      }
+    }
+    if (confidence === undefined) confidence = 0.5;
+
+    return {
+      action: parsed.action.trim(),
+      object: parsed.object.trim(),
+      confidence,
+    };
+  } catch (e) {
+    console.warn("parseTask: unexpected error", {
+      functionId: telemetry?.functionId ?? "bot-parse-task",
+      error: (e as Error)?.message,
+    });
     return null;
   }
 }

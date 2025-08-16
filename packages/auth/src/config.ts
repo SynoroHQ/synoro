@@ -78,7 +78,7 @@ export const auth = betterAuth({
       role: {
         type: "string",
         required: true,
-        enum: ["super_admin", "admin", "moderator", "editor"] as const,
+        enum: ["super_admin", "admin", "moderator", "editor", "user"] as const,
       },
     },
   },
