@@ -5,10 +5,10 @@ import { admin } from "better-auth/plugins";
 
 import { db } from "@synoro/db/client";
 import {
-  accounts,
-  admins,
-  sessions as SessionSchema,
-  verifications,
+  account,
+  user,
+  session as SessionSchema,
+  verification,
 } from "@synoro/db/schema";
 
 import { env } from "../env";
@@ -18,9 +18,9 @@ export const auth = betterAuth({
     provider: "pg",
     schema: {
       session: SessionSchema,
-      account: accounts,
-      user: admins,
-      verification: verifications,
+      account: account,
+      user: user,
+      verification: verification,
     },
   }),
   emailAndPassword: {
