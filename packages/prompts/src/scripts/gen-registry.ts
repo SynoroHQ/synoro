@@ -18,7 +18,16 @@ type PromptModule = {
 };
 
 function toVarName(name: string) {
-  return name.replace(/[^a-zA-Z0-9]/g, "_");
+  // Разрешаем буквы/цифры/$_, остальное — в '_'
+  const base = name.replace(/[^a-zA-Z0-9_$]/g, "_");
+  const startSafe = /^[A-Za-z_$]/.test(base) ? base : `_${base}`;
+  const RESERVED = new Set([
+    "default","class","function","import","export","var","const","let","enum",
+    "extends","super","switch","case","do","while","if","else","for","try",
+    "catch","finally","with","yield","await","break","continue","return",
+    "throw","new","in","instanceof","typeof","delete","this","void",
+  ]);
+  return RESERVED.has(startSafe) ? `_${startSafe}` : startSafe;
 }
 
 function findPromptModules(dir: string): PromptModule[] {
