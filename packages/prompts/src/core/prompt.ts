@@ -27,7 +27,7 @@ export function compilePrompt(
     // Экранируем специальные символы регулярных выражений
     const escapedKey = k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const rx = new RegExp(`\\{\\{\\s*${escapedKey}\\s*\\}}`, "g");
-    output = output.replace(rx, v);
+    output = output.replace(rx, () => v);
   }
   return output;
 }
