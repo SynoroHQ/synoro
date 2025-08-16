@@ -51,7 +51,10 @@ async function main() {
       client,
       modelArg ?? undefined,
     );
-    console.log("[update-prompt] Prompt published successfully:", res);
+    console.log(
+      `[update-prompt] Prompt '${keyArg}' опубликован успешно` +
+        (modelArg ? ` (model='${modelArg}')` : ""),
+    );
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     console.error("[update-prompt] Failed to publish prompt:", message);
