@@ -9,5 +9,5 @@ export const userProfile = pgTable("user_profile", {
   locale: text("locale").notNull().default("ru-RU"),
   preferences: jsonb("preferences").$type<Record<string, unknown> | null>(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });

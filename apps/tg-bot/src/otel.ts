@@ -1,17 +1,22 @@
-import { NodeSDK } from "@opentelemetry/sdk-node";
 import { getNodeAutoInstrumentations } from "@opentelemetry/auto-instrumentations-node";
+import { resourceFromAttributes } from "@opentelemetry/resources";
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { ATTR_SERVICE_NAME } from "@opentelemetry/semantic-conventions";
 import { LangfuseExporter } from "langfuse-vercel";
-import { Resource } from "@opentelemetry/resources";
-import { SEMRESATTRS_SERVICE_NAME } from "@opentelemetry/semantic-conventions";
+
 let sdk: NodeSDK | null = null;
 
-export async function startTracing(serviceName = "synoro-tg-bot"): Promise<void> {
+export async function startTracing(
+  serviceName = "synoro-tg-bot",
+): Promise<void> {
   if (sdk) return;
   sdk = new NodeSDK({
     traceExporter: new LangfuseExporter(),
     instrumentations: [getNodeAutoInstrumentations()],
-    serviceName,
-  } as any);
+    resource: resourceFromAttributes({
+      [ATTR_SERVICE_NAME]: serviceName,
+    }),
+  });
   await sdk.start();
 }
 

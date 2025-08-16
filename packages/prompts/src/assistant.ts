@@ -1,16 +1,7 @@
 import type { AIModel } from "./models";
 import { createModelConfig, DEFAULT_MODEL } from "./models";
-
-// Minimal interface to avoid coupling to a specific langfuse SDK here
-export type LangfuseClientLike = {
-  createPrompt: (args: {
-    name: string;
-    type: string; // typically 'text'
-    prompt: string;
-    labels?: string[];
-    config?: unknown;
-  }) => Promise<unknown>;
-};
+import type { LangfuseClientLike } from "./core/types";
+export type { LangfuseClientLike } from "./core/types";
 
 export const assistantRuV1Template = `
 # ROLE
