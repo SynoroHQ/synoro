@@ -17,8 +17,8 @@ import {
   FormCardFooter,
 } from "@/components/forms/form-card";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Input } from "@synoro/ui/components/input";
+import { Label } from "@synoro/ui/components/label";
 
 export default function Page() {
   return (

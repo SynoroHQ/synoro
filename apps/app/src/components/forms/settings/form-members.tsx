@@ -13,7 +13,7 @@ import {
   FormCardTitle,
   FormCardUpgrade,
 } from "@/components/forms/form-card";
-import { Button } from "@/components/ui/button";
+import { Button } from "@synoro/ui/components/button";
 import {
   Form,
   FormControl,
@@ -21,9 +21,9 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+} from "@synoro/ui/components/form";
+import { Input } from "@synoro/ui/components/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@synoro/ui/components/tabs";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Lock } from "lucide-react";
 import { useForm } from "react-hook-form";

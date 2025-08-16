@@ -7,8 +7,8 @@ import {
 } from "@/components/content/section";
 import { columns } from "@/components/data-table/auth/users/columns";
 import { CreateUserDialog } from "@/components/forms/auth/create-user-dialog";
-import { Button } from "@/components/ui/button";
-import { DataTable } from "@/components/ui/data-table/data-table";
+import { Button } from "@synoro/ui/components/button";
+import { DataTable } from "@synoro/ui/components/data-table/data-table";
 import { Plus, Search } from "lucide-react";
 
 // Mock data for users

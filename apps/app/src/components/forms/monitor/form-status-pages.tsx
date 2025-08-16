@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@synoro/ui/components/button";
 import {
   FormCard,
   FormCardContent,
@@ -22,15 +22,15 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+} from "@synoro/ui/components/form";
+import { Input } from "@synoro/ui/components/input";
 import { toast } from "sonner";
 import {
   EmptyStateContainer,
   EmptyStateTitle,
 } from "@/components/content/empty-state";
 import { statusPages } from "@/data/status-pages";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Checkbox } from "@synoro/ui/components/checkbox";
 import { cn } from "@/lib/utils";
 
 const schema = z.object({

@@ -12,9 +12,9 @@ import {
   SidebarMenuItem,
   SidebarSeparator,
   useSidebar,
-} from "@/components/ui/sidebar";
+} from "@synoro/ui/components/sidebar";
 import { SidebarMetadata, SidebarMetadataProps } from "./sidebar-metadata";
-import { Button } from "@/components/ui/button";
+import { Button } from "@synoro/ui/components/button";
 import { PanelRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {

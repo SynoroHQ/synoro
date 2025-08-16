@@ -11,9 +11,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+} from "@synoro/ui/components/alert-dialog";
+import { Button } from "@synoro/ui/components/button";
+import { Input } from "@synoro/ui/components/input";
 import { toast } from "sonner";
 
 interface FormAlertDialogProps {

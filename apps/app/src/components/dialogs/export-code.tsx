@@ -1,13 +1,13 @@
 import { Check, Copy } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@synoro/ui/components/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+} from "@synoro/ui/components/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@synoro/ui/components/tabs";
 import { Link } from "@/components/common/link";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 import { DialogProps } from "@radix-ui/react-dialog";

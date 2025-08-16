@@ -5,7 +5,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@synoro/ui/components/card";
 import { cn } from "@/lib/utils";
 
 export function ActionCard({

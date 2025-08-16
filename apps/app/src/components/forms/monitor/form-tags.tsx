@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@synoro/ui/components/button";
 import {
   FormCard,
   FormCardContent,
@@ -21,7 +21,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from "@synoro/ui/components/form";
 import { toast } from "sonner";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -29,7 +29,7 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
+} from "@synoro/ui/components/popover";
 import {
   Command,
   CommandEmpty,
@@ -37,9 +37,9 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/components/ui/command";
+} from "@synoro/ui/components/command";
 import { Link } from "@/components/common/link";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@synoro/ui/components/badge";
 import { monitorTags } from "@/data/monitor-tags";
 
 const schema = z.object({

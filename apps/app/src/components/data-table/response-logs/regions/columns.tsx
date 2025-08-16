@@ -3,7 +3,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 import type { RegionMetric } from "@/data/region-metrics";
 import { TableCellNumber } from "@/components/data-table/table-cell-number";
-import { DataTableColumnHeader } from "@/components/ui/data-table/data-table-column-header";
+import { DataTableColumnHeader } from "@synoro/ui/components/data-table/data-table-column-header";
 import { ChartLineRegion } from "@/components/chart/chart-line-region";
 import { getActions } from "@/data/region-metrics.client";
 import { QuickActions } from "@/components/dropdowns/quick-actions";

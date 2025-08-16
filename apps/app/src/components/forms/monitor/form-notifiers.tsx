@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@synoro/ui/components/button";
 import {
   FormCard,
   FormCardContent,
@@ -20,14 +20,14 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from "@synoro/ui/components/form";
 import { toast } from "sonner";
 import {
   EmptyStateContainer,
   EmptyStateTitle,
 } from "@/components/content/empty-state";
 import { notifiers } from "@/data/notifiers";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Checkbox } from "@synoro/ui/components/checkbox";
 
 const schema = z.object({
   notifiers: z.array(z.number()),

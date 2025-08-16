@@ -14,13 +14,13 @@ import {
   SidebarRail,
   SidebarTrigger,
   useSidebar,
-} from "@/components/ui/sidebar";
+} from "@synoro/ui/components/sidebar";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from "@synoro/ui/components/tooltip";
 import { Cog, LayoutGrid, Shield } from "lucide-react";
 
 import { NavChecklist } from "./nav-checklist";

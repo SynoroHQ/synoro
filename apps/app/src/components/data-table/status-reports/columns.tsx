@@ -1,7 +1,7 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { DataTableColumnHeader } from "@/components/ui/data-table/data-table-column-header";
+import { Button } from "@synoro/ui/components/button";
+import { DataTableColumnHeader } from "@synoro/ui/components/data-table/data-table-column-header";
 import { StatusReport } from "@/data/status-reports";
 import { ColumnDef } from "@tanstack/react-table";
 import { ChevronDown, ChevronUp } from "lucide-react";

@@ -4,7 +4,7 @@ import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
-} from "@/components/ui/hover-card";
+} from "@synoro/ui/components/hover-card";
 import { ResponseLog } from "@/data/response-logs";
 import { cn } from "@/lib/utils";
 import { HoverCardPortal } from "@radix-ui/react-hover-card";
@@ -18,7 +18,7 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from "@synoro/ui/components/tooltip";
 import { statusCodes } from "@/data/status-codes";
 
 const icons = {

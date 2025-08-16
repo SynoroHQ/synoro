@@ -7,10 +7,10 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from "@synoro/ui/components/form";
 
-import { Form } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { Form } from "@synoro/ui/components/form";
+import { Input } from "@synoro/ui/components/input";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,7 +23,7 @@ import {
   FormCardHeader,
   FormCardTitle,
 } from "@/components/forms/form-card";
-import { Button } from "@/components/ui/button";
+import { Button } from "@synoro/ui/components/button";
 import { DevTool } from "@hookform/devtools";
 import { toast } from "sonner";
 

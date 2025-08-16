@@ -5,12 +5,12 @@ import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+} from "@synoro/ui/components/collapsible";
 import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
-} from "@/components/ui/sidebar";
+} from "@synoro/ui/components/sidebar";
 import {
   Table,
   TableHeader,
@@ -18,7 +18,7 @@ import {
   TableHead,
   TableCell,
   TableBody,
-} from "@/components/ui/table";
+} from "@synoro/ui/components/table";
 import {
   EmptyStateContainer,
   EmptyStateDescription,

@@ -8,11 +8,11 @@ import {
   FormDescription,
   FormMessage,
   FormLabel,
-} from "@/components/ui/form";
+} from "@synoro/ui/components/form";
 
-import { Form } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Form } from "@synoro/ui/components/form";
+import { Input } from "@synoro/ui/components/input";
+import { Textarea } from "@synoro/ui/components/textarea";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -24,7 +24,7 @@ import {
   FormCardSeparator,
   FormCardTitle,
 } from "@/components/forms/form-card";
-import { Button } from "@/components/ui/button";
+import { Button } from "@synoro/ui/components/button";
 import { z } from "zod";
 import { useTransition } from "react";
 import { toast } from "sonner";

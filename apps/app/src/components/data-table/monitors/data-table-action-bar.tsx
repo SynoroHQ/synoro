@@ -9,14 +9,14 @@ import {
   DataTableActionBar,
   DataTableActionBarAction,
   DataTableActionBarSelection,
-} from "@/components/ui/data-table/data-table-action-bar";
+} from "@synoro/ui/components/data-table/data-table-action-bar";
 import {
   Select,
   SelectContent,
   SelectGroup,
   SelectItem,
-} from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
+} from "@synoro/ui/components/select";
+import { Separator } from "@synoro/ui/components/separator";
 import { Monitor } from "@/data/monitors";
 
 interface MonitorDataTableActionBarProps {

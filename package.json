@@ -40,5 +40,8 @@
     "apps/*",
     "packages/*",
     "tooling/*"
-  ]
+  ],
+  "overrides": {
+    "nanoid": "3.3.7"
+  }
 }

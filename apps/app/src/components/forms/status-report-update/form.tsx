@@ -5,19 +5,19 @@ import {
   FormCardContent,
   FormCardSeparator,
 } from "@/components/forms/form-card";
-import { Label } from "@/components/ui/label";
+import { Label } from "@synoro/ui/components/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { Calendar } from "@/components/ui/calendar";
-import { TabsContent } from "@/components/ui/tabs";
-import { TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Tabs } from "@/components/ui/tabs";
+} from "@synoro/ui/components/select";
+import { Textarea } from "@synoro/ui/components/textarea";
+import { Calendar } from "@synoro/ui/components/calendar";
+import { TabsContent } from "@synoro/ui/components/tabs";
+import { TabsList, TabsTrigger } from "@synoro/ui/components/tabs";
+import { Tabs } from "@synoro/ui/components/tabs";
 import {
   Form,
   FormMessage,
@@ -26,17 +26,17 @@ import {
   FormLabel,
   FormControl,
   FormDescription,
-} from "@/components/ui/form";
+} from "@synoro/ui/components/form";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { useTransition } from "react";
-import { PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Popover } from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
+import { PopoverContent, PopoverTrigger } from "@synoro/ui/components/popover";
+import { Popover } from "@synoro/ui/components/popover";
+import { Button } from "@synoro/ui/components/button";
 import { CalendarIcon, ClockIcon } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { Input } from "@synoro/ui/components/input";
 import { format } from "date-fns";
 
 const colors = {

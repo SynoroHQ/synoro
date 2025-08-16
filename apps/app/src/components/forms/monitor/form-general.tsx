@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@synoro/ui/components/button";
 import {
   FormControl,
   FormDescription,
@@ -8,17 +8,17 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Form } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+} from "@synoro/ui/components/form";
+import { Form } from "@synoro/ui/components/form";
+import { Input } from "@synoro/ui/components/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
+} from "@synoro/ui/components/select";
+import { Textarea } from "@synoro/ui/components/textarea";
 import { Globe, Network, Plus, X } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -36,7 +36,7 @@ import {
 } from "@/components/forms/form-card";
 import { DevTool } from "@hookform/devtools";
 import { toast } from "sonner";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { RadioGroup, RadioGroupItem } from "@synoro/ui/components/radio-group";
 import { Link } from "@/components/common/link";
 
 const TYPES = ["HTTP", "TCP"] as const;

@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@synoro/ui/components/button";
 import {
   Table,
   TableBody,
@@ -8,7 +8,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@synoro/ui/components/table";
 import { icons } from "@/data/icons";
 import { statusReports } from "@/data/status-reports";
 import { cn } from "@/lib/utils";

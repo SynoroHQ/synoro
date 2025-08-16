@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@synoro/ui/components/button";
 import { FormCard, FormCardGroup } from "@/components/forms/form-card";
 import {
   FormMaintenance,

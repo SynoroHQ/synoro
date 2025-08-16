@@ -6,7 +6,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@synoro/ui/components/table";
 
 export function DataTable({ data }: { data: any[] }) {
   return (

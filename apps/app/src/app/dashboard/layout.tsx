@@ -1,5 +1,5 @@
 import { AppSidebar } from "@/components/nav/app-sidebar";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarInset, SidebarProvider } from "@synoro/ui/components/sidebar";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (

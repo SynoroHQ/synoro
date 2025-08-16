@@ -1,6 +1,6 @@
 "use client";
 
-import {} from "@/components/ui/checkbox";
+import {} from "@synoro/ui/components/checkbox";
 import {
   FormControl,
   FormDescription,
@@ -8,10 +8,10 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from "@synoro/ui/components/form";
 
-import { Form } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { Form } from "@synoro/ui/components/form";
+import { Input } from "@synoro/ui/components/input";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";

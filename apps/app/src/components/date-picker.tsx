@@ -4,8 +4,8 @@ import { useState } from "react";
 import { subDays, subHours } from "date-fns";
 import { DateRange } from "react-day-picker";
 
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
+import { Button } from "@synoro/ui/components/button";
+import { Calendar } from "@synoro/ui/components/calendar";
 
 const LOCKED = true;
 

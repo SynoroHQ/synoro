@@ -10,7 +10,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@synoro/ui/components/select";
 import { useState } from "react";
 import { useEffect } from "react";
 import { cn } from "@/lib/utils";

@@ -7,7 +7,7 @@ import {
 } from "@/components/content/section";
 import { DataTable } from "@/components/data-table/billing/data-table";
 import { BillingProgress } from "@/components/content/billing-progress";
-import { Button } from "@/components/ui/button";
+import { Button } from "@synoro/ui/components/button";
 import {
   FormCard,
   FormCardContent,

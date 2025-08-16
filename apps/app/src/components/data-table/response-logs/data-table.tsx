@@ -1,6 +1,6 @@
 "use client";
 
-import { DataTable as DefaultDataTable } from "@/components/ui/data-table/data-table";
+import { DataTable as DefaultDataTable } from "@synoro/ui/components/data-table/data-table";
 import { ResponseLog } from "@/data/response-logs";
 import { columns } from "./columns";
 import {
@@ -17,16 +17,16 @@ import {
   TableCell,
   TableHead,
   TableRow,
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
+} from "@synoro/ui/components/table";
+import { Button } from "@synoro/ui/components/button";
 import { Braces, Share, TableProperties } from "lucide-react";
 import { regions } from "@/data/regions";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DataTablePagination } from "@/components/ui/data-table/data-table-pagination";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@synoro/ui/components/tabs";
+import { DataTablePagination } from "@synoro/ui/components/data-table/data-table-pagination";
 import { TableCellDate } from "@/components/data-table/table-cell-date";
 import { TableCellNumber } from "@/components/data-table/table-cell-number";
 import { statusCodes } from "@/data/status-codes";
-import { Separator } from "@/components/ui/separator";
+import { Separator } from "@synoro/ui/components/separator";
 import { ResponseLogsDataTableToolbar } from "@/components/data-table/response-logs/data-table-toolbar";
 
 export function DataTable({ data }: { data: ResponseLog[] }) {

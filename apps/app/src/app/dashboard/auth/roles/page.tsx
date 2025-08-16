@@ -5,10 +5,10 @@ import {
   SectionHeader,
   SectionTitle,
 } from "@/components/content/section";
-import { Button } from "@/components/ui/button";
+import { Button } from "@synoro/ui/components/button";
 import { Plus, Shield, Users, Settings } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@synoro/ui/components/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@synoro/ui/components/card";
 import { CreateRoleDialog } from "@/components/forms/auth/create-role-dialog";
 
 const roles = [

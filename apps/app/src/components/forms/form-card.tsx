@@ -5,9 +5,9 @@ import {
 	CardFooter,
 	CardHeader,
 	CardTitle,
-} from "@/components/ui/card";
+} from "@synoro/ui/components/card";
 import { cn } from "@/lib/utils";
-import { Separator } from "@/components/ui/separator";
+import { Separator } from "@synoro/ui/components/separator";
 
 import { cva, type VariantProps } from "class-variance-authority";
 

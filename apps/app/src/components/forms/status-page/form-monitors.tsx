@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@synoro/ui/components/button";
 import {
   FormCard,
   FormCardContent,
@@ -23,15 +23,15 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from "@synoro/ui/components/form";
 import { toast } from "sonner";
 import {
   EmptyStateContainer,
   EmptyStateTitle,
 } from "@/components/content/empty-state";
 import { Monitor } from "@/data/monitors";
-import { PopoverContent } from "@/components/ui/popover";
-import { Popover, PopoverTrigger } from "@/components/ui/popover";
+import { PopoverContent } from "@synoro/ui/components/popover";
+import { Popover, PopoverTrigger } from "@synoro/ui/components/popover";
 import { cn } from "@/lib/utils";
 import {
   Command,
@@ -40,7 +40,7 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/components/ui/command";
+} from "@synoro/ui/components/command";
 import { Check, ChevronsUpDown, GripVertical } from "lucide-react";
 import { UniqueIdentifier } from "@dnd-kit/core";
 import {
@@ -49,7 +49,7 @@ import {
   SortableItem,
   SortableItemHandle,
   SortableOverlay,
-} from "@/components/ui/sortable";
+} from "@synoro/ui/components/sortable";
 import { monitors } from "@/data/monitors";
 import {
   Select,
@@ -57,7 +57,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@synoro/ui/components/select";
 import { Link } from "@/components/common/link";
 
 // TODO: add type selection + reordering

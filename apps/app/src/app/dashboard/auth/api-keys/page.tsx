@@ -7,10 +7,10 @@ import {
   SectionHeader,
   SectionTitle,
 } from "@/components/content/section";
-import { Button } from "@/components/ui/button";
+import { Button } from "@synoro/ui/components/button";
 import { Plus, Key, Copy, Eye, EyeOff, Trash2 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@synoro/ui/components/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@synoro/ui/components/card";
 import { useState } from "react";
 import { toast } from "sonner";
 import { GenerateApiKeyDialog } from "@/components/forms/auth/generate-api-key-dialog";

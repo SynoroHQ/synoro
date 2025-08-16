@@ -4,7 +4,7 @@ import {
   SidebarMenu,
   SidebarMenuAction,
   SidebarMenuItem,
-} from "@/components/ui/sidebar";
+} from "@synoro/ui/components/sidebar";
 import { X, CircleDashed, CircleCheck } from "lucide-react";
 import { Link } from "@/components/common/link";
 

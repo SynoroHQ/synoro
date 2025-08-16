@@ -5,7 +5,7 @@ import "@synoro/ui/globals.css";
 
 import { TailwindIndicator } from "@/components/tailwind-indicator";
 import { ThemeProvider } from "@/components/theme-provider";
-import { Toaster } from "@/components/ui/sonner";
+import { Toaster } from "@synoro/ui/components/sonner";
 import PlausibleProvider from "next-plausible";
 
 import { defaultMetadata, ogMetadata, twitterMetadata } from "./metadata";

@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@synoro/ui/components/badge";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -17,8 +17,8 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
+} from "@synoro/ui/components/dropdown-menu";
+import { Input } from "@synoro/ui/components/input";
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -27,13 +27,13 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/components/ui/sidebar";
+} from "@synoro/ui/components/sidebar";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from "@synoro/ui/components/tooltip";
 import { cn } from "@/lib/utils";
 import {
   Code,

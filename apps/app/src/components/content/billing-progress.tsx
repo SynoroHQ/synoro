@@ -1,4 +1,4 @@
-import { Progress } from "@/components/ui/progress";
+import { Progress } from "@synoro/ui/components/progress";
 
 interface BillingProgressProps {
   label: string;

@@ -8,8 +8,8 @@ import {
   FormMessage,
   FormItem,
   FormControl,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+} from "@synoro/ui/components/form";
+import { Input } from "@synoro/ui/components/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTransition } from "react";
 import { useForm } from "react-hook-form";

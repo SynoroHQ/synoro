@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@synoro/ui/components/button";
 import {
   FormCard,
   FormCardContent,
@@ -22,12 +22,12 @@ import {
   FormField,
   FormItem,
   FormLabel,
-} from "@/components/ui/form";
+} from "@synoro/ui/components/form";
 import { toast } from "sonner";
 import { Lock } from "lucide-react";
 import NextLink from "next/link";
 import { Link } from "@/components/common/link";
-import { Switch } from "@/components/ui/switch";
+import { Switch } from "@synoro/ui/components/switch";
 
 const LOCKED = true;
 
