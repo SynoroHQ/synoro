@@ -21,7 +21,7 @@
     "typecheck": "turbo run typecheck",
     "ui-add": "turbo run ui-add",
     "knip": "bun run with-env -- knip",
-    "with-env": "dotenv -e .env --",
+    "with-env": "bun x dotenv -e .env --",
     "update-prompt": "bun -C packages/prompts run update-prompt --"
   },
   "devDependencies": {
