@@ -4,6 +4,7 @@ import { Bot } from "grammy";
 import { env } from "./env";
 import { handleAudio } from "./handlers/audio";
 import { handleText } from "./handlers/text";
+import { handleOther } from "./handlers/other";
 
 export function createBot(): Bot<Context> {
   const bot = new Bot<Context>(env.TELEGRAM_BOT_TOKEN);
@@ -17,6 +18,8 @@ export function createBot(): Bot<Context> {
 
   bot.on("message:text", handleText);
   bot.on(["message:voice", "message:audio"], handleAudio);
+  // Fallback for any other message types
+  bot.on("message", handleOther);
 
   bot.catch((err: unknown) => console.error("Bot error:", err));
 

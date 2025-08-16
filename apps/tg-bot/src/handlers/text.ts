@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import type { Context } from "grammy";
 
 import { logEvent } from "../services/db";
-import { advise, parseTask } from "../services/openai";
+import { advise, parseTask, classifyRelevance } from "../services/openai";
 
 export async function handleText(ctx: Context): Promise<void> {
   const text = ctx.message?.text ?? "";
@@ -48,11 +48,27 @@ export async function handleText(ctx: Context): Promise<void> {
       "Не удалось обработать сообщение. Попробуйте ещё раз позже.",
     );
   } finally {
-    await logEvent({
-      chatId: String(ctx.chat?.id ?? "unknown"),
-      type: "text",
-      text,
-      meta: { user: ctx.from?.username ?? ctx.from?.id, parsed },
-    });
+    try {
+      const cls = await classifyRelevance(text);
+      const relevant = (cls?.relevant === true) || Boolean(parsed);
+      if (relevant) {
+        await logEvent({
+          chatId: String(ctx.chat?.id ?? "unknown"),
+          type: "text",
+          text,
+          meta: { user: ctx.from?.username ?? ctx.from?.id, parsed },
+        });
+      }
+    } catch (_e) {
+      // If classification fails, log only if parsed exists
+      if (parsed) {
+        await logEvent({
+          chatId: String(ctx.chat?.id ?? "unknown"),
+          type: "text",
+          text,
+          meta: { user: ctx.from?.username ?? ctx.from?.id, parsed },
+        });
+      }
+    }
   }
 }

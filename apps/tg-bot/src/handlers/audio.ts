@@ -3,7 +3,7 @@ import type { Context } from "grammy";
 
 import { env } from "../env";
 import { logEvent } from "../services/db";
-import { advise, parseTask, transcribe } from "../services/openai";
+import { advise, parseTask, transcribe, classifyRelevance } from "../services/openai";
 
 export async function handleAudio(ctx: Context): Promise<void> {
   const fileId = ctx.message?.voice?.file_id ?? ctx.message?.audio?.file_id;
@@ -59,13 +59,6 @@ export async function handleAudio(ctx: Context): Promise<void> {
       },
     });
 
-    await logEvent({
-      chatId: String(ctx.chat?.id ?? "unknown"),
-      type: "audio",
-      text,
-      meta: { file_path: file.file_path, parsed },
-    });
-
     if (text.trim().length === 0) {
       await ctx.reply("Голос распознан, но текста не найдено.");
       return;
@@ -85,6 +78,18 @@ export async function handleAudio(ctx: Context): Promise<void> {
     await ctx.reply(
       tip ? `Распознал: ${text}\nСовет: ${tip}` : `Распознал: ${text}`,
     );
+
+    // Log only if relevant by LLM or if we extracted a structured task
+    const cls = await classifyRelevance(text);
+    const relevant = (cls?.relevant === true) || Boolean(parsed);
+    if (relevant) {
+      await logEvent({
+        chatId: String(ctx.chat?.id ?? "unknown"),
+        type: "audio",
+        text,
+        meta: { file_path: file.file_path, parsed },
+      });
+    }
   } catch (err) {
     console.error("Audio handling error:", err);
     await ctx.reply("Не удалось обработать аудио. Попробуйте ещё раз позже.");
