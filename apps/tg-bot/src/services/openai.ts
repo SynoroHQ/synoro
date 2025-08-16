@@ -2,6 +2,7 @@ import type { AttributeValue } from "@opentelemetry/api";
 import { openai } from "@ai-sdk/openai";
 import { experimental_transcribe as aiTranscribe, generateText } from "ai";
 import { Langfuse } from "langfuse";
+import { z } from "zod";
 
 import {
   DEFAULT_PROMPT_KEY,

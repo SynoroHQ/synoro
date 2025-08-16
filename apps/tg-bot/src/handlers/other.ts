@@ -21,8 +21,21 @@ export async function handleOther(ctx: Context): Promise<void> {
             chatId: String(ctx.chat?.id ?? "unknown"),
             type: "text",
             text: caption,
-            meta: { kind: "caption", messageType: msg?.media ? "media" : "other" },
+            meta: {
+              kind: "caption",
+              messageType:
+                "photo" in msg ? "photo" :
+                "video" in msg ? "video" :
+                "document" in msg ? "document" :
+                "animation" in msg ? "animation" :
+                "sticker" in msg ? "sticker" :
+                "location" in msg ? "location" :
+                "contact" in msg ? "contact" :
+                "poll" in msg ? "poll" :
+                "other",
+            },
           });
+        }
         }
       } catch (_e) {
         // ignore classification errors; do not log
