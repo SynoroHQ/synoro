@@ -23,7 +23,9 @@
     "format": "prettier --check . --ignore-path ../../.gitignore",
     "lint": "eslint",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false",
-    "prepare": "tsup"
+    "prepare": "tsup",
+    "with-env": "dotenv -e ../../.env --",
+    "update-prompt": "bun run with-env -- bun src/scripts/update-prompt.ts"
   },
   "devDependencies": {
     "@synoro/eslint-config": "workspace:*",
@@ -32,7 +34,8 @@
     "eslint": "9.33.0",
     "prettier": "3.6.2",
     "tsup": "8.5.0",
-    "typescript": "5.9.2"
+    "typescript": "5.9.2",
+    "dotenv-cli": "10.0.0"
   },
   "prettier": "@synoro/prettier-config",
   "dependencies": {

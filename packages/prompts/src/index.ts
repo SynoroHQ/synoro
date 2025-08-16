@@ -8,12 +8,7 @@ export * from "./core/types";
 export type { PromptDefinition } from "./core/prompt";
 export { getPromptSafeFromRegistry } from "./core/prompt";
 export * from "./publish/langfuse";
-export { assistantRuV1 } from "./prompts/assistant/ru/v1";
-
-// Back-compat convenience map of key->string prompt
-export const prompts: Record<string, string> = Object.fromEntries(
-  Object.entries(registry).map(([k, def]) => [k, def.prompt]),
-);
+export { assistant } from "./prompts/assistant";
 
 export function getPrompt(key: string): string {
   return registry[key]?.prompt ?? "";

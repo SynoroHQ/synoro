@@ -1,8 +1,8 @@
 import type { AIModel } from "./models";
 
 export type PromptDefinition = {
-  key: string; // unique registry key, e.g. "assistant/ru/v1"
-  name: string; // cloud-friendly name, e.g. "assistant-ru-v1"
+  key: string; // unique registry key, e.g. "assistant"
+  name: string; // cloud-friendly name, e.g. "assistant"
   type: "text" | string;
   prompt: string;
   labels?: string[];
@@ -11,7 +11,7 @@ export type PromptDefinition = {
   defaultTemperature?: number;
 };
 
-export const DEFAULT_PROMPT_KEY = "assistant/ru/v1" as const;
+export const DEFAULT_PROMPT_KEY = "assistant" as const;
 
 export function getPrompt(def: PromptDefinition): string {
   return def.prompt;
