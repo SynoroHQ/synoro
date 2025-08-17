@@ -1,7 +1,7 @@
 import { AuthGuard } from "@/components/auth/auth-guard";
 import { AppSidebar } from "@/components/nav/app-sidebar";
 
-import { SidebarInset, SidebarProvider } from "@synoro/ui/components/sidebar";
+import { SidebarInset, SidebarProvider } from "@synoro/ui";
 
 export default function HomePage() {
   return (

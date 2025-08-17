@@ -19,6 +19,3 @@ export const {
   resetPassword,
   changePassword,
 } = authClient;
-
-// Export AuthProvider separately from better-auth/react
-export { AuthProvider } from "better-auth/react";

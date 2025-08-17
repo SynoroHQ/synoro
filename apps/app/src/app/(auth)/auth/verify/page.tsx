@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { ArrowLeft, Loader2, Mail } from "lucide-react";
 
-import { emailOtp } from "@synoro/auth/client";
+import { emailOtp } from "@synoro/auth";
 import { Button } from "@synoro/ui/components/button";
 import {
   Card,

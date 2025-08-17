@@ -25,6 +25,10 @@ export function middleware(req: NextRequest) {
   // Если это не публичная страница и пользователь не авторизован, перенаправляем на логин
   if (!isPublicRoute && !sessionCookie) {
     const loginUrl = new URL("/auth/login", req.url);
+    loginUrl.searchParams.set(
+      "redirectTo",
+      req.nextUrl.pathname + req.nextUrl.search,
+    );
     return NextResponse.redirect(loginUrl);
   }
 
