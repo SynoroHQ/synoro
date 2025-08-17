@@ -29,6 +29,15 @@ export default function ProfilePage() {
     email: session?.user?.email || "",
   });
 
+  // Синхронизация полей с актуальными данными сессии (если не редактируем вручную)
+  useEffect(() => {
+    if (session?.user && !isEditing) {
+      setFormData({
+        name: session.user.name ?? "",
+        email: session.user.email ?? "",
+      });
+    }
+  }, [session?.user?.name, session?.user?.email, isEditing]);
   if (!session?.user) {
     return (
       <div className="p-6">
