@@ -32,9 +32,15 @@ export const auth = betterAuth({
     // Minimal email sender for dev – integrate your email service here
     sendResetPassword: async ({ user, url }, _request) => {
       // TODO: replace with your email provider (e.g., Resend, Postmark)
-      console.log(
-        `[better-auth] Reset password link for ${user.email}: ${url}`,
-      );
+      if (env.NODE_ENV !== "production") {
+        console.log(
+          `[better-auth] Reset password link for ${user.email}: ${url}`,
+        );
+        return;
+      }
+      // В продакшене логирование запрещено — интегрируйте провайдера отправки email:
+      // await sendResetEmail({ to: user.email, url });
+    },
     },
   },
   session: {
