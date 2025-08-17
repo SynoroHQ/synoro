@@ -1,7 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Camera, Clock, Globe, Mail, User } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
 import {
   Avatar,
@@ -16,8 +19,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@synoro/ui/components/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@synoro/ui/components/form";
 import { Input } from "@synoro/ui/components/input";
-import { Label } from "@synoro/ui/components/label";
 import {
   Select,
   SelectContent,
@@ -25,16 +35,53 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@synoro/ui/components/select";
+import { Textarea } from "@synoro/ui/components/textarea";
+
+const profileSchema = z.object({
+  firstName: z.string().min(2, {
+    message: "Имя должно содержать минимум 2 символа.",
+  }),
+  lastName: z.string().min(2, {
+    message: "Фамилия должна содержать минимум 2 символа.",
+  }),
+  email: z.string().email({
+    message: "Введите корректный email адрес.",
+  }),
+  phone: z.string().min(10, {
+    message: "Введите корректный номер телефона.",
+  }),
+  language: z.string().min(1, {
+    message: "Выберите язык интерфейса.",
+  }),
+  timezone: z.string().min(1, {
+    message: "Выберите часовой пояс.",
+  }),
+  bio: z.string().max(500, {
+    message: "Описание не должно превышать 500 символов.",
+  }),
+});
+
+type ProfileFormValues = z.infer<typeof profileSchema>;
 
 export function ProfileForm() {
-  const [isLoading, setIsLoading] = useState(false);
   const [avatar, setAvatar] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+  const form = useForm<ProfileFormValues>({
+    resolver: zodResolver(profileSchema),
+    defaultValues: {
+      firstName: "Иван",
+      lastName: "Иванов",
+      email: "ivan@example.com",
+      phone: "+7 (999) 123-45-67",
+      language: "ru",
+      timezone: "Europe/Moscow",
+      bio: "Люблю планировать и организовывать свою жизнь с помощью умных инструментов.",
+    },
+  });
+
+  const onSubmit = async (values: ProfileFormValues) => {
     // TODO: Implement profile update logic
-    setTimeout(() => setIsLoading(false), 1000);
+    console.log(values);
   };
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -57,148 +104,220 @@ export function ProfileForm() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Avatar Section */}
-          <div className="flex items-center space-x-6">
-            <div className="relative">
-              <Avatar className="h-20 w-20">
-                <AvatarImage src={avatar || undefined} alt="Profile" />
-                <AvatarFallback className="text-lg">СИ</AvatarFallback>
-              </Avatar>
-              <label
-                htmlFor="avatar-upload"
-                className="absolute right-0 bottom-0 cursor-pointer"
-              >
-                <div className="rounded-full bg-blue-600 p-1 text-white hover:bg-blue-700">
-                  <Camera className="h-4 w-4" />
-                </div>
-                <input
-                  id="avatar-upload"
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleAvatarChange}
-                />
-              </label>
-            </div>
-            <div>
-              <h3 className="text-lg font-medium">Фото профиля</h3>
-              <p className="text-muted-foreground text-sm">
-                Загрузите изображение в формате JPG, PNG или GIF
-              </p>
-            </div>
-          </div>
-
-          {/* Personal Information */}
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="firstName">Имя</Label>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            {/* Avatar Section */}
+            <div className="flex items-center space-x-6">
               <div className="relative">
-                <User className="text-muted-foreground absolute top-3 left-3 h-4 w-4" />
-                <Input
-                  id="firstName"
-                  type="text"
-                  placeholder="Ваше имя"
-                  className="pl-10"
-                  defaultValue="Иван"
-                />
+                <Avatar className="h-20 w-20">
+                  <AvatarImage src={avatar || undefined} alt="Profile" />
+                  <AvatarFallback className="text-lg">СИ</AvatarFallback>
+                </Avatar>
+                <label
+                  htmlFor="avatar-upload"
+                  className="absolute right-0 bottom-0 cursor-pointer"
+                >
+                  <div className="rounded-full bg-blue-600 p-1 text-white hover:bg-blue-700">
+                    <Camera className="h-4 w-4" />
+                  </div>
+                  <input
+                    id="avatar-upload"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleAvatarChange}
+                  />
+                </label>
+              </div>
+              <div>
+                <h3 className="text-lg font-medium">Фото профиля</h3>
+                <p className="text-muted-foreground text-sm">
+                  Загрузите изображение в формате JPG, PNG или GIF
+                </p>
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="lastName">Фамилия</Label>
-              <div className="relative">
-                <User className="text-muted-foreground absolute top-3 left-3 h-4 w-4" />
-                <Input
-                  id="lastName"
-                  type="text"
-                  placeholder="Ваша фамилия"
-                  className="pl-10"
-                  defaultValue="Иванов"
-                />
-              </div>
-            </div>
+            {/* Personal Information */}
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <FormField
+                control={form.control}
+                name="firstName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Имя</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <User className="text-muted-foreground absolute top-3 left-3 h-4 w-4" />
+                        <Input
+                          placeholder="Ваше имя"
+                          className="pl-10"
+                          {...field}
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <div className="relative">
-                <Mail className="text-muted-foreground absolute top-3 left-3 h-4 w-4" />
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="your@email.com"
-                  className="pl-10"
-                  defaultValue="ivan@example.com"
-                  disabled
-                />
-              </div>
-            </div>
+              <FormField
+                control={form.control}
+                name="lastName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Фамилия</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <User className="text-muted-foreground absolute top-3 left-3 h-4 w-4" />
+                        <Input
+                          placeholder="Ваша фамилия"
+                          className="pl-10"
+                          {...field}
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <div className="space-y-2">
-              <Label htmlFor="phone">Телефон</Label>
-              <Input
-                id="phone"
-                type="tel"
-                placeholder="+7 (999) 123-45-67"
-                defaultValue="+7 (999) 123-45-67"
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Mail className="text-muted-foreground absolute top-3 left-3 h-4 w-4" />
+                        <Input
+                          placeholder="your@email.com"
+                          type="email"
+                          className="pl-10"
+                          disabled
+                          {...field}
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="phone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Телефон</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="+7 (999) 123-45-67"
+                        type="tel"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
             </div>
-          </div>
 
-          {/* Preferences */}
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="language">Язык интерфейса</Label>
-              <Select defaultValue="ru">
-                <SelectTrigger>
-                  <SelectValue placeholder="Выберите язык" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ru">Русский</SelectItem>
-                  <SelectItem value="en">English</SelectItem>
-                  <SelectItem value="de">Deutsch</SelectItem>
-                </SelectContent>
-              </Select>
+            {/* Preferences */}
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <FormField
+                control={form.control}
+                name="language"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Язык интерфейса</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Выберите язык" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="ru">Русский</SelectItem>
+                        <SelectItem value="en">English</SelectItem>
+                        <SelectItem value="de">Deutsch</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="timezone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Часовой пояс</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Выберите часовой пояс" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="Europe/Moscow">
+                          Москва (UTC+3)
+                        </SelectItem>
+                        <SelectItem value="Europe/London">
+                          Лондон (UTC+0)
+                        </SelectItem>
+                        <SelectItem value="America/New_York">
+                          Нью-Йорк (UTC-5)
+                        </SelectItem>
+                        <SelectItem value="Asia/Tokyo">
+                          Токио (UTC+9)
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="timezone">Часовой пояс</Label>
-              <Select defaultValue="Europe/Moscow">
-                <SelectTrigger>
-                  <SelectValue placeholder="Выберите часовой пояс" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Europe/Moscow">Москва (UTC+3)</SelectItem>
-                  <SelectItem value="Europe/London">Лондон (UTC+0)</SelectItem>
-                  <SelectItem value="America/New_York">
-                    Нью-Йорк (UTC-5)
-                  </SelectItem>
-                  <SelectItem value="Asia/Tokyo">Токио (UTC+9)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          {/* Bio */}
-          <div className="space-y-2">
-            <Label htmlFor="bio">О себе</Label>
-            <textarea
-              id="bio"
-              className="border-input focus:ring-ring min-h-[100px] w-full resize-none rounded-md border px-3 py-2 focus:ring-2 focus:ring-offset-2 focus:outline-none"
-              placeholder="Расскажите немного о себе..."
-              defaultValue="Люблю планировать и организовывать свою жизнь с помощью умных инструментов."
+            {/* Bio */}
+            <FormField
+              control={form.control}
+              name="bio"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>О себе</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Расскажите немного о себе..."
+                      className="min-h-[100px] resize-none"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <div className="flex justify-end space-x-4">
-            <Button type="button" variant="outline">
-              Отмена
-            </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Сохранение..." : "Сохранить изменения"}
-            </Button>
-          </div>
-        </form>
+            <div className="flex justify-end space-x-4">
+              <Button type="button" variant="outline">
+                Отмена
+              </Button>
+              <Button type="submit" disabled={form.formState.isSubmitting}>
+                {form.formState.isSubmitting
+                  ? "Сохранение..."
+                  : "Сохранить изменения"}
+              </Button>
+            </div>
+          </form>
+        </Form>
       </CardContent>
     </Card>
   );

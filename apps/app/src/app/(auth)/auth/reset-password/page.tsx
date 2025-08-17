@@ -3,7 +3,10 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Eye, EyeOff, Loader2, Lock } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
 import { resetPassword } from "@synoro/auth/client";
 import {
@@ -14,22 +17,48 @@ import {
   CardHeader,
   CardTitle,
   Input,
-  Label,
 } from "@synoro/ui";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@synoro/ui/components/form";
+
+const resetPasswordSchema = z
+  .object({
+    newPassword: z.string().min(6, {
+      message: "Пароль должен содержать минимум 6 символов.",
+    }),
+    confirmPassword: z.string().min(6, {
+      message: "Пароль должен содержать минимум 6 символов.",
+    }),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Пароли не совпадают.",
+    path: ["confirmPassword"],
+  });
+
+type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>;
 
 export default function ResetPasswordPage() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
 
-  const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [formData, setFormData] = useState({
-    newPassword: "",
-    confirmPassword: "",
-  });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+
+  const form = useForm<ResetPasswordFormValues>({
+    resolver: zodResolver(resetPasswordSchema),
+    defaultValues: {
+      newPassword: "",
+      confirmPassword: "",
+    },
+  });
 
   useEffect(() => {
     if (!token) {
@@ -37,28 +66,15 @@ export default function ResetPasswordPage() {
     }
   }, [token]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (values: ResetPasswordFormValues) => {
     if (!token) return;
 
-    // Валидация
-    if (formData.newPassword !== formData.confirmPassword) {
-      setError("Пароли не совпадают");
-      return;
-    }
-
-    if (formData.newPassword.length < 6) {
-      setError("Пароль должен содержать минимум 6 символов");
-      return;
-    }
-
-    setIsLoading(true);
     setError("");
 
     try {
       const result = await resetPassword({
-        newPassword: formData.newPassword,
         token,
+        newPassword: values.newPassword,
       });
 
       if (result?.error) {
@@ -69,20 +85,33 @@ export default function ResetPasswordPage() {
       }
     } catch (err) {
       setError("Произошла ошибка при сбросе пароля");
-    } finally {
-      setIsLoading(false);
     }
   };
 
   if (!token) {
     return (
       <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[400px]">
+        <div className="flex flex-col space-y-2 text-center">
+          <h1 className="text-2xl font-semibold tracking-tight">
+            Ошибка сброса пароля
+          </h1>
+          <p className="text-muted-foreground text-sm">
+            Токен для сброса пароля не найден
+          </p>
+        </div>
+
         <Card>
           <CardContent className="pt-6">
             <div className="text-center">
-              <p className="text-red-600">Токен для сброса пароля не найден</p>
-              <Link href="/auth/login" className="text-primary hover:underline">
-                Вернуться к входу
+              <p className="text-muted-foreground mb-4">
+                Для сброса пароля необходим корректный токен
+              </p>
+              <Link
+                href="/auth/forgot-password"
+                className="text-muted-foreground hover:text-foreground inline-flex items-center text-sm"
+              >
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Запросить сброс пароля
               </Link>
             </div>
           </CardContent>
@@ -99,7 +128,7 @@ export default function ResetPasswordPage() {
             Пароль успешно изменен
           </h1>
           <p className="text-muted-foreground text-sm">
-            Теперь вы можете войти в систему с новым паролем
+            Теперь вы можете войти с новым паролем
           </p>
         </div>
 
@@ -111,7 +140,7 @@ export default function ResetPasswordPage() {
               </div>
               <div>
                 <h3 className="text-lg font-medium">Пароль обновлен</h3>
-                <p className="text-muted-foreground mt-2 text-sm">
+                <p className="text-muted-foreground text-sm">
                   Ваш пароль был успешно изменен. Теперь вы можете войти в
                   систему.
                 </p>
@@ -123,9 +152,8 @@ export default function ResetPasswordPage() {
         <div className="text-center">
           <Link
             href="/auth/login"
-            className="text-muted-foreground hover:text-primary inline-flex items-center text-sm"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium"
           >
-            <ArrowLeft className="mr-2 h-4 w-4" />
             Войти в систему
           </Link>
         </div>
@@ -138,7 +166,7 @@ export default function ResetPasswordPage() {
       <div className="flex flex-col space-y-2 text-center">
         <h1 className="text-2xl font-semibold tracking-tight">Сброс пароля</h1>
         <p className="text-muted-foreground text-sm">
-          Введите новый пароль для вашего аккаунта
+          Создайте новый пароль для вашего аккаунта
         </p>
       </div>
 
@@ -146,103 +174,113 @@ export default function ResetPasswordPage() {
         <CardHeader>
           <CardTitle>Новый пароль</CardTitle>
           <CardDescription>
-            Создайте новый надежный пароль для входа в систему
+            Введите новый пароль для вашего аккаунта
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="newPassword">Новый пароль</Label>
-              <div className="relative">
-                <Lock className="text-muted-foreground absolute top-3 left-3 h-4 w-4" />
-                <Input
-                  id="newPassword"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Введите новый пароль"
-                  value={formData.newPassword}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      newPassword: e.target.value,
-                    }))
-                  }
-                  className="pr-10 pl-10"
-                  required
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
-                </Button>
-              </div>
-            </div>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="newPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Новый пароль</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Lock className="text-muted-foreground absolute top-3 left-3 h-4 w-4" />
+                        <Input
+                          placeholder="Введите новый пароль"
+                          type={showPassword ? "text" : "password"}
+                          className="pr-10 pl-10"
+                          {...field}
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Подтвердите пароль</Label>
-              <div className="relative">
-                <Lock className="text-muted-foreground absolute top-3 left-3 h-4 w-4" />
-                <Input
-                  id="confirmPassword"
-                  type={showConfirmPassword ? "text" : "password"}
-                  placeholder="Повторите новый пароль"
-                  value={formData.confirmPassword}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      confirmPassword: e.target.value,
-                    }))
-                  }
-                  className="pr-10 pl-10"
-                  required
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                >
-                  {showConfirmPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
-                </Button>
-              </div>
-            </div>
+              <FormField
+                control={form.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Подтвердите пароль</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Lock className="text-muted-foreground absolute top-3 left-3 h-4 w-4" />
+                        <Input
+                          placeholder="Повторите новый пароль"
+                          type={showConfirmPassword ? "text" : "password"}
+                          className="pr-10 pl-10"
+                          {...field}
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent"
+                          onClick={() =>
+                            setShowConfirmPassword(!showConfirmPassword)
+                          }
+                        >
+                          {showConfirmPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            {error && (
-              <div className="rounded-md bg-red-50 p-3 text-sm text-red-600">
-                {error}
-              </div>
-            )}
-
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Сброс пароля...
-                </>
-              ) : (
-                "Сбросить пароль"
+              {error && (
+                <div className="rounded-md bg-red-50 p-3 text-sm text-red-600">
+                  {error}
+                </div>
               )}
-            </Button>
-          </form>
+
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={form.formState.isSubmitting}
+              >
+                {form.formState.isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Сброс пароля...
+                  </>
+                ) : (
+                  "Сбросить пароль"
+                )}
+              </Button>
+            </form>
+          </Form>
         </CardContent>
       </Card>
 
       <div className="text-center">
         <Link
           href="/auth/login"
-          className="text-muted-foreground hover:text-primary inline-flex items-center text-sm"
+          className="text-muted-foreground hover:text-foreground inline-flex items-center text-sm"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Вернуться к входу

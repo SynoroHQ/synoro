@@ -1,7 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Eye, EyeOff } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
 import { Button } from "@synoro/ui/components/button";
 import {
@@ -11,17 +14,41 @@ import {
   CardHeader,
   CardTitle,
 } from "@synoro/ui/components/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@synoro/ui/components/form";
 import { Input } from "@synoro/ui/components/input";
-import { Label } from "@synoro/ui/components/label";
+
+const loginSchema = z.object({
+  email: z.string().email({
+    message: "Введите корректный email адрес.",
+  }),
+  password: z.string().min(6, {
+    message: "Пароль должен содержать минимум 6 символов.",
+  }),
+});
+
+type LoginFormValues = z.infer<typeof loginSchema>;
 
 export function LoginForm() {
-  const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+  const form = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  const onSubmit = async (values: LoginFormValues) => {
     // TODO: Implement login logic
-    setTimeout(() => setIsLoading(false), 1000);
+    console.log(values);
   };
 
   return (
@@ -31,37 +58,83 @@ export function LoginForm() {
         <CardDescription>Введите ваш email для входа в аккаунт</CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="grid gap-4">
-          <div className="grid gap-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="m@example.com"
-              required
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="m@example.com"
+                      type="email"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-          <div className="grid gap-2">
-            <div className="flex items-center">
-              <Label htmlFor="password">Пароль</Label>
-              <Link href="#" className="ml-auto inline-block text-sm underline">
-                Забыли пароль?
-              </Link>
-            </div>
-            <Input id="password" type="password" required />
-          </div>
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? "Вход..." : "Войти"}
-          </Button>
-          <Button variant="outline" className="w-full">
-            Войти через Google
-          </Button>
-        </form>
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <div className="flex items-center justify-between">
+                    <FormLabel>Пароль</FormLabel>
+                    <a
+                      href="/auth/forgot-password"
+                      className="text-muted-foreground text-sm hover:underline"
+                    >
+                      Забыли пароль?
+                    </a>
+                  </div>
+                  <FormControl>
+                    <div className="relative">
+                      <Input
+                        placeholder="Введите пароль"
+                        type={showPassword ? "text" : "password"}
+                        className="pr-10"
+                        {...field}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={form.formState.isSubmitting}
+            >
+              {form.formState.isSubmitting ? "Вход..." : "Войти"}
+            </Button>
+            <Button variant="outline" className="w-full">
+              Войти через Google
+            </Button>
+          </form>
+        </Form>
         <div className="mt-4 text-center text-sm">
           Нет аккаунта?{" "}
-          <Link href="/auth/register" className="underline">
+          <a href="/auth/register" className="underline">
             Зарегистрироваться
-          </Link>
+          </a>
         </div>
       </CardContent>
     </Card>
