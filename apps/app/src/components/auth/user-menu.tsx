@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { LogOut, Settings, Shield, User } from "lucide-react";
 
-import { signOut, useSession } from "@synoro/auth";
+import { signOut, useSession } from "@synoro/auth/client";
 import {
   Avatar,
   AvatarFallback,
@@ -29,7 +29,7 @@ export function UserMenu() {
   const handleSignOut = async () => {
     setIsLoading(true);
     try {
-      await signOut({ redirect: false });
+      await signOut();
       window.location.href = "/auth/login";
     } catch (error) {
       console.error("Ошибка при выходе:", error);

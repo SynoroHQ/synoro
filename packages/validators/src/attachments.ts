@@ -1,37 +1,24 @@
 import { z } from "zod";
 
-export const FileNameRegex = /^[a-zA-Z0-9!_.*'()-\\/]+$/;
-export const AVATAR_MAX_FILE_SIZE_MB = 2;
-export const AVATAR_ALLOWED_FILE_TYPES = {
-  "image/jpeg": [".jpg", ".jpeg"],
-  "image/png": [".png"],
-};
-
+// Schema for creating presigned URLs
 export const CreatePresignedUrlSchema = z.object({
-  key: z
-    .string()
-    .min(1, "Key cannot be empty")
-    .max(1024, "Key cannot be longer than 1024 characters"),
-
-  temporary: z.boolean().optional(),
+  key: z.string().min(1, "Key is required"),
+  temporary: z.boolean().default(false),
 });
 
+// Schema for attachment metadata
+export const attachmentSchema = z.object({
+  id: z.string().uuid(),
+  key: z.string(),
+  originalName: z.string(),
+  mimeType: z.string(),
+  size: z.number().int().positive(),
+  url: z.string().url(),
+  userId: z.string().uuid(),
+  createdAt: z.date(),
+  expiresAt: z.date().optional(),
+});
+
+// Type exports
 export type CreatePresignedUrlInput = z.infer<typeof CreatePresignedUrlSchema>;
-
-export const FileInfoSchema = z.object({
-  key: z.string(),
-  name: z.string(),
-  size: z.number(),
-  logoType: z.enum(["workspace", "assistant"]),
-});
-
-export type FileInfo = z.infer<typeof FileInfoSchema>;
-
-export const UserFileInfoSchema = z.object({
-  key: z.string(),
-  name: z.string(),
-  size: z.number(),
-  type: z.string(),
-});
-
-export type UserFileInfo = z.infer<typeof UserFileInfoSchema>;
+export type AttachmentData = z.infer<typeof attachmentSchema>;

@@ -3,7 +3,6 @@
 import * as React from "react";
 import { UserMenu } from "@/components/auth/user-menu";
 import { Kbd } from "@/components/common/kbd";
-import { NavMonitors } from "@/components/nav/nav-monitors";
 import { NavOverview } from "@/components/nav/nav-overview";
 import { OrganizationSwitcher } from "@/components/nav/organization-switcher";
 import { CheckSquare, Cog, LayoutGrid, Shield, User } from "lucide-react";

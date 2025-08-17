@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Loader2, Mail, Save, Shield, User } from "lucide-react";
 
-import { useSession } from "@synoro/auth";
+import { useSession } from "@synoro/auth/client";
 import {
   Avatar,
   AvatarFallback,

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { ArrowLeft, Loader2, Mail } from "lucide-react";
 
-import { emailOtp } from "@synoro/auth";
+import { emailOtp } from "@synoro/auth/client";
 import { Button } from "@synoro/ui/components/button";
 import {
   Card,
@@ -41,7 +41,7 @@ export default function VerifyPage() {
     setError("");
 
     try {
-      const result = await emailOtp.verify({
+      const result = await emailOtp.verifyEmail({
         email,
         otp,
       });

@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
 
-import { emailOtp, signIn } from "@synoro/auth";
+import { emailOtp, signIn } from "@synoro/auth/client";
 import { Button } from "@synoro/ui/components/button";
 import {
   Card,

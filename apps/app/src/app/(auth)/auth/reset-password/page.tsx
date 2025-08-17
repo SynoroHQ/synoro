@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { ArrowLeft, Eye, EyeOff, Loader2, Lock } from "lucide-react";
 
-import { resetPassword } from "@synoro/auth";
+import { resetPassword } from "@synoro/auth/client";
 import { Button } from "@synoro/ui/components/button";
 import {
   Card,

@@ -20,7 +20,8 @@ export const attachmentsRouter = {
       const { key, temporary } = input;
       try {
         const newKey = generateS3Key(key, temporary);
-        return await createPresignedUrl(newKey);
+        const url = await createPresignedUrl(newKey);
+        return { url, key: newKey };
       } catch (e) {
         console.error("Error creating presigned URL:", e);
         if (e instanceof Error && e.name === "S3ServiceException") {
