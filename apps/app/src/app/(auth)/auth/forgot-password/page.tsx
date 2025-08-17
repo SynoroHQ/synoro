@@ -5,16 +5,16 @@ import Link from "next/link";
 import { ArrowLeft, CheckCircle, Loader2, Mail } from "lucide-react";
 
 import { requestPasswordReset } from "@synoro/auth/client";
-import { Button } from "@synoro/ui/components/button";
 import {
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@synoro/ui/components/card";
-import { Input } from "@synoro/ui/components/input";
-import { Label } from "@synoro/ui/components/label";
+  Input,
+  Label,
+} from "@synoro/ui";
 
 export default function ForgotPasswordPage() {
   const [isLoading, setIsLoading] = useState(false);

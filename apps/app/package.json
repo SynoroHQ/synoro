@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "bun with-env next dev --turbopack",
     "build": "bun with-env next build",
     "start": "next start",
     "lint": "next lint",

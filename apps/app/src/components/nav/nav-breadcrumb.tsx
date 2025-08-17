@@ -7,14 +7,12 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@synoro/ui/components/breadcrumb";
-import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@synoro/ui/components/select";
+} from "@synoro/ui";
 import { type LucideIcon } from "lucide-react";
 import { Fragment } from "react";
 import Link from "next/link";

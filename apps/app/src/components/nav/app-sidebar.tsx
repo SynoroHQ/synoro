@@ -15,13 +15,11 @@ import {
   SidebarRail,
   SidebarTrigger,
   useSidebar,
-} from "@synoro/ui/components/sidebar";
-import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@synoro/ui/components/tooltip";
+} from "@synoro/ui";
 
 import { NavChecklist } from "./nav-checklist";
 import { NavHelp } from "./nav-help";
