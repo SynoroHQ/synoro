@@ -1,7 +1,16 @@
 "use client";
 
-import {} from "@synoro/ui/components/checkbox";
+import "@synoro/ui/components/checkbox";
+
+import { useTransition } from "react";
+import { cn } from "@/lib/utils";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
+
 import {
+  Form,
   FormControl,
   FormDescription,
   FormField,
@@ -9,15 +18,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@synoro/ui/components/form";
-
-import { Form } from "@synoro/ui/components/form";
 import { Input } from "@synoro/ui/components/input";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useTransition } from "react";
-import { toast } from "sonner";
-import { cn } from "@/lib/utils";
 
 const schema = z.object({
   name: z.string(),
@@ -95,11 +96,7 @@ export function FormEmail({
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input
-                  placeholder="max@openstatus.dev"
-                  type="email"
-                  {...field}
-                />
+                <Input placeholder="max@synoro.dev" type="email" {...field} />
               </FormControl>
               <FormMessage />
               <FormDescription>

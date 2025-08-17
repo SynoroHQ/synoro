@@ -1,20 +1,25 @@
 "use client";
 
-import { Button } from "@synoro/ui/components/button";
+import { useTransition } from "react";
+import NextLink from "next/link";
+import { Link } from "@/components/common/link";
 import {
   FormCard,
   FormCardContent,
   FormCardDescription,
   FormCardFooter,
+  FormCardFooterInfo,
   FormCardHeader,
   FormCardTitle,
   FormCardUpgrade,
-  FormCardFooterInfo,
 } from "@/components/forms/form-card";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useTransition } from "react";
+import { Lock } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
+
+import { Button } from "@synoro/ui/components/button";
 import {
   Form,
   FormControl,
@@ -24,10 +29,6 @@ import {
   FormMessage,
 } from "@synoro/ui/components/form";
 import { Input } from "@synoro/ui/components/input";
-import { toast } from "sonner";
-import { Lock } from "lucide-react";
-import NextLink from "next/link";
-import { Link } from "@/components/common/link";
 
 const LOCKED = true;
 
@@ -48,7 +49,7 @@ export function FormOtel({
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: defaultValues ?? {
-      endpoint: "https://otel.openstatus.dev/api/v1/metrics",
+      endpoint: "https://otel.synoro.dev/api/v1/metrics",
     },
   });
   const [isPending, startTransition] = useTransition();
@@ -92,7 +93,7 @@ export function FormOtel({
                   <FormLabel>Endpoint</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="https://otel.openstatus.dev/api/v1/metrics"
+                      placeholder="https://otel.synoro.dev/api/v1/metrics"
                       disabled={LOCKED}
                       {...field}
                     />

@@ -1,10 +1,14 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useTransition } from "react";
+import { cn } from "@/lib/utils";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
+import { Button } from "@synoro/ui/components/button";
+import { Checkbox } from "@synoro/ui/components/checkbox";
 import {
   Form,
   FormControl,
@@ -13,17 +17,15 @@ import {
   FormLabel,
   FormMessage,
 } from "@synoro/ui/components/form";
-
-import { toast } from "sonner";
 import { Input } from "@synoro/ui/components/input";
-import { SelectItem } from "@synoro/ui/components/select";
-import { SelectContent, SelectValue } from "@synoro/ui/components/select";
-import { SelectTrigger } from "@synoro/ui/components/select";
-import { Select } from "@synoro/ui/components/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@synoro/ui/components/select";
 import { Textarea } from "@synoro/ui/components/textarea";
-import { Button } from "@synoro/ui/components/button";
-import { Checkbox } from "@synoro/ui/components/checkbox";
-import { cn } from "@/lib/utils";
 
 export const types = [
   {
@@ -107,7 +109,7 @@ export function ContactForm({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(submitAction)}
-        className={cn("grid sm:grid-cols-2 gap-4", className)}
+        className={cn("grid gap-4 sm:grid-cols-2", className)}
       >
         <FormField
           control={form.control}
@@ -129,7 +131,7 @@ export function ContactForm({
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input placeholder="max@openstatus.dev" {...field} />
+                <Input placeholder="max@synoro.dev" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -179,14 +181,14 @@ export function ContactForm({
             control={form.control}
             name="blocker"
             render={({ field }) => (
-              <FormItem className="sm:col-span-full flex flex-row items-start">
+              <FormItem className="flex flex-row items-start sm:col-span-full">
                 <FormControl>
                   <Checkbox
                     checked={field.value}
                     onCheckedChange={field.onChange}
                   />
                 </FormControl>
-                <FormLabel className="font-normal leading-none">
+                <FormLabel className="leading-none font-normal">
                   This bug prevents me from using the product.
                 </FormLabel>
               </FormItem>

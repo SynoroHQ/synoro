@@ -43,7 +43,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <PlausibleProvider domain="template.openstatus.dev">
+        <PlausibleProvider domain="template.synoro.dev">
           <ThemeProvider
             attribute="class"
             defaultTheme="system"

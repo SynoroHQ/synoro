@@ -1,20 +1,7 @@
 "use client";
 
+import { useTransition } from "react";
 import { InputWithAddons } from "@/components/common/input-with-addons";
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormDescription,
-  FormMessage,
-  FormLabel,
-} from "@synoro/ui/components/form";
-
-import { Form } from "@synoro/ui/components/form";
-import { Input } from "@synoro/ui/components/input";
-import { Textarea } from "@synoro/ui/components/textarea";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import {
   FormCard,
   FormCardContent,
@@ -24,10 +11,23 @@ import {
   FormCardSeparator,
   FormCardTitle,
 } from "@/components/forms/form-card";
-import { Button } from "@synoro/ui/components/button";
-import { z } from "zod";
-import { useTransition } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { z } from "zod";
+
+import { Button } from "@synoro/ui/components/button";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@synoro/ui/components/form";
+import { Input } from "@synoro/ui/components/input";
+import { Textarea } from "@synoro/ui/components/textarea";
 
 const schema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -112,7 +112,7 @@ export function FormGeneral({
                   <FormControl>
                     <InputWithAddons
                       placeholder="status"
-                      trailing=".openstatus.dev"
+                      trailing=".synoro.dev"
                       {...field}
                     />
                   </FormControl>
@@ -132,7 +132,7 @@ export function FormGeneral({
                   <FormLabel>Favicon</FormLabel>
                   <FormControl>
                     <div className="flex flex-row items-center space-x-2">
-                      <div className="size-[36px] bg-muted rounded-md border"></div>
+                      <div className="bg-muted size-[36px] rounded-md border"></div>
                       <Input type="file" {...field} />
                     </div>
                   </FormControl>

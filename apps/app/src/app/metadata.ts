@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-export const TITLE = "OpenStatus Template";
+export const TITLE = "Synoro Template";
 export const DESCRIPTION =
   "We've created this template to help you get started with your @shadcn/ui project. It uses @nextjs in an SPA mode and can be exported statically (BYO router).";
 
@@ -10,7 +10,7 @@ export const defaultMetadata: Metadata = {
     default: TITLE,
   },
   description: DESCRIPTION,
-  metadataBase: new URL("https://template.openstatus.dev"),
+  metadataBase: new URL("https://template.synoro.dev"),
 };
 
 export const twitterMetadata: Metadata["twitter"] = {

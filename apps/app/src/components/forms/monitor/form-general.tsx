@@ -1,29 +1,7 @@
 "use client";
 
-import { Button } from "@synoro/ui/components/button";
-import {
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@synoro/ui/components/form";
-import { Form } from "@synoro/ui/components/form";
-import { Input } from "@synoro/ui/components/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@synoro/ui/components/select";
-import { Textarea } from "@synoro/ui/components/textarea";
-import { Globe, Network, Plus, X } from "lucide-react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useTransition } from "react";
+import { Link } from "@/components/common/link";
 import {
   FormCard,
   FormCardContent,
@@ -35,9 +13,32 @@ import {
   FormCardTitle,
 } from "@/components/forms/form-card";
 import { DevTool } from "@hookform/devtools";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Globe, Network, Plus, X } from "lucide-react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { z } from "zod";
+
+import { Button } from "@synoro/ui/components/button";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@synoro/ui/components/form";
+import { Input } from "@synoro/ui/components/input";
 import { RadioGroup, RadioGroupItem } from "@synoro/ui/components/radio-group";
-import { Link } from "@/components/common/link";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@synoro/ui/components/select";
+import { Textarea } from "@synoro/ui/components/textarea";
 
 const TYPES = ["HTTP", "TCP"] as const;
 const METHODS = ["GET", "POST", "PUT", "DELETE", "PATCH"] as const;
@@ -53,7 +54,7 @@ const schema = z.object({
     z.object({
       key: z.string(),
       value: z.string(),
-    })
+    }),
   ),
   body: z.string().optional(),
   assertions: z.array(
@@ -61,7 +62,7 @@ const schema = z.object({
       type: z.enum(ASSERTION_TYPES),
       eq: z.enum(ASSERTION_EQ),
       value: z.string().min(1),
-    })
+    }),
   ),
 });
 
@@ -128,7 +129,7 @@ export function FormGeneral({
                 <FormItem>
                   <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="OpenStatus API" {...field} />
+                    <Input placeholder="Synoro API" {...field} />
                   </FormControl>
                   <FormMessage />
                   <FormDescription>
@@ -150,7 +151,7 @@ export function FormGeneral({
                     <RadioGroup
                       onValueChange={field.onChange}
                       defaultValue={field.value}
-                      className="grid gap-4 grid-cols-2 sm:grid-cols-4"
+                      className="grid grid-cols-2 gap-4 sm:grid-cols-4"
                     >
                       <FormItem className="border-input has-aria-[invalid=true]:border-destructive has-data-[state=checked]:border-primary/50 has-focus-visible:border-ring has-focus-visible:ring-ring/50 relative flex cursor-pointer flex-row items-center gap-3 rounded-md border px-2 py-3 text-center shadow-xs transition-[color,box-shadow] outline-none has-focus-visible:ring-[3px]">
                         <FormControl>
@@ -178,7 +179,7 @@ export function FormGeneral({
                           TCP
                         </FormLabel>
                       </FormItem>
-                      <div className="text-xs text-muted-foreground self-end sm:place-self-end col-span-2">
+                      <div className="text-muted-foreground col-span-2 self-end text-xs sm:place-self-end">
                         Missing a type? <Link href="/contact">Contact us</Link>
                       </div>
                     </RadioGroup>
@@ -191,7 +192,7 @@ export function FormGeneral({
           {watchType ? <FormCardSeparator /> : null}
           {watchType === "HTTP" && (
             <>
-              <FormCardContent className="grid gap-4 grid-cols-4">
+              <FormCardContent className="grid grid-cols-4 gap-4">
                 <FormField
                   control={form.control}
                   name="method"
@@ -226,10 +227,7 @@ export function FormGeneral({
                     <FormItem className="col-span-3">
                       <FormLabel>URL</FormLabel>
                       <FormControl>
-                        <Input
-                          placeholder="https://openstatus.dev"
-                          {...field}
-                        />
+                        <Input placeholder="https://synoro.dev" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -274,7 +272,7 @@ export function FormGeneral({
                             variant="ghost"
                             onClick={() => {
                               const newHeaders = field.value.filter(
-                                (_, i) => i !== index
+                                (_, i) => i !== index,
                               );
                               field.onChange(newHeaders);
                             }}
@@ -396,7 +394,7 @@ export function FormGeneral({
                               <FormItem>
                                 <Input
                                   placeholder="Value"
-                                  className="w-full col-span-2"
+                                  className="col-span-2 w-full"
                                   {...field}
                                 />
                               </FormItem>
@@ -408,7 +406,7 @@ export function FormGeneral({
                             type="button"
                             onClick={() => {
                               const newAssertions = field.value.filter(
-                                (_, i) => i !== index
+                                (_, i) => i !== index,
                               );
                               field.onChange(newAssertions);
                             }}
@@ -458,24 +456,24 @@ export function FormGeneral({
                   </FormItem>
                 )}
               />
-              <div className="text-sm text-muted-foreground">
+              <div className="text-muted-foreground text-sm">
                 Examples:
-                <ul className="list-disc list-inside">
+                <ul className="list-inside list-disc">
                   <li>
                     Domain:{" "}
-                    <span className="font-mono text-foreground">
-                      openstatus.dev:443
+                    <span className="text-foreground font-mono">
+                      synoro.dev:443
                     </span>
                   </li>
                   <li>
                     IPv4:{" "}
-                    <span className="font-mono text-foreground">
+                    <span className="text-foreground font-mono">
                       192.168.1.1:443
                     </span>
                   </li>
                   <li>
                     IPv6:{" "}
-                    <span className="font-mono text-foreground">
+                    <span className="text-foreground font-mono">
                       [2001:db8:85a3:8d3:1319:8a2e:370:7348]:443
                     </span>
                   </li>

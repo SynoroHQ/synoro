@@ -1,29 +1,32 @@
 "use client";
 
+import React, { useTransition } from "react";
+import { InputWithAddons } from "@/components/common/input-with-addons";
+import { Link } from "@/components/common/link";
 import {
   FormCard,
+  FormCardContent,
+  FormCardDescription,
   FormCardFooter,
   FormCardFooterInfo,
   FormCardHeader,
   FormCardTitle,
-  FormCardDescription,
-  FormCardContent,
   FormCardUpgrade,
 } from "@/components/forms/form-card";
-
-import { Label } from "@synoro/ui/components/label";
-
-import { InputWithAddons } from "@/components/common/input-with-addons";
-import { Lock } from "lucide-react";
-import { Button } from "@synoro/ui/components/button";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-
-import { Form, FormField, FormItem, FormMessage } from "@synoro/ui/components/form";
-import React, { useTransition } from "react";
+import { Lock } from "lucide-react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { Link } from "@/components/common/link";
+import { z } from "zod";
+
+import { Button } from "@synoro/ui/components/button";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@synoro/ui/components/form";
+import { Label } from "@synoro/ui/components/label";
 
 const LOCKED = true;
 
@@ -87,7 +90,7 @@ export function FormCustomDomain({
                 <FormItem>
                   <Label>Domain</Label>
                   <InputWithAddons
-                    placeholder="status.openstatus.dev"
+                    placeholder="status.synoro.dev"
                     leading="https://"
                     disabled={LOCKED}
                     {...field}

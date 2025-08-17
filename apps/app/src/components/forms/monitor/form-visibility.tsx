@@ -1,20 +1,25 @@
 "use client";
 
-import { Button } from "@synoro/ui/components/button";
+import { useTransition } from "react";
+import NextLink from "next/link";
+import { Link } from "@/components/common/link";
 import {
   FormCard,
   FormCardContent,
   FormCardDescription,
   FormCardFooter,
+  FormCardFooterInfo,
   FormCardHeader,
   FormCardTitle,
   FormCardUpgrade,
-  FormCardFooterInfo,
 } from "@/components/forms/form-card";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useTransition } from "react";
+import { Lock } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
+
+import { Button } from "@synoro/ui/components/button";
 import {
   Form,
   FormControl,
@@ -23,10 +28,6 @@ import {
   FormItem,
   FormLabel,
 } from "@synoro/ui/components/form";
-import { toast } from "sonner";
-import { Lock } from "lucide-react";
-import NextLink from "next/link";
-import { Link } from "@/components/common/link";
 import { Switch } from "@synoro/ui/components/switch";
 
 const LOCKED = true;
@@ -96,7 +97,7 @@ export function FormVisibility({
                       from the overview page will be public. You will be able to
                       share it via a connected status page or{" "}
                       <Link href="#">
-                        https://openstatus.dev/public/monitors/:id
+                        https://synoro.dev/public/monitors/:id
                       </Link>
                       .
                     </FormDescription>

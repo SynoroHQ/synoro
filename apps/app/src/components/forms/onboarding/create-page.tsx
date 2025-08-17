@@ -1,20 +1,21 @@
 "use client";
 
-import { InputWithAddons } from "@/components/common/input-with-addons";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormDescription,
-  FormMessage,
-} from "@synoro/ui/components/form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useTransition } from "react";
+import { InputWithAddons } from "@/components/common/input-with-addons";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@synoro/ui/components/form";
 
 const schema = z.object({
   slug: z.string().min(3),
@@ -67,7 +68,7 @@ export function CreatePageForm({
               <FormControl>
                 <InputWithAddons
                   placeholder="status"
-                  trailing=".openstatus.dev"
+                  trailing=".synoro.dev"
                   {...field}
                 />
               </FormControl>
