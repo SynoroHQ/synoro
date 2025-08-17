@@ -1,12 +1,12 @@
 "use client";
 
 import * as React from "react";
+import { UserMenu } from "@/components/auth/user-menu";
 import { Kbd } from "@/components/common/kbd";
 import { NavMonitors } from "@/components/nav/nav-monitors";
 import { NavOverview } from "@/components/nav/nav-overview";
-import { NavUser } from "@/components/nav/nav-user";
 import { OrganizationSwitcher } from "@/components/nav/organization-switcher";
-import { CheckSquare, Cog, LayoutGrid, Shield } from "lucide-react";
+import { CheckSquare, Cog, LayoutGrid, Shield, User } from "lucide-react";
 
 import {
   Sidebar,
@@ -89,23 +89,28 @@ const data = {
   overview: [
     {
       name: "Overview",
-      url: "/dashboard/overview",
+      url: "/",
       icon: LayoutGrid,
     },
     {
       name: "Tasks",
-      url: "/dashboard/tasks/list",
+      url: "/tasks",
       icon: CheckSquare,
+    },
+    {
+      name: "Profile",
+      url: "/profile",
+      icon: User,
     },
     // Keep only essential entries for admin
     {
       name: "Settings",
-      url: "/dashboard/settings/general",
+      url: "/settings",
       icon: Cog,
     },
     {
-      name: "Auth",
-      url: "/dashboard/auth",
+      name: "Analytics",
+      url: "/analytics/overview",
       icon: Shield,
     },
   ],
@@ -126,7 +131,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavHelp />
       </SidebarContent>
       <SidebarFooter className="border-t">
-        <NavUser user={data.user} />
+        <div className="flex items-center justify-center p-2">
+          <UserMenu />
+        </div>
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

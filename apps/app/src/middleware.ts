@@ -1,0 +1,37 @@
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import { getSessionCookie } from "better-auth/cookies";
+
+export function middleware(req: NextRequest) {
+  const publicRoutes = [
+    "/auth/login",
+    "/auth/register",
+    "/auth/verify",
+    "/auth/forgot-password",
+    "/auth/reset-password",
+  ];
+  const isPublicRoute = publicRoutes.some((path) =>
+    req.nextUrl.pathname.startsWith(path),
+  );
+
+  const sessionCookie = getSessionCookie(req);
+
+  // Если это auth-страница и пользователь уже авторизован, перенаправляем на главную
+  if (isPublicRoute && sessionCookie) {
+    const homeUrl = new URL("/", req.url);
+    return NextResponse.redirect(homeUrl);
+  }
+
+  // Если это не публичная страница и пользователь не авторизован, перенаправляем на логин
+  if (!isPublicRoute && !sessionCookie) {
+    const loginUrl = new URL("/auth/login", req.url);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  return NextResponse.next();
+}
+
+// Read more: https://nextjs.org/docs/app/building-your-application/routing/middleware#matcher
+export const config = {
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+};
