@@ -3,12 +3,13 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build && shadcn build -o 'out/r'",
+    "dev": "bun with-env next dev --turbopack",
+    "build": "bun with-env next build",
     "start": "next start",
     "lint": "next lint",
     "tsc": "tsc --noEmit",
-    "registry:build": "shadcn build -o out/r"
+    "registry:build": "shadcn build -o out/r",
+    "with-env": "dotenv -e ../../.env --"
   },
   "dependencies": {
     "@date-fns/tz": "^1.4.1",

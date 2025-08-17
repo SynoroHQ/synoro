@@ -3,25 +3,23 @@
 import { useState } from "react";
 import { Loader2, Mail, Save, Shield, User } from "lucide-react";
 
-import { useSession } from "@synoro/auth";
+import { useSession } from "@synoro/auth/client";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
-} from "@synoro/ui/components/avatar";
-import { Button } from "@synoro/ui/components/button";
-import {
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@synoro/ui/components/card";
-import { Input } from "@synoro/ui/components/input";
-import { Label } from "@synoro/ui/components/label";
+  Input,
+  Label,
+} from "@synoro/ui";
 
 export default function ProfilePage() {
-  const { data: session, update } = useSession();
+  const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({

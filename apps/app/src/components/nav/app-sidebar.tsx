@@ -3,7 +3,6 @@
 import * as React from "react";
 import { UserMenu } from "@/components/auth/user-menu";
 import { Kbd } from "@/components/common/kbd";
-import { NavMonitors } from "@/components/nav/nav-monitors";
 import { NavOverview } from "@/components/nav/nav-overview";
 import { OrganizationSwitcher } from "@/components/nav/organization-switcher";
 import { CheckSquare, Cog, LayoutGrid, Shield, User } from "lucide-react";
@@ -16,13 +15,11 @@ import {
   SidebarRail,
   SidebarTrigger,
   useSidebar,
-} from "@synoro/ui/components/sidebar";
-import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@synoro/ui/components/tooltip";
+} from "@synoro/ui";
 
 import { NavChecklist } from "./nav-checklist";
 import { NavHelp } from "./nav-help";

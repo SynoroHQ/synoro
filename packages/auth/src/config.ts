@@ -41,7 +41,6 @@ export const auth = betterAuth({
       // В продакшене логирование запрещено — интегрируйте провайдера отправки email:
       // await sendResetEmail({ to: user.email, url });
     },
-    },
   },
   session: {
     expiresIn: 60 * 60 * 24 * 7, // 7 days

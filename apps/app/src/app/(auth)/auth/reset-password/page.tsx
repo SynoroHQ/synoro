@@ -6,16 +6,16 @@ import { useSearchParams } from "next/navigation";
 import { ArrowLeft, Eye, EyeOff, Loader2, Lock } from "lucide-react";
 
 import { resetPassword } from "@synoro/auth/client";
-import { Button } from "@synoro/ui/components/button";
 import {
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@synoro/ui/components/card";
-import { Input } from "@synoro/ui/components/input";
-import { Label } from "@synoro/ui/components/label";
+  Input,
+  Label,
+} from "@synoro/ui";
 
 export default function ResetPasswordPage() {
   const searchParams = useSearchParams();

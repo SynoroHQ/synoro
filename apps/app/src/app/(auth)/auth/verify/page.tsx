@@ -6,16 +6,16 @@ import { useSearchParams } from "next/navigation";
 import { ArrowLeft, Loader2, Mail } from "lucide-react";
 
 import { emailOtp } from "@synoro/auth/client";
-import { Button } from "@synoro/ui/components/button";
 import {
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@synoro/ui/components/card";
-import { Input } from "@synoro/ui/components/input";
-import { Label } from "@synoro/ui/components/label";
+  Input,
+  Label,
+} from "@synoro/ui";
 
 export default function VerifyPage() {
   const searchParams = useSearchParams();
@@ -41,7 +41,7 @@ export default function VerifyPage() {
     setError("");
 
     try {
-      const result = await emailOtp.verify({
+      const result = await emailOtp.verifyEmail({
         email,
         otp,
       });

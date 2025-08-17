@@ -10,8 +10,6 @@ export * from "./button";
 export * from "./calendar";
 export * from "./card";
 export * from "./checkbox";
-export * from "./ckeditor";
-export * from "./client-side-ckeditor";
 export * from "./code-node";
 export * from "./code-node-static";
 export * from "./collapsible";

@@ -4,18 +4,18 @@ import { useState } from "react";
 import Link from "next/link";
 import { Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
 
-import { emailOtp, signIn } from "@synoro/auth";
-import { Button } from "@synoro/ui/components/button";
+import { emailOtp, signIn } from "@synoro/auth/client";
 import {
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@synoro/ui/components/card";
-import { Input } from "@synoro/ui/components/input";
-import { Label } from "@synoro/ui/components/label";
-import { Separator } from "@synoro/ui/components/separator";
+  Input,
+  Label,
+  Separator,
+} from "@synoro/ui";
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);

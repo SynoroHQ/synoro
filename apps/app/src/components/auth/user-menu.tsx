@@ -9,16 +9,14 @@ import {
   Avatar,
   AvatarFallback,
   AvatarImage,
-} from "@synoro/ui/components/avatar";
-import { Button } from "@synoro/ui/components/button";
-import {
+  Button,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@synoro/ui/components/dropdown-menu";
+} from "@synoro/ui";
 
 export function UserMenu() {
   const { data: session } = useSession();
@@ -31,7 +29,7 @@ export function UserMenu() {
   const handleSignOut = async () => {
     setIsLoading(true);
     try {
-      await signOut({ redirect: false });
+      await signOut();
       window.location.href = "/auth/login";
     } catch (error) {
       console.error("Ошибка при выходе:", error);

@@ -4,8 +4,8 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Button } from "@synoro/ui/components/button";
 import {
+  Button,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -13,20 +13,20 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@synoro/ui/components/dialog";
-import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-} from "@synoro/ui/components/form";
-import { Input } from "@synoro/ui/components/input";
-import { Textarea } from "@synoro/ui/components/textarea";
-import { Checkbox } from "@synoro/ui/components/checkbox";
-import { Calendar } from "@synoro/ui/components/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@synoro/ui/components/popover";
+  Input,
+  Textarea,
+  Checkbox,
+  Calendar,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@synoro/ui";
 import { CalendarIcon, Key } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";

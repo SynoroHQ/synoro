@@ -4,6 +4,7 @@
   "version": "0.1.0",
   "type": "module",
   "exports": {
+    ".": "./src/index.ts",
     "./globals.css": "./src/styles/globals.css",
     "./postcss.config": "./postcss.config.mjs",
     "./lib/*": "./src/lib/*.ts",
@@ -20,7 +21,6 @@
     "ui-add": "bun x shadcn@latest add && prettier src --write --list-different"
   },
   "dependencies": {
-    "@ckeditor/ckeditor5-react": "^11.0.0",
     "@hookform/resolvers": "^5.2.1",
     "@platejs/basic-nodes": "^49.0.0",
     "@radix-ui/react-accordion": "1.2.11",
@@ -45,7 +45,6 @@
     "@radix-ui/react-tabs": "1.1.12",
     "@radix-ui/react-toolbar": "^1.1.10",
     "@radix-ui/react-tooltip": "1.2.7",
-    "ckeditor5": "^46.0.1",
     "class-variance-authority": "0.7.1",
     "cmdk": "1.1.1",
     "date-fns": "4.1.0",
