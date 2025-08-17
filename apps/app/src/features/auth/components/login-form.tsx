@@ -1,11 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { AuthError } from "@/components/auth/auth-error";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff } from "lucide-react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
+import { signIn } from "@synoro/auth/client";
 import { Button } from "@synoro/ui/components/button";
 import {
   Card,
@@ -37,6 +41,8 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const router = useRouter();
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -47,8 +53,27 @@ export function LoginForm() {
   });
 
   const onSubmit = async (values: LoginFormValues) => {
-    // TODO: Implement login logic
-    console.log(values);
+    try {
+      setError("");
+      const result = await signIn("credentials", {
+        email: values.email,
+        password: values.password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        setError("Неверный email или пароль");
+        return;
+      }
+
+      if (result?.success) {
+        toast.success("Успешный вход!");
+        router.push("/dashboard");
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      setError("Произошла ошибка при входе");
+    }
   };
 
   return (
@@ -118,6 +143,7 @@ export function LoginForm() {
                 </FormItem>
               )}
             />
+            <AuthError error={error} />
             <Button
               type="submit"
               className="w-full"

@@ -7,13 +7,14 @@ import {
   Eye,
   EyeOff,
   Key,
-  Lock,
   Shield,
   Smartphone,
 } from "lucide-react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
+import { changePassword } from "@synoro/auth/client";
 import { Alert, AlertDescription } from "@synoro/ui/components/alert";
 import { Badge } from "@synoro/ui/components/badge";
 import { Button } from "@synoro/ui/components/button";
@@ -60,6 +61,7 @@ export function SecurityForm() {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(true);
+  const [error, setError] = useState("");
 
   const form = useForm<ChangePasswordFormValues>({
     resolver: zodResolver(changePasswordSchema),
@@ -71,8 +73,30 @@ export function SecurityForm() {
   });
 
   const onSubmit = async (values: ChangePasswordFormValues) => {
-    // TODO: Implement password change logic
-    console.log(values);
+    try {
+      setError("");
+      const result = await changePassword({
+        currentPassword: values.currentPassword,
+        newPassword: values.newPassword,
+      });
+
+      if (result?.error) {
+        if (result.error === "INVALID_PASSWORD") {
+          setError("Неверный текущий пароль");
+        } else {
+          setError("Ошибка при смене пароля");
+        }
+        return;
+      }
+
+      if (result?.success) {
+        toast.success("Пароль успешно изменен!");
+        form.reset();
+      }
+    } catch (err) {
+      console.error("Change password error:", err);
+      setError("Произошла ошибка при смене пароля");
+    }
   };
 
   return (
@@ -81,7 +105,7 @@ export function SecurityForm() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Lock className="h-5 w-5" />
+            <Key className="h-5 w-5" />
             Изменение пароля
           </CardTitle>
           <CardDescription>
@@ -198,6 +222,12 @@ export function SecurityForm() {
                 )}
               />
 
+              {error && (
+                <div className="rounded-md bg-red-50 p-3 text-sm text-red-600">
+                  {error}
+                </div>
+              )}
+
               <Button type="submit" disabled={form.formState.isSubmitting}>
                 {form.formState.isSubmitting
                   ? "Изменение..."
@@ -238,7 +268,6 @@ export function SecurityForm() {
               onCheckedChange={setTwoFactorEnabled}
             />
           </div>
-
           <Alert>
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
@@ -275,7 +304,6 @@ export function SecurityForm() {
                 Обновить
               </Button>
             </div>
-
             <Button variant="outline" className="w-full">
               Создать новый API ключ
             </Button>

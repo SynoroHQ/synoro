@@ -5,6 +5,7 @@ import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, CheckCircle, Loader2, Mail } from "lucide-react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import { requestPasswordReset } from "@synoro/auth/client";
@@ -46,21 +47,30 @@ export default function ForgotPasswordPage() {
   });
 
   const onSubmit = async (values: ForgotPasswordFormValues) => {
-    setError("");
-
     try {
+      setError("");
       const result = await requestPasswordReset({
         email: values.email,
         redirectTo: "/auth/reset-password",
       });
 
       if (result?.error) {
-        setError(result.error.message || "Произошла ошибка при отправке");
-      } else {
+        if (result.error === "USER_NOT_FOUND") {
+          setError("Пользователь с таким email не найден");
+        } else {
+          setError("Ошибка при отправке инструкций");
+        }
+        return;
+      }
+
+      if (result?.success) {
         setSuccess(true);
-        setError("");
+        toast.success(
+          "Инструкции по восстановлению пароля отправлены на ваш email",
+        );
       }
     } catch (err) {
+      console.error("Password reset error:", err);
       setError("Произошла ошибка при отправке инструкций");
     }
   };
@@ -89,19 +99,16 @@ export default function ForgotPasswordPage() {
                   Мы отправили инструкции по восстановлению пароля на ваш email
                 </p>
               </div>
+              <Link
+                href="/auth/login"
+                className="text-muted-foreground hover:text-foreground inline-flex items-center text-sm"
+              >
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Вернуться к входу
+              </Link>
             </div>
           </CardContent>
         </Card>
-
-        <div className="text-center">
-          <Link
-            href="/auth/login"
-            className="text-muted-foreground hover:text-foreground inline-flex items-center text-sm"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Вернуться к входу
-          </Link>
-        </div>
       </div>
     );
   }
@@ -113,7 +120,7 @@ export default function ForgotPasswordPage() {
           Восстановление пароля
         </h1>
         <p className="text-muted-foreground text-sm">
-          Введите email для получения инструкций
+          Введите ваш email для получения инструкций по восстановлению пароля
         </p>
       </div>
 
@@ -173,8 +180,7 @@ export default function ForgotPasswordPage() {
           </Form>
         </CardContent>
       </Card>
-
-      <div className="text-center">
+      <p className="text-muted-foreground mt-4 text-center text-sm">
         <Link
           href="/auth/login"
           className="text-muted-foreground hover:text-foreground inline-flex items-center text-sm"
@@ -182,7 +188,7 @@ export default function ForgotPasswordPage() {
           <ArrowLeft className="mr-2 h-4 w-4" />
           Вернуться к входу
         </Link>
-      </div>
+      </p>
     </div>
   );
 }

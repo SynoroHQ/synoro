@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Loader2, Mail } from "lucide-react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import { emailOtp } from "@synoro/auth/client";
@@ -38,6 +39,7 @@ type VerifyFormValues = z.infer<typeof verifySchema>;
 export default function VerifyPage() {
   const searchParams = useSearchParams();
   const email = searchParams.get("email");
+  const router = useRouter();
 
   const [countdown, setCountdown] = useState(0);
   const [error, setError] = useState("");
@@ -59,29 +61,56 @@ export default function VerifyPage() {
   const onSubmit = async (values: VerifyFormValues) => {
     if (!email) return;
 
-    setError("");
-
     try {
+      setError("");
       const result = await emailOtp.verifyEmail({
         email,
         otp: values.otp,
       });
 
       if (result?.error) {
-        setError(result.error.message || "Произошла ошибка при верификации");
-      } else {
-        // Успешная верификация - редирект на главную
-        window.location.href = "/";
+        if (result.error === "INVALID_OTP") {
+          setError("Неверный код подтверждения");
+        } else if (result.error === "OTP_EXPIRED") {
+          setError("Код подтверждения истек");
+        } else {
+          setError("Ошибка верификации");
+        }
+        return;
+      }
+
+      if (result?.success) {
+        toast.success("Email успешно подтвержден!");
+        router.push("/auth/login");
       }
     } catch (err) {
+      console.error("Verification error:", err);
       setError("Произошла ошибка при верификации");
     }
   };
 
   const handleResend = async () => {
     if (!email) return;
-    // Временно отключаем отправку OTP
-    setError("Функция повторной отправки временно недоступна.");
+
+    try {
+      const result = await emailOtp.sendEmail({
+        email,
+        redirectTo: "/auth/verify",
+      });
+
+      if (result?.error) {
+        setError("Ошибка при отправке кода");
+        return;
+      }
+
+      if (result?.success) {
+        toast.success("Код подтверждения отправлен повторно");
+        setCountdown(60);
+      }
+    } catch (err) {
+      console.error("Resend error:", err);
+      setError("Ошибка при повторной отправке");
+    }
   };
 
   if (!email) {

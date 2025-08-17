@@ -5,6 +5,7 @@ import "@synoro/ui/globals.css";
 
 import { TailwindIndicator } from "@/components/tailwind-indicator";
 import { ThemeProvider } from "@/components/theme-provider";
+import { AuthProvider } from "@/providers/auth-provider";
 import PlausibleProvider from "next-plausible";
 
 import { Toaster } from "@synoro/ui";
@@ -50,9 +51,11 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            {children}
-            <TailwindIndicator />
-            <Toaster />
+            <AuthProvider>
+              {children}
+              <TailwindIndicator />
+              <Toaster />
+            </AuthProvider>
           </ThemeProvider>
         </PlausibleProvider>
       </body>

@@ -1,11 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { AuthError } from "@/components/auth/auth-error";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff } from "lucide-react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
+import { signUp } from "@synoro/auth/client";
 import { Button } from "@synoro/ui/components/button";
 import {
   Card,
@@ -43,6 +47,8 @@ type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const router = useRouter();
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -55,8 +61,35 @@ export function RegisterForm() {
   });
 
   const onSubmit = async (values: RegisterFormValues) => {
-    // TODO: Implement registration logic
-    console.log(values);
+    try {
+      setError("");
+      const result = await signUp("credentials", {
+        email: values.email,
+        password: values.password,
+        firstName: values.firstName,
+        lastName: values.lastName,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        if (result.error === "EMAIL_ALREADY_EXISTS") {
+          setError("Пользователь с таким email уже существует");
+        } else {
+          setError("Ошибка при регистрации. Попробуйте еще раз.");
+        }
+        return;
+      }
+
+      if (result?.success) {
+        toast.success(
+          "Регистрация успешна! Проверьте email для подтверждения.",
+        );
+        router.push("/auth/verify?email=" + encodeURIComponent(values.email));
+      }
+    } catch (err) {
+      console.error("Registration error:", err);
+      setError("Произошла ошибка при регистрации");
+    }
   };
 
   return (
@@ -148,6 +181,7 @@ export function RegisterForm() {
                 </FormItem>
               )}
             />
+            <AuthError error={error} />
             <Button
               type="submit"
               className="w-full"

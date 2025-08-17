@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Eye, EyeOff, Loader2, Lock } from "lucide-react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import { resetPassword } from "@synoro/auth/client";
@@ -46,6 +47,7 @@ type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>;
 export default function ResetPasswordPage() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
+  const router = useRouter();
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -69,21 +71,30 @@ export default function ResetPasswordPage() {
   const onSubmit = async (values: ResetPasswordFormValues) => {
     if (!token) return;
 
-    setError("");
-
     try {
+      setError("");
       const result = await resetPassword({
         token,
         newPassword: values.newPassword,
       });
 
       if (result?.error) {
-        setError(result.error.message || "Произошла ошибка при сбросе пароля");
-      } else {
+        if (result.error === "INVALID_TOKEN") {
+          setError("Недействительный токен для сброса пароля");
+        } else if (result.error === "TOKEN_EXPIRED") {
+          setError("Токен для сброса пароля истек");
+        } else {
+          setError("Ошибка при сбросе пароля");
+        }
+        return;
+      }
+
+      if (result?.success) {
         setSuccess(true);
-        setError("");
+        toast.success("Пароль успешно изменен!");
       }
     } catch (err) {
+      console.error("Password reset error:", err);
       setError("Произошла ошибка при сбросе пароля");
     }
   };
@@ -125,7 +136,7 @@ export default function ResetPasswordPage() {
       <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[400px]">
         <div className="flex flex-col space-y-2 text-center">
           <h1 className="text-2xl font-semibold tracking-tight">
-            Пароль успешно изменен
+            Пароль изменен
           </h1>
           <p className="text-muted-foreground text-sm">
             Теперь вы можете войти с новым паролем
@@ -145,18 +156,15 @@ export default function ResetPasswordPage() {
                   систему.
                 </p>
               </div>
+              <Link
+                href="/auth/login"
+                className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium"
+              >
+                Войти в систему
+              </Link>
             </div>
           </CardContent>
         </Card>
-
-        <div className="text-center">
-          <Link
-            href="/auth/login"
-            className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium"
-          >
-            Войти в систему
-          </Link>
-        </div>
       </div>
     );
   }
@@ -276,8 +284,7 @@ export default function ResetPasswordPage() {
           </Form>
         </CardContent>
       </Card>
-
-      <div className="text-center">
+      <p className="text-muted-foreground mt-4 text-center text-sm">
         <Link
           href="/auth/login"
           className="text-muted-foreground hover:text-foreground inline-flex items-center text-sm"
@@ -285,7 +292,7 @@ export default function ResetPasswordPage() {
           <ArrowLeft className="mr-2 h-4 w-4" />
           Вернуться к входу
         </Link>
-      </div>
+      </p>
     </div>
   );
 }

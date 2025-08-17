@@ -1,62 +1,46 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
-import { LogOut, Settings, Shield, User } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
 
-import { signOut, useSession } from "@synoro/auth/client";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
-  Button,
+} from "@synoro/ui/components/avatar";
+import { Button } from "@synoro/ui/components/button";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@synoro/ui";
+} from "@synoro/ui/components/dropdown-menu";
 
 export function UserMenu() {
-  const { data: session } = useSession();
-  const [isLoading, setIsLoading] = useState(false);
+  const { user, logout, isLoading } = useAuth();
 
-  if (!session?.user) {
-    return null;
+  if (isLoading) {
+    return (
+      <div className="flex items-center space-x-2">
+        <div className="bg-muted h-8 w-8 animate-pulse rounded-full" />
+        <div className="bg-muted h-4 w-20 animate-pulse rounded" />
+      </div>
+    );
   }
 
-  const handleSignOut = async () => {
-    setIsLoading(true);
-    try {
-      await signOut();
-      window.location.href = "/auth/login";
-    } catch (error) {
-      console.error("Ошибка при выходе:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  if (!user) {
+    return (
+      <Button asChild variant="outline" size="sm">
+        <a href="/auth/login">Войти</a>
+      </Button>
+    );
+  }
 
-  const getUserInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
-  const getRoleLabel = (role: string) => {
-    const roleLabels: Record<string, string> = {
-      super_admin: "Супер администратор",
-      admin: "Администратор",
-      moderator: "Модератор",
-      editor: "Редактор",
-      user: "Пользователь",
-    };
-    return roleLabels[role] || role;
-  };
+  const initials =
+    user.firstName && user.lastName
+      ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
+      : user.email?.[0]?.toUpperCase() || "U";
 
   return (
     <DropdownMenu>
@@ -64,16 +48,10 @@ export function UserMenu() {
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
             <AvatarImage
-              src={session.user.image || ""}
-              alt={session.user.name || ""}
+              src={user.image || undefined}
+              alt={user.email || "User"}
             />
-            <AvatarFallback>
-              {session.user.name ? (
-                getUserInitials(session.user.name)
-              ) : (
-                <User className="h-4 w-4" />
-              )}
-            </AvatarFallback>
+            <AvatarFallback>{initials}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
@@ -81,41 +59,24 @@ export function UserMenu() {
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
             <p className="text-sm leading-none font-medium">
-              {session.user.name || "Пользователь"}
+              {user.firstName && user.lastName
+                ? `${user.firstName} ${user.lastName}`
+                : "Пользователь"}
             </p>
             <p className="text-muted-foreground text-xs leading-none">
-              {session.user.email}
+              {user.email}
             </p>
-            <div className="mt-1 flex items-center space-x-1">
-              <Shield className="text-muted-foreground h-3 w-3" />
-              <span className="text-muted-foreground text-xs">
-                {getRoleLabel(session.user.role || "user")}
-              </span>
-            </div>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link href="/dashboard/profile" className="cursor-pointer">
-            <User className="mr-2 h-4 w-4" />
-            <span>Профиль</span>
-          </Link>
+          <a href="/profile">Профиль</a>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href="/dashboard/settings" className="cursor-pointer">
-            <Settings className="mr-2 h-4 w-4" />
-            <span>Настройки</span>
-          </Link>
+          <a href="/settings">Настройки</a>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onClick={handleSignOut}
-          disabled={isLoading}
-          className="cursor-pointer text-red-600 focus:text-red-600"
-        >
-          <LogOut className="mr-2 h-4 w-4" />
-          <span>{isLoading ? "Выход..." : "Выйти"}</span>
-        </DropdownMenuItem>
+        <DropdownMenuItem onClick={logout}>Выйти</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
