@@ -1,3 +1,5 @@
+"use client";
+
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { useAuth } from "@/hooks/use-auth";
 
@@ -24,9 +26,7 @@ function DashboardContent() {
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <div className="bg-card rounded-lg border p-6">
           <h3 className="text-lg font-semibold">Профиль</h3>
-          <p className="text-muted-foreground mt-2">
-            Имя: {user?.firstName} {user?.lastName}
-          </p>
+          <p className="text-muted-foreground mt-2">Имя: {user?.name}</p>
           <p className="text-muted-foreground">Email: {user?.email}</p>
           <p className="text-muted-foreground">Роль: {user?.role}</p>
         </div>
