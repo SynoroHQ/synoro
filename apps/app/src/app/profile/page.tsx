@@ -21,7 +21,7 @@ import { Input } from "@synoro/ui/components/input";
 import { Label } from "@synoro/ui/components/label";
 
 export default function ProfilePage() {
-  const { data: session, update } = useSession();
+  const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({

@@ -1,8 +1,8 @@
 import { AppSidebar } from "@/components/nav/app-sidebar";
 
-import { SidebarInset, SidebarProvider } from "@synoro/ui/components/sidebar";
+import { SidebarInset, SidebarProvider } from "@synoro/ui";
 
-export default function AnalyticsLayout({
+export default function TasksLayout({
   children,
 }: {
   children: React.ReactNode;

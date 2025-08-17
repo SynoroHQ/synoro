@@ -4,21 +4,19 @@ import { useState } from "react";
 import Link from "next/link";
 import { LogOut, Settings, Shield, User } from "lucide-react";
 
-import { signOut, useSession } from "@synoro/auth/client";
+import { signOut, useSession } from "@synoro/auth";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
-} from "@synoro/ui/components/avatar";
-import { Button } from "@synoro/ui/components/button";
-import {
+  Button,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@synoro/ui/components/dropdown-menu";
+} from "@synoro/ui";
 
 export function UserMenu() {
   const { data: session } = useSession();
