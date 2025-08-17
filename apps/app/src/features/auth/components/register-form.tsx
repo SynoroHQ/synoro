@@ -63,16 +63,14 @@ export function RegisterForm() {
   const onSubmit = async (values: RegisterFormValues) => {
     try {
       setError("");
-      const result = await signUp("credentials", {
+      const result = await signUp.email({
         email: values.email,
         password: values.password,
-        firstName: values.firstName,
-        lastName: values.lastName,
-        redirect: false,
+        name: `${values.firstName} ${values.lastName}`,
       });
 
-      if (result?.error) {
-        if (result.error === "EMAIL_ALREADY_EXISTS") {
+      if (result?.error?.code) {
+        if (result.error.code === "EMAIL_ALREADY_EXISTS") {
           setError("Пользователь с таким email уже существует");
         } else {
           setError("Ошибка при регистрации. Попробуйте еще раз.");
@@ -80,7 +78,7 @@ export function RegisterForm() {
         return;
       }
 
-      if (result?.success) {
+      if (result?.data?.user) {
         toast.success(
           "Регистрация успешна! Проверьте email для подтверждения.",
         );

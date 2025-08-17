@@ -78,10 +78,10 @@ export default function ResetPasswordPage() {
         newPassword: values.newPassword,
       });
 
-      if (result?.error) {
-        if (result.error === "INVALID_TOKEN") {
+      if (result?.error?.code) {
+        if (result.error.code === "INVALID_TOKEN") {
           setError("Недействительный токен для сброса пароля");
-        } else if (result.error === "TOKEN_EXPIRED") {
+        } else if (result.error.code === "TOKEN_EXPIRED") {
           setError("Токен для сброса пароля истек");
         } else {
           setError("Ошибка при сбросе пароля");
@@ -89,7 +89,7 @@ export default function ResetPasswordPage() {
         return;
       }
 
-      if (result?.success) {
+      if (result?.data?.status) {
         setSuccess(true);
         toast.success("Пароль успешно изменен!");
       }

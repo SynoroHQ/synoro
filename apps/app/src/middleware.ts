@@ -1,13 +1,7 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
-import { auth } from "@synoro/auth";
-
-export async function middleware(request: NextRequest) {
-  const session = await auth.api.getSession({
-    headers: request.headers,
-  });
-
+export function middleware(request: NextRequest) {
   // Защищенные маршруты
   const protectedRoutes = ["/dashboard", "/profile", "/settings"];
   const isProtectedRoute = protectedRoutes.some((route) =>
@@ -20,14 +14,18 @@ export async function middleware(request: NextRequest) {
     request.nextUrl.pathname.startsWith(route),
   );
 
-  if (isProtectedRoute && !session) {
+  // Проверяем наличие сессии через cookie
+  const sessionCookie = request.cookies.get("better-auth.session-token");
+  const hasSession = !!sessionCookie;
+
+  if (isProtectedRoute && !hasSession) {
     // Перенаправляем неавторизованных пользователей на страницу входа
     const loginUrl = new URL("/auth/login", request.url);
     loginUrl.searchParams.set("callbackUrl", request.nextUrl.pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  if (isAuthRoute && session) {
+  if (isAuthRoute && hasSession) {
     // Перенаправляем авторизованных пользователей на dashboard
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }

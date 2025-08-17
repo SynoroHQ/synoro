@@ -55,18 +55,17 @@ export function LoginForm() {
   const onSubmit = async (values: LoginFormValues) => {
     try {
       setError("");
-      const result = await signIn("credentials", {
+      const result = await signIn.email({
         email: values.email,
         password: values.password,
-        redirect: false,
       });
 
-      if (result?.error) {
+      if (result?.error?.code) {
         setError("Неверный email или пароль");
         return;
       }
 
-      if (result?.success) {
+      if (result?.data?.user) {
         toast.success("Успешный вход!");
         router.push("/dashboard");
       }

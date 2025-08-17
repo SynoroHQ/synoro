@@ -1,10 +1,12 @@
+"use client";
+
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { signOut, useSession } from "@synoro/auth/client";
 
 export function useAuth() {
-  const { data: session, isLoading, error } = useSession();
+  const { data: session, isPending, error } = useSession();
   const router = useRouter();
 
   const logout = async () => {
@@ -24,7 +26,7 @@ export function useAuth() {
   return {
     session,
     user,
-    isLoading,
+    isPending,
     error,
     isAuthenticated,
     logout,

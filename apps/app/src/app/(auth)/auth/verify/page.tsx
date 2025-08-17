@@ -68,10 +68,10 @@ export default function VerifyPage() {
         otp: values.otp,
       });
 
-      if (result?.error) {
-        if (result.error === "INVALID_OTP") {
+      if (result?.error?.code) {
+        if (result.error.code === "INVALID_OTP") {
           setError("Неверный код подтверждения");
-        } else if (result.error === "OTP_EXPIRED") {
+        } else if (result.error.code === "OTP_EXPIRED") {
           setError("Код подтверждения истек");
         } else {
           setError("Ошибка верификации");
@@ -79,7 +79,7 @@ export default function VerifyPage() {
         return;
       }
 
-      if (result?.success) {
+      if (result?.data?.user) {
         toast.success("Email успешно подтвержден!");
         router.push("/auth/login");
       }
@@ -93,9 +93,9 @@ export default function VerifyPage() {
     if (!email) return;
 
     try {
-      const result = await emailOtp.sendEmail({
+      const result = await emailOtp.sendVerificationOtp({
         email,
-        redirectTo: "/auth/verify",
+        type: "email-verification",
       });
 
       if (result?.error) {
@@ -103,7 +103,7 @@ export default function VerifyPage() {
         return;
       }
 
-      if (result?.success) {
+      if (result?.data?.success) {
         toast.success("Код подтверждения отправлен повторно");
         setCountdown(60);
       }
