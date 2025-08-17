@@ -4,7 +4,7 @@ import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
-} from "@/components/ui/hover-card";
+} from "@synoro/ui/components/hover-card";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 // import { UTCDate } from "@date-fns/utc";
 import { HoverCardPortal } from "@radix-ui/react-hover-card";

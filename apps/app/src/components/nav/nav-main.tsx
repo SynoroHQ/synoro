@@ -6,7 +6,7 @@ import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+} from "@synoro/ui/components/collapsible";
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -16,9 +16,9 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
-} from "@/components/ui/sidebar";
+} from "@synoro/ui/components/sidebar";
 import Link from "next/link";
-import { useSidebar } from "@/components/ui/sidebar";
+import { useSidebar } from "@synoro/ui/components/sidebar";
 export function NavMain({
   items,
 }: {

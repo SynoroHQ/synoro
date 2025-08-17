@@ -1,11 +1,8 @@
-import { Suspense } from "react";
-import { AnalyticsOverviewSkeleton } from "@/features/analytics/components/analytics-overview-skeleton";
-import { AnalyticsOverviewPage } from "@/features/analytics/pages/analytics-overview-page";
-
 export default function AnalyticsOverviewPageServer() {
   return (
-    <Suspense fallback={<AnalyticsOverviewSkeleton />}>
-      <AnalyticsOverviewPage />
-    </Suspense>
+    <div className="p-6">
+      <h1 className="mb-4 text-2xl font-bold">Analytics Overview</h1>
+      <p>Analytics overview page is under construction.</p>
+    </div>
   );
 }

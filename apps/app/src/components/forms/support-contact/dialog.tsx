@@ -5,7 +5,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from "@synoro/ui/components/dialog";
 import { ContactForm, FormValues } from "./form";
 import { useState } from "react";
 

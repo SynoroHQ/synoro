@@ -1,7 +1,7 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Badge } from "@synoro/ui/components/badge";
+import { Button } from "@synoro/ui/components/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,13 +9,14 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { ColumnDef } from "@tanstack/react-table";
+} from "@synoro/ui/components/dropdown-menu";
+import type { ColumnDef } from "@tanstack/react-table";
 import { formatDistanceToNow } from "date-fns";
-import { Edit, MoreHorizontal, Trash2, User } from "lucide-react";
+import type { User } from "lucide-react";
+import { Edit, MoreHorizontal, Trash2 } from "lucide-react";
 import { EditUserDialog } from "@/components/forms/auth/edit-user-dialog";
 
-export type User = {
+export interface User {
   id: string;
   name: string;
   email: string;
@@ -23,7 +24,7 @@ export type User = {
   status: "active" | "inactive" | "banned";
   lastLogin: string;
   createdAt: string;
-};
+}
 
 const roleColors = {
   super_admin: "destructive",
@@ -62,7 +63,7 @@ export const columns: ColumnDef<User>[] = [
     accessorKey: "role",
     header: "Role",
     cell: ({ row }) => {
-      const role = row.getValue("role") as string;
+      const role = row.getValue("role");
       return (
         <Badge variant={roleColors[role as keyof typeof roleColors]}>
           {role.replace("_", " ")}
@@ -74,7 +75,7 @@ export const columns: ColumnDef<User>[] = [
     accessorKey: "status",
     header: "Status",
     cell: ({ row }) => {
-      const status = row.getValue("status") as string;
+      const status = row.getValue("status");
       return (
         <Badge variant={statusColors[status as keyof typeof statusColors]}>
           {status}

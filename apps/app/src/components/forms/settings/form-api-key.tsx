@@ -17,7 +17,7 @@ import {
 } from "@/components/content/empty-state";
 import { EmptyStateContainer } from "@/components/content/empty-state";
 import { FormAlertDialog } from "@/components/forms/form-alert-dialog";
-import { Button } from "@/components/ui/button";
+import { Button } from "@synoro/ui/components/button";
 import { useTransition } from "react";
 import { toast } from "sonner";
 

@@ -3,9 +3,9 @@
 import { Table } from "@tanstack/react-table";
 import { X } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@synoro/ui/components/button";
 
-import { DataTableFacetedFilter } from "@/components/ui/data-table/data-table-faceted-filter";
+import { DataTableFacetedFilter } from "@synoro/ui/components/data-table/data-table-faceted-filter";
 import type { ResponseLog } from "@/data/response-logs";
 import { statusCodes } from "@/data/status-codes";
 import { regions } from "@/data/regions";

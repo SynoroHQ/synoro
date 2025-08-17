@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { Button } from "@synoro/ui/components/button";
 
 export function BillingOverlayContainer({
   children,

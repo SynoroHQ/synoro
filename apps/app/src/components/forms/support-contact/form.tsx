@@ -12,17 +12,17 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from "@synoro/ui/components/form";
 
 import { toast } from "sonner";
-import { Input } from "@/components/ui/input";
-import { SelectItem } from "@/components/ui/select";
-import { SelectContent, SelectValue } from "@/components/ui/select";
-import { SelectTrigger } from "@/components/ui/select";
-import { Select } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@synoro/ui/components/input";
+import { SelectItem } from "@synoro/ui/components/select";
+import { SelectContent, SelectValue } from "@synoro/ui/components/select";
+import { SelectTrigger } from "@synoro/ui/components/select";
+import { Select } from "@synoro/ui/components/select";
+import { Textarea } from "@synoro/ui/components/textarea";
+import { Button } from "@synoro/ui/components/button";
+import { Checkbox } from "@synoro/ui/components/checkbox";
 import { cn } from "@/lib/utils";
 
 export const types = [

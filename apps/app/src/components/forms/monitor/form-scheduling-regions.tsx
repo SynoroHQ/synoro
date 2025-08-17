@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@synoro/ui/components/button";
 import {
   FormCard,
   FormCardContent,
@@ -22,10 +22,10 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from "@synoro/ui/components/form";
 import { toast } from "sonner";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Slider } from "@/components/ui/slider";
+import { Checkbox } from "@synoro/ui/components/checkbox";
+import { Slider } from "@synoro/ui/components/slider";
 import { cn } from "@/lib/utils";
 import { groupedRegions, type Region, regions } from "@/data/regions";
 import { Link } from "@/components/common/link";

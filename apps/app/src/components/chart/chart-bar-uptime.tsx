@@ -9,7 +9,7 @@ import {
   ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
-} from "@/components/ui/chart";
+} from "@synoro/ui/components/chart";
 
 const chartData = Array.from({ length: 28 }, (_, i) => ({
   timestamp: new Date(

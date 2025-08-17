@@ -14,7 +14,7 @@ import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-} from "@/components/ui/chart";
+} from "@synoro/ui/components/chart";
 import { cn } from "@/lib/utils";
 import { ChartTooltipNumber } from "./chart-tooltip-number";
 

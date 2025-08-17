@@ -17,7 +17,7 @@ import {
   ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
-} from "@/components/ui/chart";
+} from "@synoro/ui/components/chart";
 import { ChartTooltipNumber } from "./chart-tooltip-number";
 
 const chartData = Array.from({ length: 30 }, (_, i) => ({

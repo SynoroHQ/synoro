@@ -1,11 +1,8 @@
-import { Suspense } from "react";
-import { ReportsSkeleton } from "@/features/analytics/components/reports-skeleton";
-import { ReportsPage } from "@/features/analytics/pages/reports-page";
-
 export default function ReportsPageServer() {
   return (
-    <Suspense fallback={<ReportsSkeleton />}>
-      <ReportsPage />
-    </Suspense>
+    <div className="p-6">
+      <h1 className="mb-4 text-2xl font-bold">Reports</h1>
+      <p>Reports functionality is under construction.</p>
+    </div>
   );
 }

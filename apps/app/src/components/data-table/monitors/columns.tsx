@@ -1,8 +1,8 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
-import { DataTableColumnHeader } from "@/components/ui/data-table/data-table-column-header";
+import { Badge } from "@synoro/ui/components/badge";
+import { Checkbox } from "@synoro/ui/components/checkbox";
+import { DataTableColumnHeader } from "@synoro/ui/components/data-table/data-table-column-header";
 import type { Monitor } from "@/data/monitors";
 import { ColumnDef } from "@tanstack/react-table";
 import { TableCellLink } from "@/components/data-table/table-cell-link";

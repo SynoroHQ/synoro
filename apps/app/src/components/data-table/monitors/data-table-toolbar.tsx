@@ -3,10 +3,10 @@
 import { Table } from "@tanstack/react-table";
 import { X } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@synoro/ui/components/button";
+import { Input } from "@synoro/ui/components/input";
 
-import { DataTableFacetedFilter } from "@/components/ui/data-table/data-table-faceted-filter";
+import { DataTableFacetedFilter } from "@synoro/ui/components/data-table/data-table-faceted-filter";
 import type { Monitor } from "@/data/monitors";
 
 export interface MonitorDataTableToolbarProps {

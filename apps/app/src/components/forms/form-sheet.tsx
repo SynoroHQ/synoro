@@ -8,7 +8,7 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@/components/ui/sheet";
+} from "@synoro/ui/components/sheet";
 import { cn } from "@/lib/utils";
 
 export function FormSheetContent({

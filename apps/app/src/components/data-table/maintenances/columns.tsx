@@ -1,6 +1,6 @@
 "use client";
 
-import { DataTableColumnHeader } from "@/components/ui/data-table/data-table-column-header";
+import { DataTableColumnHeader } from "@synoro/ui/components/data-table/data-table-column-header";
 import { Maintenance } from "@/data/maintenances";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTableRowActions } from "./data-table-row-actions";

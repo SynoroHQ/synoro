@@ -4,7 +4,7 @@ import {
   TableCell,
   TableHead,
   TableRow,
-} from "@/components/ui/table";
+} from "@synoro/ui/components/table";
 
 export function DataTable() {
   return (

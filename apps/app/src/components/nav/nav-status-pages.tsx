@@ -11,13 +11,13 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/components/ui/sidebar";
+} from "@synoro/ui/components/sidebar";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from "@synoro/ui/components/tooltip";
 import { getActions } from "@/data/status-pages.client";
 import { cn } from "@/lib/utils";
 import { MoreHorizontal, Plus } from "lucide-react";

@@ -1,4 +1,4 @@
-import type { ChartConfig } from "@/components/ui/chart";
+import type { ChartConfig } from "@synoro/ui/components/chart";
 import type {
   NameType,
   ValueType,

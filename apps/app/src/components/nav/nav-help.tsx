@@ -8,14 +8,14 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar";
+} from "@synoro/ui/components/sidebar";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@synoro/ui/components/dropdown-menu";
 import {
   Book,
   Braces,
@@ -23,7 +23,7 @@ import {
   HelpCircle,
   LifeBuoy,
 } from "lucide-react";
-import { useSidebar } from "@/components/ui/sidebar";
+import { useSidebar } from "@synoro/ui/components/sidebar";
 import Link from "next/link";
 import { DiscordIcon } from "@/components/icons/discord";
 import { FormDialogSupportContact } from "@/components/forms/support-contact/dialog";

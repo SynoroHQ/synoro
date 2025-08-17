@@ -5,7 +5,7 @@ import { useState, useTransition } from "react";
 
 import { MoreHorizontal, Trash2, LucideIcon } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@synoro/ui/components/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,7 +14,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@synoro/ui/components/dropdown-menu";
 import { DropdownMenuContentProps } from "@radix-ui/react-dropdown-menu";
 import {
   AlertDialog,
@@ -26,8 +26,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Input } from "@/components/ui/input";
+} from "@synoro/ui/components/alert-dialog";
+import { Input } from "@synoro/ui/components/input";
 import { toast } from "sonner";
 
 interface QuickActionsProps extends React.ComponentProps<typeof Button> {

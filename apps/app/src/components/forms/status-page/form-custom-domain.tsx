@@ -11,16 +11,16 @@ import {
   FormCardUpgrade,
 } from "@/components/forms/form-card";
 
-import { Label } from "@/components/ui/label";
+import { Label } from "@synoro/ui/components/label";
 
 import { InputWithAddons } from "@/components/common/input-with-addons";
 import { Lock } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@synoro/ui/components/button";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { Form, FormField, FormItem, FormMessage } from "@/components/ui/form";
+import { Form, FormField, FormItem, FormMessage } from "@synoro/ui/components/form";
 import React, { useTransition } from "react";
 import { toast } from "sonner";
 import { Link } from "@/components/common/link";

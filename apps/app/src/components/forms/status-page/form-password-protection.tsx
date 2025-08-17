@@ -1,6 +1,6 @@
 "use client";
 
-import { Checkbox } from "@/components/ui/checkbox";
+import { Checkbox } from "@synoro/ui/components/checkbox";
 import {
   Form,
   FormControl,
@@ -9,7 +9,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from "@synoro/ui/components/form";
 import {
   FormCard,
   FormCardContent,
@@ -20,9 +20,9 @@ import {
   FormCardTitle,
   FormCardUpgrade,
 } from "@/components/forms/form-card";
-import { Input } from "@/components/ui/input";
+import { Input } from "@synoro/ui/components/input";
 import { Link } from "@/components/common/link";
-import { Button } from "@/components/ui/button";
+import { Button } from "@synoro/ui/components/button";
 import { Lock } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
