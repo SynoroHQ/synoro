@@ -16,10 +16,10 @@ export function middleware(req: NextRequest) {
 
   const sessionCookie = getSessionCookie(req);
 
-  // Если это auth-страница и пользователь уже авторизован, перенаправляем на dashboard
+  // Если это auth-страница и пользователь уже авторизован, перенаправляем на главную
   if (isPublicRoute && sessionCookie) {
-    const dashboardUrl = new URL("/dashboard", req.url);
-    return NextResponse.redirect(dashboardUrl);
+    const homeUrl = new URL("/", req.url);
+    return NextResponse.redirect(homeUrl);
   }
 
   // Если это не публичная страница и пользователь не авторизован, перенаправляем на логин

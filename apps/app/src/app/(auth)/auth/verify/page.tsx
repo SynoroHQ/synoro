@@ -49,8 +49,8 @@ export default function VerifyPage() {
       if (result?.error) {
         setError(result.error.message || "Произошла ошибка при верификации");
       } else {
-        // Успешная верификация - редирект на dashboard
-        window.location.href = "/dashboard";
+        // Успешная верификация - редирект на главную
+        window.location.href = "/";
       }
     } catch (err) {
       setError("Произошла ошибка при верификации");
@@ -61,26 +61,8 @@ export default function VerifyPage() {
 
   const handleResend = async () => {
     if (!email) return;
-
-    setIsLoading(true);
-    setError("");
-
-    try {
-      const result = await emailOtp.send({
-        email,
-      });
-
-      if (result?.error) {
-        setError(result.error.message || "Произошла ошибка при отправке кода");
-      } else {
-        setCountdown(60); // 60 секунд до следующей отправки
-        setError("");
-      }
-    } catch (err) {
-      setError("Произошла ошибка при отправке кода");
-    } finally {
-      setIsLoading(false);
-    }
+    // Временно отключаем отправку OTP
+    setError("Функция повторной отправки временно недоступна.");
   };
 
   if (!email) {

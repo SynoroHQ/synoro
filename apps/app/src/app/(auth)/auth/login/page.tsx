@@ -39,8 +39,8 @@ export default function LoginPage() {
       if (result?.error) {
         setError(result.error.message || "Произошла ошибка при входе");
       } else {
-        // Успешный вход - редирект на dashboard
-        window.location.href = "/dashboard";
+        // Успешный вход - редирект на главную
+        window.location.href = "/";
       }
     } catch (err) {
       setError("Произошла ошибка при входе");
@@ -51,23 +51,8 @@ export default function LoginPage() {
 
   const handleOtpLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    setError("");
-
-    try {
-      const result = await emailOtp.send({ email });
-
-      if (result?.error) {
-        setError(result.error.message || "Произошла ошибка при отправке кода");
-      } else {
-        // Отправляем на страницу подтверждения OTP
-        window.location.href = `/auth/verify?email=${encodeURIComponent(email)}`;
-      }
-    } catch (err) {
-      setError("Произошла ошибка при отправке кода");
-    } finally {
-      setIsLoading(false);
-    }
+    // Временно отключаем OTP до исправления API
+    setError("OTP функция временно недоступна. Используйте вход по паролю.");
   };
 
   return (

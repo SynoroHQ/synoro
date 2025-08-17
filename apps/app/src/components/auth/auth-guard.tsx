@@ -29,7 +29,7 @@ export function AuthGuard({ children, requiredRole }: AuthGuardProps) {
         const userRole = session.user?.role;
         if (userRole !== requiredRole && userRole !== "super_admin") {
           // Пользователь не имеет необходимой роли
-          router.push("/dashboard");
+          router.push("/");
           return;
         }
       }

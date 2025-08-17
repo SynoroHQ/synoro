@@ -64,8 +64,8 @@ export default function RegisterPage() {
       if (result?.error) {
         setError(result.error.message || "Произошла ошибка при регистрации");
       } else {
-        // Успешная регистрация - редирект на dashboard
-        window.location.href = "/dashboard";
+        // Успешная регистрация - редирект на главную
+        window.location.href = "/";
       }
     } catch (err) {
       setError("Произошла ошибка при регистрации");
