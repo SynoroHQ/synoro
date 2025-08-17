@@ -6,8 +6,8 @@ import { admin } from "better-auth/plugins";
 import { db } from "@synoro/db/client";
 import {
   account,
-  user,
   session as SessionSchema,
+  user,
   verification,
 } from "@synoro/db/schema";
 
@@ -27,7 +27,14 @@ export const auth = betterAuth({
     enabled: true,
     resetPassword: {
       enabled: true,
-      redirectTo: "/reset-password",
+      redirectTo: "/auth/reset-password",
+    },
+    // Minimal email sender for dev – integrate your email service here
+    sendResetPassword: async ({ user, url }, _request) => {
+      // TODO: replace with your email provider (e.g., Resend, Postmark)
+      console.log(
+        `[better-auth] Reset password link for ${user.email}: ${url}`,
+      );
     },
   },
   session: {

@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
 
-import { emailOtp, signIn } from "@synoro/auth/client";
+import { emailOtp, signIn } from "@synoro/auth";
 import { Button } from "@synoro/ui/components/button";
 import {
   Card,
@@ -30,14 +30,14 @@ export default function LoginPage() {
     setError("");
 
     try {
-      const result = await signIn("email", {
+      const result = await signIn.email({
         email,
         password,
-        redirect: false,
+        rememberMe: true,
       });
 
       if (result?.error) {
-        setError(result.error);
+        setError(result.error.message || "Произошла ошибка при входе");
       } else {
         // Успешный вход - редирект на dashboard
         window.location.href = "/dashboard";
@@ -55,13 +55,10 @@ export default function LoginPage() {
     setError("");
 
     try {
-      const result = await emailOtp.send({
-        email,
-        redirect: false,
-      });
+      const result = await emailOtp.send({ email });
 
       if (result?.error) {
-        setError(result.error);
+        setError(result.error.message || "Произошла ошибка при отправке кода");
       } else {
         // Отправляем на страницу подтверждения OTP
         window.location.href = `/auth/verify?email=${encodeURIComponent(email)}`;

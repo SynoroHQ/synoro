@@ -44,11 +44,10 @@ export default function VerifyPage() {
       const result = await emailOtp.verify({
         email,
         otp,
-        redirect: false,
       });
 
       if (result?.error) {
-        setError(result.error);
+        setError(result.error.message || "Произошла ошибка при верификации");
       } else {
         // Успешная верификация - редирект на dashboard
         window.location.href = "/dashboard";
@@ -69,11 +68,10 @@ export default function VerifyPage() {
     try {
       const result = await emailOtp.send({
         email,
-        redirect: false,
       });
 
       if (result?.error) {
-        setError(result.error);
+        setError(result.error.message || "Произошла ошибка при отправке кода");
       } else {
         setCountdown(60); // 60 секунд до следующей отправки
         setError("");

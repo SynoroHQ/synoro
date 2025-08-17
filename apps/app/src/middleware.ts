@@ -3,22 +3,28 @@ import { NextResponse } from "next/server";
 import { getSessionCookie } from "better-auth/cookies";
 
 export function middleware(req: NextRequest) {
-  const publicRoutes = ["/login", "/reset-password"];
+  const publicRoutes = [
+    "/auth/login",
+    "/auth/register",
+    "/auth/verify",
+    "/auth/forgot-password",
+    "/auth/reset-password",
+  ];
   const isPublicRoute = publicRoutes.some((path) =>
     req.nextUrl.pathname.startsWith(path),
   );
 
   const sessionCookie = getSessionCookie(req);
 
-  // Если это auth-страница и пользователь уже авторизован, перенаправляем на главную
+  // Если это auth-страница и пользователь уже авторизован, перенаправляем на dashboard
   if (isPublicRoute && sessionCookie) {
-    const dashboardUrl = new URL("/", req.url);
+    const dashboardUrl = new URL("/dashboard", req.url);
     return NextResponse.redirect(dashboardUrl);
   }
 
   // Если это не публичная страница и пользователь не авторизован, перенаправляем на логин
   if (!isPublicRoute && !sessionCookie) {
-    const loginUrl = new URL("/login", req.url);
+    const loginUrl = new URL("/auth/login", req.url);
     return NextResponse.redirect(loginUrl);
   }
 

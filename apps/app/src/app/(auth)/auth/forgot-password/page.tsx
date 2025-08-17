@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, CheckCircle, Loader2, Mail } from "lucide-react";
 
+import { requestPasswordReset } from "@synoro/auth";
 import { Button } from "@synoro/ui/components/button";
 import {
   Card,
@@ -27,12 +28,17 @@ export default function ForgotPasswordPage() {
     setError("");
 
     try {
-      // Здесь будет интеграция с @synoro/auth для сброса пароля
-      // Пока что просто симулируем успешную отправку
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const result = await requestPasswordReset({
+        email,
+        redirectTo: "/auth/reset-password",
+      });
 
-      setSuccess(true);
-      setError("");
+      if (result?.error) {
+        setError(result.error.message || "Произошла ошибка при отправке");
+      } else {
+        setSuccess(true);
+        setError("");
+      }
     } catch (err) {
       setError("Произошла ошибка при отправке инструкций");
     } finally {

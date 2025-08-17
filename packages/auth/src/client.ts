@@ -4,8 +4,21 @@ import { createAuthClient } from "better-auth/react";
 import { getBaseUrl } from "./util";
 
 export const authClient = createAuthClient({
-  baseURL: getBaseUrl(),
+  // Better Auth Next.js client should target the API route base
+  baseURL: "/api/auth",
   plugins: [emailOTPClient(), adminClient()],
 });
 
-export const { signIn, signOut, useSession, emailOtp } = authClient;
+export const {
+  signIn,
+  signUp,
+  signOut,
+  useSession,
+  emailOtp,
+  requestPasswordReset,
+  resetPassword,
+  changePassword,
+} = authClient;
+
+// Export AuthProvider separately from better-auth/react
+export { AuthProvider } from "better-auth/react";

@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Checkbox, Eye, EyeOff, Loader2, Lock, Mail, User } from "lucide-react";
 
-import { signIn } from "@synoro/auth/client";
+import { signUp } from "@synoro/auth/client";
 import { Button } from "@synoro/ui/components/button";
 import {
   Card,
@@ -55,15 +55,14 @@ export default function RegisterPage() {
     }
 
     try {
-      const result = await signIn("email", {
+      const result = await signUp.email({
+        name: formData.name,
         email: formData.email,
         password: formData.password,
-        redirect: false,
-        mode: "signup",
       });
 
       if (result?.error) {
-        setError(result.error);
+        setError(result.error.message || "Произошла ошибка при регистрации");
       } else {
         // Успешная регистрация - редирект на dashboard
         window.location.href = "/dashboard";

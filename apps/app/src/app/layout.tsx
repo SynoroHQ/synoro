@@ -7,7 +7,7 @@ import { TailwindIndicator } from "@/components/tailwind-indicator";
 import { ThemeProvider } from "@/components/theme-provider";
 import PlausibleProvider from "next-plausible";
 
-import { AuthProvider } from "@synoro/auth/client";
+import { AuthProvider } from "@synoro/auth";
 import { Toaster } from "@synoro/ui/components/sonner";
 
 import { defaultMetadata, ogMetadata, twitterMetadata } from "./metadata";
