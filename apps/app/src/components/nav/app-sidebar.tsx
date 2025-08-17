@@ -6,6 +6,8 @@ import { NavMonitors } from "@/components/nav/nav-monitors";
 import { NavOverview } from "@/components/nav/nav-overview";
 import { NavUser } from "@/components/nav/nav-user";
 import { OrganizationSwitcher } from "@/components/nav/organization-switcher";
+import { CheckSquare, Cog, LayoutGrid, Shield } from "lucide-react";
+
 import {
   Sidebar,
   SidebarContent,
@@ -21,7 +23,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@synoro/ui/components/tooltip";
-import { Cog, LayoutGrid, Shield } from "lucide-react";
 
 import { NavChecklist } from "./nav-checklist";
 import { NavHelp } from "./nav-help";
@@ -90,6 +91,11 @@ const data = {
       name: "Overview",
       url: "/dashboard/overview",
       icon: LayoutGrid,
+    },
+    {
+      name: "Tasks",
+      url: "/dashboard/tasks/list",
+      icon: CheckSquare,
     },
     // Keep only essential entries for admin
     {
