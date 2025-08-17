@@ -330,7 +330,7 @@ export function middleware(req: NextRequest) {
 
 ## API Routes
 
-- **`/api/auth/[...better-auth]`** - Обработка аутентификации Better Auth
+- **`/api/auth/[...all]`** – Обработка аутентификации Better Auth
 
 ## Безопасность
 
