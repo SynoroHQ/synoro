@@ -1,6 +1,8 @@
 "use client";
 
-import type { AppRouter } from "@qco/api";
+// apps/app/src/trpc/react.tsx
+
+import type { AppRouter } from "@synoro/api";
 import type { QueryClient } from "@tanstack/react-query";
 import { QueryClientProvider } from "@tanstack/react-query";
 import {
