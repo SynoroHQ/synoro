@@ -1,10 +1,10 @@
 "use client";
 
 import * as React from "react";
+import { UserMenu } from "@/components/auth/user-menu";
 import { Kbd } from "@/components/common/kbd";
 import { NavMonitors } from "@/components/nav/nav-monitors";
 import { NavOverview } from "@/components/nav/nav-overview";
-import { NavUser } from "@/components/nav/nav-user";
 import { OrganizationSwitcher } from "@/components/nav/organization-switcher";
 import { CheckSquare, Cog, LayoutGrid, Shield } from "lucide-react";
 
@@ -97,6 +97,11 @@ const data = {
       url: "/dashboard/tasks/list",
       icon: CheckSquare,
     },
+    {
+      name: "Profile",
+      url: "/dashboard/profile",
+      icon: User,
+    },
     // Keep only essential entries for admin
     {
       name: "Settings",
@@ -126,7 +131,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavHelp />
       </SidebarContent>
       <SidebarFooter className="border-t">
-        <NavUser user={data.user} />
+        <div className="flex items-center justify-center p-2">
+          <UserMenu />
+        </div>
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

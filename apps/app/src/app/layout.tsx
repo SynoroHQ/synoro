@@ -5,8 +5,10 @@ import "@synoro/ui/globals.css";
 
 import { TailwindIndicator } from "@/components/tailwind-indicator";
 import { ThemeProvider } from "@/components/theme-provider";
-import { Toaster } from "@synoro/ui/components/sonner";
 import PlausibleProvider from "next-plausible";
+
+import { AuthProvider } from "@synoro/auth/client";
+import { Toaster } from "@synoro/ui/components/sonner";
 
 import { defaultMetadata, ogMetadata, twitterMetadata } from "./metadata";
 
@@ -43,16 +45,18 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <PlausibleProvider domain="template.openstatus.dev">
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            {children}
-            <TailwindIndicator />
-            <Toaster />
-          </ThemeProvider>
+          <AuthProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              {children}
+              <TailwindIndicator />
+              <Toaster />
+            </ThemeProvider>
+          </AuthProvider>
         </PlausibleProvider>
       </body>
     </html>
