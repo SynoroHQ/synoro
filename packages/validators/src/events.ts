@@ -73,7 +73,7 @@ export const createEventSchema = z.object({
   description: z.string().max(2000, "Description is too long").optional(),
   category: EventCategory,
   tags: z.array(tagSchema).max(20, "Too many tags").optional().default([]),
-  timestamp: timestampSchema.optional().default(new Date()),
+  timestamp: z.preprocess((v) => v ?? new Date(), timestampSchema),
   amount: amountSchema.optional(),
   currency: CurrencyCode.optional().default("RUB"),
   location: locationSchema.optional(),
