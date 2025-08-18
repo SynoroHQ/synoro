@@ -189,7 +189,12 @@ export function RegisterForm() {
                 ? "Создание аккаунта..."
                 : "Создать аккаунт"}
             </Button>
-            <Button variant="outline" className="w-full">
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleGoogleSignUp}
+              disabled={form.formState.isSubmitting}
+            >
               Зарегистрироваться через Google
             </Button>
           </form>
