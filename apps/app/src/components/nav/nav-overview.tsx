@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { type LucideIcon } from "lucide-react";
+
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -10,7 +12,6 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@synoro/ui/components/sidebar";
-import { type LucideIcon } from "lucide-react";
 
 export function NavOverview({
   items,
@@ -23,10 +24,7 @@ export function NavOverview({
 }) {
   const pathname = usePathname();
   const { setOpenMobile } = useSidebar();
-  const allowed = new Set([
-    "/dashboard/overview",
-    "/dashboard/settings/general",
-  ]);
+  const allowed = new Set(["/overview", "/settings/general"]);
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Workspace</SidebarGroupLabel>

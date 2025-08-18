@@ -2,29 +2,30 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Button } from "@synoro/ui";
 import { cn } from "@/lib/utils";
 import { Key, Settings, Shield, Users } from "lucide-react";
+
+import { Button } from "@synoro/ui";
 
 const navItems = [
   {
     title: "Overview",
-    href: "/dashboard/auth/overview",
+    href: "/auth/overview",
     icon: Settings,
   },
   {
     title: "Users",
-    href: "/dashboard/auth/users",
+    href: "/auth/users",
     icon: Users,
   },
   {
     title: "Roles",
-    href: "/dashboard/auth/roles",
+    href: "/auth/roles",
     icon: Shield,
   },
   {
     title: "API Keys",
-    href: "/dashboard/auth/api-keys",
+    href: "/auth/api-keys",
     icon: Key,
   },
 ];

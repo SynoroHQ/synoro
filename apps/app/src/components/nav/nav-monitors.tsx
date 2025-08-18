@@ -3,6 +3,19 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
+import {
+  Code,
+  Eye,
+  MoreHorizontal,
+  Plus,
+  RotateCcw,
+  Search,
+  Send,
+  Tag,
+  XIcon,
+} from "lucide-react";
+
 import { Badge } from "@synoro/ui/components/badge";
 import {
   DropdownMenu,
@@ -34,18 +47,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@synoro/ui/components/tooltip";
-import { cn } from "@/lib/utils";
-import {
-  Code,
-  Eye,
-  MoreHorizontal,
-  Plus,
-  RotateCcw,
-  Search,
-  Send,
-  Tag,
-  XIcon,
-} from "lucide-react";
 
 type Monitor = {
   id: string;
@@ -263,10 +264,7 @@ export function NavMonitors({ monitors }: { monitors: Monitor[] }) {
                 className="group-has-data-[sidebar=menu-dot]/menu-item:pr-11"
                 asChild
               >
-                <Link
-                  href="/dashboard/overview"
-                  onClick={() => setOpenMobile(false)}
-                >
+                <Link href="/overview" onClick={() => setOpenMobile(false)}>
                   <span>{item.name}</span>
                 </Link>
               </SidebarMenuButton>

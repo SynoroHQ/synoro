@@ -37,7 +37,6 @@ import { Edit, User } from "lucide-react";
 const editUserSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
-  role: z.enum(["super_admin", "admin", "moderator", "editor", "user"]),
   status: z.enum(["active", "inactive", "banned"]),
   password: z.string().optional(),
 });
@@ -48,7 +47,6 @@ interface User {
   id: string;
   name: string;
   email: string;
-  role: "super_admin" | "admin" | "moderator" | "editor" | "user";
   status: "active" | "inactive" | "banned";
 }
 
@@ -67,7 +65,6 @@ export function EditUserDialog({ user, children }: EditUserDialogProps) {
     defaultValues: {
       name: user.name,
       email: user.email,
-      role: user.role,
       status: user.status,
       password: "",
     },
@@ -78,7 +75,6 @@ export function EditUserDialog({ user, children }: EditUserDialogProps) {
       form.reset({
         name: user.name,
         email: user.email,
-        role: user.role,
         status: user.status,
         password: "",
       });
@@ -148,31 +144,6 @@ export function EditUserDialog({ user, children }: EditUserDialogProps) {
             />
             
             <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="role"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Role</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a role" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="user">User</SelectItem>
-                        <SelectItem value="editor">Editor</SelectItem>
-                        <SelectItem value="moderator">Moderator</SelectItem>
-                        <SelectItem value="admin">Admin</SelectItem>
-                        <SelectItem value="super_admin">Super Admin</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
               <FormField
                 control={form.control}
                 name="status"

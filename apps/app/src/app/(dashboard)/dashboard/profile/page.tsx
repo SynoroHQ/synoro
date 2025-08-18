@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2, Mail, Save, Shield, User } from "lucide-react";
+import { Loader2, Mail, Save, User } from "lucide-react";
 
 import { useSession } from "@synoro/auth/client";
 import {
@@ -57,17 +57,6 @@ export default function ProfilePage() {
     }
   };
 
-  const getRoleLabel = (role: string) => {
-    const roleLabels: Record<string, string> = {
-      super_admin: "Супер администратор",
-      admin: "Администратор",
-      moderator: "Модератор",
-      editor: "Редактор",
-      user: "Пользователь",
-    };
-    return roleLabels[role] || role;
-  };
-
   const getUserInitials = (name: string) => {
     return name
       .split(" ")
@@ -117,12 +106,6 @@ export default function ProfilePage() {
                 <p className="text-muted-foreground text-sm">
                   {session.user.email}
                 </p>
-                <div className="mt-1 flex items-center space-x-1">
-                  <Shield className="text-muted-foreground h-3 w-3" />
-                  <span className="text-muted-foreground text-xs">
-                    {getRoleLabel(session.user.role || "user")}
-                  </span>
-                </div>
               </div>
             </div>
 

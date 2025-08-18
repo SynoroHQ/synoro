@@ -3,6 +3,11 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { QuickActions } from "@/components/dropdowns/quick-actions";
+import { getActions } from "@/data/status-pages.client";
+import { cn } from "@/lib/utils";
+import { MoreHorizontal, Plus } from "lucide-react";
+import { toast } from "sonner";
+
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -18,10 +23,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@synoro/ui/components/tooltip";
-import { getActions } from "@/data/status-pages.client";
-import { cn } from "@/lib/utils";
-import { MoreHorizontal, Plus } from "lucide-react";
-import { toast } from "sonner";
 
 type StatusPage = { id: string; slug: string };
 
@@ -35,7 +36,7 @@ export function NavStatusPages({ statusPages }: { statusPages: StatusPage[] }) {
   const { isMobile, setOpenMobile } = useSidebar();
   const router = useRouter();
   const actions = getActions({
-    edit: () => router.push(`/dashboard/status-pages/edit`),
+    edit: () => router.push(`/status-pages/edit`),
     "copy-id": () => {
       navigator.clipboard.writeText("ID");
       toast.success("Status Page ID copied to clipboard");
@@ -56,7 +57,7 @@ export function NavStatusPages({ statusPages }: { statusPages: StatusPage[] }) {
                 <SidebarMenuAction
                   className="relative top-0 right-0 border"
                   onClick={() => {
-                    router.push("/dashboard/status-pages/create");
+                    router.push("/status-pages/create");
                     setOpenMobile(false);
                   }}
                 >
@@ -81,7 +82,7 @@ export function NavStatusPages({ statusPages }: { statusPages: StatusPage[] }) {
                 asChild
               >
                 <Link
-                  href={`/dashboard/status-pages/status-reports`}
+                  href={`/status-pages/status-reports`}
                   onClick={() => setOpenMobile(false)}
                 >
                   <span>{item.name}</span>

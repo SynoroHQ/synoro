@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   ChevronsUpDown,
   CreditCard,
@@ -8,7 +9,11 @@ import {
   User,
 } from "lucide-react";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@synoro/ui/components/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@synoro/ui/components/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,7 +29,6 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@synoro/ui/components/sidebar";
-import Link from "next/link";
 
 export function NavUser({
   user,
@@ -81,7 +85,7 @@ export function NavUser({
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>
                 <Link
-                  href="/dashboard/settings/billing"
+                  href="/settings/billing"
                   onClick={() => setOpenMobile(false)}
                 >
                   <Sparkles />
@@ -93,7 +97,7 @@ export function NavUser({
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>
                 <Link
-                  href="/dashboard/settings/account"
+                  href="/settings/account"
                   onClick={() => setOpenMobile(false)}
                 >
                   <User />
@@ -102,7 +106,7 @@ export function NavUser({
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link
-                  href="/dashboard/settings/billing"
+                  href="/settings/billing"
                   onClick={() => setOpenMobile(false)}
                 >
                   <CreditCard />

@@ -1,12 +1,12 @@
 "use client";
 
-import { Row } from "@tanstack/react-table";
-import { QuickActions } from "@/components/dropdowns/quick-actions";
-import { useRouter } from "next/navigation";
-import { getActions } from "@/data/monitors.client";
-import { toast } from "sonner";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { ExportCodeDialog } from "@/components/dialogs/export-code";
+import { QuickActions } from "@/components/dropdowns/quick-actions";
+import { getActions } from "@/data/monitors.client";
+import { Row } from "@tanstack/react-table";
+import { toast } from "sonner";
 
 interface DataTableRowActionsProps<TData> {
   row?: Row<TData>;
@@ -14,12 +14,12 @@ interface DataTableRowActionsProps<TData> {
 
 export function DataTableRowActions<TData>(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  _props: DataTableRowActionsProps<TData>
+  _props: DataTableRowActionsProps<TData>,
 ) {
   const [openDialog, setOpenDialog] = useState(false);
   const router = useRouter();
   const actions = getActions({
-    edit: () => router.push(`/dashboard/monitors/edit`),
+    edit: () => router.push(`/monitors/edit`),
     "copy-id": () => {
       navigator.clipboard.writeText("ID");
       toast.success("Monitor ID copied to clipboard");

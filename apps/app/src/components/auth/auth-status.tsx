@@ -42,11 +42,7 @@ export function AuthStatus() {
     <div className="flex items-center space-x-4">
       <div className="flex items-center space-x-2">
         <User className="h-4 w-4" />
-        <span className="text-sm">
-          {user?.firstName && user?.lastName
-            ? `${user.firstName} ${user.lastName}`
-            : user?.email}
-        </span>
+        <span className="text-sm">{user?.name || user?.email}</span>
       </div>
       <Button variant="ghost" size="sm" onClick={logout}>
         <LogOut className="mr-2 h-4 w-4" />

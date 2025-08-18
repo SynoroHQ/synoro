@@ -1,9 +1,29 @@
+"use client";
+
 import Link from "next/link";
 import { AuthStatus } from "@/components/auth/auth-status";
+import { ProtectedRoute } from "@/components/auth/protected-route";
+import { useAuth } from "@/hooks/use-auth";
 
 import { Button } from "@synoro/ui/components/button";
 
 export default function HomePage() {
+  const { isAuthenticated, isPending } = useAuth();
+
+  // Если пользователь авторизован, показываем dashboard
+  if (isAuthenticated && !isPending) {
+    return (
+      <ProtectedRoute>
+        <DashboardContent />
+      </ProtectedRoute>
+    );
+  }
+
+  // Если пользователь не авторизован, показываем лендинг
+  return <LandingPage />;
+}
+
+function LandingPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* Header */}
@@ -38,16 +58,55 @@ export default function HomePage() {
               <Link href="/auth/login">Войти</Link>
             </Button>
           </div>
-          <div className="mt-8">
-            <Link
-              href="/dashboard"
-              className="text-blue-600 hover:text-blue-800 hover:underline"
-            >
-              Перейти к Dashboard →
-            </Link>
-          </div>
         </div>
       </main>
+    </div>
+  );
+}
+
+function DashboardContent() {
+  const { user } = useAuth();
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold">Dashboard</h1>
+        <p className="text-muted-foreground mt-2">
+          Добро пожаловать в панель управления
+        </p>
+      </div>
+
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="bg-card rounded-lg border p-6">
+          <h3 className="text-lg font-semibold">Профиль</h3>
+          <p className="text-muted-foreground mt-2">Имя: {user?.name}</p>
+          <p className="text-muted-foreground">Email: {user?.email}</p>
+        </div>
+
+        <div className="bg-card rounded-lg border p-6">
+          <h3 className="text-lg font-semibold">Статистика</h3>
+          <p className="text-muted-foreground mt-2">Мониторы: 0</p>
+          <p className="text-muted-foreground">Статус страницы: 0</p>
+        </div>
+
+        <div className="bg-card rounded-lg border p-6">
+          <h3 className="text-lg font-semibold">Быстрые действия</h3>
+          <div className="mt-4 space-y-2">
+            <a
+              href="/monitors/new"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 block rounded-md px-3 py-2 text-sm"
+            >
+              Создать монитор
+            </a>
+            <a
+              href="/status-pages/new"
+              className="bg-secondary text-secondary-foreground hover:bg-secondary/80 block rounded-md px-3 py-2 text-sm"
+            >
+              Создать статус страницу
+            </a>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

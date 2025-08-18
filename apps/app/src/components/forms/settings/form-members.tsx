@@ -13,6 +13,12 @@ import {
   FormCardTitle,
   FormCardUpgrade,
 } from "@/components/forms/form-card";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Lock } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
+
 import { Button } from "@synoro/ui/components/button";
 import {
   Form,
@@ -23,12 +29,12 @@ import {
   FormMessage,
 } from "@synoro/ui/components/form";
 import { Input } from "@synoro/ui/components/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@synoro/ui/components/tabs";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Lock } from "lucide-react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { z } from "zod";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@synoro/ui/components/tabs";
 
 import { FormCardFooter, FormCardFooterInfo } from "../form-card";
 
@@ -122,7 +128,7 @@ export function FormMembers() {
                   <Link href="#">Pro plan</Link>.
                 </FormCardFooterInfo>
                 <Button type="button" size="sm" asChild>
-                  <Link href="/dashboard/settings/billing">
+                  <Link href="/settings/billing">
                     <Lock />
                     Upgrade
                   </Link>
