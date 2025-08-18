@@ -17,6 +17,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@synoro/ui/components/sidebar";
+
 import { Link } from "../common/link";
 
 export function OrganizationSwitcher({
@@ -73,14 +74,14 @@ export function OrganizationSwitcher({
                 className="gap-2 p-2"
               >
                 <span>{org.name}</span>
-                <span className="text-xs text-muted-foreground font-mono">
+                <span className="text-muted-foreground font-mono text-xs">
                   {org.slug}
                 </span>
               </DropdownMenuItem>
             ))}
             <DropdownMenuSeparator />
             <DropdownMenuItem className="gap-2 p-2" asChild>
-              <Link href="/dashboard/settings/general">
+              <Link href="/settings/general">
                 <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
                   <Plus className="size-4" />
                 </div>

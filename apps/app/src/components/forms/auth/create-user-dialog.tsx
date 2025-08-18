@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
+
 import { Button } from "@synoro/ui/components/button";
 import {
   Dialog,
@@ -30,12 +32,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@synoro/ui/components/select";
-import { toast } from "sonner";
 
 const createUserSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
-  role: z.enum(["super_admin", "admin", "moderator", "editor", "user"]),
   password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
@@ -54,7 +54,6 @@ export function CreateUserDialog({ children }: CreateUserDialogProps) {
     defaultValues: {
       name: "",
       email: "",
-      role: "user",
       password: "",
     },
   });
@@ -65,7 +64,7 @@ export function CreateUserDialog({ children }: CreateUserDialogProps) {
       // TODO: Implement actual user creation logic
       console.log("Creating user:", values);
       await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
-      
+
       toast.success("User created successfully");
       setOpen(false);
       form.reset();
@@ -87,7 +86,7 @@ export function CreateUserDialog({ children }: CreateUserDialogProps) {
             Add a new user to the system with appropriate role and permissions.
           </DialogDescription>
         </DialogHeader>
-        
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
@@ -103,7 +102,7 @@ export function CreateUserDialog({ children }: CreateUserDialogProps) {
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="email"
@@ -111,38 +110,17 @@ export function CreateUserDialog({ children }: CreateUserDialogProps) {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input placeholder="john@example.com" type="email" {...field} />
+                    <Input
+                      placeholder="john@example.com"
+                      type="email"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            
-            <FormField
-              control={form.control}
-              name="role"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Role</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a role" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="user">User</SelectItem>
-                      <SelectItem value="editor">Editor</SelectItem>
-                      <SelectItem value="moderator">Moderator</SelectItem>
-                      <SelectItem value="admin">Admin</SelectItem>
-                      <SelectItem value="super_admin">Super Admin</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
+
             <FormField
               control={form.control}
               name="password"
@@ -150,13 +128,17 @@ export function CreateUserDialog({ children }: CreateUserDialogProps) {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter password" type="password" {...field} />
+                    <Input
+                      placeholder="Enter password"
+                      type="password"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            
+
             <DialogFooter>
               <Button
                 type="button"

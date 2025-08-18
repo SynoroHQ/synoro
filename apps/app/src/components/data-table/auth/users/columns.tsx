@@ -1,5 +1,11 @@
 "use client";
 
+import type { ColumnDef } from "@tanstack/react-table";
+import type { User } from "lucide-react";
+import { EditUserDialog } from "@/components/forms/auth/edit-user-dialog";
+import { formatDistanceToNow } from "date-fns";
+import { Edit, MoreHorizontal, Trash2 } from "lucide-react";
+
 import { Badge } from "@synoro/ui/components/badge";
 import { Button } from "@synoro/ui/components/button";
 import {
@@ -10,29 +16,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@synoro/ui/components/dropdown-menu";
-import type { ColumnDef } from "@tanstack/react-table";
-import { formatDistanceToNow } from "date-fns";
-import type { User } from "lucide-react";
-import { Edit, MoreHorizontal, Trash2 } from "lucide-react";
-import { EditUserDialog } from "@/components/forms/auth/edit-user-dialog";
 
 export interface User {
   id: string;
   name: string;
   email: string;
-  role: "super_admin" | "admin" | "moderator" | "editor" | "user";
   status: "active" | "inactive" | "banned";
   lastLogin: string;
   createdAt: string;
 }
-
-const roleColors = {
-  super_admin: "destructive",
-  admin: "default",
-  moderator: "secondary",
-  editor: "outline",
-  user: "outline",
-} as const;
 
 const statusColors = {
   active: "default",
@@ -56,18 +48,6 @@ export const columns: ColumnDef<User>[] = [
             <div className="text-muted-foreground text-sm">{user.email}</div>
           </div>
         </div>
-      );
-    },
-  },
-  {
-    accessorKey: "role",
-    header: "Role",
-    cell: ({ row }) => {
-      const role = row.getValue("role");
-      return (
-        <Badge variant={roleColors[role as keyof typeof roleColors]}>
-          {role.replace("_", " ")}
-        </Badge>
       );
     },
   },

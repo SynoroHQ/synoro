@@ -90,6 +90,17 @@ export function RegisterForm() {
     }
   };
 
+  const handleGoogleSignUp = async () => {
+    try {
+      setError("");
+      // TODO: Реализовать регистрацию через Google OAuth
+      toast.info("Регистрация через Google будет доступна в ближайшее время");
+    } catch (err) {
+      console.error("Google signup error:", err);
+      setError("Ошибка при регистрации через Google");
+    }
+  };
+
   return (
     <Card className="mx-auto w-full max-w-sm">
       <CardHeader>

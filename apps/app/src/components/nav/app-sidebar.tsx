@@ -48,39 +48,39 @@ const data = {
   monitors: [
     {
       name: "Synoro Marketing",
-      url: "/dashboard/monitors/overview",
+      url: "/monitors/overview",
       tags: ["Production"],
     },
     {
       name: "Synoro API",
-      url: "/dashboard/monitors/overview",
+      url: "/monitors/overview",
       tags: ["Production"],
     },
     {
       name: "Synoro Dashboard",
-      url: "/dashboard/monitors/overview",
+      url: "/monitors/overview",
       tags: ["Production"],
     },
     {
       name: "Lightweight OS",
-      url: "/dashboard/monitors/overview",
+      url: "/monitors/overview",
       tags: ["Development"],
     },
     {
       name: "Astro Status Page",
-      url: "/dashboard/monitors/overview",
+      url: "/monitors/overview",
       tags: ["Development"],
     },
     {
       name: "Vercel Edge Ping",
-      url: "/dashboard/monitors/overview",
+      url: "/monitors/overview",
       tags: ["Staging"],
     },
   ],
   statusPages: [
     {
       name: "Synoro Status",
-      url: "/dashboard/status-pages/status-reports",
+      url: "/status-pages/status-reports",
     },
   ],
   overview: [

@@ -3,12 +3,12 @@ import { NextResponse } from "next/server";
 
 export function middleware(request: NextRequest) {
   // Защищенные маршруты
-  const protectedRoutes = ["/dashboard", "/profile", "/settings"];
+  const protectedRoutes = ["/profile", "/settings"];
   const isProtectedRoute = protectedRoutes.some((route) =>
     request.nextUrl.pathname.startsWith(route),
   );
 
-  // Маршруты аутентификации (если пользователь уже авторизован, перенаправляем на dashboard)
+  // Маршруты аутентификации (если пользователь уже авторизован, перенаправляем на главную)
   const authRoutes = ["/auth/login", "/auth/register"];
   const isAuthRoute = authRoutes.some((route) =>
     request.nextUrl.pathname.startsWith(route),
@@ -23,14 +23,14 @@ export function middleware(request: NextRequest) {
     const loginUrl = new URL("/auth/login", request.url);
     loginUrl.searchParams.set(
       "callbackUrl",
-      `${request.nextUrl.pathname}${request.nextUrl.search}`
+      `${request.nextUrl.pathname}${request.nextUrl.search}`,
     );
     return NextResponse.redirect(loginUrl);
   }
 
   if (isAuthRoute && hasSession) {
-    // Перенаправляем авторизованных пользователей на dashboard
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    // Перенаправляем авторизованных пользователей на главную страницу
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
   return NextResponse.next();

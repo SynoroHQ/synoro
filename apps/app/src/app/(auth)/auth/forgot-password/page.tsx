@@ -55,7 +55,6 @@ export default function ForgotPasswordPage() {
       });
 
       if (result?.error) {
-      if (result?.error) {
         if (result.error?.code === "USER_NOT_FOUND") {
           setError("Пользователь с таким email не найден");
         } else {
@@ -64,7 +63,7 @@ export default function ForgotPasswordPage() {
         return;
       }
 
-      if (result?.success) {
+      if (result?.data?.status === true) {
         setSuccess(true);
         toast.success(
           "Инструкции по восстановлению пароля отправлены на ваш email",

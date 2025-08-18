@@ -1,9 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Edit, User } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
+
 import { Button } from "@synoro/ui/components/button";
 import {
   Dialog,
@@ -31,13 +34,10 @@ import {
   SelectValue,
 } from "@synoro/ui/components/select";
 import { Switch } from "@synoro/ui/components/switch";
-import { toast } from "sonner";
-import { Edit, User } from "lucide-react";
 
 const editUserSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
-  role: z.enum(["super_admin", "admin", "moderator", "editor", "user"]),
   status: z.enum(["active", "inactive", "banned"]),
   password: z.string().optional(),
 });
@@ -48,7 +48,6 @@ interface User {
   id: string;
   name: string;
   email: string;
-  role: "super_admin" | "admin" | "moderator" | "editor" | "user";
   status: "active" | "inactive" | "banned";
 }
 
@@ -67,7 +66,6 @@ export function EditUserDialog({ user, children }: EditUserDialogProps) {
     defaultValues: {
       name: user.name,
       email: user.email,
-      role: user.role,
       status: user.status,
       password: "",
     },
@@ -78,7 +76,6 @@ export function EditUserDialog({ user, children }: EditUserDialogProps) {
       form.reset({
         name: user.name,
         email: user.email,
-        role: user.role,
         status: user.status,
         password: "",
       });
@@ -92,7 +89,7 @@ export function EditUserDialog({ user, children }: EditUserDialogProps) {
       // TODO: Implement actual user update logic
       console.log("Updating user:", values);
       await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
-      
+
       toast.success("User updated successfully");
       setOpen(false);
     } catch (error) {
@@ -116,7 +113,7 @@ export function EditUserDialog({ user, children }: EditUserDialogProps) {
             Update user information and permissions.
           </DialogDescription>
         </DialogHeader>
-        
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
@@ -132,7 +129,7 @@ export function EditUserDialog({ user, children }: EditUserDialogProps) {
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="email"
@@ -140,46 +137,28 @@ export function EditUserDialog({ user, children }: EditUserDialogProps) {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input placeholder="john@example.com" type="email" {...field} />
+                    <Input
+                      placeholder="john@example.com"
+                      type="email"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            
+
             <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="role"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Role</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a role" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="user">User</SelectItem>
-                        <SelectItem value="editor">Editor</SelectItem>
-                        <SelectItem value="moderator">Moderator</SelectItem>
-                        <SelectItem value="admin">Admin</SelectItem>
-                        <SelectItem value="super_admin">Super Admin</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
               <FormField
                 control={form.control}
                 name="status"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Status</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select status" />
@@ -216,14 +195,18 @@ export function EditUserDialog({ user, children }: EditUserDialogProps) {
                   <FormItem>
                     <FormLabel>New Password</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter new password" type="password" {...field} />
+                      <Input
+                        placeholder="Enter new password"
+                        type="password"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             )}
-            
+
             <DialogFooter>
               <Button
                 type="button"

@@ -18,9 +18,9 @@ import {
 } from "@synoro/ui/components/dropdown-menu";
 
 export function UserMenu() {
-  const { user, logout, isLoading } = useAuth();
+  const { user, logout, isPending } = useAuth();
 
-  if (isLoading) {
+  if (isPending) {
     return (
       <div className="flex items-center space-x-2">
         <div className="bg-muted h-8 w-8 animate-pulse rounded-full" />

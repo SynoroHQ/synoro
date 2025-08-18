@@ -1,5 +1,6 @@
 "use client";
 
+import type { z } from "zod";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -7,7 +8,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Loader2, Mail } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { z } from "zod";
 
 import { emailOtp } from "@synoro/auth/client";
 import {
@@ -27,14 +27,9 @@ import {
   FormLabel,
   FormMessage,
 } from "@synoro/ui/components/form";
+import { verifyOtpSchema } from "@synoro/validators";
 
-const verifySchema = z.object({
-  otp: z.string().length(6, {
-    message: "Код подтверждения должен содержать 6 символов.",
-  }),
-});
-
-type VerifyFormValues = z.infer<typeof verifySchema>;
+type VerifyFormValues = z.infer<typeof verifyOtpSchema>;
 
 export default function VerifyPage() {
   const searchParams = useSearchParams();
@@ -45,7 +40,7 @@ export default function VerifyPage() {
   const [error, setError] = useState("");
 
   const form = useForm<VerifyFormValues>({
-    resolver: zodResolver(verifySchema),
+    resolver: zodResolver(verifyOtpSchema),
     defaultValues: {
       otp: "",
     },

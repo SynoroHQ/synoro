@@ -1,4 +1,5 @@
 import { QuickActions } from "@/components/dropdowns/quick-actions";
+
 import {
   Table,
   TableBody,
@@ -15,7 +16,6 @@ export function DataTable({ data }: { data: any[] }) {
         <TableRow>
           <TableHead>Name</TableHead>
           <TableHead>Email</TableHead>
-          <TableHead>Role</TableHead>
           <TableHead>Created</TableHead>
           <TableHead>
             <span className="sr-only">Actions</span>
@@ -27,7 +27,6 @@ export function DataTable({ data }: { data: any[] }) {
           <TableRow key={item.id}>
             <TableCell>{item.name}</TableCell>
             <TableCell>{item.email}</TableCell>
-            <TableCell>{item.role}</TableCell>
             <TableCell>{item.createdAt}</TableCell>
             <TableCell>
               <div className="flex justify-end">

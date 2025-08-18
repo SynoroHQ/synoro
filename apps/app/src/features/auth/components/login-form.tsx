@@ -67,7 +67,7 @@ export function LoginForm() {
 
       if (result?.data?.user) {
         toast.success("Успешный вход!");
-        router.push("/dashboard");
+        router.push("/");
       }
     } catch (err) {
       console.error("Login error:", err);

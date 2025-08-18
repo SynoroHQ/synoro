@@ -69,8 +69,6 @@ export const auth = betterAuth({
   plugins: [
     nextCookies(),
     admin({
-      defaultRole: "user",
-      adminRoles: ["super_admin", "admin", "moderator", "editor"],
       impersonationSessionDuration: 60 * 60, // 1 hour
       defaultBanReason: "Нарушение правил",
       bannedUserMessage:
@@ -85,15 +83,7 @@ export const auth = betterAuth({
       enabled: true,
     },
   },
-  user: {
-    additionalFields: {
-      role: {
-        type: "string",
-        required: true,
-        enum: ["super_admin", "admin", "moderator", "editor", "user"] as const,
-      },
-    },
-  },
+ 
 });
 
 export type Session = typeof auth.$Infer.Session;

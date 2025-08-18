@@ -1,15 +1,7 @@
 "use client";
 
-import { Checkbox } from "@synoro/ui/components/checkbox";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@synoro/ui/components/form";
+import { useTransition } from "react";
+import { Link } from "@/components/common/link";
 import {
   FormCard,
   FormCardContent,
@@ -20,15 +12,24 @@ import {
   FormCardTitle,
   FormCardUpgrade,
 } from "@/components/forms/form-card";
-import { Input } from "@synoro/ui/components/input";
-import { Link } from "@/components/common/link";
-import { Button } from "@synoro/ui/components/button";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Lock } from "lucide-react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useTransition } from "react";
 import { toast } from "sonner";
+import { z } from "zod";
+
+import { Button } from "@synoro/ui/components/button";
+import { Checkbox } from "@synoro/ui/components/checkbox";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@synoro/ui/components/form";
+import { Input } from "@synoro/ui/components/input";
 
 const LOCKED = true;
 
@@ -127,7 +128,7 @@ export function FormPasswordProtection({
             </FormCardFooterInfo>
             {LOCKED ? (
               <Button type="button" asChild>
-                <Link href="/dashboard/settings/billing">
+                <Link href="/settings/billing">
                   <Lock />
                   Upgrade
                 </Link>

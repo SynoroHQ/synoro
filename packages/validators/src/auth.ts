@@ -87,6 +87,13 @@ export const otpSignInSchema = z.object({
     .regex(/^\d+$/, "OTP must contain only numbers"),
 });
 
+export const verifyOtpSchema = z.object({
+  otp: z
+    .string()
+    .length(6, "OTP must be exactly 6 digits")
+    .regex(/^\d+$/, "OTP must contain only numbers"),
+});
+
 export const requestOtpSchema = z.object({
   email: emailSchema,
 });
@@ -100,4 +107,5 @@ export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
 export type VerifyEmailInput = z.infer<typeof verifyEmailSchema>;
 export type ResendVerificationInput = z.infer<typeof resendVerificationSchema>;
 export type OtpSignInInput = z.infer<typeof otpSignInSchema>;
+export type VerifyOtpInput = z.infer<typeof verifyOtpSchema>;
 export type RequestOtpInput = z.infer<typeof requestOtpSchema>;

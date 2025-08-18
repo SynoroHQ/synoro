@@ -1,3 +1,6 @@
+import { Link } from "@/components/common/link";
+import { CircleCheck, CircleDashed, X } from "lucide-react";
+
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -5,26 +8,16 @@ import {
   SidebarMenuAction,
   SidebarMenuItem,
 } from "@synoro/ui";
-import { X, CircleDashed, CircleCheck } from "lucide-react";
-import { Link } from "@/components/common/link";
 
 const items = [
-  {
-    title: "Create Monitor",
-    checked: true,
-    href: "/dashboard/monitors/create",
-  },
-  {
-    title: "Create Status Page",
-    checked: true,
-    href: "/dashboard/status-pages/create",
-  },
-  { title: "Create Notifier", checked: false, href: "/dashboard/notifiers" },
+  { title: "Create Monitor", checked: false, href: "/monitors/create" },
+  { title: "Create Status Page", checked: false, href: "/status-pages/create" },
+  { title: "Create Notifier", checked: false, href: "/notifiers" },
 ];
 
 export function NavChecklist() {
   return (
-    <SidebarGroup className="group-data-[collapsible=icon]:hidden bg-background rounded-lg border">
+    <SidebarGroup className="bg-background rounded-lg border group-data-[collapsible=icon]:hidden">
       <SidebarGroupLabel className="flex items-center justify-between pr-1">
         <span>Getting Started</span>
         <SidebarMenuAction className="relative top-0 right-0">
