@@ -265,8 +265,19 @@ export function SecurityForm() {
             </div>
             <Switch
               checked={twoFactorEnabled}
-              onCheckedChange={setTwoFactorEnabled}
-            />
+              <Switch
+                checked={twoFactorEnabled}
+               onCheckedChange={async (enabled) => {
+                 try {
+                   // TODO: Вызов API для обновления настроек 2FA
+                   // await updateTwoFactorSettings({ enabled });
+                   setTwoFactorEnabled(enabled);
+                   toast.success(enabled ? "2FA включена" : "2FA отключена");
+                 } catch (error) {
+                   toast.error("Ошибка при обновлении настроек 2FA");
+                 }
+               }}
+              />
           </div>
           <Alert>
             <AlertTriangle className="h-4 w-4" />
