@@ -1,0 +1,19 @@
+User-agent: *
+Allow: /
+
+# Основные страницы
+Allow: /auth/login
+Allow: /auth/register
+
+# Запрещаем индексацию приватных страниц
+Disallow: /dashboard
+Disallow: /profile
+Disallow: /settings
+Disallow: /events
+Disallow: /tasks
+Disallow: /analytics
+Disallow: /receipts
+Disallow: /calendar
+
+# Sitemap
+Sitemap: https://synoro.dev/sitemap.xml

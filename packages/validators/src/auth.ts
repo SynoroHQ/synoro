@@ -98,6 +98,22 @@ export const requestOtpSchema = z.object({
   email: emailSchema,
 });
 
+// Registration schema for the app
+export const registerSchema = z.object({
+  firstName: z.string().min(2, {
+    message: "Имя должно содержать минимум 2 символа.",
+  }),
+  lastName: z.string().min(2, {
+    message: "Фамилия должна содержать минимум 2 символа.",
+  }),
+  email: z.string().email({
+    message: "Введите корректный email адрес.",
+  }),
+  password: z.string().min(6, {
+    message: "Пароль должен содержать минимум 6 символов.",
+  }),
+});
+
 // Type exports for TypeScript
 export type SignUpInput = z.infer<typeof signUpSchema>;
 export type SignInInput = z.infer<typeof signInSchema>;
@@ -109,3 +125,4 @@ export type ResendVerificationInput = z.infer<typeof resendVerificationSchema>;
 export type OtpSignInInput = z.infer<typeof otpSignInSchema>;
 export type VerifyOtpInput = z.infer<typeof verifyOtpSchema>;
 export type RequestOtpInput = z.infer<typeof requestOtpSchema>;
+export type RegisterFormValues = z.infer<typeof registerSchema>;

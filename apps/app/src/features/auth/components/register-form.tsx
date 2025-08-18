@@ -7,8 +7,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { z } from "zod";
 
+import type { RegisterFormValues } from "@synoro/validators";
 import { signUp } from "@synoro/auth/client";
 import { Button } from "@synoro/ui/components/button";
 import {
@@ -27,23 +27,7 @@ import {
   FormMessage,
 } from "@synoro/ui/components/form";
 import { Input } from "@synoro/ui/components/input";
-
-const registerSchema = z.object({
-  firstName: z.string().min(2, {
-    message: "Имя должно содержать минимум 2 символа.",
-  }),
-  lastName: z.string().min(2, {
-    message: "Фамилия должна содержать минимум 2 символа.",
-  }),
-  email: z.string().email({
-    message: "Введите корректный email адрес.",
-  }),
-  password: z.string().min(6, {
-    message: "Пароль должен содержать минимум 6 символов.",
-  }),
-});
-
-type RegisterFormValues = z.infer<typeof registerSchema>;
+import { registerSchema } from "@synoro/validators";
 
 export function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false);

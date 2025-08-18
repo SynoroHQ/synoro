@@ -1,112 +1,124 @@
 "use client";
 
 import Link from "next/link";
-import { AuthStatus } from "@/components/auth/auth-status";
-import { ProtectedRoute } from "@/components/auth/protected-route";
-import { useAuth } from "@/hooks/use-auth";
+import { Button } from "@synoro/ui";
+import { useSession } from "@synoro/auth/client";
+import { Metadata } from "next";
 
-import { Button } from "@synoro/ui/components/button";
+export const metadata: Metadata = {
+  title: "Главная",
+  description: "Synoro - интеллектуальный ассистент для управления жизненными событиями, задачами и аналитики. Универсальный цифровой мозг для дома.",
+  keywords: [
+    "Synoro",
+    "умный дом",
+    "управление задачами",
+    "аналитика",
+    "финансы",
+    "жизненные события",
+    "планирование",
+    "telegram бот",
+    "OCR",
+    "голосовые команды"
+  ],
+  openGraph: {
+    title: "Synoro - Интеллектуальный ассистент для дома",
+    description: "Универсальный цифровой мозг для управления жизненными событиями, задачами и аналитики",
+    type: "website",
+    locale: "ru_RU",
+    siteName: "Synoro",
+    images: [
+      {
+        url: "/opengraph-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Synoro - Интеллектуальный ассистент для управления жизненными событиями",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Synoro - Интеллектуальный ассистент для дома",
+    description: "Универсальный цифровой мозг для управления жизненными событиями, задачами и аналитики",
+    images: ["/opengraph-image.png"],
+  },
+};
 
 export default function HomePage() {
-  const { isAuthenticated, isPending } = useAuth();
-
-  // Если пользователь авторизован, показываем dashboard
-  if (isAuthenticated && !isPending) {
-    return (
-      <ProtectedRoute>
-        <DashboardContent />
-      </ProtectedRoute>
-    );
-  }
-
-  // Если пользователь не авторизован, показываем лендинг
-  return <LandingPage />;
-}
-
-function LandingPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      {/* Header */}
-      <header className="border-b bg-white/80 backdrop-blur-sm">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <div className="flex items-center space-x-2">
-            <div className="bg-primary text-primary-foreground flex h-8 w-8 items-center justify-center rounded-md">
-              <span className="text-lg font-bold">S</span>
+    <div className="flex min-h-screen flex-col">
+      <main className="flex-1">
+        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48">
+          <div className="container px-4 md:px-6">
+            <div className="flex flex-col items-center space-y-4 text-center">
+              <div className="space-y-2">
+                <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none">
+                  Synoro
+                </h1>
+                <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl dark:text-gray-400">
+                  Интеллектуальный ассистент для управления жизненными событиями, задачами и аналитики
+                </p>
+              </div>
+              <div className="space-x-4">
+                <Link href="/auth/register">
+                  <Button size="lg">Начать бесплатно</Button>
+                </Link>
+                <Link href="/auth/login">
+                  <Button variant="outline" size="lg">
+                    Войти в систему
+                  </Button>
+                </Link>
+              </div>
             </div>
-            <span className="text-xl font-bold">Synoro</span>
           </div>
-          <AuthStatus />
-        </div>
-      </header>
+        </section>
 
-      {/* Main Content */}
-      <main className="flex flex-1 flex-col items-center justify-center px-4 py-20">
-        <div className="max-w-4xl text-center">
-          <h1 className="text-4xl font-bold text-gray-900 sm:text-6xl">
-            Добро пожаловать в <span className="text-blue-600">Synoro</span>
-          </h1>
-          <p className="mt-6 text-lg text-gray-600 sm:text-xl">
-            Мониторинг и статус страницы для ваших сервисов. Отслеживайте
-            доступность, получайте уведомления и держите пользователей в курсе
-            состояния ваших сервисов.
-          </p>
-          <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Button asChild size="lg">
-              <Link href="/auth/register">Начать бесплатно</Link>
-            </Button>
-            <Button asChild variant="outline" size="lg">
-              <Link href="/auth/login">Войти</Link>
-            </Button>
+        <section className="w-full py-12 md:py-24 lg:py-32 bg-gray-100 dark:bg-gray-800">
+          <div className="container px-4 md:px-6">
+            <div className="grid gap-6 lg:grid-cols-2 lg:gap-12">
+              <div className="space-y-4">
+                <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">
+                  Что такое Synoro?
+                </h2>
+                <p className="text-gray-500 md:text-xl dark:text-gray-400">
+                  Synoro - это универсальный цифровой мозг для дома, который помогает:
+                </p>
+                <ul className="space-y-2 text-gray-500 dark:text-gray-400">
+                  <li>• Логировать все важные жизненные события</li>
+                  <li>• Анализировать данные и выявлять паттерны</li>
+                  <li>• Помогать принимать обоснованные решения</li>
+                  <li>• Управлять задачами и напоминаниями</li>
+                  <li>• Отслеживать финансы и расходы</li>
+                </ul>
+              </div>
+              <div className="space-y-4">
+                <h3 className="text-2xl font-bold tracking-tighter">
+                  Основные возможности
+                </h3>
+                <div className="grid gap-4">
+                  <div className="space-y-2">
+                    <h4 className="font-semibold">📱 Telegram Bot</h4>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Голосовые и текстовые сообщения, обработка фото чеков
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <h4 className="font-semibold">🌐 Веб-интерфейс</h4>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Удобное управление через браузер
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <h4 className="font-semibold">📊 Аналитика</h4>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Визуализация данных и умные рекомендации
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
+        </section>
       </main>
-    </div>
-  );
-}
-
-function DashboardContent() {
-  const { user } = useAuth();
-
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">Dashboard</h1>
-        <p className="text-muted-foreground mt-2">
-          Добро пожаловать в панель управления
-        </p>
-      </div>
-
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <div className="bg-card rounded-lg border p-6">
-          <h3 className="text-lg font-semibold">Профиль</h3>
-          <p className="text-muted-foreground mt-2">Имя: {user?.name}</p>
-          <p className="text-muted-foreground">Email: {user?.email}</p>
-        </div>
-
-        <div className="bg-card rounded-lg border p-6">
-          <h3 className="text-lg font-semibold">Статистика</h3>
-          <p className="text-muted-foreground mt-2">Мониторы: 0</p>
-          <p className="text-muted-foreground">Статус страницы: 0</p>
-        </div>
-
-        <div className="bg-card rounded-lg border p-6">
-          <h3 className="text-lg font-semibold">Быстрые действия</h3>
-          <div className="mt-4 space-y-2">
-            <a
-              href="/monitors/new"
-              className="bg-primary text-primary-foreground hover:bg-primary/90 block rounded-md px-3 py-2 text-sm"
-            >
-              Создать монитор
-            </a>
-            <a
-              href="/status-pages/new"
-              className="bg-secondary text-secondary-foreground hover:bg-secondary/80 block rounded-md px-3 py-2 text-sm"
-            >
-              Создать статус страницу
-            </a>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

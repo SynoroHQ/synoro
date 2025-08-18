@@ -68,12 +68,6 @@ export const auth = betterAuth({
       : {},
   plugins: [
     nextCookies(),
-    admin({
-      impersonationSessionDuration: 60 * 60, // 1 hour
-      defaultBanReason: "Нарушение правил",
-      bannedUserMessage:
-        "Ваш аккаунт заблокирован. Обратитесь в поддержку, если считаете это ошибкой.",
-    }),
   ],
   advanced: {
     generateId: false,

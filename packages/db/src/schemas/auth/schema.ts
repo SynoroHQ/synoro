@@ -1,7 +1,8 @@
-import { pgTable } from "drizzle-orm/pg-core";
+import { createId } from "@paralleldrive/cuid2";
+import { pgTable, text } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", (t) => ({
-  id: t.text().primaryKey(),
+  id: text("id").primaryKey().$defaultFn(createId),
   name: t.text().notNull(),
   email: t.text().notNull().unique(),
   emailVerified: t.boolean().notNull(),
@@ -11,7 +12,7 @@ export const user = pgTable("user", (t) => ({
 }));
 
 export const session = pgTable("session", (t) => ({
-  id: t.text().primaryKey(),
+  id: text("id").primaryKey().$defaultFn(createId),
   expiresAt: t.timestamp().notNull(),
   token: t.text().notNull().unique(),
   createdAt: t.timestamp().notNull(),
@@ -25,7 +26,7 @@ export const session = pgTable("session", (t) => ({
 }));
 
 export const account = pgTable("account", (t) => ({
-  id: t.text().primaryKey(),
+  id: text("id").primaryKey().$defaultFn(createId),
   accountId: t.text().notNull(),
   providerId: t.text().notNull(),
   userId: t
@@ -44,7 +45,7 @@ export const account = pgTable("account", (t) => ({
 }));
 
 export const verification = pgTable("verification", (t) => ({
-  id: t.text().primaryKey(),
+  id: text("id").primaryKey().$defaultFn(createId),
   identifier: t.text().notNull(),
   value: t.text().notNull(),
   expiresAt: t.timestamp().notNull(),

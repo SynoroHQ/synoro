@@ -44,6 +44,15 @@ const resetPasswordSchema = z
 
 type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>;
 
+export const metadata = {
+  title: "Сброс пароля",
+  description: "Создайте новый пароль для вашего аккаунта Synoro",
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
+
 export default function ResetPasswordPage() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");

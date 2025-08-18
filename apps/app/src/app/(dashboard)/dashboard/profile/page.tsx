@@ -18,6 +18,15 @@ import {
   Label,
 } from "@synoro/ui";
 
+export const metadata = {
+  title: "Профиль пользователя",
+  description: "Управление личной информацией и настройками профиля в Synoro",
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
+
 export default function ProfilePage() {
   const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState(false);
@@ -27,7 +36,7 @@ export default function ProfilePage() {
     email: session?.user?.email || "",
   });
 
-  // Синхронизация полей с актуальными данными сессии (если не редактируем вручную)
+  // Синхронизация полей с актуальными данными сессии
   useEffect(() => {
     if (session?.user && !isEditing) {
       setFormData({
@@ -36,6 +45,7 @@ export default function ProfilePage() {
       });
     }
   }, [session?.user?.name, session?.user?.email, isEditing]);
+
   if (!session?.user) {
     return (
       <div className="p-6">
@@ -186,7 +196,7 @@ export default function ProfilePage() {
               <div className="bg-muted rounded-lg p-4 text-center">
                 <div className="text-2xl font-bold">0</div>
                 <div className="text-muted-foreground text-sm">
-                  Задач создано
+                  Событий создано
                 </div>
               </div>
               <div className="bg-muted rounded-lg p-4 text-center">

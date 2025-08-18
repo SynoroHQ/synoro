@@ -31,6 +31,15 @@ import { verifyOtpSchema } from "@synoro/validators";
 
 type VerifyFormValues = z.infer<typeof verifyOtpSchema>;
 
+export const metadata = {
+  title: "Верификация email",
+  description: "Подтвердите ваш email адрес для активации аккаунта Synoro",
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
+
 export default function VerifyPage() {
   const searchParams = useSearchParams();
   const email = searchParams.get("email");
