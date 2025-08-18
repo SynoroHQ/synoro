@@ -6,13 +6,21 @@ import { Loader2, LogOut, User } from "lucide-react";
 import { Button } from "@synoro/ui/components/button";
 
 export function AuthStatus() {
-  const { user, isLoading, isAuthenticated, logout } = useAuth();
+  const { user, isPending, isAuthenticated, logout, error } = useAuth();
 
-  if (isLoading) {
+  if (isPending) {
     return (
       <div className="flex items-center space-x-2">
         <Loader2 className="h-4 w-4 animate-spin" />
         <span className="text-muted-foreground text-sm">Загрузка...</span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center space-x-2">
+        <span className="text-destructive text-sm">Ошибка загрузки данных</span>
       </div>
     );
   }
