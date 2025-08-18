@@ -111,7 +111,10 @@ export function ProfileForm() {
               <div className="relative">
                 <Avatar className="h-20 w-20">
                   <AvatarImage src={avatar || undefined} alt="Profile" />
-                  <AvatarFallback className="text-lg">СИ</AvatarFallback>
+                  <AvatarFallback className="text-lg">
+                    {form.watch("firstName")[0]?.toUpperCase() || ""}
+                    {form.watch("lastName")[0]?.toUpperCase() || ""}
+                  </AvatarFallback>
                 </Avatar>
                 <label
                   htmlFor="avatar-upload"
