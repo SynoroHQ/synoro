@@ -3,6 +3,45 @@
 import Link from "next/link";
 import { Button } from "@synoro/ui";
 import { useSession } from "@synoro/auth/client";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Главная",
+  description: "Synoro - интеллектуальный ассистент для управления жизненными событиями, задачами и аналитики. Универсальный цифровой мозг для дома.",
+  keywords: [
+    "Synoro",
+    "умный дом",
+    "управление задачами",
+    "аналитика",
+    "финансы",
+    "жизненные события",
+    "планирование",
+    "telegram бот",
+    "OCR",
+    "голосовые команды"
+  ],
+  openGraph: {
+    title: "Synoro - Интеллектуальный ассистент для дома",
+    description: "Универсальный цифровой мозг для управления жизненными событиями, задачами и аналитики",
+    type: "website",
+    locale: "ru_RU",
+    siteName: "Synoro",
+    images: [
+      {
+        url: "/opengraph-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Synoro - Интеллектуальный ассистент для управления жизненными событиями",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Synoro - Интеллектуальный ассистент для дома",
+    description: "Универсальный цифровой мозг для управления жизненными событиями, задачами и аналитики",
+    images: ["/opengraph-image.png"],
+  },
+};
 
 export default function HomePage() {
   return (

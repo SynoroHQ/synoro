@@ -1,3 +1,4 @@
+import { Metadata } from "next";
 import Link from "next/link";
 import {
   BarChart3,
@@ -15,6 +16,24 @@ import {
   CardHeader,
   CardTitle,
 } from "@synoro/ui";
+
+export const metadata: Metadata = {
+  title: "Панель управления",
+  description: "Панель управления Synoro - ваш персональный цифровой ассистент для управления жизненными событиями, задачами и аналитики",
+  keywords: [
+    "Synoro",
+    "панель управления",
+    "дашборд",
+    "события",
+    "задачи",
+    "аналитика",
+    "личный кабинет"
+  ],
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default function DashboardPage() {
   return (

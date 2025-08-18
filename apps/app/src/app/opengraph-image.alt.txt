@@ -1,1 +1,1 @@
-<meta property="og:image:alt" content="Dashboard Monitor Overview Page" />
+Synoro - Интеллектуальный ассистент для управления жизненными событиями, задачами и аналитики. Универсальный цифровой мозг для дома.

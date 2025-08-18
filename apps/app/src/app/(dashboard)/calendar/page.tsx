@@ -1,3 +1,4 @@
+import { Metadata } from "next";
 import Link from "next/link";
 import { Calendar, Download, Filter, Plus } from "lucide-react";
 
@@ -9,6 +10,25 @@ import {
   CardHeader,
   CardTitle,
 } from "@synoro/ui";
+
+export const metadata: Metadata = {
+  title: "Календарь",
+  description: "Планирование и просмотр событий по дням, неделям и месяцам в Synoro. Организуйте свое время эффективно.",
+  keywords: [
+    "Synoro",
+    "календарь",
+    "планирование",
+    "события",
+    "задачи",
+    "расписание",
+    "временное управление",
+    "организация"
+  ],
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default function CalendarPage() {
   return (

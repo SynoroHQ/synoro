@@ -1,3 +1,4 @@
+import { Metadata } from "next";
 import Link from "next/link";
 import { Camera, Plus, Receipt, Search, Upload } from "lucide-react";
 
@@ -9,6 +10,25 @@ import {
   CardHeader,
   CardTitle,
 } from "@synoro/ui";
+
+export const metadata: Metadata = {
+  title: "Чеки",
+  description: "Управление чеками и финансовыми записями в Synoro. Автоматическая обработка чеков через OCR и анализ расходов.",
+  keywords: [
+    "Synoro",
+    "чеки",
+    "финансы",
+    "расходы",
+    "OCR",
+    "обработка чеков",
+    "финансовая аналитика",
+    "бюджет"
+  ],
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default function ReceiptsPage() {
   return (

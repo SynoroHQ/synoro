@@ -1,3 +1,4 @@
+import { Metadata } from "next";
 import Link from "next/link";
 import { FileText, Plus, Search } from "lucide-react";
 
@@ -9,6 +10,24 @@ import {
   CardHeader,
   CardTitle,
 } from "@synoro/ui";
+
+export const metadata: Metadata = {
+  title: "События",
+  description: "Управление жизненными событиями и записями в Synoro. Отслеживайте важные моменты жизни и анализируйте паттерны.",
+  keywords: [
+    "Synoro",
+    "события",
+    "жизненные события",
+    "записи",
+    "аналитика",
+    "паттерны",
+    "управление"
+  ],
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default function EventsPage() {
   return (

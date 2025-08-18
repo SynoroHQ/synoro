@@ -1,7 +1,41 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@synoro/ui";
-import { Button } from "@synoro/ui";
-import { BarChart3, TrendingUp, Calendar, Download, Filter } from "lucide-react";
+import { Metadata } from "next";
 import Link from "next/link";
+import {
+  BarChart3,
+  Calendar,
+  Download,
+  Filter,
+  TrendingUp,
+} from "lucide-react";
+
+import {
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@synoro/ui";
+
+export const metadata: Metadata = {
+  title: "Аналитика",
+  description: "Анализ данных и получение инсайтов о вашей жизни в Synoro. Визуализация паттернов и тенденций.",
+  keywords: [
+    "Synoro",
+    "аналитика",
+    "данные",
+    "инсайты",
+    "паттерны",
+    "тенденции",
+    "статистика",
+    "графики",
+    "отчеты"
+  ],
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default function AnalyticsPage() {
   return (
@@ -30,13 +64,11 @@ export default function AnalyticsPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Всего событий</CardTitle>
-            <BarChart3 className="h-4 w-4 text-muted-foreground" />
+            <BarChart3 className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">0</div>
-            <p className="text-xs text-muted-foreground">
-              За все время
-            </p>
+            <p className="text-muted-foreground text-xs">За все время</p>
           </CardContent>
         </Card>
 
@@ -47,7 +79,7 @@ export default function AnalyticsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-600">0%</div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               По сравнению с прошлым месяцем
             </p>
           </CardContent>
@@ -55,14 +87,14 @@ export default function AnalyticsPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Среднее в день</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Среднее в день
+            </CardTitle>
             <Calendar className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">0</div>
-            <p className="text-xs text-muted-foreground">
-              Событий в день
-            </p>
+            <p className="text-muted-foreground text-xs">Событий в день</p>
           </CardContent>
         </Card>
 
@@ -73,9 +105,7 @@ export default function AnalyticsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-purple-600">0</div>
-            <p className="text-xs text-muted-foreground">
-              Активных категорий
-            </p>
+            <p className="text-muted-foreground text-xs">Активных категорий</p>
           </CardContent>
         </Card>
       </div>
@@ -90,16 +120,14 @@ export default function AnalyticsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-center py-12">
-              <BarChart3 className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium mb-2">Данных пока нет</h3>
+            <div className="py-12 text-center">
+              <BarChart3 className="text-muted-foreground mx-auto mb-4 h-12 w-12" />
+              <h3 className="mb-2 text-lg font-medium">Данных пока нет</h3>
               <p className="text-muted-foreground mb-4">
                 Добавьте события, чтобы увидеть график активности
               </p>
               <Button asChild>
-                <Link href="/events/new">
-                  Добавить событие
-                </Link>
+                <Link href="/events/new">Добавить событие</Link>
               </Button>
             </div>
           </CardContent>
@@ -113,16 +141,14 @@ export default function AnalyticsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-center py-12">
-              <BarChart3 className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium mb-2">Категорий нет</h3>
+            <div className="py-12 text-center">
+              <BarChart3 className="text-muted-foreground mx-auto mb-4 h-12 w-12" />
+              <h3 className="mb-2 text-lg font-medium">Категорий нет</h3>
               <p className="text-muted-foreground mb-4">
                 Создайте события с категориями для анализа
               </p>
               <Button asChild>
-                <Link href="/events/new">
-                  Добавить событие
-                </Link>
+                <Link href="/events/new">Добавить событие</Link>
               </Button>
             </div>
           </CardContent>
@@ -138,22 +164,18 @@ export default function AnalyticsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-12">
-            <BarChart3 className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium mb-2">Финансовых данных нет</h3>
+          <div className="py-12 text-center">
+            <BarChart3 className="text-muted-foreground mx-auto mb-4 h-12 w-12" />
+            <h3 className="mb-2 text-lg font-medium">Финансовых данных нет</h3>
             <p className="text-muted-foreground mb-4">
               Добавьте чеки и финансовые события для анализа расходов
             </p>
             <div className="flex justify-center space-x-2">
               <Button asChild>
-                <Link href="/receipts/upload">
-                  Загрузить чек
-                </Link>
+                <Link href="/receipts/upload">Загрузить чек</Link>
               </Button>
               <Button variant="outline" asChild>
-                <Link href="/events/new">
-                  Добавить событие
-                </Link>
+                <Link href="/events/new">Добавить событие</Link>
               </Button>
             </div>
           </div>
@@ -169,16 +191,14 @@ export default function AnalyticsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-12">
-            <TrendingUp className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium mb-2">Инсайтов пока нет</h3>
+          <div className="py-12 text-center">
+            <TrendingUp className="text-muted-foreground mx-auto mb-4 h-12 w-12" />
+            <h3 className="mb-2 text-lg font-medium">Инсайтов пока нет</h3>
             <p className="text-muted-foreground mb-4">
               Система будет генерировать рекомендации после накопления данных
             </p>
             <Button asChild>
-              <Link href="/events/new">
-                Начать сбор данных
-              </Link>
+              <Link href="/events/new">Начать сбор данных</Link>
             </Button>
           </div>
         </CardContent>

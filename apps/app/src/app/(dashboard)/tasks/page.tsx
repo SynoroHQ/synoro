@@ -1,3 +1,4 @@
+import { Metadata } from "next";
 import Link from "next/link";
 import { Calendar, CheckSquare, Plus, Search } from "lucide-react";
 
@@ -9,6 +10,24 @@ import {
   CardHeader,
   CardTitle,
 } from "@synoro/ui";
+
+export const metadata: Metadata = {
+  title: "Задачи",
+  description: "Управление задачами, напоминаниями и планами в Synoro. Организуйте свою работу и отслеживайте прогресс.",
+  keywords: [
+    "Synoro",
+    "задачи",
+    "планирование",
+    "напоминания",
+    "управление проектами",
+    "трекинг",
+    "продуктивность"
+  ],
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default function TasksPage() {
   return (

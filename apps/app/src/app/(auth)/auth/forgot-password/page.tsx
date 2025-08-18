@@ -35,6 +35,15 @@ const forgotPasswordSchema = z.object({
 
 type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>;
 
+export const metadata = {
+  title: "Восстановление пароля",
+  description: "Восстановите доступ к вашему аккаунту Synoro",
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
+
 export default function ForgotPasswordPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);

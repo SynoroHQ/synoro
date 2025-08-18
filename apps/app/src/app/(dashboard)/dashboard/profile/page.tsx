@@ -18,6 +18,15 @@ import {
   Label,
 } from "@synoro/ui";
 
+export const metadata = {
+  title: "Профиль пользователя",
+  description: "Управление личной информацией и настройками профиля в Synoro",
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
+
 export default function ProfilePage() {
   const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState(false);
