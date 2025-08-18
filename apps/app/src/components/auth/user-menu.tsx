@@ -37,10 +37,9 @@ export function UserMenu() {
     );
   }
 
-  const initials =
-    user.firstName && user.lastName
-      ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
-      : user.email?.[0]?.toUpperCase() || "U";
+  const initials = user.name
+    ? user.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
+    : user.email?.[0]?.toUpperCase() || "U";
 
   return (
     <DropdownMenu>
