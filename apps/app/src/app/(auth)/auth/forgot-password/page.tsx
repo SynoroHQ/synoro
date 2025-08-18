@@ -55,7 +55,8 @@ export default function ForgotPasswordPage() {
       });
 
       if (result?.error) {
-        if (result.error === "USER_NOT_FOUND") {
+      if (result?.error) {
+        if (result.error?.code === "USER_NOT_FOUND") {
           setError("Пользователь с таким email не найден");
         } else {
           setError("Ошибка при отправке инструкций");
