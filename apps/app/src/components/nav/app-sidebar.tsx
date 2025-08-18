@@ -37,78 +37,104 @@ export function AppSidebar({ ...props }) {
   const isActive = (href: string) => pathname === href;
 
   return (
-    <Sidebar {...props} collapsible="icon">
-      <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild>
-              <Link href="/dashboard">
-                <div className="bg-primary text-primary-foreground flex h-8 w-8 items-center justify-center rounded-md">
-                  <span className="text-lg font-bold">S</span>
+    <Sidebar {...props} collapsible="icon" className="w-auto min-w-0">
+      <SidebarHeader className="w-auto min-w-0">
+        <SidebarMenu className="w-auto min-w-0">
+          <SidebarMenuItem className="w-auto min-w-0">
+            <SidebarMenuButton asChild className="w-auto min-w-0">
+              <Link href="/dashboard" className="w-auto min-w-0">
+                <div className="bg-primary text-primary-foreground flex h-8 w-8 w-auto min-w-0 items-center justify-center rounded-md">
+                  <span className="w-auto min-w-0 text-lg font-bold">S</span>
                 </div>
-                <span className="text-lg font-bold">Synoro</span>
+                <span className="w-auto min-w-0 text-lg font-bold">Synoro</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
 
-      <SidebarInset>
-        <SidebarContent>
-          <SidebarGroup>
-            <SidebarGroupLabel>Основное</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={isActive("/dashboard")}>
-                    <Link href="/dashboard">
+      <SidebarInset className="w-auto min-w-0">
+        <SidebarContent className="w-auto min-w-0">
+          <SidebarGroup className="w-auto min-w-0">
+            <SidebarGroupLabel className="w-auto min-w-0">
+              Основное
+            </SidebarGroupLabel>
+            <SidebarGroupContent className="w-auto min-w-0">
+              <SidebarMenu className="w-auto min-w-0">
+                <SidebarMenuItem className="w-auto min-w-0">
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isActive("/dashboard")}
+                    className="w-auto min-w-0"
+                  >
+                    <Link href="/dashboard" className="w-auto min-w-0">
                       <Home className="h-4 w-4" />
-                      <span>Главная</span>
+                      <span className="w-auto min-w-0">Главная</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
 
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={isActive("/events")}>
-                    <Link href="/events">
+                <SidebarMenuItem className="w-auto min-w-0">
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isActive("/events")}
+                    className="w-auto min-w-0"
+                  >
+                    <Link href="/events" className="w-auto min-w-0">
                       <FileText className="h-4 w-4" />
-                      <span>События</span>
+                      <span className="w-auto min-w-0">События</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
 
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={isActive("/tasks")}>
-                    <Link href="/tasks">
+                <SidebarMenuItem className="w-auto min-w-0">
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isActive("/tasks")}
+                    className="w-auto min-w-0"
+                  >
+                    <Link href="/tasks" className="w-auto min-w-0">
                       <CheckSquare className="h-4 w-4" />
-                      <span>Задачи</span>
+                      <span className="w-auto min-w-0">Задачи</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
 
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={isActive("/receipts")}>
-                    <Link href="/receipts">
+                <SidebarMenuItem className="w-auto min-w-0">
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isActive("/receipts")}
+                    className="w-auto min-w-0"
+                  >
+                    <Link href="/receipts" className="w-auto min-w-0">
                       <Receipt className="h-4 w-4" />
-                      <span>Чеки</span>
+                      <span className="w-auto min-w-0">Чеки</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
 
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={isActive("/analytics")}>
-                    <Link href="/analytics">
+                <SidebarMenuItem className="w-auto min-w-0">
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isActive("/analytics")}
+                    className="w-auto min-w-0"
+                  >
+                    <Link href="/analytics" className="w-auto min-w-0">
                       <BarChart3 className="h-4 w-4" />
-                      <span>Аналитика</span>
+                      <span className="w-auto min-w-0">Аналитика</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
 
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={isActive("/calendar")}>
-                    <Link href="/calendar">
+                <SidebarMenuItem className="w-auto min-w-0">
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isActive("/calendar")}
+                    className="w-auto min-w-0"
+                  >
+                    <Link href="/calendar" className="w-auto min-w-0">
                       <Calendar className="h-4 w-4" />
-                      <span>Календарь</span>
+                      <span className="w-auto min-w-0">Календарь</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -116,15 +142,21 @@ export function AppSidebar({ ...props }) {
             </SidebarGroupContent>
           </SidebarGroup>
 
-          <SidebarGroup>
-            <SidebarGroupLabel>Интеграции</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={isActive("/telegram")}>
-                    <Link href="/telegram">
+          <SidebarGroup className="w-auto min-w-0">
+            <SidebarGroupLabel className="w-auto min-w-0">
+              Интеграции
+            </SidebarGroupLabel>
+            <SidebarGroupContent className="w-auto min-w-0">
+              <SidebarMenu className="w-auto min-w-0">
+                <SidebarMenuItem className="w-auto min-w-0">
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isActive("/telegram")}
+                    className="w-auto min-w-0"
+                  >
+                    <Link href="/telegram" className="w-auto min-w-0">
                       <Bot className="h-4 w-4" />
-                      <span>Telegram Bot</span>
+                      <span className="w-auto min-w-0">Telegram Bot</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -132,15 +164,21 @@ export function AppSidebar({ ...props }) {
             </SidebarGroupContent>
           </SidebarGroup>
 
-          <SidebarGroup>
-            <SidebarGroupLabel>Настройки</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={isActive("/profile")}>
-                    <Link href="/profile">
+          <SidebarGroup className="w-auto min-w-0">
+            <SidebarGroupLabel className="w-auto min-w-0">
+              Настройки
+            </SidebarGroupLabel>
+            <SidebarGroupContent className="w-auto min-w-0">
+              <SidebarMenu className="w-auto min-w-0">
+                <SidebarMenuItem className="w-auto min-w-0">
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isActive("/profile")}
+                    className="w-auto min-w-0"
+                  >
+                    <Link href="/profile" className="w-auto min-w-0">
                       <Settings className="h-4 w-4" />
-                      <span>Профиль</span>
+                      <span className="w-auto min-w-0">Профиль</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -150,8 +188,8 @@ export function AppSidebar({ ...props }) {
         </SidebarContent>
       </SidebarInset>
 
-      <SidebarFooter>
-        <div className="flex items-center justify-between p-4">
+      <SidebarFooter className="w-auto min-w-0">
+        <div className="flex w-auto min-w-0 items-center justify-between p-4">
           <UserMenu />
           <ThemeToggle />
         </div>
@@ -165,10 +203,10 @@ export function AppSidebarTrigger() {
     <Button
       variant="ghost"
       size="sm"
-      className="hover:bg-accent hover:text-accent-foreground gap-2 px-2 text-base md:hidden"
+      className="hover:bg-accent hover:text-accent-foreground w-auto min-w-0 gap-2 px-2 text-base md:hidden"
     >
-      <SidebarTrigger className="h-5 w-5" />
-      <span>Меню</span>
+      <SidebarTrigger className="h-5 w-5 w-auto min-w-0" />
+      <span className="w-auto min-w-0">Меню</span>
     </Button>
   );
 }

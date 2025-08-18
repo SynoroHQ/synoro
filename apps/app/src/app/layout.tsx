@@ -48,7 +48,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ru" suppressHydrationWarning>
+    <html lang="ru" suppressHydrationWarning className="h-full w-full">
       <head>
         <link rel="manifest" href="/manifest.json" />
         <meta name="application-name" content="Synoro" />
@@ -62,7 +62,7 @@ export default function RootLayout({
         <meta name="msapplication-tap-highlight" content="no" />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} h-full w-full antialiased`}
       >
         <PlausibleProvider domain="synoro.dev">
           <ThemeProvider
