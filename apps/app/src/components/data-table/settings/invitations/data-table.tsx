@@ -4,6 +4,7 @@ import {
   EmptyStateTitle,
 } from "@/components/content/empty-state";
 import { QuickActions } from "@/components/dropdowns/quick-actions";
+
 import {
   Table,
   TableBody,
@@ -30,7 +31,6 @@ export function DataTable({ data }: { data: any[] }) {
       <TableHeader>
         <TableRow>
           <TableHead>Email</TableHead>
-          <TableHead>Role</TableHead>
           <TableHead>Created At</TableHead>
           <TableHead>Expires At</TableHead>
           <TableHead>Accepted At</TableHead>
@@ -43,7 +43,6 @@ export function DataTable({ data }: { data: any[] }) {
         {data.map((item: any) => (
           <TableRow key={item.id}>
             <TableCell>{item.email}</TableCell>
-            <TableCell>{item.role}</TableCell>
             <TableCell>{item.createdAt}</TableCell>
             <TableCell>{item.expiresAt}</TableCell>
             <TableCell>{item.acceptedAt}</TableCell>

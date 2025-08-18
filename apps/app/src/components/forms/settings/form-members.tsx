@@ -44,7 +44,6 @@ const LOCKED = true;
 
 const schema = z.object({
   email: z.string().email(),
-  role: z.enum(["member"]),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -54,7 +53,6 @@ export function FormMembers() {
     resolver: zodResolver(schema),
     defaultValues: {
       email: "",
-      role: "member",
     },
   });
   const [isPending, startTransition] = useTransition();
