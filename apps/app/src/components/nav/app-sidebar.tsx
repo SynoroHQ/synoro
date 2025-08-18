@@ -1,9 +1,20 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { cn } from "@/lib/utils";
+import { UserMenu } from "@/components/auth/user-menu";
+import { ThemeToggle } from "@/components/theme-toggle";
+import {
+  BarChart3,
+  Bot,
+  Calendar,
+  CheckSquare,
+  FileText,
+  Home,
+  Receipt,
+  Settings,
+} from "lucide-react";
+
 import { Button } from "@synoro/ui";
 import {
   Sidebar,
@@ -17,41 +28,16 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuLabel,
-  SidebarMenuSeparator,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubLabel,
-  SidebarMenuSubTrigger,
   SidebarTrigger,
 } from "@synoro/ui/components/sidebar";
-import { UserMenu } from "@/components/auth/user-menu";
-import { ThemeToggle } from "@/components/theme-toggle";
-import {
-  BarChart3,
-  Bot,
-  Calendar,
-  FileText,
-  Home,
-  Receipt,
-  Settings,
-  TaskSquare,
-} from "lucide-react";
 
 export function AppSidebar({ ...props }) {
-  const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
   const isActive = (href: string) => pathname === href;
 
   return (
-    <Sidebar
-      {...props}
-      collapsible
-      collapsedBreakpoint="lg"
-      open={open}
-      onOpenChange={setOpen}
-    >
+    <Sidebar {...props} collapsible="icon">
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -94,7 +80,7 @@ export function AppSidebar({ ...props }) {
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild isActive={isActive("/tasks")}>
                     <Link href="/tasks">
-                      <TaskSquare className="h-4 w-4" />
+                      <CheckSquare className="h-4 w-4" />
                       <span>Задачи</span>
                     </Link>
                   </SidebarMenuButton>
@@ -179,7 +165,7 @@ export function AppSidebarTrigger() {
     <Button
       variant="ghost"
       size="sm"
-      className="gap-2 px-2 text-base hover:bg-accent hover:text-accent-foreground md:hidden"
+      className="hover:bg-accent hover:text-accent-foreground gap-2 px-2 text-base md:hidden"
     >
       <SidebarTrigger className="h-5 w-5" />
       <span>Меню</span>

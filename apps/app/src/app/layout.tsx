@@ -11,6 +11,7 @@ import PlausibleProvider from "next-plausible";
 import { Toaster } from "@synoro/ui";
 
 import { defaultMetadata, ogMetadata, twitterMetadata } from "./metadata";
+import { viewport } from "./viewport";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,17 +37,9 @@ export const metadata: Metadata = {
     shortcut: "/favicon.ico",
     apple: "/apple-touch-icon.png",
   },
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1,
-  },
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#000000" },
-  ],
 };
 
+export { viewport };
 export const dynamic = "error";
 
 export default function RootLayout({
