@@ -1,5 +1,6 @@
 "use client";
 
+import { FormAlertDialog } from "@/components/forms/form-alert-dialog";
 import {
   FormCard,
   FormCardDescription,
@@ -7,7 +8,6 @@ import {
   FormCardHeader,
   FormCardTitle,
 } from "@/components/forms/form-card";
-import { FormAlertDialog } from "@/components/forms/form-alert-dialog";
 
 export function FormDangerZone() {
   return (
@@ -18,7 +18,7 @@ export function FormDangerZone() {
       </FormCardHeader>
       <FormCardFooter variant="destructive" className="justify-end">
         <FormAlertDialog
-          title="OpenStatus API"
+          title="Synoro API"
           confirmationValue="delete status page"
         />
       </FormCardFooter>

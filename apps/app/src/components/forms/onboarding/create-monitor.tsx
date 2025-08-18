@@ -1,20 +1,21 @@
 "use client";
 
-import {
-  Form,
-  FormDescription,
-  FormField,
-  FormLabel,
-  FormMessage,
-  FormItem,
-  FormControl,
-} from "@synoro/ui/components/form";
-import { Input } from "@synoro/ui/components/input";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useTransition } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@synoro/ui/components/form";
+import { Input } from "@synoro/ui/components/input";
 
 const schema = z.object({
   url: z.string().url(),
@@ -67,7 +68,7 @@ export function CreateMonitorForm({
             <FormItem>
               <FormLabel>URL</FormLabel>
               <FormControl>
-                <Input placeholder="https://api.openstatus.dev" {...field} />
+                <Input placeholder="https://api.synoro.dev" {...field} />
               </FormControl>
               <FormMessage />
               <FormDescription>

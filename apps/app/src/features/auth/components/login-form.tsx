@@ -1,8 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { Eye, EyeOff, Lock, Mail, Telegram } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { AuthError } from "@/components/auth/auth-error";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Eye, EyeOff } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
 
+import { signIn } from "@synoro/auth/client";
 import { Button } from "@synoro/ui/components/button";
 import {
   Card,
@@ -11,111 +18,146 @@ import {
   CardHeader,
   CardTitle,
 } from "@synoro/ui/components/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@synoro/ui/components/form";
 import { Input } from "@synoro/ui/components/input";
-import { Label } from "@synoro/ui/components/label";
-import { Separator } from "@synoro/ui/components/separator";
+
+const loginSchema = z.object({
+  email: z.string().email({
+    message: "Введите корректный email адрес.",
+  }),
+  password: z.string().min(6, {
+    message: "Пароль должен содержать минимум 6 символов.",
+  }),
+});
+
+type LoginFormValues = z.infer<typeof loginSchema>;
 
 export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const router = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    // TODO: Implement login logic
-    setTimeout(() => setIsLoading(false), 1000);
+  const form = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  const onSubmit = async (values: LoginFormValues) => {
+    try {
+      setError("");
+      const result = await signIn.email({
+        email: values.email,
+        password: values.password,
+      });
+
+      if (result?.error?.code) {
+        setError("Неверный email или пароль");
+        return;
+      }
+
+      if (result?.data?.user) {
+        toast.success("Успешный вход!");
+        router.push("/dashboard");
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      setError("Произошла ошибка при входе");
+    }
   };
 
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-center text-2xl">Вход в аккаунт</CardTitle>
-        <CardDescription className="text-center">
-          Войдите в свой личный кабинет Synoro
-        </CardDescription>
+    <Card className="mx-auto w-full max-w-sm">
+      <CardHeader>
+        <CardTitle className="text-2xl">Вход</CardTitle>
+        <CardDescription>Введите ваш email для входа в аккаунт</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <div className="relative">
-              <Mail className="text-muted-foreground absolute top-3 left-3 h-4 w-4" />
-              <Input
-                id="email"
-                type="email"
-                placeholder="your@email.com"
-                className="pl-10"
-                required
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="password">Пароль</Label>
-            <div className="relative">
-              <Lock className="text-muted-foreground absolute top-3 left-3 h-4 w-4" />
-              <Input
-                id="password"
-                type={showPassword ? "text" : "password"}
-                placeholder="Введите пароль"
-                className="pr-10 pl-10"
-                required
-              />
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
-              </Button>
-            </div>
-          </div>
-
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? "Вход..." : "Войти"}
-          </Button>
-        </form>
-
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <Separator className="w-full" />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background text-muted-foreground px-2">
-              Или войдите через
-            </span>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <Button variant="outline" className="w-full">
-            <Telegram className="mr-2 h-4 w-4" />
-            Telegram
-          </Button>
-          <Button variant="outline" className="w-full">
-            <Mail className="mr-2 h-4 w-4" />
-            Google
-          </Button>
-        </div>
-
-        <div className="text-center text-sm">
-          <a
-            href="/auth/forgot-password"
-            className="text-blue-600 hover:underline"
-          >
-            Забыли пароль?
-          </a>
-        </div>
-
-        <div className="text-center text-sm">
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="m@example.com"
+                      type="email"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <div className="flex items-center justify-between">
+                    <FormLabel>Пароль</FormLabel>
+                    <a
+                      href="/auth/forgot-password"
+                      className="text-muted-foreground text-sm hover:underline"
+                    >
+                      Забыли пароль?
+                    </a>
+                  </div>
+                  <FormControl>
+                    <div className="relative">
+                      <Input
+                        placeholder="Введите пароль"
+                        type={showPassword ? "text" : "password"}
+                        className="pr-10"
+                        {...field}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <AuthError error={error} />
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={form.formState.isSubmitting}
+            >
+              {form.formState.isSubmitting ? "Вход..." : "Войти"}
+            </Button>
+            <Button variant="outline" className="w-full">
+              Войти через Google
+            </Button>
+          </form>
+        </Form>
+        <div className="mt-4 text-center text-sm">
           Нет аккаунта?{" "}
-          <a href="/auth/register" className="text-blue-600 hover:underline">
+          <a href="/auth/register" className="underline">
             Зарегистрироваться
           </a>
         </div>

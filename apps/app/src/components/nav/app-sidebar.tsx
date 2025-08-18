@@ -14,11 +14,11 @@ import {
   SidebarHeader,
   SidebarRail,
   SidebarTrigger,
-  useSidebar,
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
+  useSidebar,
 } from "@synoro/ui";
 
 import { NavChecklist } from "./nav-checklist";
@@ -30,12 +30,12 @@ const SIDEBAR_KEYBOARD_SHORTCUT = "[";
 const data = {
   user: {
     name: "mxkaske",
-    email: "max@openstatus.dev",
+    email: "max@synoro.dev",
     avatar: "/avatars/shadcn.jpg",
   },
   orgs: [
     {
-      name: "OpenStatus",
+      name: "Synoro",
       slug: "easy-peasy",
       plan: "Hobby",
     },
@@ -47,17 +47,17 @@ const data = {
   ],
   monitors: [
     {
-      name: "OpenStatus Marketing",
+      name: "Synoro Marketing",
       url: "/dashboard/monitors/overview",
       tags: ["Production"],
     },
     {
-      name: "OpenStatus API",
+      name: "Synoro API",
       url: "/dashboard/monitors/overview",
       tags: ["Production"],
     },
     {
-      name: "OpenStatus Dashboard",
+      name: "Synoro Dashboard",
       url: "/dashboard/monitors/overview",
       tags: ["Production"],
     },
@@ -79,7 +79,7 @@ const data = {
   ],
   statusPages: [
     {
-      name: "OpenStatus Status",
+      name: "Synoro Status",
       url: "/dashboard/status-pages/status-reports",
     },
   ],

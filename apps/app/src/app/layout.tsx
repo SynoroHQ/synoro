@@ -5,6 +5,7 @@ import "@synoro/ui/globals.css";
 
 import { TailwindIndicator } from "@/components/tailwind-indicator";
 import { ThemeProvider } from "@/components/theme-provider";
+import { AuthProvider } from "@/providers/auth-provider";
 import PlausibleProvider from "next-plausible";
 
 import { Toaster } from "@synoro/ui";
@@ -43,16 +44,18 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <PlausibleProvider domain="template.openstatus.dev">
+        <PlausibleProvider domain="template.synoro.dev">
           <ThemeProvider
             attribute="class"
             defaultTheme="system"
             enableSystem
             disableTransitionOnChange
           >
-            {children}
-            <TailwindIndicator />
-            <Toaster />
+            <AuthProvider>
+              {children}
+              <TailwindIndicator />
+              <Toaster />
+            </AuthProvider>
           </ThemeProvider>
         </PlausibleProvider>
       </body>

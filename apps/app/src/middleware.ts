@@ -1,41 +1,50 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { getSessionCookie } from "better-auth/cookies";
 
-export function middleware(req: NextRequest) {
-  const publicRoutes = [
-    "/auth/login",
-    "/auth/register",
-    "/auth/verify",
-    "/auth/forgot-password",
-    "/auth/reset-password",
-  ];
-  const isPublicRoute = publicRoutes.some((path) =>
-    req.nextUrl.pathname.startsWith(path),
+export function middleware(request: NextRequest) {
+  // Защищенные маршруты
+  const protectedRoutes = ["/dashboard", "/profile", "/settings"];
+  const isProtectedRoute = protectedRoutes.some((route) =>
+    request.nextUrl.pathname.startsWith(route),
   );
 
-  const sessionCookie = getSessionCookie(req);
+  // Маршруты аутентификации (если пользователь уже авторизован, перенаправляем на dashboard)
+  const authRoutes = ["/auth/login", "/auth/register"];
+  const isAuthRoute = authRoutes.some((route) =>
+    request.nextUrl.pathname.startsWith(route),
+  );
 
-  // Если это auth-страница и пользователь уже авторизован, перенаправляем на главную
-  if (isPublicRoute && sessionCookie) {
-    const homeUrl = new URL("/", req.url);
-    return NextResponse.redirect(homeUrl);
-  }
+  // Проверяем наличие сессии через cookie
+  const sessionCookie = request.cookies.get("better-auth.session-token");
+  const hasSession = !!sessionCookie;
 
-  // Если это не публичная страница и пользователь не авторизован, перенаправляем на логин
-  if (!isPublicRoute && !sessionCookie) {
-    const loginUrl = new URL("/auth/login", req.url);
+  if (isProtectedRoute && !hasSession) {
+    // Перенаправляем неавторизованных пользователей на страницу входа
+    const loginUrl = new URL("/auth/login", request.url);
     loginUrl.searchParams.set(
-      "redirectTo",
-      req.nextUrl.pathname + req.nextUrl.search,
+      "callbackUrl",
+      `${request.nextUrl.pathname}${request.nextUrl.search}`
     );
     return NextResponse.redirect(loginUrl);
+  }
+
+  if (isAuthRoute && hasSession) {
+    // Перенаправляем авторизованных пользователей на dashboard
+    return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
   return NextResponse.next();
 }
 
-// Read more: https://nextjs.org/docs/app/building-your-application/routing/middleware#matcher
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    "/((?!api|_next/static|_next/image|favicon.ico).*)",
+  ],
 };

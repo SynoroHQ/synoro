@@ -1,7 +1,7 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry.json",
-  "name": "OpenStatus Dashboard",
-  "homepage": "https://template.openstatus.dev",
+  "name": "Synoro Dashboard",
+  "homepage": "https://template.synoro.dev",
   "items": [
     {
       "name": "empty-state",
