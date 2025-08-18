@@ -28,7 +28,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   if (!mounted) {
-    return null;
+    return (
+      <AuthContext.Provider
+        value={{ session: null, isLoading: true, isAuthenticated: false }}
+      >
+        {children}
+      </AuthContext.Provider>
+    );
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
