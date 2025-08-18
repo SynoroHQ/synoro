@@ -41,32 +41,6 @@
       ]
     },
     {
-      "name": "metric-card",
-      "type": "registry:component",
-      "title": "Metric Card",
-      "description": "A metric card component.",
-      "registryDependencies": ["badge"],
-      "dependencies": ["lucide-react", "class-variance-authority"],
-      "files": [
-        {
-          "path": "src/components/metric/metric-card.tsx",
-          "type": "registry:component"
-        }
-      ],
-      "cssVars": {
-        "light": {
-          "success": "oklch(0.72 0.19 150)",
-          "warning": "oklch(0.77 0.16 70)",
-          "info": "oklch(0.62 0.19 260)"
-        },
-        "dark": {
-          "success": "oklch(0.72 0.19 150)",
-          "warning": "oklch(0.77 0.16 70)",
-          "info": "oklch(0.62 0.19 260)"
-        }
-      }
-    },
-    {
       "name": "form-card",
       "type": "registry:component",
       "title": "Form Card",
@@ -76,27 +50,6 @@
       "files": [
         {
           "path": "src/components/forms/form-card.tsx",
-          "type": "registry:component"
-        }
-      ]
-    },
-    {
-      "name": "feedback",
-      "type": "registry:component",
-      "title": "Feedback",
-      "description": "A feedback component with popover form.",
-      "registryDependencies": ["button", "form", "popover", "textarea"],
-      "dependencies": [
-        "@hookform/resolvers",
-        "react-hook-form",
-        "sonner",
-        "zod",
-        "lucide-react",
-        "class-variance-authority"
-      ],
-      "files": [
-        {
-          "path": "src/components/feedback.tsx",
           "type": "registry:component"
         }
       ]

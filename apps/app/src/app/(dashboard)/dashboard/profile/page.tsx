@@ -27,7 +27,7 @@ export default function ProfilePage() {
     email: session?.user?.email || "",
   });
 
-  // Синхронизация полей с актуальными данными сессии (если не редактируем вручную)
+  // Синхронизация полей с актуальными данными сессии
   useEffect(() => {
     if (session?.user && !isEditing) {
       setFormData({
@@ -36,6 +36,7 @@ export default function ProfilePage() {
       });
     }
   }, [session?.user?.name, session?.user?.email, isEditing]);
+
   if (!session?.user) {
     return (
       <div className="p-6">
@@ -186,7 +187,7 @@ export default function ProfilePage() {
               <div className="bg-muted rounded-lg p-4 text-center">
                 <div className="text-2xl font-bold">0</div>
                 <div className="text-muted-foreground text-sm">
-                  Задач создано
+                  Событий создано
                 </div>
               </div>
               <div className="bg-muted rounded-lg p-4 text-center">

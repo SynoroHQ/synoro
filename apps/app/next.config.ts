@@ -5,7 +5,6 @@ const nextConfig: NextConfig = {
     "@synoro/ui",
     "@synoro/auth",
     "@synoro/config",
-    "@synoro/prompts",
     "@synoro/db",
   ],
   typescript: {

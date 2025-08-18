@@ -1,175 +1,188 @@
 "use client";
 
-import * as React from "react";
-import { UserMenu } from "@/components/auth/user-menu";
-import { Kbd } from "@/components/common/kbd";
-import { NavOverview } from "@/components/nav/nav-overview";
-import { OrganizationSwitcher } from "@/components/nav/organization-switcher";
-import { CheckSquare, Cog, LayoutGrid, Shield, User } from "lucide-react";
-
+import { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
+import { Button } from "@synoro/ui";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarHeader,
-  SidebarRail,
+  SidebarInset,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarMenuLabel,
+  SidebarMenuSeparator,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubLabel,
+  SidebarMenuSubTrigger,
   SidebarTrigger,
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-  useSidebar,
-} from "@synoro/ui";
+} from "@synoro/ui/components/sidebar";
+import { UserMenu } from "@/components/auth/user-menu";
+import { ThemeToggle } from "@/components/theme-toggle";
+import {
+  BarChart3,
+  Bot,
+  Calendar,
+  FileText,
+  Home,
+  Receipt,
+  Settings,
+  TaskSquare,
+} from "lucide-react";
 
-import { NavChecklist } from "./nav-checklist";
-import { NavHelp } from "./nav-help";
+export function AppSidebar({ ...props }) {
+  const [open, setOpen] = useState(false);
+  const pathname = usePathname();
 
-const SIDEBAR_KEYBOARD_SHORTCUT = "[";
+  const isActive = (href: string) => pathname === href;
 
-// This is sample data.
-const data = {
-  user: {
-    name: "mxkaske",
-    email: "max@synoro.dev",
-    avatar: "/avatars/shadcn.jpg",
-  },
-  orgs: [
-    {
-      name: "Synoro",
-      slug: "easy-peasy",
-      plan: "Hobby",
-    },
-    {
-      name: "Acme Corp.",
-      slug: "acme-corp",
-      plan: "Starter",
-    },
-  ],
-  monitors: [
-    {
-      name: "Synoro Marketing",
-      url: "/monitors/overview",
-      tags: ["Production"],
-    },
-    {
-      name: "Synoro API",
-      url: "/monitors/overview",
-      tags: ["Production"],
-    },
-    {
-      name: "Synoro Dashboard",
-      url: "/monitors/overview",
-      tags: ["Production"],
-    },
-    {
-      name: "Lightweight OS",
-      url: "/monitors/overview",
-      tags: ["Development"],
-    },
-    {
-      name: "Astro Status Page",
-      url: "/monitors/overview",
-      tags: ["Development"],
-    },
-    {
-      name: "Vercel Edge Ping",
-      url: "/monitors/overview",
-      tags: ["Staging"],
-    },
-  ],
-  statusPages: [
-    {
-      name: "Synoro Status",
-      url: "/status-pages/status-reports",
-    },
-  ],
-  overview: [
-    {
-      name: "Overview",
-      url: "/",
-      icon: LayoutGrid,
-    },
-    {
-      name: "Tasks",
-      url: "/tasks",
-      icon: CheckSquare,
-    },
-    {
-      name: "Profile",
-      url: "/profile",
-      icon: User,
-    },
-    // Keep only essential entries for admin
-    {
-      name: "Settings",
-      url: "/settings",
-      icon: Cog,
-    },
-    {
-      name: "Analytics",
-      url: "/analytics/overview",
-      icon: Shield,
-    },
-  ],
-};
-
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
-    <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader className="flex h-14 justify-center border-b py-1">
-        <OrganizationSwitcher orgs={data.orgs} />
+    <Sidebar
+      {...props}
+      collapsible
+      collapsedBreakpoint="lg"
+      open={open}
+      onOpenChange={setOpen}
+    >
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild>
+              <Link href="/dashboard">
+                <div className="bg-primary text-primary-foreground flex h-8 w-8 items-center justify-center rounded-md">
+                  <span className="text-lg font-bold">S</span>
+                </div>
+                <span className="text-lg font-bold">Synoro</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent>
-        <NavOverview items={data.overview} />
-        {/* Minimal admin nav */}
-        <div className="mt-auto px-2">
-          <NavChecklist />
-        </div>
-        <NavHelp />
-      </SidebarContent>
-      <SidebarFooter className="border-t">
-        <div className="flex items-center justify-center p-2">
+
+      <SidebarInset>
+        <SidebarContent>
+          <SidebarGroup>
+            <SidebarGroupLabel>Основное</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={isActive("/dashboard")}>
+                    <Link href="/dashboard">
+                      <Home className="h-4 w-4" />
+                      <span>Главная</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={isActive("/events")}>
+                    <Link href="/events">
+                      <FileText className="h-4 w-4" />
+                      <span>События</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={isActive("/tasks")}>
+                    <Link href="/tasks">
+                      <TaskSquare className="h-4 w-4" />
+                      <span>Задачи</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={isActive("/receipts")}>
+                    <Link href="/receipts">
+                      <Receipt className="h-4 w-4" />
+                      <span>Чеки</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={isActive("/analytics")}>
+                    <Link href="/analytics">
+                      <BarChart3 className="h-4 w-4" />
+                      <span>Аналитика</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={isActive("/calendar")}>
+                    <Link href="/calendar">
+                      <Calendar className="h-4 w-4" />
+                      <span>Календарь</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+
+          <SidebarGroup>
+            <SidebarGroupLabel>Интеграции</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={isActive("/telegram")}>
+                    <Link href="/telegram">
+                      <Bot className="h-4 w-4" />
+                      <span>Telegram Bot</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+
+          <SidebarGroup>
+            <SidebarGroupLabel>Настройки</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={isActive("/profile")}>
+                    <Link href="/profile">
+                      <Settings className="h-4 w-4" />
+                      <span>Профиль</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarContent>
+      </SidebarInset>
+
+      <SidebarFooter>
+        <div className="flex items-center justify-between p-4">
           <UserMenu />
+          <ThemeToggle />
         </div>
       </SidebarFooter>
-      <SidebarRail />
     </Sidebar>
   );
 }
 
 export function AppSidebarTrigger() {
-  const { toggleSidebar } = useSidebar();
-
-  // Adds a keyboard shortcut to toggle the sidebar.
-  React.useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (
-        event.key === SIDEBAR_KEYBOARD_SHORTCUT &&
-        (event.metaKey || event.ctrlKey)
-      ) {
-        event.preventDefault();
-        toggleSidebar();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [toggleSidebar]);
   return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <SidebarTrigger />
-        </TooltipTrigger>
-        <TooltipContent side="right">
-          <p className="mr-px inline-flex items-center gap-1">
-            Toggle Sidebar{" "}
-            <Kbd className="bg-primary text-background border-muted-foreground">
-              ⌘+{SIDEBAR_KEYBOARD_SHORTCUT}
-            </Kbd>
-          </p>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+    <Button
+      variant="ghost"
+      size="sm"
+      className="gap-2 px-2 text-base hover:bg-accent hover:text-accent-foreground md:hidden"
+    >
+      <SidebarTrigger className="h-5 w-5" />
+      <span>Меню</span>
+    </Button>
   );
 }
