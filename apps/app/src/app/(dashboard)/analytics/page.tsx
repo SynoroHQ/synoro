@@ -19,7 +19,8 @@ import {
 
 export const metadata: Metadata = {
   title: "Аналитика",
-  description: "Анализ данных и получение инсайтов о вашей жизни в Synoro. Визуализация паттернов и тенденций.",
+  description:
+    "Анализ данных и получение инсайтов о вашей жизни в Synoro. Визуализация паттернов и тенденций.",
   keywords: [
     "Synoro",
     "аналитика",
@@ -29,7 +30,7 @@ export const metadata: Metadata = {
     "тенденции",
     "статистика",
     "графики",
-    "отчеты"
+    "отчеты",
   ],
   robots: {
     index: false,

@@ -13,7 +13,8 @@ import {
 
 export const metadata: Metadata = {
   title: "Чеки",
-  description: "Управление чеками и финансовыми записями в Synoro. Автоматическая обработка чеков через OCR и анализ расходов.",
+  description:
+    "Управление чеками и финансовыми записями в Synoro. Автоматическая обработка чеков через OCR и анализ расходов.",
   keywords: [
     "Synoro",
     "чеки",
@@ -22,7 +23,7 @@ export const metadata: Metadata = {
     "OCR",
     "обработка чеков",
     "финансовая аналитика",
-    "бюджет"
+    "бюджет",
   ],
   robots: {
     index: false,

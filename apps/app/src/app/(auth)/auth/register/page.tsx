@@ -1,10 +1,11 @@
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import { AuthLogo } from "@/components/auth/auth-logo";
 import { RegisterForm } from "@/features/auth/components/register-form";
 
 export const metadata: Metadata = {
   title: "Регистрация",
-  description: "Создайте аккаунт в Synoro и начните управлять своими жизненными событиями, задачами и аналитикой",
+  description:
+    "Создайте аккаунт в Synoro и начните управлять своими жизненными событиями, задачами и аналитикой",
   keywords: [
     "Synoro",
     "регистрация",
@@ -12,7 +13,7 @@ export const metadata: Metadata = {
     "умный дом",
     "управление задачами",
     "аналитика",
-    "планирование"
+    "планирование",
   ],
   robots: {
     index: false,
