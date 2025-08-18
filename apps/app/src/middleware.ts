@@ -21,7 +21,10 @@ export function middleware(request: NextRequest) {
   if (isProtectedRoute && !hasSession) {
     // Перенаправляем неавторизованных пользователей на страницу входа
     const loginUrl = new URL("/auth/login", request.url);
-    loginUrl.searchParams.set("callbackUrl", request.nextUrl.pathname);
+    loginUrl.searchParams.set(
+      "callbackUrl",
+      `${request.nextUrl.pathname}${request.nextUrl.search}`
+    );
     return NextResponse.redirect(loginUrl);
   }
 
