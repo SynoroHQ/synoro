@@ -56,7 +56,7 @@ To switch between providers, simply change the `AI_PROVIDER` environment variabl
 Both providers support:
 
 - Text generation (advice, task parsing, relevance classification)
-- Audio transcription
+- Audio transcription (with limitations for Moonshot AI)
 - Consistent API interface
 - Telemetry and logging
 
@@ -65,4 +65,5 @@ Both providers support:
 - Moonshot AI uses the base URL `https://api.moonshot.ai/v1`
 - The bot automatically selects the appropriate models based on the chosen provider
 - All existing functionality remains the same regardless of the provider choice
-- Moonshot AI is implemented using OpenAI-compatible API interface via `createOpenAI`
+- Moonshot AI is implemented using OpenAI-compatible API interface via `createOpenAICompatible`
+- **Transcription Limitation**: Currently, Moonshot AI transcription falls back to OpenAI due to API limitations. This will be updated when Moonshot AI provides transcription capabilities.

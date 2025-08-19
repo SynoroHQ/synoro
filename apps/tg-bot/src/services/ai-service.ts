@@ -1,5 +1,6 @@
 import type { AttributeValue } from "@opentelemetry/api";
-import { createOpenAI, openai } from "@ai-sdk/openai";
+import { openai } from "@ai-sdk/openai";
+import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { experimental_transcribe as aiTranscribe, generateText } from "ai";
 import { Langfuse } from "langfuse";
 import { z } from "zod";
@@ -15,7 +16,8 @@ import { env } from "../env";
 
 // Initialize AI providers
 const oai = openai; // use default provider instance; it reads OPENAI_API_KEY from env
-const moonshotAI = createOpenAI({
+const moonshotAI = createOpenAICompatible({
+  name: "moonshot",
   apiKey: env.MOONSHOT_API_KEY,
   baseURL: "https://api.moonshot.ai/v1",
 });
@@ -25,20 +27,37 @@ function getActiveProvider() {
   return env.AI_PROVIDER === "moonshot" ? moonshotAI : oai;
 }
 
+// Helper function to get model based on provider and environment variables
+function getModelFromEnv(
+  moonshotEnvKey: string | undefined,
+  openaiEnvKey: string | undefined,
+  moonshotDefault: string,
+  openaiDefault: string,
+): string {
+  if (env.AI_PROVIDER === "moonshot") {
+    return moonshotEnvKey ?? moonshotDefault;
+  }
+  return openaiEnvKey ?? openaiDefault;
+}
+
 // Get the active transcription model
 function getTranscribeModel() {
-  if (env.AI_PROVIDER === "moonshot") {
-    return env.MOONSHOT_TRANSCRIBE_MODEL ?? "moonshot-v1";
-  }
-  return env.OPENAI_TRANSCRIBE_MODEL ?? "whisper-1";
+  return getModelFromEnv(
+    env.MOONSHOT_TRANSCRIBE_MODEL,
+    env.OPENAI_TRANSCRIBE_MODEL,
+    "moonshot-v1",
+    "whisper-1",
+  );
 }
 
 // Get the active advice model
 function getAdviceModel() {
-  if (env.AI_PROVIDER === "moonshot") {
-    return env.MOONSHOT_ADVICE_MODEL ?? "kimi-k2-0711-preview";
-  }
-  return env.OPENAI_ADVICE_MODEL ?? "gpt-4o-mini";
+  return getModelFromEnv(
+    env.MOONSHOT_ADVICE_MODEL,
+    env.OPENAI_ADVICE_MODEL,
+    "kimi-k2-0711-preview",
+    "gpt-4o-mini",
+  );
 }
 
 // Lazy-initialized Langfuse client and cached prompts per key
@@ -161,12 +180,30 @@ export async function transcribe(
   _filename: string,
   _telemetry?: Telemetry,
 ): Promise<string> {
-  const { text } = await aiTranscribe({
-    model: getActiveProvider().transcription(getTranscribeModel()),
-    audio: buffer,
-    // mimeType: "audio/mpeg", // можно указать при необходимости
-  });
-  return text ?? "";
+  const provider = getActiveProvider();
+
+  if (env.AI_PROVIDER === "moonshot") {
+    // For Moonshot AI, we need to use a different approach since OpenAICompatibleProvider
+    // doesn't have transcription method. We'll use the base OpenAI provider for now.
+    // TODO: Implement proper Moonshot transcription when available
+    console.warn(
+      "Moonshot AI transcription not yet implemented, falling back to OpenAI",
+    );
+    const { text } = await aiTranscribe({
+      model: oai.transcription(getTranscribeModel()),
+      audio: buffer,
+    });
+    return text ?? "";
+  } else {
+    // For OpenAI, use the standard transcription
+    // Type assertion to ensure we're working with OpenAI provider
+    const openaiProvider = provider as typeof oai;
+    const { text } = await aiTranscribe({
+      model: openaiProvider.transcription(getTranscribeModel()),
+      audio: buffer,
+    });
+    return text ?? "";
+  }
 }
 
 type ParsedTask = {
@@ -285,14 +322,11 @@ export async function parseTask(
       return null;
     }
 
-    let confidence: number | undefined = undefined;
-    if (parsed.confidence !== undefined) {
-      const asNumber = Number((parsed as any).confidence);
-      if (!Number.isNaN(asNumber)) {
-        confidence = Math.min(1, Math.max(0, asNumber));
-      }
+    const raw = Number((parsed as any).confidence);
+    let confidence = 0.5;
+    if (Number.isFinite(raw)) {
+      confidence = Math.min(1, Math.max(0, raw));
     }
-    if (confidence === undefined) confidence = 0.5;
 
     return {
       action: parsed.action.trim(),

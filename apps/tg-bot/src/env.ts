@@ -8,7 +8,10 @@ export const env = createEnv({
     OPENAI_API_KEY: z.string().min(10, "OPENAI_API_KEY is required"),
     OPENAI_TRANSCRIBE_MODEL: z.string().optional(),
     OPENAI_ADVICE_MODEL: z.string().optional(),
-    MOONSHOT_API_KEY: z.string().min(10, "MOONSHOT_API_KEY is required"),
+    MOONSHOT_API_KEY: z
+      .string()
+      .min(10, "MOONSHOT_API_KEY is required")
+      .optional(),
     MOONSHOT_TRANSCRIBE_MODEL: z.string().optional(),
     MOONSHOT_ADVICE_MODEL: z.string().optional(),
     AI_PROVIDER: z.enum(["openai", "moonshot"]).default("openai"),
