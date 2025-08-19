@@ -8,6 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@/src/components/ui/dropdown-menu";
 import { Globe } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 type Language = "en" | "ru";
 
@@ -20,9 +21,10 @@ export function LanguageSwitcher({
   currentLanguage,
   onLanguageChange,
 }: LanguageSwitcherProps) {
+  const t = useTranslations("LanguageSwitcher");
   const languages = {
-    en: { name: "English", flag: "🇺🇸" },
-    ru: { name: "Русский", flag: "🇷🇺" },
+    en: { name: t("english"), flag: "🇺🇸" },
+    ru: { name: t("russian"), flag: "🇷🇺" },
   };
 
   return (

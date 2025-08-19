@@ -31,7 +31,18 @@
     "title": "Your Smart Home Assistant",
     "subtitle": "Transform your daily routine with AI-powered task management. Log activities with voice commands, get intelligent insights, and optimize your time like never before.",
     "startTrial": "Start Your Free Trial",
-    "seeDemo": "See Live Demo"
+    "seeDemo": "See Live Demo",
+    "aiName": "Synoro AI",
+    "aiStatus": "Online • Smart Assistant",
+    "recording": "Recording voice message...",
+    "userMessage1": "🔧 Finished oil change and tire rotation on my Honda. Took 2 hours total.",
+    "userMessage2": "📅 Schedule brake inspection for next month",
+    "aiAnalyzing": "Synoro AI is analyzing",
+    "aiResponse1": "✅ Vehicle maintenance logged: Oil change + tire rotation (2h). Next service due in 3,000 miles. Great job staying on schedule!",
+    "aiSuggestion": "💡 Based on your maintenance pattern, I recommend scheduling brake inspection next month.",
+    "scheduling": "Scheduling...",
+    "aiResponse2": "✅ Brake inspection scheduled for March 15th at 10:00 AM. Reminder set for 2 days before.",
+    "inputHint": "Try: \"Washed car, $15 at car wash\" or \"Changed air filter\""
   },
   "Features": {
     "badge": "Features",
@@ -70,21 +81,160 @@
       "title": "Free",
       "subtitle": "Perfect for getting started",
       "price": "$0",
-      "period": "/month"
+      "period": "/month",
+      "features": {
+        "basicLogging": "Basic task logging",
+        "telegram": "Telegram integration",
+        "basicReports": "Basic reports"
+      }
     },
     "premium": {
       "title": "Premium",
       "subtitle": "Advanced features for power users",
       "price": "$12",
       "period": "/month",
-      "badge": "Most Popular"
+      "badge": "Most Popular",
+      "features": {
+        "everythingFree": "Everything in Free",
+        "advancedAnalytics": "Advanced analytics",
+        "smartReminders": "Smart reminders",
+        "receiptAnalysis": "Receipt analysis"
+      }
     },
     "family": {
       "title": "Family",
       "subtitle": "Perfect for families and teams",
       "price": "$20",
-      "period": "/month"
+      "period": "/month",
+      "features": {
+        "everythingPremium": "Everything in Premium",
+        "multiUser": "Multi-user access",
+        "sharedAnalytics": "Shared analytics",
+        "familyInsights": "Family insights"
+      }
+    },
+    "trust": {
+      "moneyBack": "30-day money-back guarantee",
+      "cancelAnytime": "Cancel anytime",
+      "instantActivation": "Instant activation"
     }
+  },
+  "Footer": {
+    "description": "Your intelligent assistant for smarter task management and life optimization.",
+    "quickLinks": "Quick Links",
+    "features": "Features",
+    "pricing": "Pricing",
+    "aboutUs": "About Us",
+    "contact": "Contact",
+    "support": "Support",
+    "helpCenter": "Help Center",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
+    "security": "Security",
+    "stayUpdated": "Stay Updated",
+    "newsletterDescription": "Get the latest updates and productivity tips delivered to your inbox.",
+    "emailPlaceholder": "Enter your email",
+    "subscribe": "Subscribe",
+    "copyright": "© 2025 Synoro. All rights reserved.",
+    "systemStatus": "System Status",
+    "apiDocs": "API Docs",
+    "allSystemsOperational": "All systems operational"
+  },
+  "HowItWorks": {
+    "badge": "How It Works",
+    "title": "Simple. Smart. Efficient.",
+    "subtitle": "Three easy steps to transform your productivity and gain valuable insights into your daily activities.",
+    "step1": {
+      "title": "1. Speak Naturally",
+      "description": "Simply tell Synoro what you've accomplished. Use voice commands or text - our AI understands natural language perfectly."
+    },
+    "step2": {
+      "title": "2. AI Processes",
+      "description": "Our intelligent system categorizes, timestamps, and analyzes your activities to provide meaningful insights and patterns."
+    },
+    "step3": {
+      "title": "3. Get Insights",
+      "description": "Receive personalized analytics, time-saving suggestions, and smart recommendations to optimize your daily routine."
+    }
+  },
+  "WhoBenefits": {
+    "badge": "Who Benefits",
+    "title": "Perfect For Everyone",
+    "subtitle": "Discover how Synoro transforms daily life for different user groups with tailored solutions and intelligent insights.",
+    "families": {
+      "title": "Families",
+      "subtitle": "Smart household management for busy families",
+      "expenseTracking": {
+        "title": "Expense Tracking Made Simple",
+        "description": "\"Just bought groceries for $85 at Whole Foods\" - instantly categorized and tracked across family budgets with smart spending insights."
+      },
+      "choreManagement": {
+        "title": "Chore Management",
+        "description": "Track completed household tasks, assign responsibilities, and celebrate family achievements with gamified progress tracking."
+      },
+      "successStory": {
+        "title": "Real Family Success",
+        "description": "\"Synoro helped us save $400/month by tracking our spending patterns. The kids love earning points for completing chores!\" - Sarah M., Mother of 3"
+      }
+    },
+    "carOwners": {
+      "title": "Car Owners",
+      "subtitle": "Never miss maintenance with intelligent tracking",
+      "predictiveMaintenance": {
+        "title": "Predictive Maintenance",
+        "description": "AI analyzes your driving patterns and maintenance history to predict when services are needed, preventing costly breakdowns."
+      },
+      "costOptimization": {
+        "title": "Cost Optimization",
+        "description": "Track maintenance costs, find the best service deals, and budget for upcoming repairs with smart financial planning."
+      },
+      "testimonial": {
+        "title": "Driver Testimonial",
+        "description": "\"Synoro saved me $800 by catching a potential transmission issue early. The maintenance reminders are spot-on!\" - Mike R., Daily Commuter"
+      }
+    },
+    "homeowners": {
+      "title": "Homeowners",
+      "subtitle": "Comprehensive property management made easy",
+      "maintenanceScheduling": {
+        "title": "Maintenance Scheduling",
+        "description": "\"Fixed leaky faucet in master bathroom\" - automatically schedules follow-up inspections and tracks warranty information."
+      },
+      "seasonalReminders": {
+        "title": "Seasonal Reminders",
+        "description": "Get intelligent reminders for seasonal tasks like gutter cleaning, HVAC maintenance, and winterization based on your location."
+      },
+      "successStory": {
+        "title": "Homeowner Success",
+        "description": "\"Synoro's maintenance tracking increased my home value by $15,000. I never miss important upkeep tasks anymore!\" - Jennifer L., Homeowner"
+      }
+    },
+    "freelancers": {
+      "title": "Freelancers",
+      "subtitle": "Optimize productivity and work-life balance",
+      "timeTracking": {
+        "title": "Time & Project Tracking",
+        "description": "\"Completed client website design - 4 hours\" - automatically categorizes work time, tracks project progress, and calculates earnings."
+      },
+      "healthWellness": {
+        "title": "Health & Wellness",
+        "description": "Monitor work breaks, exercise routines, and mental health check-ins to maintain optimal productivity and well-being."
+      },
+      "successStory": {
+        "title": "Freelancer Success",
+        "description": "\"Synoro helped me increase my hourly rate by 40% through better time tracking and productivity insights. Game changer!\" - Alex K., Graphic Designer"
+      }
+    },
+    "cta": {
+      "title": "Ready to Transform Your Daily Routine?",
+      "subtitle": "Join thousands of users who have already optimized their lives with Synoro's intelligent assistance.",
+      "startTrial": "Start Your Free Trial",
+      "seeDemo": "See Live Demo"
+    }
+  },
+  "LanguageSwitcher": {
+    "english": "English",
+    "russian": "Русский"
   },
   "Manifest": {
     "name": "Synoro"

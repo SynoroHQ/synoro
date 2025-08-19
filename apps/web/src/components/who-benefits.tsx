@@ -11,8 +11,10 @@ import {
   User,
   Users,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export default function WhoBenefits() {
+  const t = useTranslations("WhoBenefits");
   return (
     <section
       id="for-whom"
@@ -22,14 +24,13 @@ export default function WhoBenefits() {
         <div className="mb-20 text-center">
           <Badge className="bg-primary/10 text-primary border-primary/30 hover:bg-primary/20 mb-6 rounded-full px-6 py-3 text-sm font-medium transition-all duration-300 hover:scale-105">
             <Users className="mr-2 h-4 w-4" />
-            Who Benefits
+            {t("badge")}
           </Badge>
           <h2 className="mb-6 font-serif text-5xl font-bold md:text-6xl">
-            Perfect For Everyone
+            {t("title")}
           </h2>
           <p className="text-muted-foreground mx-auto max-w-3xl text-xl leading-relaxed">
-            Discover how Synoro transforms daily life for different user groups
-            with tailored solutions and intelligent insights.
+            {t("subtitle")}
           </p>
         </div>
 
@@ -44,10 +45,10 @@ export default function WhoBenefits() {
                   </div>
                   <div>
                     <h3 className="mb-2 text-3xl font-bold text-blue-600">
-                      Families
+                      {t("families.title")}
                     </h3>
                     <p className="text-muted-foreground">
-                      Smart household management for busy families
+                      {t("families.subtitle")}
                     </p>
                   </div>
                 </div>
@@ -56,24 +57,20 @@ export default function WhoBenefits() {
                   <div className="rounded-2xl border border-blue-100 bg-blue-50 p-6">
                     <h4 className="mb-3 flex items-center gap-2 font-semibold text-blue-900">
                       <CheckCircle className="h-5 w-5 text-blue-600" />
-                      Expense Tracking Made Simple
+                      {t("families.expenseTracking.title")}
                     </h4>
                     <p className="text-sm leading-relaxed text-blue-800">
-                      "Just bought groceries for $85 at Whole Foods" - instantly
-                      categorized and tracked across family budgets with smart
-                      spending insights.
+                      {t("families.expenseTracking.description")}
                     </p>
                   </div>
 
                   <div className="rounded-2xl border border-blue-100 bg-blue-50 p-6">
                     <h4 className="mb-3 flex items-center gap-2 font-semibold text-blue-900">
                       <CheckCircle className="h-5 w-5 text-blue-600" />
-                      Chore Management
+                      {t("families.choreManagement.title")}
                     </h4>
                     <p className="text-sm leading-relaxed text-blue-800">
-                      Track completed household tasks, assign responsibilities,
-                      and celebrate family achievements with gamified progress
-                      tracking.
+                      {t("families.choreManagement.description")}
                     </p>
                   </div>
 
@@ -84,12 +81,10 @@ export default function WhoBenefits() {
                       </div>
                       <div>
                         <h4 className="mb-2 font-semibold">
-                          Real Family Success
+                          {t("families.successStory.title")}
                         </h4>
                         <p className="text-sm text-blue-100 italic">
-                          "Synoro helped us save $400/month by tracking our
-                          spending patterns. The kids love earning points for
-                          completing chores!" - Sarah M., Mother of 3
+                          {t("families.successStory.description")}
                         </p>
                       </div>
                     </div>
@@ -177,10 +172,10 @@ export default function WhoBenefits() {
                   </div>
                   <div>
                     <h3 className="mb-2 text-3xl font-bold text-purple-600">
-                      Car Owners
+                      {t("carOwners.title")}
                     </h3>
                     <p className="text-muted-foreground">
-                      Never miss maintenance with intelligent tracking
+                      {t("carOwners.subtitle")}
                     </p>
                   </div>
                 </div>
@@ -189,23 +184,20 @@ export default function WhoBenefits() {
                   <div className="rounded-2xl border border-purple-100 bg-purple-50 p-6">
                     <h4 className="mb-3 flex items-center gap-2 font-semibold text-purple-900">
                       <CheckCircle className="h-5 w-5 text-purple-600" />
-                      Predictive Maintenance
+                      {t("carOwners.predictiveMaintenance.title")}
                     </h4>
                     <p className="text-sm leading-relaxed text-purple-800">
-                      AI analyzes your driving patterns and maintenance history
-                      to predict when services are needed, preventing costly
-                      breakdowns.
+                      {t("carOwners.predictiveMaintenance.description")}
                     </p>
                   </div>
 
                   <div className="rounded-2xl border border-purple-100 bg-purple-50 p-6">
                     <h4 className="mb-3 flex items-center gap-2 font-semibold text-purple-900">
                       <CheckCircle className="h-5 w-5 text-purple-600" />
-                      Cost Optimization
+                      {t("carOwners.costOptimization.title")}
                     </h4>
                     <p className="text-sm leading-relaxed text-purple-800">
-                      Track maintenance costs, find the best service deals, and
-                      budget for upcoming repairs with smart financial planning.
+                      {t("carOwners.costOptimization.description")}
                     </p>
                   </div>
 
@@ -216,12 +208,10 @@ export default function WhoBenefits() {
                       </div>
                       <div>
                         <h4 className="mb-2 font-semibold">
-                          Driver Testimonial
+                          {t("carOwners.testimonial.title")}
                         </h4>
                         <p className="text-sm text-purple-100 italic">
-                          "Synoro saved me $800 by catching a potential
-                          transmission issue early. The maintenance reminders
-                          are spot-on!" - Mike R., Daily Commuter
+                          {t("carOwners.testimonial.description")}
                         </p>
                       </div>
                     </div>
@@ -241,10 +231,10 @@ export default function WhoBenefits() {
                   </div>
                   <div>
                     <h3 className="mb-2 text-3xl font-bold text-teal-600">
-                      Homeowners
+                      {t("homeowners.title")}
                     </h3>
                     <p className="text-muted-foreground">
-                      Comprehensive property management made easy
+                      {t("homeowners.subtitle")}
                     </p>
                   </div>
                 </div>
@@ -253,24 +243,20 @@ export default function WhoBenefits() {
                   <div className="rounded-2xl border border-teal-100 bg-teal-50 p-6">
                     <h4 className="mb-3 flex items-center gap-2 font-semibold text-teal-900">
                       <CheckCircle className="h-5 w-5 text-teal-600" />
-                      Maintenance Scheduling
+                      {t("homeowners.maintenanceScheduling.title")}
                     </h4>
                     <p className="text-sm leading-relaxed text-teal-800">
-                      "Fixed leaky faucet in master bathroom" - automatically
-                      schedules follow-up inspections and tracks warranty
-                      information.
+                      {t("homeowners.maintenanceScheduling.description")}
                     </p>
                   </div>
 
                   <div className="rounded-2xl border border-teal-100 bg-teal-50 p-6">
                     <h4 className="mb-3 flex items-center gap-2 font-semibold text-teal-900">
                       <CheckCircle className="h-5 w-5 text-teal-600" />
-                      Seasonal Reminders
+                      {t("homeowners.seasonalReminders.title")}
                     </h4>
                     <p className="text-sm leading-relaxed text-teal-800">
-                      Get intelligent reminders for seasonal tasks like gutter
-                      cleaning, HVAC maintenance, and winterization based on
-                      your location.
+                      {t("homeowners.seasonalReminders.description")}
                     </p>
                   </div>
 
@@ -281,12 +267,10 @@ export default function WhoBenefits() {
                       </div>
                       <div>
                         <h4 className="mb-2 font-semibold">
-                          Homeowner Success
+                          {t("homeowners.successStory.title")}
                         </h4>
                         <p className="text-sm text-teal-100 italic">
-                          "Synoro's maintenance tracking increased my home value
-                          by $15,000. I never miss important upkeep tasks
-                          anymore!" - Jennifer L., Homeowner
+                          {t("homeowners.successStory.description")}
                         </p>
                       </div>
                     </div>
@@ -397,10 +381,10 @@ export default function WhoBenefits() {
                   </div>
                   <div>
                     <h3 className="mb-2 text-3xl font-bold text-orange-600">
-                      Freelancers
+                      {t("freelancers.title")}
                     </h3>
                     <p className="text-muted-foreground">
-                      Optimize productivity and work-life balance
+                      {t("freelancers.subtitle")}
                     </p>
                   </div>
                 </div>
@@ -409,23 +393,20 @@ export default function WhoBenefits() {
                   <div className="rounded-2xl border border-orange-100 bg-orange-50 p-6">
                     <h4 className="mb-3 flex items-center gap-2 font-semibold text-orange-900">
                       <CheckCircle className="h-5 w-5 text-orange-600" />
-                      Time & Project Tracking
+                      {t("freelancers.timeTracking.title")}
                     </h4>
                     <p className="text-sm leading-relaxed text-orange-800">
-                      "Completed client website design - 4 hours" -
-                      automatically categorizes work time, tracks project
-                      progress, and calculates earnings.
+                      {t("freelancers.timeTracking.description")}
                     </p>
                   </div>
 
                   <div className="rounded-2xl border border-orange-100 bg-orange-50 p-6">
                     <h4 className="mb-3 flex items-center gap-2 font-semibold text-orange-900">
                       <CheckCircle className="h-5 w-5 text-orange-600" />
-                      Health & Wellness
+                      {t("freelancers.healthWellness.title")}
                     </h4>
                     <p className="text-sm leading-relaxed text-orange-800">
-                      Monitor work breaks, exercise routines, and mental health
-                      check-ins to maintain optimal productivity and well-being.
+                      {t("freelancers.healthWellness.description")}
                     </p>
                   </div>
 
@@ -436,12 +417,10 @@ export default function WhoBenefits() {
                       </div>
                       <div>
                         <h4 className="mb-2 font-semibold">
-                          Freelancer Success
+                          {t("freelancers.successStory.title")}
                         </h4>
                         <p className="text-sm text-orange-100 italic">
-                          "Synoro helped me increase my hourly rate by 40%
-                          through better time tracking and productivity
-                          insights. Game changer!" - Alex K., Graphic Designer
+                          {t("freelancers.successStory.description")}
                         </p>
                       </div>
                     </div>
@@ -456,11 +435,10 @@ export default function WhoBenefits() {
         <div className="mt-20 text-center">
           <div className="from-primary/10 to-accent/10 border-primary/20 rounded-3xl border bg-gradient-to-r p-12">
             <h3 className="mb-4 text-3xl font-bold">
-              Ready to Transform Your Daily Routine?
+              {t("cta.title")}
             </h3>
             <p className="text-muted-foreground mx-auto mb-8 max-w-2xl">
-              Join thousands of users who have already optimized their lives
-              with Synoro's intelligent assistance.
+              {t("cta.subtitle")}
             </p>
             <div className="flex flex-col justify-center gap-6 sm:flex-row">
               <Button
@@ -468,7 +446,7 @@ export default function WhoBenefits() {
                 className="bg-primary hover:bg-primary/90 rounded-xl px-8 py-3 font-semibold text-gray-900 shadow-lg transition-all duration-300 hover:shadow-xl"
               >
                 <Sparkles className="mr-2 h-4 w-4" />
-                Start Your Free Trial
+                {t("cta.startTrial")}
               </Button>
 
               <Button
@@ -477,7 +455,7 @@ export default function WhoBenefits() {
                 className="border-primary text-primary hover:bg-primary rounded-xl bg-transparent px-8 py-3 font-semibold shadow-lg transition-all duration-300 hover:text-gray-900 hover:shadow-xl"
               >
                 <Play className="mr-2 h-4 w-4" />
-                See Live Demo
+                {t("cta.seeDemo")}
               </Button>
             </div>
           </div>

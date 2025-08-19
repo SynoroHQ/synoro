@@ -54,7 +54,7 @@ export default function Pricing() {
                   <li className="flex items-center gap-3 transition-transform duration-300 group-hover:translate-x-1">
                     <CheckCircle className="text-primary h-5 w-5 flex-shrink-0 transition-transform duration-300 group-hover:scale-110" />
                     <span className="group-hover:text-foreground transition-colors duration-300">
-                      Basic task logging
+                      {t("free.features.basicLogging")}
                     </span>
                   </li>
                   <li
@@ -63,7 +63,7 @@ export default function Pricing() {
                   >
                     <CheckCircle className="text-primary h-5 w-5 flex-shrink-0 transition-transform duration-300 group-hover:scale-110" />
                     <span className="group-hover:text-foreground transition-colors duration-300">
-                      Telegram integration
+                      {t("free.features.telegram")}
                     </span>
                   </li>
                   <li
@@ -72,7 +72,7 @@ export default function Pricing() {
                   >
                     <CheckCircle className="text-primary h-5 w-5 flex-shrink-0 transition-transform duration-300 group-hover:scale-110" />
                     <span className="group-hover:text-foreground transition-colors duration-300">
-                      Basic reports
+                      {t("free.features.basicReports")}
                     </span>
                   </li>
                 </ul>
@@ -97,15 +97,15 @@ export default function Pricing() {
                   ⭐
                 </div>
                 <CardTitle className="group-hover:text-primary mb-2 font-serif text-3xl font-bold transition-colors duration-300">
-                  Premium
+                  {t("premium.title")}
                 </CardTitle>
                 <CardDescription className="group-hover:text-foreground/80 mb-6 text-base transition-colors duration-300">
-                  Advanced features for power users
+                  {t("premium.subtitle")}
                 </CardDescription>
                 <div className="text-foreground mb-4 text-5xl font-bold transition-transform duration-300 group-hover:scale-110">
-                  $12
+                  {t("premium.price")}
                   <span className="text-muted-foreground text-lg font-normal">
-                    /month
+                    {t("premium.period")}
                   </span>
                 </div>
               </CardHeader>
@@ -114,7 +114,7 @@ export default function Pricing() {
                   <li className="flex items-center gap-3 transition-transform duration-300 group-hover:translate-x-1">
                     <CheckCircle className="text-primary h-5 w-5 flex-shrink-0 transition-transform duration-300 group-hover:scale-110" />
                     <span className="group-hover:text-foreground transition-colors duration-300">
-                      Everything in Free
+                      {t("premium.features.everythingFree")}
                     </span>
                   </li>
                   <li
@@ -123,16 +123,16 @@ export default function Pricing() {
                   >
                     <CheckCircle className="text-primary h-5 w-5 flex-shrink-0 transition-transform duration-300 group-hover:scale-110" />
                     <span className="group-hover:text-foreground transition-colors duration-300">
-                      Advanced analytics
+                      {t("premium.features.advancedAnalytics")}
                     </span>
                   </li>
                   <li
                     className="flex items-center gap-3 transition-transform duration-300 group-hover:translate-x-1"
                     style={{ transitionDelay: "100ms" }}
                   >
-                    <CheckCircle className="text-primary h-5 w-5 flex-shrink-0 transition-transform duration-300 group-hover:scale-110" />
+                    <CheckCircle className="text-primary h-5 w-5 flex-shrink-0 transition-transform duration-300 group-hover:scale-110 group-hover:scale-300" />
                     <span className="group-hover:text-foreground transition-colors duration-300">
-                      Smart reminders
+                      {t("premium.features.smartReminders")}
                     </span>
                   </li>
                   <li
@@ -141,7 +141,7 @@ export default function Pricing() {
                   >
                     <CheckCircle className="text-primary h-5 w-5 flex-shrink-0 transition-transform duration-300 group-hover:scale-110" />
                     <span className="group-hover:text-foreground transition-colors duration-300">
-                      Receipt analysis
+                      {t("premium.features.receiptAnalysis")}
                     </span>
                   </li>
                 </ul>
@@ -158,15 +158,15 @@ export default function Pricing() {
                   👨‍👩‍👧‍👦
                 </div>
                 <CardTitle className="group-hover:text-accent mb-2 font-serif text-3xl font-bold transition-colors duration-300">
-                  Family
+                  {t("family.title")}
                 </CardTitle>
                 <CardDescription className="group-hover:text-foreground/80 mb-6 text-base transition-colors duration-300">
-                  Perfect for families and teams
+                  {t("family.subtitle")}
                 </CardDescription>
                 <div className="mb-4 text-5xl font-bold transition-transform duration-300 group-hover:scale-110">
-                  $20
+                  {t("family.price")}
                   <span className="text-muted-foreground text-lg font-normal">
-                    /month
+                    {t("family.period")}
                   </span>
                 </div>
               </CardHeader>
@@ -175,7 +175,7 @@ export default function Pricing() {
                   <li className="flex items-center gap-3 transition-transform duration-300 group-hover:translate-x-1">
                     <CheckCircle className="text-primary h-5 w-5 flex-shrink-0 transition-transform duration-300 group-hover:scale-110" />
                     <span className="group-hover:text-foreground transition-colors duration-300">
-                      Everything in Premium
+                      {t("family.features.everythingPremium")}
                     </span>
                   </li>
                   <li
@@ -184,7 +184,7 @@ export default function Pricing() {
                   >
                     <CheckCircle className="text-primary h-5 w-5 flex-shrink-0 transition-transform duration-300 group-hover:scale-110" />
                     <span className="group-hover:text-foreground transition-colors duration-300">
-                      Multi-user access
+                      {t("family.features.multiUser")}
                     </span>
                   </li>
                   <li
@@ -192,8 +192,9 @@ export default function Pricing() {
                     style={{ transitionDelay: "100ms" }}
                   >
                     <CheckCircle className="text-primary h-5 w-5 flex-shrink-0 transition-transform duration-300 group-hover:scale-110" />
+                    <span className="group-hover:text-300 group-hover:scale-110" />
                     <span className="group-hover:text-foreground transition-colors duration-300">
-                      Shared analytics
+                      {t("family.features.sharedAnalytics")}
                     </span>
                   </li>
                   <li
@@ -202,7 +203,7 @@ export default function Pricing() {
                   >
                     <CheckCircle className="text-primary h-5 w-5 flex-shrink-0 transition-transform duration-300 group-hover:scale-110" />
                     <span className="group-hover:text-foreground transition-colors duration-300">
-                      Family insights
+                      {t("family.features.familyInsights")}
                     </span>
                   </li>
                 </ul>
@@ -216,15 +217,15 @@ export default function Pricing() {
           <div className="text-muted-foreground flex flex-col items-center justify-center gap-8 text-sm sm:flex-row">
             <div className="hover:text-foreground flex items-center gap-2 transition-colors duration-300">
               <Shield className="text-primary h-4 w-4" />
-              <span>30-day money-back guarantee</span>
+              <span>{t("trust.moneyBack")}</span>
             </div>
             <div className="hover:text-foreground flex items-center gap-2 transition-colors duration-300">
               <CheckCircle className="text-primary h-4 w-4" />
-              <span>Cancel anytime</span>
+              <span>{t("trust.cancelAnytime")}</span>
             </div>
             <div className="hover:text-foreground flex items-center gap-2 transition-colors duration-300">
               <Zap className="text-primary h-4 w-4" />
-              <span>Instant activation</span>
+              <span>{t("trust.instantActivation")}</span>
             </div>
           </div>
         </div>

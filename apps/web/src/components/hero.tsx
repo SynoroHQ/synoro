@@ -118,10 +118,8 @@ export default function Hero() {
                 <div className="absolute -right-1 -bottom-1 h-4 w-4 animate-pulse rounded-full border-2 border-white bg-green-500"></div>
               </div>
               <div className="flex-1">
-                <h3 className="text-foreground font-semibold">Synoro AI</h3>
-                <p className="text-muted-foreground text-sm">
-                  Online • Smart Assistant
-                </p>
+                <h3 className="text-foreground font-semibold">{t("aiName")}</h3>
+                <p className="text-muted-foreground text-sm">{t("aiStatus")}</p>
               </div>
               {isRecording && (
                 <div className="animate-fade-in flex items-center gap-2">
@@ -138,7 +136,7 @@ export default function Hero() {
                   <div className="flex items-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3">
                     <div className="h-3 w-3 animate-pulse rounded-full bg-red-500"></div>
                     <span className="text-sm text-red-600">
-                      Recording voice message...
+                      {t("recording")}
                     </span>
                     <Mic className="h-4 w-4 text-red-500" />
                   </div>
@@ -149,10 +147,7 @@ export default function Hero() {
               {currentStep >= 2 && (
                 <div className="animate-slide-in-right flex justify-end">
                   <div className="bg-primary text-primary-foreground animate-message-pop max-w-[80%] rounded-2xl rounded-tr-md px-4 py-3">
-                    <p className="text-sm">
-                      🔧 Finished oil change and tire rotation on my Honda. Took
-                      2 hours total.
-                    </p>
+                    <p className="text-sm">{t("userMessage1")}</p>
                     <div className="mt-1 flex items-center justify-end gap-1">
                       <span className="text-xs opacity-70">14:32</span>
                       <CheckCircle className="animate-check-mark h-3 w-3 opacity-70" />
@@ -167,7 +162,7 @@ export default function Hero() {
                   <div className="bg-muted animate-bounce-subtle max-w-[80%] rounded-2xl rounded-tl-md px-4 py-3">
                     <div className="flex items-center gap-1">
                       <span className="text-muted-foreground text-sm">
-                        Synoro AI is analyzing
+                        {t("aiAnalyzing")}
                       </span>
                       <div className="ml-2 flex gap-1">
                         <div
@@ -193,9 +188,7 @@ export default function Hero() {
                 <div className="animate-slide-in-left flex justify-start">
                   <div className="bg-muted animate-message-pop max-w-[80%] rounded-2xl rounded-tl-md px-4 py-3">
                     <p className="text-sm">
-                      ✅ Vehicle maintenance logged: Oil change + tire rotation
-                      (2h). Next service due in 3,000 miles. Great job staying
-                      on schedule!
+                      {t("aiResponse1")}
                     </p>
                     <div className="mt-1 flex items-center justify-start gap-1">
                       <span className="text-muted-foreground text-xs">
@@ -214,8 +207,7 @@ export default function Hero() {
                 >
                   <div className="bg-accent/10 border-accent/20 animate-glow-pulse max-w-[80%] rounded-2xl rounded-tl-md border px-4 py-3">
                     <p className="text-accent text-sm">
-                      💡 Based on your maintenance pattern, I recommend
-                      scheduling brake inspection next month.
+                      {t("aiSuggestion")}
                     </p>
                   </div>
                 </div>
@@ -229,7 +221,7 @@ export default function Hero() {
                 >
                   <div className="bg-primary text-primary-foreground animate-message-pop max-w-[80%] rounded-2xl rounded-tr-md px-4 py-3">
                     <p className="text-sm">
-                      📅 Schedule brake inspection for next month
+                      {t("userMessage2")}
                     </p>
                     <div className="mt-1 flex items-center justify-end gap-1">
                       <span className="text-xs opacity-70">14:35</span>
@@ -245,7 +237,7 @@ export default function Hero() {
                   <div className="bg-muted max-w-[80%] rounded-2xl rounded-tl-md px-4 py-3">
                     <div className="flex items-center gap-1">
                       <span className="text-muted-foreground text-sm">
-                        Scheduling...
+                        {t("scheduling")}
                       </span>
                       <div className="ml-2 flex gap-1">
                         <div
@@ -271,8 +263,7 @@ export default function Hero() {
                 <div className="animate-slide-in-left flex justify-start">
                   <div className="bg-muted animate-message-pop max-w-[80%] rounded-2xl rounded-tl-md px-4 py-3">
                     <p className="text-sm">
-                      ✅ Brake inspection scheduled for March 15th at 10:00 AM.
-                      Reminder set for 2 days before.
+                      {t("aiResponse2")}
                     </p>
                     <div className="mt-1 flex items-center justify-start gap-1">
                       <span className="text-muted-foreground text-xs">
@@ -291,7 +282,7 @@ export default function Hero() {
                   <MessageSquare className="text-primary h-4 w-4" />
                 </div>
                 <span className="flex-1 italic">
-                  Try: "Washed car, $15 at car wash" or "Changed air filter"
+                  {t("inputHint")}
                 </span>
               </div>
             </div>

@@ -1,6 +1,8 @@
 import { Button } from "@/src/components/ui/button";
+import { useTranslations } from "next-intl";
 
 export default function Footer() {
+  const t = useTranslations("Footer");
   return (
     <footer className="relative overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
       {/* Background Pattern */}
@@ -25,8 +27,7 @@ export default function Footer() {
                 Synoro
               </div>
               <p className="mb-6 leading-relaxed text-gray-400">
-                Your intelligent assistant for smarter task management and life
-                optimization.
+                {t("description")}
               </p>
               <div className="flex space-x-4">
                 <a
@@ -74,7 +75,7 @@ export default function Footer() {
             {/* Quick Links */}
             <div>
               <h3 className="mb-6 text-lg font-semibold text-white">
-                Quick Links
+                {t("quickLinks")}
               </h3>
               <ul className="space-y-3">
                 <li>
@@ -82,7 +83,7 @@ export default function Footer() {
                     href="#features"
                     className="inline-block text-gray-400 transition-all duration-300 hover:translate-x-1 hover:text-white"
                   >
-                    Features
+                    {t("features")}
                   </a>
                 </li>
                 <li>
@@ -90,7 +91,7 @@ export default function Footer() {
                     href="#pricing"
                     className="inline-block text-gray-400 transition-all duration-300 hover:translate-x-1 hover:text-white"
                   >
-                    Pricing
+                    {t("pricing")}
                   </a>
                 </li>
                 <li>
@@ -98,7 +99,7 @@ export default function Footer() {
                     href="#about"
                     className="inline-block text-gray-400 transition-all duration-300 hover:translate-x-1 hover:text-white"
                   >
-                    About Us
+                    {t("aboutUs")}
                   </a>
                 </li>
                 <li>
@@ -106,7 +107,7 @@ export default function Footer() {
                     href="#contact"
                     className="inline-block text-gray-400 transition-all duration-300 hover:translate-x-1 hover:text-white"
                   >
-                    Contact
+                    {t("contact")}
                   </a>
                 </li>
               </ul>
@@ -114,14 +115,16 @@ export default function Footer() {
 
             {/* Support */}
             <div>
-              <h3 className="mb-6 text-lg font-semibold text-white">Support</h3>
+              <h3 className="mb-6 text-lg font-semibold text-white">
+                {t("support")}
+              </h3>
               <ul className="space-y-3">
                 <li>
                   <a
                     href="#help"
                     className="inline-block text-gray-400 transition-all duration-300 hover:translate-x-1 hover:text-white"
                   >
-                    Help Center
+                    {t("helpCenter")}
                   </a>
                 </li>
                 <li>
@@ -129,7 +132,7 @@ export default function Footer() {
                     href="#privacy"
                     className="inline-block text-gray-400 transition-all duration-300 hover:translate-x-1 hover:text-white"
                   >
-                    Privacy Policy
+                    {t("privacyPolicy")}
                   </a>
                 </li>
                 <li>
@@ -137,7 +140,7 @@ export default function Footer() {
                     href="#terms"
                     className="inline-block text-gray-400 transition-all duration-300 hover:translate-x-1 hover:text-white"
                   >
-                    Terms of Service
+                    {t("termsOfService")}
                   </a>
                 </li>
                 <li>
@@ -145,7 +148,7 @@ export default function Footer() {
                     href="#security"
                     className="inline-block text-gray-400 transition-all duration-300 hover:translate-x-1 hover:text-white"
                   >
-                    Security
+                    {t("security")}
                   </a>
                 </li>
               </ul>
@@ -154,22 +157,21 @@ export default function Footer() {
             {/* Newsletter */}
             <div>
               <h3 className="mb-6 text-lg font-semibold text-white">
-                Stay Updated
+                {t("stayUpdated")}
               </h3>
               <p className="mb-4 text-sm text-gray-400">
-                Get the latest updates and productivity tips delivered to your
-                inbox.
+                {t("newsletterDescription")}
               </p>
               <div className="space-y-3">
                 <div className="relative">
                   <input
                     type="email"
-                    placeholder="Enter your email"
+                    placeholder={t("emailPlaceholder")}
                     className="focus:ring-primary w-full rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-white placeholder-gray-400 backdrop-blur-sm transition-all duration-300 focus:border-transparent focus:ring-2 focus:outline-none"
                   />
                 </div>
                 <Button className="from-primary to-accent hover:from-primary/90 hover:to-accent/90 w-full rounded-xl bg-gradient-to-r py-3 font-semibold text-gray-900 shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl">
-                  Subscribe
+                  {t("subscribe")}
                 </Button>
               </div>
             </div>
@@ -182,24 +184,24 @@ export default function Footer() {
         <div className="container mx-auto max-w-6xl">
           <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
             <div className="text-sm text-gray-400">
-              © 2025 Synoro. All rights reserved.
+              {t("copyright")}
             </div>
             <div className="flex items-center gap-6 text-sm">
               <a
                 href="#status"
                 className="text-gray-400 transition-colors duration-300 hover:text-white"
               >
-                System Status
+                {t("systemStatus")}
               </a>
               <a
                 href="#api"
                 className="text-gray-400 transition-colors duration-300 hover:text-white"
               >
-                API Docs
+                {t("apiDocs")}
               </a>
               <div className="flex items-center gap-2 text-gray-400">
                 <div className="h-2 w-2 animate-pulse rounded-full bg-green-500"></div>
-                <span className="text-xs">All systems operational</span>
+                <span className="text-xs">{t("allSystemsOperational")}</span>
               </div>
             </div>
           </div>
