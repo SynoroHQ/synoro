@@ -11,6 +11,9 @@ export async function handleOther(ctx: Context): Promise<void> {
   // Skip if already handled by text/voice/audio handlers
   if ("text" in msg || "voice" in msg || "audio" in msg) return;
 
+  // Показываем индикатор "печатает..." для других типов сообщений
+  await ctx.replyWithChatAction("typing");
+
   try {
     // If a caption exists (e.g., photo with caption), try to log if relevant
     const caption = typeof msg.caption === "string" ? msg.caption.trim() : "";

@@ -20,7 +20,7 @@ async function main() {
   const bot = createBot();
 
   console.log("🔄 Инициализация бота...");
-  await bot.start();
+  bot.start();
 
   console.log("✅ Telegram Bot успешно запущен!");
   console.log("📱 Режим: long polling");

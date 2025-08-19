@@ -29,17 +29,16 @@ function getActiveProvider() {
 
 // Helper function to get model based on provider and environment variables
 function getModelFromEnv(
-  moonshotEnvKey: string | undefined,
-  openaiEnvKey: string | undefined,
+  moonshotModel: string | undefined,
+  openaiModel: string | undefined,
   moonshotDefault: string,
   openaiDefault: string,
 ): string {
   if (env.AI_PROVIDER === "moonshot") {
-    return moonshotEnvKey ?? moonshotDefault;
+    return moonshotModel ?? moonshotDefault;
   }
-  return openaiEnvKey ?? openaiDefault;
+  return openaiModel ?? openaiDefault;
 }
-
 // Get the active transcription model
 function getTranscribeModel() {
   return getModelFromEnv(
@@ -119,10 +118,24 @@ export type RelevanceResult = {
   category?: "relevant" | "irrelevant" | "spam";
 };
 
+export type MessageTypeResult = {
+  type: "question" | "event" | "chat" | "irrelevant";
+  subtype?: string | null;
+  confidence: number;
+  need_logging: boolean;
+};
+
 const relevanceSchema = z.object({
   relevant: z.boolean(),
   score: z.number().min(0).max(1).optional(),
   category: z.enum(["relevant", "irrelevant", "spam"]).optional(),
+});
+
+const messageTypeSchema = z.object({
+  type: z.enum(["question", "event", "chat", "irrelevant"]),
+  subtype: z.string().nullable().optional(),
+  confidence: z.number().min(0).max(1),
+  need_logging: z.boolean(),
 });
 
 export async function classifyRelevance(
@@ -156,6 +169,37 @@ export async function classifyRelevance(
   return { relevant: false, score: 0 };
 }
 
+export async function classifyMessageType(
+  text: string,
+  telemetry?: Telemetry,
+): Promise<MessageTypeResult> {
+  const system = await getSystemPrompt(PROMPT_KEYS.CLASSIFIER_MESSAGE_TYPE);
+  try {
+    const { text: out } = await generateText({
+      model: getActiveProvider()(getAdviceModel()),
+      system,
+      prompt: `Message: ${text}\nJSON:`,
+      temperature: 0.1,
+      experimental_telemetry: {
+        isEnabled: true,
+        functionId: telemetry?.functionId ?? "bot-classify-message-type",
+        metadata: telemetry?.metadata,
+      },
+    });
+    const trimmed = out.trim();
+    const candidate = extractFirstJsonObject(trimmed);
+    if (candidate) {
+      const obj = JSON.parse(candidate);
+      const validated = messageTypeSchema.safeParse(obj);
+      if (validated.success) return validated.data;
+    }
+  } catch (_e) {
+    // ignore and fallback below
+  }
+  // Fallback: default to chat without logging
+  return { type: "chat", subtype: null, confidence: 0.3, need_logging: false };
+}
+
 export async function advise(
   input: string,
   telemetry?: Telemetry,
@@ -169,6 +213,44 @@ export async function advise(
     experimental_telemetry: {
       isEnabled: true,
       functionId: telemetry?.functionId ?? "bot-advise",
+      metadata: telemetry?.metadata,
+    },
+  });
+  return text.trim();
+}
+
+export async function answerQuestion(
+  question: string,
+  messageType: MessageTypeResult,
+  telemetry?: Telemetry,
+): Promise<string> {
+  const systemPrompt = await getAssistantSystemPrompt();
+
+  // Создаем контекстный промпт в зависимости от типа вопроса
+  let contextPrompt = question;
+
+  if (messageType.subtype === "about_bot") {
+    contextPrompt = `Пользователь спрашивает о тебе как о боте. Вопрос: "${question}"
+    
+Ответь дружелюбно, расскажи о своих возможностях согласно системному промпту.`;
+  } else if (messageType.subtype === "data_query") {
+    contextPrompt = `Пользователь спрашивает о своих данных/статистике. Вопрос: "${question}"
+    
+Объясни, что для получения статистики нужно сначала накопить данные, записывая события. Предложи начать с записи покупок, задач или других событий.`;
+  } else if (messageType.subtype === "general") {
+    contextPrompt = `Пользователь задает общий вопрос. Вопрос: "${question}"
+    
+Ответь полезно и по возможности покажи, как Synoro может помочь в этой ситуации.`;
+  }
+
+  const { text } = await generateText({
+    model: getActiveProvider()(getAdviceModel()),
+    system: systemPrompt,
+    prompt: contextPrompt,
+    temperature: 0.6,
+    experimental_telemetry: {
+      isEnabled: true,
+      functionId: telemetry?.functionId ?? "bot-answer-question",
       metadata: telemetry?.metadata,
     },
   });

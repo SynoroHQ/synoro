@@ -1,14 +1,22 @@
 import { randomUUID } from "node:crypto";
 import type { Context } from "grammy";
 
-import { advise, classifyRelevance, parseTask } from "../services/ai-service";
+import {
+  advise,
+  answerQuestion,
+  classifyMessageType,
+  classifyRelevance,
+  parseTask,
+} from "../services/ai-service";
 import { logEvent } from "../services/db";
 import { extractTags } from "../services/relevance";
 
 export async function handleText(ctx: Context): Promise<void> {
   const text = ctx.message?.text ?? "";
-  let tip = "";
-  let parsed: unknown = null;
+
+  // Показываем индикатор "печатает..."
+  await ctx.replyWithChatAction("typing");
+
   try {
     const traceId = randomUUID();
     const chatId = String(ctx.chat?.id ?? "unknown");
@@ -18,60 +26,109 @@ export async function handleText(ctx: Context): Promise<void> {
         ? String(ctx.message.message_id)
         : undefined;
 
-    parsed = await parseTask(text, {
-      functionId: "tg-parse-text",
-      metadata: {
-        langfuseTraceId: traceId,
-        chatId,
-        userId,
-        channel: "telegram",
-        type: "text",
-      },
+    const telemetryBase = {
+      langfuseTraceId: traceId,
+      chatId,
+      userId,
+      channel: "telegram",
+      type: "text",
+      ...(messageId ? { messageId } : {}),
+    };
+
+    // Классифицируем тип сообщения
+    const messageType = await classifyMessageType(text, {
+      functionId: "tg-classify-message-type",
+      metadata: telemetryBase,
     });
-    tip = await advise(text, {
-      functionId: "tg-handle-text",
-      metadata: {
-        langfuseTraceId: traceId,
-        chatId,
-        userId,
-        ...(messageId ? { messageId } : {}),
-        channel: "telegram",
-        type: "text",
-      },
-    });
-    const msg = tip
-      ? `Записал: “${text}”.\nСовет: ${tip}`
-      : `Записал: “${text}”.`;
-    await ctx.reply(msg);
+
+    let response = "";
+    let parsed: unknown = null;
+
+    // Обрабатываем в зависимости от типа сообщения
+    switch (messageType.type) {
+      case "question":
+        // Отвечаем на вопрос без записи в базу
+        response = await answerQuestion(text, messageType, {
+          functionId: "tg-answer-question",
+          metadata: telemetryBase,
+        });
+        break;
+
+      case "event":
+        // Обрабатываем событие: парсим и даем совет
+        parsed = await parseTask(text, {
+          functionId: "tg-parse-text",
+          metadata: telemetryBase,
+        });
+
+        const tip = await advise(text, {
+          functionId: "tg-handle-text",
+          metadata: telemetryBase,
+        });
+
+        response = tip
+          ? `Записал: "${text}".\nСовет: ${tip}`
+          : `Записал: "${text}".`;
+        break;
+
+      case "chat":
+        // Простое общение - даем дружелюбный ответ
+        response = await answerQuestion(text, messageType, {
+          functionId: "tg-chat-response",
+          metadata: telemetryBase,
+        });
+        break;
+
+      case "irrelevant":
+        // Игнорируем спам и нерелевантные сообщения
+        response =
+          "Понял, спасибо за сообщение! Если нужна помощь, просто спроси.";
+        break;
+
+      default:
+        // Fallback - обрабатываем как событие
+        parsed = await parseTask(text, {
+          functionId: "tg-parse-text-fallback",
+          metadata: telemetryBase,
+        });
+
+        const fallbackTip = await advise(text, {
+          functionId: "tg-handle-text-fallback",
+          metadata: telemetryBase,
+        });
+
+        response = fallbackTip
+          ? `Записал: "${text}".\nСовет: ${fallbackTip}`
+          : `Записал: "${text}".`;
+    }
+
+    await ctx.reply(response);
+
+    // Логируем в базу только если нужно
+    if (messageType.need_logging || parsed) {
+      try {
+        const tags = extractTags(text);
+        await logEvent({
+          chatId,
+          type: "text",
+          text,
+          meta: {
+            user: ctx.from?.username ?? ctx.from?.id,
+            parsed,
+            tags,
+            messageType: messageType.type,
+            subtype: messageType.subtype,
+            confidence: messageType.confidence,
+          },
+        });
+      } catch (logError) {
+        console.warn("Failed to log event:", logError);
+      }
+    }
   } catch (err) {
     console.error("Text handling error:", err);
     await ctx.reply(
       "Не удалось обработать сообщение. Попробуйте ещё раз позже.",
     );
-  } finally {
-    try {
-      const cls = await classifyRelevance(text);
-      const relevant = cls?.relevant === true || Boolean(parsed);
-      if (relevant) {
-        const tags = extractTags(text);
-        await logEvent({
-          chatId: String(ctx.chat?.id ?? "unknown"),
-          type: "text",
-          text,
-          meta: { user: ctx.from?.username ?? ctx.from?.id, parsed, tags },
-        });
-      }
-    } catch (_e) {
-      // If classification fails, log only if parsed exists
-      if (parsed) {
-        const tags = extractTags(text);
-        await logEvent({
-          chatId: String(ctx.chat?.id ?? "unknown"),
-          type: "text",
-          text,
-          meta: { user: ctx.from?.username ?? ctx.from?.id, parsed, tags },
-        });
-      }
-    }
   }
 }

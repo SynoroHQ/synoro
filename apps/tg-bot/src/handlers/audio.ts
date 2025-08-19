@@ -4,6 +4,8 @@ import type { Context } from "grammy";
 import { env } from "../env";
 import {
   advise,
+  answerQuestion,
+  classifyMessageType,
   classifyRelevance,
   parseTask,
   transcribe,
@@ -17,6 +19,9 @@ export async function handleAudio(ctx: Context): Promise<void> {
     await ctx.reply("Не удалось получить файл аудио.");
     return;
   }
+
+  // Показываем индикатор "печатает..." для аудио сообщений
+  await ctx.replyWithChatAction("typing");
 
   try {
     const traceId = randomUUID();
@@ -52,50 +57,111 @@ export async function handleAudio(ctx: Context): Promise<void> {
       },
     });
 
-    const parsed = await parseTask(text, {
-      functionId: "tg-parse-audio",
-      metadata: {
-        langfuseTraceId: traceId,
-        chatId,
-        userId,
-        ...(messageId ? { messageId } : {}),
-        channel: "telegram",
-        type: "audio",
-        filename,
-      },
-    });
-
     if (text.trim().length === 0) {
       await ctx.reply("Голос распознан, но текста не найдено.");
       return;
     }
 
-    const tip = await advise(text, {
-      functionId: "tg-advise-audio",
-      metadata: {
-        langfuseTraceId: traceId,
-        chatId,
-        userId,
-        ...(messageId ? { messageId } : {}),
-        channel: "telegram",
-        type: "audio",
-      },
-    });
-    await ctx.reply(
-      tip ? `Распознал: ${text}\nСовет: ${tip}` : `Распознал: ${text}`,
-    );
+    const telemetryBase = {
+      langfuseTraceId: traceId,
+      chatId,
+      userId,
+      channel: "telegram",
+      type: "audio",
+      filename,
+      ...(messageId ? { messageId } : {}),
+    };
 
-    // Log only if relevant by LLM or if we extracted a structured task
-    const cls = await classifyRelevance(text);
-    const relevant = cls?.relevant === true || Boolean(parsed);
-    if (relevant) {
-      const tags = extractTags(text);
-      await logEvent({
-        chatId: String(ctx.chat?.id ?? "unknown"),
-        type: "audio",
-        text,
-        meta: { file_path: file.file_path, parsed, tags },
-      });
+    // Классифицируем тип распознанного сообщения
+    const messageType = await classifyMessageType(text, {
+      functionId: "tg-classify-audio-message-type",
+      metadata: telemetryBase,
+    });
+
+    let response = "";
+    let parsed: unknown = null;
+
+    // Обрабатываем в зависимости от типа сообщения
+    switch (messageType.type) {
+      case "question":
+        // Отвечаем на вопрос без записи в базу
+        const answer = await answerQuestion(text, messageType, {
+          functionId: "tg-answer-audio-question",
+          metadata: telemetryBase,
+        });
+        response = `Распознал: "${text}"\n\n${answer}`;
+        break;
+
+      case "event":
+        // Обрабатываем событие: парсим и даем совет
+        parsed = await parseTask(text, {
+          functionId: "tg-parse-audio",
+          metadata: telemetryBase,
+        });
+
+        const tip = await advise(text, {
+          functionId: "tg-advise-audio",
+          metadata: telemetryBase,
+        });
+
+        response = tip
+          ? `Распознал: "${text}"\nЗаписал!\nСовет: ${tip}`
+          : `Распознал: "${text}"\nЗаписал!`;
+        break;
+
+      case "chat":
+        // Простое общение - даем дружелюбный ответ
+        const chatResponse = await answerQuestion(text, messageType, {
+          functionId: "tg-audio-chat-response",
+          metadata: telemetryBase,
+        });
+        response = `Распознал: "${text}"\n\n${chatResponse}`;
+        break;
+
+      case "irrelevant":
+        // Игнорируем спам и нерелевантные сообщения
+        response = `Распознал: "${text}"\n\nПонял, спасибо за сообщение! Если нужна помощь, просто спроси.`;
+        break;
+
+      default:
+        // Fallback - обрабатываем как событие
+        parsed = await parseTask(text, {
+          functionId: "tg-parse-audio-fallback",
+          metadata: telemetryBase,
+        });
+
+        const fallbackTip = await advise(text, {
+          functionId: "tg-advise-audio-fallback",
+          metadata: telemetryBase,
+        });
+
+        response = fallbackTip
+          ? `Распознал: "${text}"\nЗаписал!\nСовет: ${fallbackTip}`
+          : `Распознал: "${text}"\nЗаписал!`;
+    }
+
+    await ctx.reply(response);
+
+    // Логируем в базу только если нужно
+    if (messageType.need_logging || parsed) {
+      try {
+        const tags = extractTags(text);
+        await logEvent({
+          chatId,
+          type: "audio",
+          text,
+          meta: {
+            file_path: file.file_path,
+            parsed,
+            tags,
+            messageType: messageType.type,
+            subtype: messageType.subtype,
+            confidence: messageType.confidence,
+          },
+        });
+      } catch (logError) {
+        console.warn("Failed to log audio event:", logError);
+      }
     }
   } catch (err) {
     console.error("Audio handling error:", err);
