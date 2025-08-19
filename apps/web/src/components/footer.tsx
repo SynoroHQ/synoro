@@ -18,25 +18,25 @@ export default function Footer() {
       </div>
 
       {/* Main Footer Content */}
-      <div className="relative z-10 px-4 py-16">
+      <div className="relative z-10 px-4 py-12 sm:py-16">
         <div className="container mx-auto max-w-6xl">
-          <div className="grid gap-8 md:grid-cols-4">
+          <div className="grid gap-6 sm:grid-cols-2 sm:gap-8 lg:grid-cols-4">
             {/* Brand Section */}
-            <div className="md:col-span-1">
-              <div className="gradient-text mb-4 font-serif text-3xl font-bold transition-transform duration-300 hover:scale-105">
+            <div className="sm:col-span-2 lg:col-span-1">
+              <div className="gradient-text mb-3 font-serif text-2xl font-bold transition-transform duration-300 hover:scale-105 sm:mb-4 sm:text-3xl">
                 Synoro
               </div>
-              <p className="mb-6 leading-relaxed text-gray-400">
+              <p className="mb-4 text-sm leading-relaxed text-gray-400 sm:mb-6 sm:text-base">
                 {t("description")}
               </p>
-              <div className="flex space-x-4">
+              <div className="flex space-x-3 sm:space-x-4">
                 <a
                   href="#"
-                  className="hover:bg-primary group flex h-10 w-10 items-center justify-center rounded-full bg-white/10 transition-all duration-300 hover:scale-110"
+                  className="hover:bg-primary group flex h-8 w-8 items-center justify-center rounded-full bg-white/10 transition-all duration-300 hover:scale-110 sm:h-10 sm:w-10"
                   aria-label="Facebook"
                 >
                   <svg
-                    className="h-5 w-5 text-white group-hover:text-white"
+                    className="h-4 w-4 text-white group-hover:text-white sm:h-5 sm:w-5"
                     fill="currentColor"
                     viewBox="0 0 24 24"
                   >
@@ -45,11 +45,11 @@ export default function Footer() {
                 </a>
                 <a
                   href="#"
-                  className="hover:bg-primary group flex h-10 w-10 items-center justify-center rounded-full bg-white/10 transition-all duration-300 hover:scale-110"
+                  className="hover:bg-primary group flex h-8 w-8 items-center justify-center rounded-full bg-white/10 transition-all duration-300 hover:scale-110 sm:h-10 sm:w-10"
                   aria-label="Twitter"
                 >
                   <svg
-                    className="h-5 w-5 text-white group-hover:text-white"
+                    className="h-4 w-4 text-white group-hover:text-white sm:h-5 sm:w-5"
                     fill="currentColor"
                     viewBox="0 0 24 24"
                   >
@@ -58,11 +58,11 @@ export default function Footer() {
                 </a>
                 <a
                   href="#"
-                  className="hover:bg-primary group flex h-10 w-10 items-center justify-center rounded-full bg-white/10 transition-all duration-300 hover:scale-110"
+                  className="hover:bg-primary group flex h-8 w-8 items-center justify-center rounded-full bg-white/10 transition-all duration-300 hover:scale-110 sm:h-10 sm:w-10"
                   aria-label="Instagram"
                 >
                   <svg
-                    className="h-5 w-5 text-white group-hover:text-white"
+                    className="h-4 w-4 text-white group-hover:text-white sm:h-5 sm:w-5"
                     fill="currentColor"
                     viewBox="0 0 24 24"
                   >
@@ -74,14 +74,14 @@ export default function Footer() {
 
             {/* Quick Links */}
             <div>
-              <h3 className="mb-6 text-lg font-semibold text-white">
+              <h3 className="mb-4 text-base font-semibold text-white sm:mb-6 sm:text-lg">
                 {t("quickLinks")}
               </h3>
-              <ul className="space-y-3">
+              <ul className="space-y-2 sm:space-y-3">
                 <li>
                   <a
                     href="#features"
-                    className="inline-block text-gray-400 transition-all duration-300 hover:translate-x-1 hover:text-white"
+                    className="inline-block text-sm text-gray-400 transition-all duration-300 hover:translate-x-1 hover:text-white sm:text-base"
                   >
                     {t("features")}
                   </a>
@@ -89,7 +89,7 @@ export default function Footer() {
                 <li>
                   <a
                     href="#pricing"
-                    className="inline-block text-gray-400 transition-all duration-300 hover:translate-x-1 hover:text-white"
+                    className="inline-block text-sm text-gray-400 transition-all duration-300 hover:translate-x-1 hover:text-white sm:text-base"
                   >
                     {t("pricing")}
                   </a>
@@ -97,7 +97,7 @@ export default function Footer() {
                 <li>
                   <a
                     href="#about"
-                    className="inline-block text-gray-400 transition-all duration-300 hover:translate-x-1 hover:text-white"
+                    className="inline-block text-sm text-gray-400 transition-all duration-300 hover:translate-x-1 hover:text-white sm:text-base"
                   >
                     {t("aboutUs")}
                   </a>
@@ -105,7 +105,7 @@ export default function Footer() {
                 <li>
                   <a
                     href="#contact"
-                    className="inline-block text-gray-400 transition-all duration-300 hover:translate-x-1 hover:text-white"
+                    className="inline-block text-sm text-gray-400 transition-all duration-300 hover:translate-x-1 hover:text-white sm:text-base"
                   >
                     {t("contact")}
                   </a>
@@ -115,14 +115,14 @@ export default function Footer() {
 
             {/* Support */}
             <div>
-              <h3 className="mb-6 text-lg font-semibold text-white">
+              <h3 className="mb-4 text-base font-semibold text-white sm:mb-6 sm:text-lg">
                 {t("support")}
               </h3>
-              <ul className="space-y-3">
+              <ul className="space-y-2 sm:space-y-3">
                 <li>
                   <a
                     href="#help"
-                    className="inline-block text-gray-400 transition-all duration-300 hover:translate-x-1 hover:text-white"
+                    className="inline-block text-sm text-gray-400 transition-all duration-300 hover:translate-x-1 hover:text-white sm:text-base"
                   >
                     {t("helpCenter")}
                   </a>
@@ -130,7 +130,7 @@ export default function Footer() {
                 <li>
                   <a
                     href="#privacy"
-                    className="inline-block text-gray-400 transition-all duration-300 hover:translate-x-1 hover:text-white"
+                    className="inline-block text-sm text-gray-400 transition-all duration-300 hover:translate-x-1 hover:text-white sm:text-base"
                   >
                     {t("privacyPolicy")}
                   </a>
@@ -138,7 +138,7 @@ export default function Footer() {
                 <li>
                   <a
                     href="#terms"
-                    className="inline-block text-gray-400 transition-all duration-300 hover:translate-x-1 hover:text-white"
+                    className="inline-block text-sm text-gray-400 transition-all duration-300 hover:translate-x-1 hover:text-white sm:text-base"
                   >
                     {t("termsOfService")}
                   </a>
@@ -146,7 +146,7 @@ export default function Footer() {
                 <li>
                   <a
                     href="#security"
-                    className="inline-block text-gray-400 transition-all duration-300 hover:translate-x-1 hover:text-white"
+                    className="inline-block text-sm text-gray-400 transition-all duration-300 hover:translate-x-1 hover:text-white sm:text-base"
                   >
                     {t("security")}
                   </a>
@@ -156,21 +156,21 @@ export default function Footer() {
 
             {/* Newsletter */}
             <div>
-              <h3 className="mb-6 text-lg font-semibold text-white">
+              <h3 className="mb-4 text-base font-semibold text-white sm:mb-6 sm:text-lg">
                 {t("stayUpdated")}
               </h3>
-              <p className="mb-4 text-sm text-gray-400">
+              <p className="mb-3 text-xs text-gray-400 sm:mb-4 sm:text-sm">
                 {t("newsletterDescription")}
               </p>
-              <div className="space-y-3">
+              <div className="space-y-2 sm:space-y-3">
                 <div className="relative">
                   <input
                     type="email"
                     placeholder={t("emailPlaceholder")}
-                    className="focus:ring-primary w-full rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-white placeholder-gray-400 backdrop-blur-sm transition-all duration-300 focus:border-transparent focus:ring-2 focus:outline-none"
+                    className="focus:ring-primary w-full rounded-xl border border-white/20 bg-white/10 px-3 py-2 text-sm text-white placeholder-gray-400 backdrop-blur-sm transition-all duration-300 focus:border-transparent focus:ring-2 focus:outline-none sm:px-4 sm:py-3 sm:text-base"
                   />
                 </div>
-                <Button className="w-full rounded-xl bg-white py-3 font-semibold text-gray-900 shadow-lg transition-all duration-300 hover:scale-105 hover:bg-gray-50 hover:shadow-xl">
+                <Button className="w-full rounded-xl bg-white py-2 text-sm font-semibold text-gray-900 shadow-lg transition-all duration-300 hover:scale-105 hover:bg-gray-50 hover:shadow-xl sm:py-3 sm:text-base">
                   {t("subscribe")}
                 </Button>
               </div>
@@ -180,11 +180,13 @@ export default function Footer() {
       </div>
 
       {/* Bottom Bar */}
-      <div className="relative z-10 border-t border-white/10 px-4 py-6">
+      <div className="relative z-10 border-t border-white/10 px-4 py-4 sm:py-6">
         <div className="container mx-auto max-w-6xl">
-          <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-            <div className="text-sm text-gray-400">{t("copyright")}</div>
-            <div className="flex items-center gap-6 text-sm">
+          <div className="flex flex-col items-center justify-between gap-3 sm:gap-4 md:flex-row">
+            <div className="text-xs text-gray-400 sm:text-sm">
+              {t("copyright")}
+            </div>
+            <div className="flex flex-col items-center gap-3 text-xs sm:flex-row sm:gap-6 sm:text-sm">
               <a
                 href="#status"
                 className="text-gray-400 transition-colors duration-300 hover:text-white"
@@ -197,9 +199,11 @@ export default function Footer() {
               >
                 {t("apiDocs")}
               </a>
-              <div className="flex items-center gap-2 text-gray-400">
+              <div className="flex items-center gap-1 text-gray-400 sm:gap-2">
                 <div className="h-2 w-2 animate-pulse rounded-full bg-green-500"></div>
-                <span className="text-xs">{t("allSystemsOperational")}</span>
+                <span className="text-[10px] sm:text-xs">
+                  {t("allSystemsOperational")}
+                </span>
               </div>
             </div>
           </div>

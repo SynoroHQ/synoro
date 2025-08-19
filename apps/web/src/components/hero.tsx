@@ -52,7 +52,7 @@ export default function Hero() {
   }, []);
 
   return (
-    <section className="relative overflow-hidden px-4 pt-32 pb-20">
+    <section className="relative overflow-hidden px-4 pt-20 pb-12 sm:pt-32 sm:pb-20">
       {/* Background Elements */}
       <div className="absolute inset-0">
         <div className="from-primary/10 to-accent/10 absolute top-0 left-0 h-full w-full bg-gradient-to-br"></div>
@@ -63,38 +63,38 @@ export default function Hero() {
         ></div>
       </div>
 
-      <div className="relative z-10 container mx-auto max-w-5xl pt-20 text-center">
-        <div className="mb-8">
-          <Badge className="bg-primary/10 text-primary border-primary/50 rounded-full px-4 py-2 text-sm font-medium">
-            <Sparkles className="mr-2 h-4 w-4" />
+      <div className="relative z-10 container mx-auto max-w-5xl pt-8 text-center sm:pt-20">
+        <div className="mb-6 sm:mb-8">
+          <Badge className="bg-primary/10 text-primary border-primary/50 rounded-full px-3 py-1.5 text-xs font-medium sm:px-4 sm:py-2 sm:text-sm">
+            <Sparkles className="mr-1.5 h-3 w-3 sm:mr-2 sm:h-4 sm:w-4" />
             {t("badge")}
           </Badge>
         </div>
 
         <h1
-          className="animate-fade-in-up mb-8 text-6xl leading-tight font-bold md:text-8xl"
+          className="animate-fade-in-up mb-6 text-4xl leading-tight font-bold sm:mb-8 sm:text-6xl md:text-8xl"
           style={{ animationDelay: "0.2s" }}
         >
           <span className="animate-gradient-x inline-block cursor-pointer bg-gradient-to-r from-green-600 via-green-400 to-green-600 bg-[length:200%_auto] bg-clip-text font-serif text-transparent transition-all duration-500">
             Synoro
           </span>
           <br />
-          <span className="text-muted-foreground text-4xl font-normal md:text-5xl">
+          <span className="text-muted-foreground text-2xl font-normal sm:text-4xl md:text-5xl">
             {t("title")}
           </span>
         </h1>
 
         <p
-          className="text-muted-foreground animate-fade-in-up mx-auto mb-12 max-w-3xl text-xl leading-relaxed"
+          className="text-muted-foreground animate-fade-in-up mx-auto mb-8 max-w-3xl px-2 text-base leading-relaxed sm:mb-12 sm:px-0 sm:text-lg lg:text-xl"
           style={{ animationDelay: "0.4s" }}
         >
           {t("subtitle")}
         </p>
 
-        <div className="mb-16 flex flex-col justify-center gap-6 sm:flex-row">
+        <div className="mb-12 flex flex-col justify-center gap-4 px-4 sm:mb-16 sm:flex-row sm:gap-6 sm:px-0">
           <Button
             size="lg"
-            className="bg-primary hover:bg-primary/90 rounded-xl px-8 py-3 font-semibold text-gray-900 shadow-lg transition-all duration-300 hover:shadow-xl"
+            className="bg-primary hover:bg-primary/90 w-full rounded-xl px-6 py-3 font-semibold text-gray-900 shadow-lg transition-all duration-300 hover:shadow-xl sm:w-auto sm:px-8"
           >
             <Sparkles className="mr-2 h-4 w-4" />
             {t("startTrial")}
@@ -103,7 +103,7 @@ export default function Hero() {
           <Button
             size="lg"
             variant="outline"
-            className="border-primary text-primary hover:bg-primary rounded-xl bg-transparent px-8 py-3 font-semibold shadow-lg transition-all duration-300 hover:text-gray-900 hover:shadow-xl"
+            className="border-primary text-primary hover:bg-primary w-full rounded-xl bg-transparent px-6 py-3 font-semibold shadow-lg transition-all duration-300 hover:text-gray-900 hover:shadow-xl sm:w-auto sm:px-8"
           >
             <Play className="mr-2 h-4 w-4" />
             {t("seeDemo")}
@@ -111,21 +111,25 @@ export default function Hero() {
         </div>
 
         <div
-          className="animate-fade-in-up relative mx-auto max-w-md"
+          className="animate-fade-in-up relative mx-auto max-w-sm sm:max-w-md"
           style={{ animationDelay: "0.8s" }}
         >
-          <div className="glass-effect border-primary/30 bg-background/95 relative rounded-3xl border p-6 backdrop-blur-xl">
+          <div className="glass-effect border-primary/30 bg-background/95 relative mx-2 rounded-3xl border p-4 backdrop-blur-xl sm:mx-0 sm:p-6">
             {/* Chat Header */}
-            <div className="border-primary/10 mb-6 flex items-center gap-4 border-b pb-4">
+            <div className="border-primary/10 mb-4 flex items-center gap-3 border-b pb-3 sm:mb-6 sm:gap-4 sm:pb-4">
               <div className="relative">
-                <div className="from-primary to-accent flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br">
-                  <MessageSquare className="text-primary-foreground h-6 w-6" />
+                <div className="from-primary to-accent flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br sm:h-12 sm:w-12">
+                  <MessageSquare className="text-primary-foreground h-5 w-5 sm:h-6 sm:w-6" />
                 </div>
                 <div className="absolute -right-1 -bottom-1 h-4 w-4 animate-pulse rounded-full border-2 border-white bg-green-500"></div>
               </div>
               <div className="flex-1">
-                <h3 className="text-foreground font-semibold">{t("aiName")}</h3>
-                <p className="text-muted-foreground text-sm">{t("aiStatus")}</p>
+                <h3 className="text-foreground text-sm font-semibold sm:text-base">
+                  {t("aiName")}
+                </h3>
+                <p className="text-muted-foreground text-xs sm:text-sm">
+                  {t("aiStatus")}
+                </p>
               </div>
               {(isRecording || animationComplete) && (
                 <div className="animate-fade-in flex items-center gap-2">
@@ -136,12 +140,12 @@ export default function Hero() {
             </div>
 
             {/* Chat Messages */}
-            <div className="scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent max-h-[400px] space-y-4 overflow-x-hidden overflow-y-auto">
+            <div className="scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent max-h-[350px] space-y-3 overflow-x-hidden overflow-y-auto sm:max-h-[400px] sm:space-y-4">
               {(currentStep === 1 || animationComplete) && (
                 <div className="animate-scale-in flex justify-center">
-                  <div className="flex items-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3">
+                  <div className="flex items-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-3 py-2 sm:px-4 sm:py-3">
                     <div className="h-3 w-3 animate-pulse rounded-full bg-red-500"></div>
-                    <span className="text-sm text-red-600">
+                    <span className="text-xs text-red-600 sm:text-sm">
                       {t("recording")}
                     </span>
                     <Mic className="h-4 w-4 text-red-500" />
@@ -152,10 +156,12 @@ export default function Hero() {
               {/* User Message 1 */}
               {(currentStep >= 2 || animationComplete) && (
                 <div className="animate-slide-in-right flex justify-end">
-                  <div className="bg-primary text-primary-foreground animate-message-pop max-w-[80%] rounded-2xl rounded-tr-md px-4 py-3">
-                    <p className="text-sm">{t("userMessage1")}</p>
+                  <div className="bg-primary text-primary-foreground animate-message-pop max-w-[85%] rounded-2xl rounded-tr-md px-3 py-2 sm:max-w-[80%] sm:px-4 sm:py-3">
+                    <p className="text-xs sm:text-sm">{t("userMessage1")}</p>
                     <div className="mt-1 flex items-center justify-end gap-1">
-                      <span className="text-xs opacity-70">14:32</span>
+                      <span className="text-[10px] opacity-70 sm:text-xs">
+                        14:32
+                      </span>
                       <CheckCircle className="animate-check-mark h-3 w-3 opacity-70" />
                     </div>
                   </div>
@@ -165,9 +171,9 @@ export default function Hero() {
               {/* Typing Indicator 1 */}
               {(currentStep === 3 || animationComplete) && (
                 <div className="animate-slide-in-left flex justify-start">
-                  <div className="bg-muted animate-bounce-subtle max-w-[80%] rounded-2xl rounded-tl-md px-4 py-3">
+                  <div className="bg-muted animate-bounce-subtle max-w-[85%] rounded-2xl rounded-tl-md px-3 py-2 sm:max-w-[80%] sm:px-4 sm:py-3">
                     <div className="flex items-center gap-1">
-                      <span className="text-muted-foreground text-sm">
+                      <span className="text-muted-foreground text-xs sm:text-sm">
                         {t("aiAnalyzing")}
                       </span>
                       <div className="ml-2 flex gap-1">
@@ -192,10 +198,10 @@ export default function Hero() {
               {/* Bot Response 1 */}
               {(currentStep >= 4 || animationComplete) && (
                 <div className="animate-slide-in-left flex justify-start">
-                  <div className="bg-muted animate-message-pop max-w-[80%] rounded-2xl rounded-tl-md px-4 py-3">
-                    <p className="text-sm">{t("aiResponse1")}</p>
+                  <div className="bg-muted animate-message-pop max-w-[85%] rounded-2xl rounded-tl-md px-3 py-2 sm:max-w-[80%] sm:px-4 sm:py-3">
+                    <p className="text-xs sm:text-sm">{t("aiResponse1")}</p>
                     <div className="mt-1 flex items-center justify-start gap-1">
-                      <span className="text-muted-foreground text-xs">
+                      <span className="text-muted-foreground text-[10px] sm:text-xs">
                         14:33
                       </span>
                     </div>
@@ -209,8 +215,10 @@ export default function Hero() {
                   className="animate-slide-in-left flex justify-start"
                   style={{ animationDelay: "0.5s" }}
                 >
-                  <div className="bg-accent/10 border-accent/20 animate-glow-pulse max-w-[80%] rounded-2xl rounded-tl-md border px-4 py-3">
-                    <p className="text-accent text-sm">{t("aiSuggestion")}</p>
+                  <div className="bg-accent/10 border-accent/20 animate-glow-pulse max-w-[85%] rounded-2xl rounded-tl-md border px-3 py-2 sm:max-w-[80%] sm:px-4 sm:py-3">
+                    <p className="text-accent text-xs sm:text-sm">
+                      {t("aiSuggestion")}
+                    </p>
                   </div>
                 </div>
               )}
@@ -274,12 +282,14 @@ export default function Hero() {
             </div>
 
             {/* Input Preview */}
-            <div className="border-primary/10 mt-6 border-t pt-4">
-              <div className="text-muted-foreground flex items-center gap-3 text-sm">
-                <div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-full">
-                  <MessageSquare className="text-primary h-4 w-4" />
+            <div className="border-primary/10 mt-4 border-t pt-3 sm:mt-6 sm:pt-4">
+              <div className="text-muted-foreground flex items-center gap-2 text-xs sm:gap-3 sm:text-sm">
+                <div className="bg-primary/10 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full sm:h-8 sm:w-8">
+                  <MessageSquare className="text-primary h-3 w-3 sm:h-4 sm:w-4" />
                 </div>
-                <span className="flex-1 italic">{t("inputHint")}</span>
+                <span className="flex-1 leading-relaxed italic">
+                  {t("inputHint")}
+                </span>
               </div>
             </div>
           </div>

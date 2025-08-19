@@ -18,63 +18,63 @@ export default function WhoBenefits() {
   return (
     <section
       id="for-whom"
-      className="from-background to-muted/20 bg-gradient-to-br px-4 py-32"
+      className="from-background to-muted/20 bg-gradient-to-br px-4 py-16 sm:py-24 lg:py-32"
     >
       <div className="container mx-auto max-w-7xl">
-        <div className="mb-20 text-center">
-          <Badge className="bg-primary/10 text-primary border-primary/30 hover:bg-primary/20 mb-6 rounded-full px-6 py-3 text-sm font-medium transition-all duration-300 hover:scale-105">
-            <Users className="mr-2 h-4 w-4" />
+        <div className="mb-12 text-center sm:mb-16 lg:mb-20">
+          <Badge className="bg-primary/10 text-primary border-primary/30 hover:bg-primary/20 mb-4 rounded-full px-4 py-2 text-xs font-medium transition-all duration-300 hover:scale-105 sm:mb-6 sm:px-6 sm:py-3 sm:text-sm">
+            <Users className="mr-1.5 h-3 w-3 sm:mr-2 sm:h-4 sm:w-4" />
             {t("badge")}
           </Badge>
-          <h2 className="mb-6 font-serif text-5xl font-bold md:text-6xl">
+          <h2 className="mb-4 font-serif text-3xl font-bold sm:mb-6 sm:text-4xl lg:text-5xl xl:text-6xl">
             {t("title")}
           </h2>
-          <p className="text-muted-foreground mx-auto max-w-3xl text-xl leading-relaxed">
+          <p className="text-muted-foreground mx-auto max-w-3xl px-2 text-base leading-relaxed sm:px-0 sm:text-lg lg:text-xl">
             {t("subtitle")}
           </p>
         </div>
 
-        <div className="space-y-24">
+        <div className="space-y-16 sm:space-y-20 lg:space-y-24">
           {/* Families Section */}
           <div className="group">
-            <div className="grid items-center gap-12 lg:grid-cols-2">
+            <div className="grid items-center gap-8 sm:gap-12 lg:grid-cols-2">
               <div className="order-2 lg:order-1">
-                <div className="mb-6 flex items-center gap-4">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-xl">
-                    <Users className="h-8 w-8 text-white" />
+                <div className="mb-4 flex items-center gap-3 sm:mb-6 sm:gap-4">
+                  <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-3xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-xl sm:h-16 sm:w-16">
+                    <Users className="h-6 w-6 text-white sm:h-8 sm:w-8" />
                   </div>
                   <div>
-                    <h3 className="mb-2 text-3xl font-bold text-blue-600">
+                    <h3 className="mb-1 text-2xl font-bold text-blue-600 sm:mb-2 sm:text-3xl">
                       {t("families.title")}
                     </h3>
-                    <p className="text-muted-foreground">
+                    <p className="text-muted-foreground text-sm sm:text-base">
                       {t("families.subtitle")}
                     </p>
                   </div>
                 </div>
 
-                <div className="space-y-6">
-                  <div className="rounded-2xl border border-blue-100 bg-blue-50 p-6">
-                    <h4 className="mb-3 flex items-center gap-2 font-semibold text-blue-900">
-                      <CheckCircle className="h-5 w-5 text-blue-600" />
+                <div className="space-y-4 sm:space-y-6">
+                  <div className="rounded-2xl border border-blue-100 bg-blue-50 p-4 sm:p-4 sm:p-6">
+                    <h4 className="mb-2 flex items-center gap-2 text-sm font-semibold text-blue-900 sm:mb-3 sm:text-base">
+                      <CheckCircle className="h-4 w-4 flex-shrink-0 text-blue-600 sm:h-5 sm:w-5" />
                       {t("families.expenseTracking.title")}
                     </h4>
-                    <p className="text-sm leading-relaxed text-blue-800">
+                    <p className="text-xs leading-relaxed text-blue-800 sm:text-sm">
                       {t("families.expenseTracking.description")}
                     </p>
                   </div>
 
-                  <div className="rounded-2xl border border-blue-100 bg-blue-50 p-6">
-                    <h4 className="mb-3 flex items-center gap-2 font-semibold text-blue-900">
-                      <CheckCircle className="h-5 w-5 text-blue-600" />
+                  <div className="rounded-2xl border border-blue-100 bg-blue-50 p-4 sm:p-4 sm:p-6">
+                    <h4 className="mb-2 flex items-center gap-2 text-sm font-semibold text-blue-900 sm:mb-3 sm:text-base">
+                      <CheckCircle className="h-4 w-4 flex-shrink-0 text-blue-600 sm:h-5 sm:w-5" />
                       {t("families.choreManagement.title")}
                     </h4>
-                    <p className="text-sm leading-relaxed text-blue-800">
+                    <p className="text-xs leading-relaxed text-blue-800 sm:text-sm">
                       {t("families.choreManagement.description")}
                     </p>
                   </div>
 
-                  <div className="rounded-2xl bg-gradient-to-r from-blue-500 to-blue-600 p-6 text-white">
+                  <div className="rounded-2xl bg-gradient-to-r from-blue-500 to-blue-600 p-4 text-white sm:p-6">
                     <div className="flex items-start gap-3">
                       <div className="mt-1 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-white/20">
                         <span className="text-sm font-bold">💡</span>
@@ -130,7 +130,7 @@ export default function WhoBenefits() {
 
           {/* Car Owners Section */}
           <div className="group">
-            <div className="grid items-center gap-12 lg:grid-cols-2">
+            <div className="grid items-center gap-8 sm:gap-12 lg:grid-cols-2">
               <div className="relative">
                 <div className="absolute -inset-4 rounded-3xl bg-gradient-to-r from-purple-500/20 to-purple-600/20 blur-xl"></div>
                 <div className="relative rounded-3xl border border-purple-100 bg-white p-8 shadow-2xl">
@@ -143,7 +143,7 @@ export default function WhoBenefits() {
                     </div>
                     <div className="space-y-3">
                       <div className="flex items-center gap-3 rounded-lg bg-purple-50 p-3">
-                        <CheckCircle className="h-5 w-5 text-green-500" />
+                        <CheckCircle className="h-4 w-4 text-green-500 sm:h-5 sm:w-5" />
                         <span className="text-sm text-purple-900">
                           {t("dashboard.carOwners.oilChange")}
                         </span>
@@ -166,42 +166,42 @@ export default function WhoBenefits() {
               </div>
 
               <div>
-                <div className="mb-6 flex items-center gap-4">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-br from-purple-500 to-purple-600 shadow-xl">
-                    <Car className="h-8 w-8 text-white" />
+                <div className="mb-4 flex items-center gap-3 sm:mb-6 sm:gap-4">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-3xl bg-gradient-to-br from-purple-500 to-purple-600 shadow-xl sm:h-16 sm:w-16">
+                    <Car className="h-6 w-6 text-white sm:h-8 sm:w-8" />
                   </div>
                   <div>
-                    <h3 className="mb-2 text-3xl font-bold text-purple-600">
+                    <h3 className="mb-1 text-2xl font-bold text-purple-600 sm:mb-2 sm:text-3xl">
                       {t("carOwners.title")}
                     </h3>
-                    <p className="text-muted-foreground">
+                    <p className="text-muted-foreground text-sm sm:text-base">
                       {t("carOwners.subtitle")}
                     </p>
                   </div>
                 </div>
 
-                <div className="space-y-6">
-                  <div className="rounded-2xl border border-purple-100 bg-purple-50 p-6">
-                    <h4 className="mb-3 flex items-center gap-2 font-semibold text-purple-900">
-                      <CheckCircle className="h-5 w-5 text-purple-600" />
+                <div className="space-y-4 sm:space-y-6">
+                  <div className="rounded-2xl border border-purple-100 bg-purple-50 p-4 sm:p-6">
+                    <h4 className="mb-2 flex items-center gap-2 text-sm font-semibold text-purple-900 sm:mb-3 sm:text-base">
+                      <CheckCircle className="h-4 w-4 text-purple-600 sm:h-5 sm:w-5" />
                       {t("carOwners.predictiveMaintenance.title")}
                     </h4>
-                    <p className="text-sm leading-relaxed text-purple-800">
+                    <p className="text-xs leading-relaxed text-purple-800 sm:text-sm">
                       {t("carOwners.predictiveMaintenance.description")}
                     </p>
                   </div>
 
-                  <div className="rounded-2xl border border-purple-100 bg-purple-50 p-6">
-                    <h4 className="mb-3 flex items-center gap-2 font-semibold text-purple-900">
-                      <CheckCircle className="h-5 w-5 text-purple-600" />
+                  <div className="rounded-2xl border border-purple-100 bg-purple-50 p-4 sm:p-6">
+                    <h4 className="mb-2 flex items-center gap-2 text-sm font-semibold text-purple-900 sm:mb-3 sm:text-base">
+                      <CheckCircle className="h-4 w-4 text-purple-600 sm:h-5 sm:w-5" />
                       {t("carOwners.costOptimization.title")}
                     </h4>
-                    <p className="text-sm leading-relaxed text-purple-800">
+                    <p className="text-xs leading-relaxed text-purple-800 sm:text-sm">
                       {t("carOwners.costOptimization.description")}
                     </p>
                   </div>
 
-                  <div className="rounded-2xl bg-gradient-to-r from-purple-500 to-purple-600 p-6 text-white">
+                  <div className="rounded-2xl bg-gradient-to-r from-purple-500 to-purple-600 p-4 text-white sm:p-6">
                     <div className="flex items-start gap-3">
                       <div className="mt-1 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-white/20">
                         <span className="text-sm font-bold">🚗</span>
@@ -223,44 +223,44 @@ export default function WhoBenefits() {
 
           {/* Homeowners Section */}
           <div className="group">
-            <div className="grid items-center gap-12 lg:grid-cols-2">
+            <div className="grid items-center gap-8 sm:gap-12 lg:grid-cols-2">
               <div className="order-2 lg:order-1">
-                <div className="mb-6 flex items-center gap-4">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-br from-teal-500 to-teal-600 shadow-xl">
-                    <Home className="h-8 w-8 text-white" />
+                <div className="mb-4 flex items-center gap-3 sm:mb-6 sm:gap-4">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-3xl bg-gradient-to-br from-teal-500 to-teal-600 shadow-xl sm:h-16 sm:w-16">
+                    <Home className="h-6 w-6 text-white sm:h-8 sm:w-8" />
                   </div>
                   <div>
-                    <h3 className="mb-2 text-3xl font-bold text-teal-600">
+                    <h3 className="mb-1 text-2xl font-bold text-teal-600 sm:mb-2 sm:text-3xl">
                       {t("homeowners.title")}
                     </h3>
-                    <p className="text-muted-foreground">
+                    <p className="text-muted-foreground text-sm sm:text-base">
                       {t("homeowners.subtitle")}
                     </p>
                   </div>
                 </div>
 
-                <div className="space-y-6">
-                  <div className="rounded-2xl border border-teal-100 bg-teal-50 p-6">
-                    <h4 className="mb-3 flex items-center gap-2 font-semibold text-teal-900">
-                      <CheckCircle className="h-5 w-5 text-teal-600" />
+                <div className="space-y-4 sm:space-y-6">
+                  <div className="rounded-2xl border border-teal-100 bg-teal-50 p-4 sm:p-6">
+                    <h4 className="mb-2 flex items-center gap-2 text-sm font-semibold text-teal-900 sm:mb-3 sm:text-base">
+                      <CheckCircle className="h-4 w-4 text-teal-600 sm:h-5 sm:w-5" />
                       {t("homeowners.maintenanceScheduling.title")}
                     </h4>
-                    <p className="text-sm leading-relaxed text-teal-800">
+                    <p className="text-xs leading-relaxed text-teal-800 sm:text-sm">
                       {t("homeowners.maintenanceScheduling.description")}
                     </p>
                   </div>
 
-                  <div className="rounded-2xl border border-teal-100 bg-teal-50 p-6">
-                    <h4 className="mb-3 flex items-center gap-2 font-semibold text-teal-900">
-                      <CheckCircle className="h-5 w-5 text-teal-600" />
+                  <div className="rounded-2xl border border-teal-100 bg-teal-50 p-4 sm:p-6">
+                    <h4 className="mb-2 flex items-center gap-2 text-sm font-semibold text-teal-900 sm:mb-3 sm:text-base">
+                      <CheckCircle className="h-4 w-4 text-teal-600 sm:h-5 sm:w-5" />
                       {t("homeowners.seasonalReminders.title")}
                     </h4>
-                    <p className="text-sm leading-relaxed text-teal-800">
+                    <p className="text-xs leading-relaxed text-teal-800 sm:text-sm">
                       {t("homeowners.seasonalReminders.description")}
                     </p>
                   </div>
 
-                  <div className="rounded-2xl bg-gradient-to-r from-teal-500 to-teal-600 p-6 text-white">
+                  <div className="rounded-2xl bg-gradient-to-r from-teal-500 to-teal-600 p-4 text-white sm:p-6">
                     <div className="flex items-start gap-3">
                       <div className="mt-1 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-white/20">
                         <span className="text-sm font-bold">🏠</span>
@@ -327,7 +327,7 @@ export default function WhoBenefits() {
 
           {/* Freelancers Section */}
           <div className="group">
-            <div className="grid items-center gap-12 lg:grid-cols-2">
+            <div className="grid items-center gap-8 sm:gap-12 lg:grid-cols-2">
               <div className="relative">
                 <div className="absolute -inset-4 rounded-3xl bg-gradient-to-r from-orange-500/20 to-orange-600/20 blur-xl"></div>
                 <div className="relative rounded-3xl border border-orange-100 bg-white p-8 shadow-2xl">
@@ -379,42 +379,42 @@ export default function WhoBenefits() {
               </div>
 
               <div>
-                <div className="mb-6 flex items-center gap-4">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-br from-orange-500 to-orange-600 shadow-xl">
-                    <User className="h-8 w-8 text-white" />
+                <div className="mb-4 flex items-center gap-3 sm:mb-6 sm:gap-4">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-3xl bg-gradient-to-br from-orange-500 to-orange-600 shadow-xl sm:h-16 sm:w-16">
+                    <User className="h-6 w-6 text-white sm:h-8 sm:w-8" />
                   </div>
                   <div>
-                    <h3 className="mb-2 text-3xl font-bold text-orange-600">
+                    <h3 className="mb-1 text-2xl font-bold text-orange-600 sm:mb-2 sm:text-3xl">
                       {t("freelancers.title")}
                     </h3>
-                    <p className="text-muted-foreground">
+                    <p className="text-muted-foreground text-sm sm:text-base">
                       {t("freelancers.subtitle")}
                     </p>
                   </div>
                 </div>
 
-                <div className="space-y-6">
-                  <div className="rounded-2xl border border-orange-100 bg-orange-50 p-6">
-                    <h4 className="mb-3 flex items-center gap-2 font-semibold text-orange-900">
-                      <CheckCircle className="h-5 w-5 text-orange-600" />
+                <div className="space-y-4 sm:space-y-6">
+                  <div className="rounded-2xl border border-orange-100 bg-orange-50 p-4 sm:p-6">
+                    <h4 className="mb-2 flex items-center gap-2 text-sm font-semibold text-orange-900 sm:mb-3 sm:text-base">
+                      <CheckCircle className="h-4 w-4 text-orange-600 sm:h-5 sm:w-5" />
                       {t("freelancers.timeTracking.title")}
                     </h4>
-                    <p className="text-sm leading-relaxed text-orange-800">
+                    <p className="text-xs leading-relaxed text-orange-800 sm:text-sm">
                       {t("freelancers.timeTracking.description")}
                     </p>
                   </div>
 
-                  <div className="rounded-2xl border border-orange-100 bg-orange-50 p-6">
-                    <h4 className="mb-3 flex items-center gap-2 font-semibold text-orange-900">
-                      <CheckCircle className="h-5 w-5 text-orange-600" />
+                  <div className="rounded-2xl border border-orange-100 bg-orange-50 p-4 sm:p-6">
+                    <h4 className="mb-2 flex items-center gap-2 text-sm font-semibold text-orange-900 sm:mb-3 sm:text-base">
+                      <CheckCircle className="h-4 w-4 text-orange-600 sm:h-5 sm:w-5" />
                       {t("freelancers.healthWellness.title")}
                     </h4>
-                    <p className="text-sm leading-relaxed text-orange-800">
+                    <p className="text-xs leading-relaxed text-orange-800 sm:text-sm">
                       {t("freelancers.healthWellness.description")}
                     </p>
                   </div>
 
-                  <div className="rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 p-6 text-white">
+                  <div className="rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 p-4 text-white sm:p-6">
                     <div className="flex items-start gap-3">
                       <div className="mt-1 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-white/20">
                         <span className="text-sm font-bold">💼</span>
@@ -436,16 +436,18 @@ export default function WhoBenefits() {
         </div>
 
         {/* CTA Section */}
-        <div className="mt-20 text-center">
-          <div className="from-primary/10 to-accent/10 border-primary/20 rounded-3xl border bg-gradient-to-r p-12">
-            <h3 className="mb-4 text-3xl font-bold">{t("cta.title")}</h3>
-            <p className="text-muted-foreground mx-auto mb-8 max-w-2xl">
+        <div className="mt-16 text-center sm:mt-20">
+          <div className="from-primary/10 to-accent/10 border-primary/20 rounded-3xl border bg-gradient-to-r p-6 sm:p-8 lg:p-12">
+            <h3 className="mb-3 text-2xl font-bold sm:mb-4 sm:text-3xl">
+              {t("cta.title")}
+            </h3>
+            <p className="text-muted-foreground mx-auto mb-6 max-w-2xl px-2 text-sm sm:mb-8 sm:px-0 sm:text-base">
               {t("cta.subtitle")}
             </p>
-            <div className="flex flex-col justify-center gap-6 sm:flex-row">
+            <div className="flex flex-col justify-center gap-4 sm:flex-row">
               <Button
                 size="lg"
-                className="bg-primary hover:bg-primary/90 rounded-xl px-8 py-3 font-semibold text-gray-900 shadow-lg transition-all duration-300 hover:shadow-xl"
+                className="bg-primary hover:bg-primary/90 w-full rounded-xl px-6 py-3 font-semibold text-gray-900 shadow-lg transition-all duration-300 hover:shadow-xl sm:w-auto sm:px-8"
               >
                 <Sparkles className="mr-2 h-4 w-4" />
                 {t("cta.startTrial")}
@@ -454,7 +456,7 @@ export default function WhoBenefits() {
               <Button
                 size="lg"
                 variant="outline"
-                className="border-primary text-primary hover:bg-primary rounded-xl bg-transparent px-8 py-3 font-semibold shadow-lg transition-all duration-300 hover:text-gray-900 hover:shadow-xl"
+                className="border-primary text-primary hover:bg-primary w-full rounded-xl bg-transparent px-6 py-3 font-semibold shadow-lg transition-all duration-300 hover:text-gray-900 hover:shadow-xl sm:w-auto sm:px-8"
               >
                 <Play className="mr-2 h-4 w-4" />
                 {t("cta.seeDemo")}

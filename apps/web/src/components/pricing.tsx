@@ -12,7 +12,10 @@ import { useTranslations } from "next-intl";
 export default function Pricing() {
   const t = useTranslations("Pricing");
   return (
-    <section id="pricing" className="bg-muted/30 px-3 py-16 sm:px-4 sm:py-32">
+    <section
+      id="pricing"
+      className="bg-muted/30 px-3 py-16 sm:px-4 sm:py-24 lg:py-32"
+    >
       <div className="container mx-auto max-w-6xl">
         <div className="mb-12 text-center sm:mb-20">
           <Badge className="from-accent/10 to-primary/10 text-accent border-accent/30 mb-4 rounded-full border bg-gradient-to-r px-4 py-2 text-xs font-medium shadow-lg backdrop-blur-sm sm:mb-6 sm:px-6 sm:py-3 sm:text-sm">
@@ -27,7 +30,7 @@ export default function Pricing() {
           </p>
         </div>
 
-        <div className="grid items-stretch gap-4 sm:gap-6 md:grid-cols-3 md:gap-8">
+        <div className="grid items-stretch gap-6 sm:gap-8 md:grid-cols-3">
           {/* Free Plan */}
           <div className="group relative">
             <Card className="bg-card/90 relative flex h-full flex-col border-0 shadow-xl backdrop-blur-sm">
@@ -71,7 +74,7 @@ export default function Pricing() {
           </div>
 
           {/* Premium Plan - Most Popular */}
-          <div className="group relative transform md:-mt-4 md:scale-110">
+          <div className="group relative transform md:-mt-4 md:scale-105 lg:scale-110">
             <Card className="border-primary bg-card relative flex h-full flex-col border-2 shadow-2xl">
               <Badge className="from-primary via-accent to-primary text-primary-foreground border-primary-foreground/20 absolute -top-4 left-1/2 z-10 -translate-x-1/2 transform rounded-full border-2 bg-gradient-to-r px-6 py-2 text-xs shadow-xl backdrop-blur-sm sm:-top-6 sm:px-8 sm:py-3 sm:text-sm">
                 <Sparkles className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
