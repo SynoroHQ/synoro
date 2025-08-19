@@ -99,26 +99,26 @@ export default function WhoBenefits() {
                     <div className="space-y-4">
                       <div className="flex items-center justify-between rounded-xl bg-blue-50 p-4">
                         <span className="font-medium text-blue-900">
-                          Monthly Grocery Budget
+                          {t("dashboard.families.monthlyGroceryBudget")}
                         </span>
                         <span className="font-bold text-blue-600">
-                          $450 / $500
+                          {t("dashboard.families.budgetValue")}
                         </span>
                       </div>
                       <div className="flex items-center justify-between rounded-xl bg-green-50 p-4">
                         <span className="font-medium text-green-900">
-                          Chores Completed
+                          {t("dashboard.families.choresCompleted")}
                         </span>
                         <span className="font-bold text-green-600">
-                          23 / 25 this week
+                          {t("dashboard.families.choresValue")}
                         </span>
                       </div>
                       <div className="flex items-center justify-between rounded-xl bg-purple-50 p-4">
                         <span className="font-medium text-purple-900">
-                          Family Savings Goal
+                          {t("dashboard.families.familySavingsGoal")}
                         </span>
                         <span className="font-bold text-purple-600">
-                          78% achieved
+                          {t("dashboard.families.savingsValue")}
                         </span>
                       </div>
                     </div>
@@ -138,26 +138,26 @@ export default function WhoBenefits() {
                     <div className="mb-6 text-center">
                       <Car className="mx-auto mb-3 h-12 w-12 text-purple-600" />
                       <h4 className="font-bold text-purple-900">
-                        Vehicle Maintenance Tracker
+                        {t("dashboard.carOwners.vehicleMaintenanceTracker")}
                       </h4>
                     </div>
                     <div className="space-y-3">
                       <div className="flex items-center gap-3 rounded-lg bg-purple-50 p-3">
                         <CheckCircle className="h-5 w-5 text-green-500" />
                         <span className="text-sm text-purple-900">
-                          Oil Change - 3,000 miles ago
+                          {t("dashboard.carOwners.oilChange")}
                         </span>
                       </div>
                       <div className="flex items-center gap-3 rounded-lg bg-yellow-50 p-3">
                         <Clock className="h-5 w-5 text-yellow-500" />
                         <span className="text-sm text-yellow-900">
-                          Brake Inspection - Due in 500 miles
+                          {t("dashboard.carOwners.brakeInspection")}
                         </span>
                       </div>
                       <div className="flex items-center gap-3 rounded-lg bg-red-50 p-3">
                         <Target className="h-5 w-5 text-red-500" />
                         <span className="text-sm text-red-900">
-                          Tire Rotation - Overdue by 200 miles
+                          {t("dashboard.carOwners.tireRotation")}
                         </span>
                       </div>
                     </div>
@@ -285,25 +285,25 @@ export default function WhoBenefits() {
                     <div className="mb-6 text-center">
                       <Home className="mx-auto mb-3 h-12 w-12 text-teal-600" />
                       <h4 className="font-bold text-teal-900">
-                        Property Dashboard
+                        {t("dashboard.homeowners.propertyDashboard")}
                       </h4>
                     </div>
                     <div className="space-y-4">
                       <div className="grid grid-cols-2 gap-4">
                         <div className="rounded-xl bg-teal-50 p-4 text-center">
                           <div className="text-2xl font-bold text-teal-600">
-                            12
+                            {t("dashboard.homeowners.tasksCompletedValue")}
                           </div>
                           <div className="text-xs text-teal-800">
-                            Tasks Completed
+                            {t("dashboard.homeowners.tasksCompleted")}
                           </div>
                         </div>
                         <div className="rounded-xl bg-green-50 p-4 text-center">
                           <div className="text-2xl font-bold text-green-600">
-                            $2.4K
+                            {t("dashboard.homeowners.maintenanceSavedValue")}
                           </div>
                           <div className="text-xs text-green-800">
-                            Maintenance Saved
+                            {t("dashboard.homeowners.maintenanceSaved")}
                           </div>
                         </div>
                       </div>
@@ -311,11 +311,11 @@ export default function WhoBenefits() {
                         <div className="mb-2 flex items-center gap-2">
                           <Clock className="h-4 w-4 text-yellow-600" />
                           <span className="text-sm font-medium text-yellow-900">
-                            Upcoming Tasks
+                            {t("dashboard.homeowners.upcomingTasks")}
                           </span>
                         </div>
                         <div className="text-xs text-yellow-800">
-                          Gutter cleaning due in 2 weeks
+                          {t("dashboard.families.gutterCleaningDue")}
                         </div>
                       </div>
                     </div>
@@ -334,39 +334,43 @@ export default function WhoBenefits() {
                   <div className="mb-6 text-center">
                     <User className="mx-auto mb-3 h-12 w-12 text-orange-600" />
                     <h4 className="font-bold text-orange-900">
-                      Productivity Insights
+                      {t("dashboard.freelancers.productivityInsights")}
                     </h4>
                   </div>
                   <div className="space-y-4">
                     <div className="rounded-xl bg-orange-50 p-4">
                       <div className="mb-2 flex items-center justify-between">
                         <span className="text-sm font-medium text-orange-900">
-                          Focus Time Today
+                          {t("dashboard.freelancers.focusTimeToday")}
                         </span>
-                        <span className="font-bold text-orange-600">6.5h</span>
+                        <span className="font-bold text-orange-600">
+                          {t("dashboard.freelancers.focusTimeValue")}
+                        </span>
                       </div>
                       <div className="h-2 w-full rounded-full bg-orange-200">
                         <div
                           className="h-2 rounded-full bg-orange-500"
-                          style={{ width: "81%" }}
+                          style={{
+                            width: t("dashboard.freelancers.focusTimePercent"),
+                          }}
                         ></div>
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       <div className="rounded-lg bg-blue-50 p-3 text-center">
                         <div className="text-lg font-bold text-blue-600">
-                          15
+                          {t("dashboard.freelancers.projectsActiveValue")}
                         </div>
                         <div className="text-xs text-blue-800">
-                          Projects Active
+                          {t("dashboard.freelancers.projectsActive")}
                         </div>
                       </div>
                       <div className="rounded-lg bg-green-50 p-3 text-center">
                         <div className="text-lg font-bold text-green-600">
-                          92%
+                          {t("dashboard.freelancers.onTimeDeliveryValue")}
                         </div>
                         <div className="text-xs text-green-800">
-                          On-Time Delivery
+                          {t("dashboard.freelancers.onTimeDelivery")}
                         </div>
                       </div>
                     </div>
@@ -434,9 +438,7 @@ export default function WhoBenefits() {
         {/* CTA Section */}
         <div className="mt-20 text-center">
           <div className="from-primary/10 to-accent/10 border-primary/20 rounded-3xl border bg-gradient-to-r p-12">
-            <h3 className="mb-4 text-3xl font-bold">
-              {t("cta.title")}
-            </h3>
+            <h3 className="mb-4 text-3xl font-bold">{t("cta.title")}</h3>
             <p className="text-muted-foreground mx-auto mb-8 max-w-2xl">
               {t("cta.subtitle")}
             </p>

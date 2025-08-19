@@ -230,6 +230,44 @@
       "subtitle": "Join thousands of users who have already optimized their lives with Synoro's intelligent assistance.",
       "startTrial": "Start Your Free Trial",
       "seeDemo": "See Live Demo"
+    },
+    "dashboard": {
+      "families": {
+        "monthlyGroceryBudget": "Monthly Grocery Budget",
+        "choresCompleted": "Chores Completed",
+        "familySavingsGoal": "Family Savings Goal",
+        "budgetValue": "$450 / $500",
+        "choresValue": "23 / 25 this week",
+        "savingsValue": "78% achieved",
+        "tasksCompleted": "Tasks Completed",
+        "maintenanceSaved": "Maintenance Saved",
+        "upcomingTasks": "Upcoming Tasks",
+        "gutterCleaningDue": "Gutter cleaning due in 2 weeks"
+      },
+      "carOwners": {
+        "vehicleMaintenanceTracker": "Vehicle Maintenance Tracker",
+        "oilChange": "Oil Change - 3,000 miles ago",
+        "brakeInspection": "Brake Inspection - Due in 500 miles",
+        "tireRotation": "Tire Rotation - Overdue by 200 miles"
+      },
+      "homeowners": {
+        "propertyDashboard": "Property Dashboard",
+        "tasksCompleted": "Tasks Completed",
+        "maintenanceSaved": "Maintenance Saved",
+        "upcomingTasks": "Upcoming Tasks",
+        "tasksCompletedValue": "12",
+        "maintenanceSavedValue": "$2.4K"
+      },
+      "freelancers": {
+        "productivityInsights": "Productivity Insights",
+        "focusTimeToday": "Focus Time Today",
+        "projectsActive": "Projects Active",
+        "onTimeDelivery": "On-Time Delivery",
+        "focusTimeValue": "6.5h",
+        "focusTimePercent": "81%",
+        "projectsActiveValue": "15",
+        "onTimeDeliveryValue": "92%"
+      }
     }
   },
   "LanguageSwitcher": {

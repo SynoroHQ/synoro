@@ -10,6 +10,7 @@ export default function Hero() {
   const t = useTranslations("Hero");
   const [currentStep, setCurrentStep] = useState(0);
   const [isRecording, setIsRecording] = useState(false);
+  const [animationComplete, setAnimationComplete] = useState(false);
 
   useEffect(() => {
     const animationSequence = [
@@ -31,16 +32,21 @@ export default function Hero() {
         setCurrentStep(step);
         if (step === 1) setIsRecording(true);
         if (step === 2) setIsRecording(false);
+
+        // Отмечаем завершение анимации на последнем шаге
+        if (step === 8) {
+          setAnimationComplete(true);
+        }
       }, delay);
       timeouts.push(timeout);
     });
 
-    // Reset cycle
-    const resetTimeout = setTimeout(() => {
-      setCurrentStep(0);
-      setIsRecording(false);
-    }, 15000);
-    timeouts.push(resetTimeout);
+    // Убираем сброс цикла - теперь сообщения остаются видимыми
+    // const resetTimeout = setTimeout(() => {
+    //   setCurrentStep(0);
+    //   setIsRecording(false);
+    // }, 15000);
+    // timeouts.push(resetTimeout);
 
     return () => timeouts.forEach(clearTimeout);
   }, []);
@@ -121,7 +127,7 @@ export default function Hero() {
                 <h3 className="text-foreground font-semibold">{t("aiName")}</h3>
                 <p className="text-muted-foreground text-sm">{t("aiStatus")}</p>
               </div>
-              {isRecording && (
+              {(isRecording || animationComplete) && (
                 <div className="animate-fade-in flex items-center gap-2">
                   <div className="h-2 w-2 animate-pulse rounded-full bg-red-500"></div>
                   <Mic className="h-4 w-4 animate-pulse text-red-500" />
@@ -131,7 +137,7 @@ export default function Hero() {
 
             {/* Chat Messages */}
             <div className="scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent max-h-[400px] space-y-4 overflow-x-hidden overflow-y-auto">
-              {currentStep === 1 && (
+              {(currentStep === 1 || animationComplete) && (
                 <div className="animate-scale-in flex justify-center">
                   <div className="flex items-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3">
                     <div className="h-3 w-3 animate-pulse rounded-full bg-red-500"></div>
@@ -144,7 +150,7 @@ export default function Hero() {
               )}
 
               {/* User Message 1 */}
-              {currentStep >= 2 && (
+              {(currentStep >= 2 || animationComplete) && (
                 <div className="animate-slide-in-right flex justify-end">
                   <div className="bg-primary text-primary-foreground animate-message-pop max-w-[80%] rounded-2xl rounded-tr-md px-4 py-3">
                     <p className="text-sm">{t("userMessage1")}</p>
@@ -157,7 +163,7 @@ export default function Hero() {
               )}
 
               {/* Typing Indicator 1 */}
-              {currentStep === 3 && (
+              {(currentStep === 3 || animationComplete) && (
                 <div className="animate-slide-in-left flex justify-start">
                   <div className="bg-muted animate-bounce-subtle max-w-[80%] rounded-2xl rounded-tl-md px-4 py-3">
                     <div className="flex items-center gap-1">
@@ -184,12 +190,10 @@ export default function Hero() {
               )}
 
               {/* Bot Response 1 */}
-              {currentStep >= 4 && (
+              {(currentStep >= 4 || animationComplete) && (
                 <div className="animate-slide-in-left flex justify-start">
                   <div className="bg-muted animate-message-pop max-w-[80%] rounded-2xl rounded-tl-md px-4 py-3">
-                    <p className="text-sm">
-                      {t("aiResponse1")}
-                    </p>
+                    <p className="text-sm">{t("aiResponse1")}</p>
                     <div className="mt-1 flex items-center justify-start gap-1">
                       <span className="text-muted-foreground text-xs">
                         14:33
@@ -200,39 +204,35 @@ export default function Hero() {
               )}
 
               {/* Smart Suggestion */}
-              {currentStep >= 5 && (
+              {(currentStep >= 5 || animationComplete) && (
                 <div
                   className="animate-slide-in-left flex justify-start"
                   style={{ animationDelay: "0.5s" }}
                 >
                   <div className="bg-accent/10 border-accent/20 animate-glow-pulse max-w-[80%] rounded-2xl rounded-tl-md border px-4 py-3">
-                    <p className="text-accent text-sm">
-                      {t("aiSuggestion")}
-                    </p>
+                    <p className="text-accent text-sm">{t("aiSuggestion")}</p>
                   </div>
                 </div>
               )}
 
               {/* User Message 2 */}
-              {currentStep >= 6 && (
+              {(currentStep >= 6 || animationComplete) && (
                 <div
                   className="animate-slide-in-right flex justify-end"
                   style={{ animationDelay: "0.3s" }}
                 >
                   <div className="bg-primary text-primary-foreground animate-message-pop max-w-[80%] rounded-2xl rounded-tr-md px-4 py-3">
-                    <p className="text-sm">
-                      {t("userMessage2")}
-                    </p>
+                    <p className="text-sm">{t("userMessage2")}</p>
                     <div className="mt-1 flex items-center justify-end gap-1">
                       <span className="text-xs opacity-70">14:35</span>
-                      <CheckCircle className="h-3 w-3 opacity-70" />
+                      <CheckCircle className="animate-check-mark h-3 w-3 opacity-70" />
                     </div>
                   </div>
                 </div>
               )}
 
               {/* Typing Indicator 2 */}
-              {currentStep === 7 && (
+              {(currentStep === 7 || animationComplete) && (
                 <div className="animate-slide-in-left flex justify-start">
                   <div className="bg-muted max-w-[80%] rounded-2xl rounded-tl-md px-4 py-3">
                     <div className="flex items-center gap-1">
@@ -259,12 +259,10 @@ export default function Hero() {
               )}
 
               {/* Bot Response 2 */}
-              {currentStep >= 8 && (
+              {(currentStep >= 8 || animationComplete) && (
                 <div className="animate-slide-in-left flex justify-start">
                   <div className="bg-muted animate-message-pop max-w-[80%] rounded-2xl rounded-tl-md px-4 py-3">
-                    <p className="text-sm">
-                      {t("aiResponse2")}
-                    </p>
+                    <p className="text-sm">{t("aiResponse2")}</p>
                     <div className="mt-1 flex items-center justify-start gap-1">
                       <span className="text-muted-foreground text-xs">
                         14:36
@@ -281,9 +279,7 @@ export default function Hero() {
                 <div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-full">
                   <MessageSquare className="text-primary h-4 w-4" />
                 </div>
-                <span className="flex-1 italic">
-                  {t("inputHint")}
-                </span>
+                <span className="flex-1 italic">{t("inputHint")}</span>
               </div>
             </div>
           </div>

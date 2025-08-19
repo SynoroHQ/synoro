@@ -183,9 +183,7 @@ export default function Footer() {
       <div className="relative z-10 border-t border-white/10 px-4 py-6">
         <div className="container mx-auto max-w-6xl">
           <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-            <div className="text-sm text-gray-400">
-              {t("copyright")}
-            </div>
+            <div className="text-sm text-gray-400">{t("copyright")}</div>
             <div className="flex items-center gap-6 text-sm">
               <a
                 href="#status"

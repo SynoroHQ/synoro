@@ -230,6 +230,44 @@
       "subtitle": "Присоединяйтесь к тысячам пользователей, которые уже оптимизировали свою жизнь с помощью интеллектуальной помощи Synoro.",
       "startTrial": "Начать бесплатный пробный период",
       "seeDemo": "Посмотреть живое демо"
+    },
+    "dashboard": {
+      "families": {
+        "monthlyGroceryBudget": "Ежемесячный бюджет на продукты",
+        "choresCompleted": "Выполненные дела",
+        "familySavingsGoal": "Семейная цель по сбережениям",
+        "budgetValue": "450$ / 500$",
+        "choresValue": "23 / 25 на этой неделе",
+        "savingsValue": "78% достигнуто",
+        "tasksCompleted": "Задачи выполнены",
+        "maintenanceSaved": "Сэкономлено на обслуживании",
+        "upcomingTasks": "Предстоящие задачи",
+        "gutterCleaningDue": "Очистка водостоков через 2 недели"
+      },
+      "carOwners": {
+        "vehicleMaintenanceTracker": "Трекер обслуживания автомобиля",
+        "oilChange": "Замена масла - 3000 миль назад",
+        "brakeInspection": "Проверка тормозов - через 500 миль",
+        "tireRotation": "Ротация шин - просрочено на 200 миль"
+      },
+      "homeowners": {
+        "propertyDashboard": "Панель управления недвижимостью",
+        "tasksCompleted": "Задачи выполнены",
+        "maintenanceSaved": "Сэкономлено на обслуживании",
+        "upcomingTasks": "Предстоящие задачи",
+        "tasksCompletedValue": "12",
+        "maintenanceSavedValue": "2.4К₽"
+      },
+      "freelancers": {
+        "productivityInsights": "Инсайты продуктивности",
+        "focusTimeToday": "Время фокуса сегодня",
+        "projectsActive": "Активные проекты",
+        "onTimeDelivery": "Своевременная доставка",
+        "focusTimeValue": "6.5ч",
+        "focusTimePercent": "81%",
+        "projectsActiveValue": "15",
+        "onTimeDeliveryValue": "92%"
+      }
     }
   },
   "LanguageSwitcher": {
