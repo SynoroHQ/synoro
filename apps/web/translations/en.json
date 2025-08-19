@@ -85,5 +85,8 @@
       "price": "$20",
       "period": "/month"
     }
+  },
+  "Manifest": {
+    "name": "Synoro"
   }
 }
