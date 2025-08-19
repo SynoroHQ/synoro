@@ -170,7 +170,7 @@ export default function Footer() {
                     className="focus:ring-primary w-full rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-white placeholder-gray-400 backdrop-blur-sm transition-all duration-300 focus:border-transparent focus:ring-2 focus:outline-none"
                   />
                 </div>
-                <Button className="from-primary to-accent hover:from-primary/90 hover:to-accent/90 w-full rounded-xl bg-gradient-to-r py-3 font-semibold text-gray-900 shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl">
+                <Button className="w-full rounded-xl bg-white py-3 font-semibold text-gray-900 shadow-lg transition-all duration-300 hover:scale-105 hover:bg-gray-50 hover:shadow-xl">
                   {t("subscribe")}
                 </Button>
               </div>
