@@ -1,66 +1,78 @@
-import { Badge } from "@/components/ui/badge"
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
-import { CheckCircle, Zap, Sparkles, Shield } from "lucide-react"
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { CheckCircle, Shield, Sparkles, Zap } from "lucide-react";
 
 export default function Pricing() {
   return (
-    <section id="pricing" className="py-32 px-4 bg-muted/30">
+    <section id="pricing" className="bg-muted/30 px-4 py-32">
       <div className="container mx-auto max-w-6xl">
-        <div className="text-center mb-20">
-          <Badge className="bg-gradient-to-r from-accent/10 to-primary/10 text-accent border border-accent/30 px-6 py-3 text-sm font-medium rounded-full mb-6 hover:bg-gradient-to-r hover:from-accent/20 hover:to-primary/20 hover:scale-105 transition-all duration-300 shadow-lg backdrop-blur-sm">
-            <Zap className="w-4 h-4 mr-2 animate-pulse" />
+        <div className="mb-20 text-center">
+          <Badge className="from-accent/10 to-primary/10 text-accent border-accent/30 hover:from-accent/20 hover:to-primary/20 mb-6 rounded-full border bg-gradient-to-r px-6 py-3 text-sm font-medium shadow-lg backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:bg-gradient-to-r">
+            <Zap className="mr-2 h-4 w-4 animate-pulse" />
             Pricing
           </Badge>
-          <h2 className="text-5xl md:text-7xl font-bold mb-6 font-serif bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent hover:scale-105 transition-transform duration-300">
+          <h2 className="from-primary via-accent to-primary mb-6 bg-gradient-to-r bg-clip-text font-serif text-5xl font-bold text-transparent transition-transform duration-300 hover:scale-105 md:text-7xl">
             Choose Your Plan
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            Find the perfect plan to supercharge your productivity and simplify your life.
+          <p className="text-muted-foreground mx-auto max-w-3xl text-xl leading-relaxed">
+            Find the perfect plan to supercharge your productivity and simplify
+            your life.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8 items-stretch">
+        <div className="grid items-stretch gap-8 md:grid-cols-3">
           {/* Free Plan */}
           <div className="group relative">
-            <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-accent/20 rounded-3xl blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
-            <Card className="relative border-0 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 bg-card/90 backdrop-blur-sm flex flex-col h-full group-hover:bg-card/95">
-              <CardHeader className="text-center pb-6 relative">
-                <div className="absolute top-4 right-4 w-8 h-8 bg-muted/50 rounded-full flex items-center justify-center text-muted-foreground font-bold text-sm opacity-0 group-hover:opacity-100 transition-all duration-300">
+            <div className="from-primary/20 to-accent/20 absolute -inset-1 rounded-3xl bg-gradient-to-r opacity-0 blur transition duration-500 group-hover:opacity-100"></div>
+            <Card className="bg-card/90 group-hover:bg-card/95 relative flex h-full flex-col border-0 shadow-xl backdrop-blur-sm transition-all duration-500 hover:scale-105 hover:shadow-2xl">
+              <CardHeader className="relative pb-6 text-center">
+                <div className="bg-muted/50 text-muted-foreground absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold opacity-0 transition-all duration-300 group-hover:opacity-100">
                   1
                 </div>
-                <CardTitle className="text-3xl font-bold font-serif mb-2 group-hover:text-primary transition-colors duration-300">
+                <CardTitle className="group-hover:text-primary mb-2 font-serif text-3xl font-bold transition-colors duration-300">
                   Free
                 </CardTitle>
-                <CardDescription className="text-base mb-6 group-hover:text-foreground/80 transition-colors duration-300">
+                <CardDescription className="group-hover:text-foreground/80 mb-6 text-base transition-colors duration-300">
                   Perfect for getting started
                 </CardDescription>
-                <div className="text-5xl font-bold mb-4 group-hover:scale-110 transition-transform duration-300">
-                  $0<span className="text-lg font-normal text-muted-foreground">/month</span>
+                <div className="mb-4 text-5xl font-bold transition-transform duration-300 group-hover:scale-110">
+                  $0
+                  <span className="text-muted-foreground text-lg font-normal">
+                    /month
+                  </span>
                 </div>
               </CardHeader>
-              <CardContent className="flex-1 flex flex-col px-6">
-                <ul className="space-y-4 mb-8 flex-1">
-                  <li className="flex items-center gap-3 group-hover:translate-x-1 transition-transform duration-300">
-                    <CheckCircle className="w-5 h-5 text-primary flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
+              <CardContent className="flex flex-1 flex-col px-6">
+                <ul className="mb-8 flex-1 space-y-4">
+                  <li className="flex items-center gap-3 transition-transform duration-300 group-hover:translate-x-1">
+                    <CheckCircle className="text-primary h-5 w-5 flex-shrink-0 transition-transform duration-300 group-hover:scale-110" />
                     <span className="group-hover:text-foreground transition-colors duration-300">
                       Basic task logging
                     </span>
                   </li>
                   <li
-                    className="flex items-center gap-3 group-hover:translate-x-1 transition-transform duration-300"
+                    className="flex items-center gap-3 transition-transform duration-300 group-hover:translate-x-1"
                     style={{ transitionDelay: "50ms" }}
                   >
-                    <CheckCircle className="w-5 h-5 text-primary flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
+                    <CheckCircle className="text-primary h-5 w-5 flex-shrink-0 transition-transform duration-300 group-hover:scale-110" />
                     <span className="group-hover:text-foreground transition-colors duration-300">
                       Telegram integration
                     </span>
                   </li>
                   <li
-                    className="flex items-center gap-3 group-hover:translate-x-1 transition-transform duration-300"
+                    className="flex items-center gap-3 transition-transform duration-300 group-hover:translate-x-1"
                     style={{ transitionDelay: "100ms" }}
                   >
-                    <CheckCircle className="w-5 h-5 text-primary flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-                    <span className="group-hover:text-foreground transition-colors duration-300">Basic reports</span>
+                    <CheckCircle className="text-primary h-5 w-5 flex-shrink-0 transition-transform duration-300 group-hover:scale-110" />
+                    <span className="group-hover:text-foreground transition-colors duration-300">
+                      Basic reports
+                    </span>
                   </li>
                 </ul>
               </CardContent>
@@ -68,58 +80,68 @@ export default function Pricing() {
           </div>
 
           {/* Premium Plan - Most Popular */}
-          <div className="group relative transform md:scale-110 md:-mt-4">
-            <div className="absolute -inset-2 bg-gradient-to-r from-primary via-accent to-primary rounded-3xl blur-lg opacity-75 group-hover:opacity-100 transition duration-500 animate-pulse"></div>
-            <Card className="relative border-2 border-primary shadow-2xl hover:shadow-3xl transition-all duration-500 hover:scale-105 bg-card flex flex-col h-full">
-              <Badge className="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-primary via-accent to-primary text-primary-foreground px-8 py-3 rounded-full shadow-xl hover:shadow-2xl hover:shadow-primary/50 transition-all duration-300 hover:scale-110 border-2 border-primary-foreground/20 backdrop-blur-sm z-10">
-                <Sparkles className="w-5 h-5 mr-2 animate-spin" style={{ animationDuration: "3s" }} />
+          <div className="group relative transform md:-mt-4 md:scale-110">
+            <div className="from-primary via-accent to-primary absolute -inset-2 animate-pulse rounded-3xl bg-gradient-to-r opacity-75 blur-lg transition duration-500 group-hover:opacity-100"></div>
+            <Card className="border-primary hover:shadow-3xl bg-card relative flex h-full flex-col border-2 shadow-2xl transition-all duration-500 hover:scale-105">
+              <Badge className="from-primary via-accent to-primary text-primary-foreground hover:shadow-primary/50 border-primary-foreground/20 absolute -top-6 left-1/2 z-10 -translate-x-1/2 transform rounded-full border-2 bg-gradient-to-r px-8 py-3 shadow-xl backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:shadow-2xl">
+                <Sparkles
+                  className="mr-2 h-5 w-5 animate-spin"
+                  style={{ animationDuration: "3s" }}
+                />
                 Most Popular
-                <div className="absolute inset-0 bg-gradient-to-r from-primary/50 to-accent/50 rounded-full blur-md -z-10 animate-pulse"></div>
+                <div className="from-primary/50 to-accent/50 absolute inset-0 -z-10 animate-pulse rounded-full bg-gradient-to-r blur-md"></div>
               </Badge>
-              <CardHeader className="text-center pb-6 pt-8 relative">
-                <div className="absolute top-6 right-4 w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center text-primary font-bold text-lg opacity-0 group-hover:opacity-100 transition-all duration-300 animate-bounce">
+              <CardHeader className="relative pt-8 pb-6 text-center">
+                <div className="bg-primary/20 text-primary absolute top-6 right-4 flex h-10 w-10 animate-bounce items-center justify-center rounded-full text-lg font-bold opacity-0 transition-all duration-300 group-hover:opacity-100">
                   ⭐
                 </div>
-                <CardTitle className="text-3xl font-bold font-serif mb-2 group-hover:text-primary transition-colors duration-300">
+                <CardTitle className="group-hover:text-primary mb-2 font-serif text-3xl font-bold transition-colors duration-300">
                   Premium
                 </CardTitle>
-                <CardDescription className="text-base mb-6 group-hover:text-foreground/80 transition-colors duration-300">
+                <CardDescription className="group-hover:text-foreground/80 mb-6 text-base transition-colors duration-300">
                   Advanced features for power users
                 </CardDescription>
-                <div className="text-5xl font-bold mb-4 text-foreground group-hover:scale-110 transition-transform duration-300">
-                  $12<span className="text-lg font-normal text-muted-foreground">/month</span>
+                <div className="text-foreground mb-4 text-5xl font-bold transition-transform duration-300 group-hover:scale-110">
+                  $12
+                  <span className="text-muted-foreground text-lg font-normal">
+                    /month
+                  </span>
                 </div>
               </CardHeader>
-              <CardContent className="flex-1 flex flex-col px-6">
-                <ul className="space-y-4 mb-8 flex-1">
-                  <li className="flex items-center gap-3 group-hover:translate-x-1 transition-transform duration-300">
-                    <CheckCircle className="w-5 h-5 text-primary flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
+              <CardContent className="flex flex-1 flex-col px-6">
+                <ul className="mb-8 flex-1 space-y-4">
+                  <li className="flex items-center gap-3 transition-transform duration-300 group-hover:translate-x-1">
+                    <CheckCircle className="text-primary h-5 w-5 flex-shrink-0 transition-transform duration-300 group-hover:scale-110" />
                     <span className="group-hover:text-foreground transition-colors duration-300">
                       Everything in Free
                     </span>
                   </li>
                   <li
-                    className="flex items-center gap-3 group-hover:translate-x-1 transition-transform duration-300"
+                    className="flex items-center gap-3 transition-transform duration-300 group-hover:translate-x-1"
                     style={{ transitionDelay: "50ms" }}
                   >
-                    <CheckCircle className="w-5 h-5 text-primary flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
+                    <CheckCircle className="text-primary h-5 w-5 flex-shrink-0 transition-transform duration-300 group-hover:scale-110" />
                     <span className="group-hover:text-foreground transition-colors duration-300">
                       Advanced analytics
                     </span>
                   </li>
                   <li
-                    className="flex items-center gap-3 group-hover:translate-x-1 transition-transform duration-300"
+                    className="flex items-center gap-3 transition-transform duration-300 group-hover:translate-x-1"
                     style={{ transitionDelay: "100ms" }}
                   >
-                    <CheckCircle className="w-5 h-5 text-primary flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-                    <span className="group-hover:text-foreground transition-colors duration-300">Smart reminders</span>
+                    <CheckCircle className="text-primary h-5 w-5 flex-shrink-0 transition-transform duration-300 group-hover:scale-110" />
+                    <span className="group-hover:text-foreground transition-colors duration-300">
+                      Smart reminders
+                    </span>
                   </li>
                   <li
-                    className="flex items-center gap-3 group-hover:translate-x-1 transition-transform duration-300"
+                    className="flex items-center gap-3 transition-transform duration-300 group-hover:translate-x-1"
                     style={{ transitionDelay: "150ms" }}
                   >
-                    <CheckCircle className="w-5 h-5 text-primary flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-                    <span className="group-hover:text-foreground transition-colors duration-300">Receipt analysis</span>
+                    <CheckCircle className="text-primary h-5 w-5 flex-shrink-0 transition-transform duration-300 group-hover:scale-110" />
+                    <span className="group-hover:text-foreground transition-colors duration-300">
+                      Receipt analysis
+                    </span>
                   </li>
                 </ul>
               </CardContent>
@@ -128,52 +150,59 @@ export default function Pricing() {
 
           {/* Family Plan */}
           <div className="group relative">
-            <div className="absolute -inset-1 bg-gradient-to-r from-accent/20 to-primary/20 rounded-3xl blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
-            <Card className="relative border-0 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 bg-card/90 backdrop-blur-sm flex flex-col h-full group-hover:bg-card/95">
-              <CardHeader className="text-center pb-6 relative">
-                <div className="absolute top-4 right-4 w-8 h-8 bg-accent/20 rounded-full flex items-center justify-center text-accent font-bold text-sm opacity-0 group-hover:opacity-100 transition-all duration-300">
+            <div className="from-accent/20 to-primary/20 absolute -inset-1 rounded-3xl bg-gradient-to-r opacity-0 blur transition duration-500 group-hover:opacity-100"></div>
+            <Card className="bg-card/90 group-hover:bg-card/95 relative flex h-full flex-col border-0 shadow-xl backdrop-blur-sm transition-all duration-500 hover:scale-105 hover:shadow-2xl">
+              <CardHeader className="relative pb-6 text-center">
+                <div className="bg-accent/20 text-accent absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold opacity-0 transition-all duration-300 group-hover:opacity-100">
                   👨‍👩‍👧‍👦
                 </div>
-                <CardTitle className="text-3xl font-bold font-serif mb-2 group-hover:text-accent transition-colors duration-300">
+                <CardTitle className="group-hover:text-accent mb-2 font-serif text-3xl font-bold transition-colors duration-300">
                   Family
                 </CardTitle>
-                <CardDescription className="text-base mb-6 group-hover:text-foreground/80 transition-colors duration-300">
+                <CardDescription className="group-hover:text-foreground/80 mb-6 text-base transition-colors duration-300">
                   Perfect for families and teams
                 </CardDescription>
-                <div className="text-5xl font-bold mb-4 group-hover:scale-110 transition-transform duration-300">
-                  $20<span className="text-lg font-normal text-muted-foreground">/month</span>
+                <div className="mb-4 text-5xl font-bold transition-transform duration-300 group-hover:scale-110">
+                  $20
+                  <span className="text-muted-foreground text-lg font-normal">
+                    /month
+                  </span>
                 </div>
               </CardHeader>
-              <CardContent className="flex-1 flex flex-col px-6">
-                <ul className="space-y-4 mb-8 flex-1">
-                  <li className="flex items-center gap-3 group-hover:translate-x-1 transition-transform duration-300">
-                    <CheckCircle className="w-5 h-5 text-primary flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
+              <CardContent className="flex flex-1 flex-col px-6">
+                <ul className="mb-8 flex-1 space-y-4">
+                  <li className="flex items-center gap-3 transition-transform duration-300 group-hover:translate-x-1">
+                    <CheckCircle className="text-primary h-5 w-5 flex-shrink-0 transition-transform duration-300 group-hover:scale-110" />
                     <span className="group-hover:text-foreground transition-colors duration-300">
                       Everything in Premium
                     </span>
                   </li>
                   <li
-                    className="flex items-center gap-3 group-hover:translate-x-1 transition-transform duration-300"
+                    className="flex items-center gap-3 transition-transform duration-300 group-hover:translate-x-1"
                     style={{ transitionDelay: "50ms" }}
                   >
-                    <CheckCircle className="w-5 h-5 text-primary flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
+                    <CheckCircle className="text-primary h-5 w-5 flex-shrink-0 transition-transform duration-300 group-hover:scale-110" />
                     <span className="group-hover:text-foreground transition-colors duration-300">
                       Multi-user access
                     </span>
                   </li>
                   <li
-                    className="flex items-center gap-3 group-hover:translate-x-1 transition-transform duration-300"
+                    className="flex items-center gap-3 transition-transform duration-300 group-hover:translate-x-1"
                     style={{ transitionDelay: "100ms" }}
                   >
-                    <CheckCircle className="w-5 h-5 text-primary flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-                    <span className="group-hover:text-foreground transition-colors duration-300">Shared analytics</span>
+                    <CheckCircle className="text-primary h-5 w-5 flex-shrink-0 transition-transform duration-300 group-hover:scale-110" />
+                    <span className="group-hover:text-foreground transition-colors duration-300">
+                      Shared analytics
+                    </span>
                   </li>
                   <li
-                    className="flex items-center gap-3 group-hover:translate-x-1 transition-transform duration-300"
+                    className="flex items-center gap-3 transition-transform duration-300 group-hover:translate-x-1"
                     style={{ transitionDelay: "150ms" }}
                   >
-                    <CheckCircle className="w-5 h-5 text-primary flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-                    <span className="group-hover:text-foreground transition-colors duration-300">Family insights</span>
+                    <CheckCircle className="text-primary h-5 w-5 flex-shrink-0 transition-transform duration-300 group-hover:scale-110" />
+                    <span className="group-hover:text-foreground transition-colors duration-300">
+                      Family insights
+                    </span>
                   </li>
                 </ul>
               </CardContent>
@@ -183,22 +212,22 @@ export default function Pricing() {
 
         {/* Trust Indicators */}
         <div className="mt-16 text-center">
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-8 text-sm text-muted-foreground">
-            <div className="flex items-center gap-2 hover:text-foreground transition-colors duration-300">
-              <Shield className="w-4 h-4 text-primary" />
+          <div className="text-muted-foreground flex flex-col items-center justify-center gap-8 text-sm sm:flex-row">
+            <div className="hover:text-foreground flex items-center gap-2 transition-colors duration-300">
+              <Shield className="text-primary h-4 w-4" />
               <span>30-day money-back guarantee</span>
             </div>
-            <div className="flex items-center gap-2 hover:text-foreground transition-colors duration-300">
-              <CheckCircle className="w-4 h-4 text-primary" />
+            <div className="hover:text-foreground flex items-center gap-2 transition-colors duration-300">
+              <CheckCircle className="text-primary h-4 w-4" />
               <span>Cancel anytime</span>
             </div>
-            <div className="flex items-center gap-2 hover:text-foreground transition-colors duration-300">
-              <Zap className="w-4 h-4 text-primary" />
+            <div className="hover:text-foreground flex items-center gap-2 transition-colors duration-300">
+              <Zap className="text-primary h-4 w-4" />
               <span>Instant activation</span>
             </div>
           </div>
         </div>
       </div>
     </section>
-  )
+  );
 }

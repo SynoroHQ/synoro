@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Sparkles, Play, MessageSquare, CheckCircle, Mic } from "lucide-react"
+import { useEffect, useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { CheckCircle, MessageSquare, Mic, Play, Sparkles } from "lucide-react";
 
 export default function Hero() {
-  const [currentStep, setCurrentStep] = useState(0)
-  const [isRecording, setIsRecording] = useState(false)
+  const [currentStep, setCurrentStep] = useState(0);
+  const [isRecording, setIsRecording] = useState(false);
 
   useEffect(() => {
     const animationSequence = [
@@ -20,129 +20,142 @@ export default function Hero() {
       { step: 6, delay: 10000 }, // Show second user message
       { step: 7, delay: 11000 }, // Show second typing
       { step: 8, delay: 13000 }, // Show second bot response
-    ]
+    ];
 
-    const timeouts: NodeJS.Timeout[] = []
+    const timeouts: NodeJS.Timeout[] = [];
 
     animationSequence.forEach(({ step, delay }) => {
       const timeout = setTimeout(() => {
-        setCurrentStep(step)
-        if (step === 1) setIsRecording(true)
-        if (step === 2) setIsRecording(false)
-      }, delay)
-      timeouts.push(timeout)
-    })
+        setCurrentStep(step);
+        if (step === 1) setIsRecording(true);
+        if (step === 2) setIsRecording(false);
+      }, delay);
+      timeouts.push(timeout);
+    });
 
     // Reset cycle
     const resetTimeout = setTimeout(() => {
-      setCurrentStep(0)
-      setIsRecording(false)
-    }, 15000)
-    timeouts.push(resetTimeout)
+      setCurrentStep(0);
+      setIsRecording(false);
+    }, 15000);
+    timeouts.push(resetTimeout);
 
-    return () => timeouts.forEach(clearTimeout)
-  }, [])
+    return () => timeouts.forEach(clearTimeout);
+  }, []);
 
   return (
-    <section className="pt-32 pb-20 px-4 relative overflow-hidden">
+    <section className="relative overflow-hidden px-4 pt-32 pb-20">
       {/* Background Elements */}
       <div className="absolute inset-0">
-        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-primary/10 to-accent/10"></div>
-        <div className="absolute top-1/4 left-1/6 w-16 h-16 border border-primary/10 rotate-45 animate-rotate-slow"></div>
+        <div className="from-primary/10 to-accent/10 absolute top-0 left-0 h-full w-full bg-gradient-to-br"></div>
+        <div className="border-primary/10 animate-rotate-slow absolute top-1/4 left-1/6 h-16 w-16 rotate-45 border"></div>
         <div
-          className="absolute bottom-1/3 right-1/5 w-12 h-12 border border-accent/10 rotate-12 animate-rotate-slow"
+          className="border-accent/10 animate-rotate-slow absolute right-1/5 bottom-1/3 h-12 w-12 rotate-12 border"
           style={{ animationDirection: "reverse" }}
         ></div>
       </div>
 
-      <div className="container mx-auto text-center max-w-5xl relative z-10 pt-20">
+      <div className="relative z-10 container mx-auto max-w-5xl pt-20 text-center">
         <div className="mb-8">
-          <Badge className="bg-primary/10 text-primary border-primary/50 px-4 py-2 text-sm font-medium rounded-full">
-            <Sparkles className="w-4 h-4 mr-2" />
+          <Badge className="bg-primary/10 text-primary border-primary/50 rounded-full px-4 py-2 text-sm font-medium">
+            <Sparkles className="mr-2 h-4 w-4" />
             AI-Powered Smart Assistant
           </Badge>
         </div>
 
         <h1
-          className="text-6xl md:text-8xl font-bold mb-8 leading-tight animate-fade-in-up"
+          className="animate-fade-in-up mb-8 text-6xl leading-tight font-bold md:text-8xl"
           style={{ animationDelay: "0.2s" }}
         >
-          <span className="bg-gradient-to-r from-green-600 via-green-400 to-green-600 bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient-x font-serif transition-all duration-500 inline-block cursor-pointer">
+          <span className="animate-gradient-x inline-block cursor-pointer bg-gradient-to-r from-green-600 via-green-400 to-green-600 bg-[length:200%_auto] bg-clip-text font-serif text-transparent transition-all duration-500">
             Synoro
           </span>
           <br />
-          <span className="text-4xl md:text-5xl text-muted-foreground font-normal">Your Smart Home Assistant</span>
+          <span className="text-muted-foreground text-4xl font-normal md:text-5xl">
+            Your Smart Home Assistant
+          </span>
         </h1>
 
         <p
-          className="text-xl text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed animate-fade-in-up"
+          className="text-muted-foreground animate-fade-in-up mx-auto mb-12 max-w-3xl text-xl leading-relaxed"
           style={{ animationDelay: "0.4s" }}
         >
-          Transform your daily routine with AI-powered task management. Log activities with voice commands, get
-          intelligent insights, and optimize your time like never before.
+          Transform your daily routine with AI-powered task management. Log
+          activities with voice commands, get intelligent insights, and optimize
+          your time like never before.
         </p>
 
-        <div className="flex flex-col sm:flex-row gap-6 justify-center mb-16">
+        <div className="mb-16 flex flex-col justify-center gap-6 sm:flex-row">
           <Button
             size="lg"
-            className="bg-primary hover:bg-primary/90 text-gray-900 font-semibold px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+            className="bg-primary hover:bg-primary/90 rounded-xl px-8 py-3 font-semibold text-gray-900 shadow-lg transition-all duration-300 hover:shadow-xl"
           >
-            <Sparkles className="w-4 h-4 mr-2" />
+            <Sparkles className="mr-2 h-4 w-4" />
             Start Your Free Trial
           </Button>
 
           <Button
             size="lg"
             variant="outline"
-            className="border-primary text-primary hover:bg-primary hover:text-gray-900 font-semibold px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 bg-transparent"
+            className="border-primary text-primary hover:bg-primary rounded-xl bg-transparent px-8 py-3 font-semibold shadow-lg transition-all duration-300 hover:text-gray-900 hover:shadow-xl"
           >
-            <Play className="w-4 h-4 mr-2" />
+            <Play className="mr-2 h-4 w-4" />
             See Live Demo
           </Button>
         </div>
 
-        <div className="relative max-w-md mx-auto animate-fade-in-up" style={{ animationDelay: "0.8s" }}>
-          <div className="relative glass-effect rounded-3xl p-6 border border-primary/30 backdrop-blur-xl bg-background/95">
+        <div
+          className="animate-fade-in-up relative mx-auto max-w-md"
+          style={{ animationDelay: "0.8s" }}
+        >
+          <div className="glass-effect border-primary/30 bg-background/95 relative rounded-3xl border p-6 backdrop-blur-xl">
             {/* Chat Header */}
-            <div className="flex items-center gap-4 mb-6 pb-4 border-b border-primary/10">
+            <div className="border-primary/10 mb-6 flex items-center gap-4 border-b pb-4">
               <div className="relative">
-                <div className="w-12 h-12 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center">
-                  <MessageSquare className="w-6 h-6 text-primary-foreground" />
+                <div className="from-primary to-accent flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br">
+                  <MessageSquare className="text-primary-foreground h-6 w-6" />
                 </div>
-                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white animate-pulse"></div>
+                <div className="absolute -right-1 -bottom-1 h-4 w-4 animate-pulse rounded-full border-2 border-white bg-green-500"></div>
               </div>
               <div className="flex-1">
-                <h3 className="font-semibold text-foreground">Synoro AI</h3>
-                <p className="text-sm text-muted-foreground">Online • Smart Assistant</p>
+                <h3 className="text-foreground font-semibold">Synoro AI</h3>
+                <p className="text-muted-foreground text-sm">
+                  Online • Smart Assistant
+                </p>
               </div>
               {isRecording && (
-                <div className="flex items-center gap-2 animate-fade-in">
-                  <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                  <Mic className="w-4 h-4 text-red-500 animate-pulse" />
+                <div className="animate-fade-in flex items-center gap-2">
+                  <div className="h-2 w-2 animate-pulse rounded-full bg-red-500"></div>
+                  <Mic className="h-4 w-4 animate-pulse text-red-500" />
                 </div>
               )}
             </div>
 
             {/* Chat Messages */}
-            <div className="space-y-4 max-h-[400px] overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
+            <div className="scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent max-h-[400px] space-y-4 overflow-x-hidden overflow-y-auto">
               {currentStep === 1 && (
-                <div className="flex justify-center animate-scale-in">
-                  <div className="bg-red-50 border border-red-200 rounded-2xl px-4 py-3 flex items-center gap-2">
-                    <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-                    <span className="text-sm text-red-600">Recording voice message...</span>
-                    <Mic className="w-4 h-4 text-red-500" />
+                <div className="animate-scale-in flex justify-center">
+                  <div className="flex items-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3">
+                    <div className="h-3 w-3 animate-pulse rounded-full bg-red-500"></div>
+                    <span className="text-sm text-red-600">
+                      Recording voice message...
+                    </span>
+                    <Mic className="h-4 w-4 text-red-500" />
                   </div>
                 </div>
               )}
 
               {/* User Message 1 */}
               {currentStep >= 2 && (
-                <div className="flex justify-end animate-slide-in-right">
-                  <div className="bg-primary text-primary-foreground rounded-2xl rounded-tr-md px-4 py-3 max-w-[80%] animate-message-pop">
-                    <p className="text-sm">🔧 Finished oil change and tire rotation on my Honda. Took 2 hours total.</p>
-                    <div className="flex items-center justify-end gap-1 mt-1">
+                <div className="animate-slide-in-right flex justify-end">
+                  <div className="bg-primary text-primary-foreground animate-message-pop max-w-[80%] rounded-2xl rounded-tr-md px-4 py-3">
+                    <p className="text-sm">
+                      🔧 Finished oil change and tire rotation on my Honda. Took
+                      2 hours total.
+                    </p>
+                    <div className="mt-1 flex items-center justify-end gap-1">
                       <span className="text-xs opacity-70">14:32</span>
-                      <CheckCircle className="w-3 h-3 opacity-70 animate-check-mark" />
+                      <CheckCircle className="animate-check-mark h-3 w-3 opacity-70" />
                     </div>
                   </div>
                 </div>
@@ -150,21 +163,23 @@ export default function Hero() {
 
               {/* Typing Indicator 1 */}
               {currentStep === 3 && (
-                <div className="flex justify-start animate-slide-in-left">
-                  <div className="bg-muted rounded-2xl rounded-tl-md px-4 py-3 max-w-[80%] animate-bounce-subtle">
+                <div className="animate-slide-in-left flex justify-start">
+                  <div className="bg-muted animate-bounce-subtle max-w-[80%] rounded-2xl rounded-tl-md px-4 py-3">
                     <div className="flex items-center gap-1">
-                      <span className="text-sm text-muted-foreground">Synoro AI is analyzing</span>
-                      <div className="flex gap-1 ml-2">
+                      <span className="text-muted-foreground text-sm">
+                        Synoro AI is analyzing
+                      </span>
+                      <div className="ml-2 flex gap-1">
                         <div
-                          className="w-1.5 h-1.5 bg-primary rounded-full animate-typing-dot"
+                          className="bg-primary animate-typing-dot h-1.5 w-1.5 rounded-full"
                           style={{ animationDelay: "0ms" }}
                         ></div>
                         <div
-                          className="w-1.5 h-1.5 bg-primary rounded-full animate-typing-dot"
+                          className="bg-primary animate-typing-dot h-1.5 w-1.5 rounded-full"
                           style={{ animationDelay: "200ms" }}
                         ></div>
                         <div
-                          className="w-1.5 h-1.5 bg-primary rounded-full animate-typing-dot"
+                          className="bg-primary animate-typing-dot h-1.5 w-1.5 rounded-full"
                           style={{ animationDelay: "400ms" }}
                         ></div>
                       </div>
@@ -175,14 +190,17 @@ export default function Hero() {
 
               {/* Bot Response 1 */}
               {currentStep >= 4 && (
-                <div className="flex justify-start animate-slide-in-left">
-                  <div className="bg-muted rounded-2xl rounded-tl-md px-4 py-3 max-w-[80%] animate-message-pop">
+                <div className="animate-slide-in-left flex justify-start">
+                  <div className="bg-muted animate-message-pop max-w-[80%] rounded-2xl rounded-tl-md px-4 py-3">
                     <p className="text-sm">
-                      ✅ Vehicle maintenance logged: Oil change + tire rotation (2h). Next service due in 3,000 miles.
-                      Great job staying on schedule!
+                      ✅ Vehicle maintenance logged: Oil change + tire rotation
+                      (2h). Next service due in 3,000 miles. Great job staying
+                      on schedule!
                     </p>
-                    <div className="flex items-center justify-start gap-1 mt-1">
-                      <span className="text-xs text-muted-foreground">14:33</span>
+                    <div className="mt-1 flex items-center justify-start gap-1">
+                      <span className="text-muted-foreground text-xs">
+                        14:33
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -190,10 +208,14 @@ export default function Hero() {
 
               {/* Smart Suggestion */}
               {currentStep >= 5 && (
-                <div className="flex justify-start animate-slide-in-left" style={{ animationDelay: "0.5s" }}>
-                  <div className="bg-accent/10 border border-accent/20 rounded-2xl rounded-tl-md px-4 py-3 max-w-[80%] animate-glow-pulse">
-                    <p className="text-sm text-accent">
-                      💡 Based on your maintenance pattern, I recommend scheduling brake inspection next month.
+                <div
+                  className="animate-slide-in-left flex justify-start"
+                  style={{ animationDelay: "0.5s" }}
+                >
+                  <div className="bg-accent/10 border-accent/20 animate-glow-pulse max-w-[80%] rounded-2xl rounded-tl-md border px-4 py-3">
+                    <p className="text-accent text-sm">
+                      💡 Based on your maintenance pattern, I recommend
+                      scheduling brake inspection next month.
                     </p>
                   </div>
                 </div>
@@ -201,12 +223,17 @@ export default function Hero() {
 
               {/* User Message 2 */}
               {currentStep >= 6 && (
-                <div className="flex justify-end animate-slide-in-right" style={{ animationDelay: "0.3s" }}>
-                  <div className="bg-primary text-primary-foreground rounded-2xl rounded-tr-md px-4 py-3 max-w-[80%] animate-message-pop">
-                    <p className="text-sm">📅 Schedule brake inspection for next month</p>
-                    <div className="flex items-center justify-end gap-1 mt-1">
+                <div
+                  className="animate-slide-in-right flex justify-end"
+                  style={{ animationDelay: "0.3s" }}
+                >
+                  <div className="bg-primary text-primary-foreground animate-message-pop max-w-[80%] rounded-2xl rounded-tr-md px-4 py-3">
+                    <p className="text-sm">
+                      📅 Schedule brake inspection for next month
+                    </p>
+                    <div className="mt-1 flex items-center justify-end gap-1">
                       <span className="text-xs opacity-70">14:35</span>
-                      <CheckCircle className="w-3 h-3 opacity-70" />
+                      <CheckCircle className="h-3 w-3 opacity-70" />
                     </div>
                   </div>
                 </div>
@@ -214,21 +241,23 @@ export default function Hero() {
 
               {/* Typing Indicator 2 */}
               {currentStep === 7 && (
-                <div className="flex justify-start animate-slide-in-left">
-                  <div className="bg-muted rounded-2xl rounded-tl-md px-4 py-3 max-w-[80%]">
+                <div className="animate-slide-in-left flex justify-start">
+                  <div className="bg-muted max-w-[80%] rounded-2xl rounded-tl-md px-4 py-3">
                     <div className="flex items-center gap-1">
-                      <span className="text-sm text-muted-foreground">Scheduling...</span>
-                      <div className="flex gap-1 ml-2">
+                      <span className="text-muted-foreground text-sm">
+                        Scheduling...
+                      </span>
+                      <div className="ml-2 flex gap-1">
                         <div
-                          className="w-1.5 h-1.5 bg-primary rounded-full animate-typing-dot"
+                          className="bg-primary animate-typing-dot h-1.5 w-1.5 rounded-full"
                           style={{ animationDelay: "0ms" }}
                         ></div>
                         <div
-                          className="w-1.5 h-1.5 bg-primary rounded-full animate-typing-dot"
+                          className="bg-primary animate-typing-dot h-1.5 w-1.5 rounded-full"
                           style={{ animationDelay: "200ms" }}
                         ></div>
                         <div
-                          className="w-1.5 h-1.5 bg-primary rounded-full animate-typing-dot"
+                          className="bg-primary animate-typing-dot h-1.5 w-1.5 rounded-full"
                           style={{ animationDelay: "400ms" }}
                         ></div>
                       </div>
@@ -239,13 +268,16 @@ export default function Hero() {
 
               {/* Bot Response 2 */}
               {currentStep >= 8 && (
-                <div className="flex justify-start animate-slide-in-left">
-                  <div className="bg-muted rounded-2xl rounded-tl-md px-4 py-3 max-w-[80%] animate-message-pop">
+                <div className="animate-slide-in-left flex justify-start">
+                  <div className="bg-muted animate-message-pop max-w-[80%] rounded-2xl rounded-tl-md px-4 py-3">
                     <p className="text-sm">
-                      ✅ Brake inspection scheduled for March 15th at 10:00 AM. Reminder set for 2 days before.
+                      ✅ Brake inspection scheduled for March 15th at 10:00 AM.
+                      Reminder set for 2 days before.
                     </p>
-                    <div className="flex items-center justify-start gap-1 mt-1">
-                      <span className="text-xs text-muted-foreground">14:36</span>
+                    <div className="mt-1 flex items-center justify-start gap-1">
+                      <span className="text-muted-foreground text-xs">
+                        14:36
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -253,17 +285,19 @@ export default function Hero() {
             </div>
 
             {/* Input Preview */}
-            <div className="mt-6 pt-4 border-t border-primary/10">
-              <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
-                  <MessageSquare className="w-4 h-4 text-primary" />
+            <div className="border-primary/10 mt-6 border-t pt-4">
+              <div className="text-muted-foreground flex items-center gap-3 text-sm">
+                <div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-full">
+                  <MessageSquare className="text-primary h-4 w-4" />
                 </div>
-                <span className="flex-1 italic">Try: "Washed car, $15 at car wash" or "Changed air filter"</span>
+                <span className="flex-1 italic">
+                  Try: "Washed car, $15 at car wash" or "Changed air filter"
+                </span>
               </div>
             </div>
           </div>
         </div>
       </div>
     </section>
-  )
+  );
 }
