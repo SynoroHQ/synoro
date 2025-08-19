@@ -1,4 +1,4 @@
-import { and, between, ilike, or } from "drizzle-orm";
+import { and, between, eq, ilike, or } from "drizzle-orm";
 
 import { createId } from "@synoro/db";
 import { db } from "@synoro/db/client";
@@ -34,10 +34,7 @@ export async function searchEventsByKeywords(params: {
   if (!keywords || keywords.length === 0) return [];
   const conditions = keywords.map((kw) => ilike(eventLog.text, `%${kw}%`));
   const where = chatId
-    ? and(
-        eventLog.chatId.eq?.(chatId) ?? (eventLog.chatId as any),
-        or(...conditions),
-      )
+    ? and(eq(eventLog.chatId, chatId), or(...conditions))
     : or(...conditions);
   const rows = await db
     .select({
@@ -60,9 +57,7 @@ export async function filterEventsByDate(params: {
 }): Promise<Array<{ id: string; text: string | null; createdAt: Date }>> {
   const { chatId, from, to, limit = 100 } = params;
   const dateCond = between(eventLog.createdAt, from, to);
-  const where = chatId
-    ? and(eventLog.chatId.eq?.(chatId) ?? (eventLog.chatId as any), dateCond)
-    : dateCond;
+  const where = chatId ? and(eq(eventLog.chatId, chatId), dateCond) : dateCond;
   const rows = await db
     .select({
       id: eventLog.id,
