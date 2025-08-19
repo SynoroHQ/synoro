@@ -1,13 +1,8 @@
 import { randomUUID } from "node:crypto";
 import type { Context } from "grammy";
 
-import {
-  advise,
-  answerQuestion,
-  classifyMessageType,
-  classifyRelevance,
-  parseTask,
-} from "../services/ai-service";
+import { processClassifiedMessage } from "../lib/messageProcessor";
+import { classifyMessageType, classifyRelevance } from "../services/ai-service";
 import { logEvent } from "../services/db";
 import { extractTags } from "../services/relevance";
 
@@ -41,66 +36,22 @@ export async function handleText(ctx: Context): Promise<void> {
       metadata: telemetryBase,
     });
 
-    let response = "";
-    let parsed: unknown = null;
+    // Обрабатываем сообщение с помощью общей функции
+    const result = await processClassifiedMessage(
+      text,
+      messageType,
+      telemetryBase,
+      {
+        questionFunctionId: "tg-answer-question",
+        chatFunctionId: "tg-chat-response",
+        parseFunctionId: "tg-parse-text",
+        adviseFunctionId: "tg-handle-text",
+        fallbackParseFunctionId: "tg-parse-text-fallback",
+        fallbackAdviseFunctionId: "tg-handle-text-fallback",
+      },
+    );
 
-    // Обрабатываем в зависимости от типа сообщения
-    switch (messageType.type) {
-      case "question":
-        // Отвечаем на вопрос без записи в базу
-        response = await answerQuestion(text, messageType, {
-          functionId: "tg-answer-question",
-          metadata: telemetryBase,
-        });
-        break;
-
-      case "event":
-        // Обрабатываем событие: парсим и даем совет
-        parsed = await parseTask(text, {
-          functionId: "tg-parse-text",
-          metadata: telemetryBase,
-        });
-
-        const tip = await advise(text, {
-          functionId: "tg-handle-text",
-          metadata: telemetryBase,
-        });
-
-        response = tip
-          ? `Записал: "${text}".\nСовет: ${tip}`
-          : `Записал: "${text}".`;
-        break;
-
-      case "chat":
-        // Простое общение - даем дружелюбный ответ
-        response = await answerQuestion(text, messageType, {
-          functionId: "tg-chat-response",
-          metadata: telemetryBase,
-        });
-        break;
-
-      case "irrelevant":
-        // Игнорируем спам и нерелевантные сообщения
-        response =
-          "Понял, спасибо за сообщение! Если нужна помощь, просто спроси.";
-        break;
-
-      default:
-        // Fallback - обрабатываем как событие
-        parsed = await parseTask(text, {
-          functionId: "tg-parse-text-fallback",
-          metadata: telemetryBase,
-        });
-
-        const fallbackTip = await advise(text, {
-          functionId: "tg-handle-text-fallback",
-          metadata: telemetryBase,
-        });
-
-        response = fallbackTip
-          ? `Записал: "${text}".\nСовет: ${fallbackTip}`
-          : `Записал: "${text}".`;
-    }
+    const { response, parsed } = result;
 
     await ctx.reply(response);
 

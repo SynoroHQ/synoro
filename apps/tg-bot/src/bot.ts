@@ -17,40 +17,24 @@ function getMessageType(message?: Message): string {
     return "unknown";
   }
 
-  if (message.text) {
-    return "text";
-  }
+  // Карта свойств сообщения к их типам в порядке приоритета
+  const messageTypeMap: Array<[keyof Message, string]> = [
+    ["text", "text"],
+    ["voice", "voice"],
+    ["audio", "audio"],
+    ["photo", "photo"],
+    ["video", "video"],
+    ["document", "document"],
+    ["sticker", "sticker"],
+    ["contact", "contact"],
+    ["location", "location"],
+  ];
 
-  if (message.voice) {
-    return "voice";
-  }
-
-  if (message.audio) {
-    return "audio";
-  }
-
-  if (message.photo) {
-    return "photo";
-  }
-
-  if (message.video) {
-    return "video";
-  }
-
-  if (message.document) {
-    return "document";
-  }
-
-  if (message.sticker) {
-    return "sticker";
-  }
-
-  if (message.contact) {
-    return "contact";
-  }
-
-  if (message.location) {
-    return "location";
+  // Итерируем по карте в порядке приоритета
+  for (const [property, type] of messageTypeMap) {
+    if (message[property]) {
+      return type;
+    }
   }
 
   return "other";

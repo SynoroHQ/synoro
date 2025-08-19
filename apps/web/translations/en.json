@@ -1,0 +1,57 @@
+{
+  "header": {
+    "features": "Features",
+    "forWhom": "For Whom",
+    "pricing": "Pricing",
+    "faq": "FAQ",
+    "tryFree": "Try Free"
+  },
+  "hero": {
+    "badge": "AI-Powered Smart Assistant",
+    "title": "Synoro",
+    "subtitle1": "Your Smart Home",
+    "subtitle2": "Assistant",
+    "description": "Transform your daily tasks with AI-powered voice and text logging through Telegram. Get intelligent analytics and smart recommendations for better home management.",
+    "startTrial": "Start Free Trial",
+    "watchDemo": "Watch Demo",
+    "telegramChat": "Telegram Chat",
+    "aiActive": "AI Assistant Active",
+    "voiceExample": "Changed oil in my Logan today",
+    "responseExample": "Logged: Car maintenance - Oil change for Logan",
+    "nextService": "Next service due in 3 months"
+  },
+  "howItWorks": {
+    "badge": "How It Works",
+    "title": "Simple. Smart. Seamless.",
+    "subtitle": "Three steps to transform your home management experience",
+    "step1": {
+      "title": "Speak or Type",
+      "description": "Simply message our Telegram bot with voice notes or text about your tasks, purchases, or maintenance activities."
+    },
+    "step2": {
+      "title": "AI Processing",
+      "description": "Our advanced AI understands context, categorizes information, and extracts meaningful data from your natural language."
+    },
+    "step3": {
+      "title": "Smart Insights",
+      "description": "Receive personalized analytics, predictive reminders, and actionable insights to optimize your home management."
+    }
+  },
+  "features": {
+    "badge": "Powerful Features",
+    "title": "Everything You Need",
+    "subtitle": "Comprehensive tools to manage your smart home efficiently"
+  },
+  "pricing": {
+    "badge": "Simple Pricing",
+    "title": "Choose Your Plan",
+    "subtitle": "Start free, upgrade when you need more power",
+    "mostPopular": "Most Popular"
+  },
+  "cta": {
+    "title": "Ready to Transform Your Home?",
+    "subtitle": "Join thousands of smart homeowners who are already managing their lives more efficiently with Synoro's AI-powered assistant.",
+    "startTrial": "Start Free Trial",
+    "scheduleDemo": "Schedule Demo"
+  }
+}
