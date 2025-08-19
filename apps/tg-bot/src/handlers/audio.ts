@@ -2,13 +2,13 @@ import { randomUUID } from "node:crypto";
 import type { Context } from "grammy";
 
 import { env } from "../env";
-import { logEvent } from "../services/db";
 import {
   advise,
   classifyRelevance,
   parseTask,
   transcribe,
-} from "../services/openai";
+} from "../services/ai-service";
+import { logEvent } from "../services/db";
 import { extractTags } from "../services/relevance";
 
 export async function handleAudio(ctx: Context): Promise<void> {

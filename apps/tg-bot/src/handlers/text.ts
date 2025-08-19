@@ -1,8 +1,8 @@
 import { randomUUID } from "node:crypto";
 import type { Context } from "grammy";
 
+import { advise, classifyRelevance, parseTask } from "../services/ai-service";
 import { logEvent } from "../services/db";
-import { advise, classifyRelevance, parseTask } from "../services/openai";
 import { extractTags } from "../services/relevance";
 
 export async function handleText(ctx: Context): Promise<void> {

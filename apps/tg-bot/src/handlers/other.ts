@@ -1,7 +1,7 @@
 import type { Context } from "grammy";
 
+import { classifyRelevance } from "../services/ai-service";
 import { logEvent } from "../services/db";
-import { classifyRelevance } from "../services/openai";
 
 // Fallback handler for any other message types the bot doesn't process yet
 export async function handleOther(ctx: Context): Promise<void> {

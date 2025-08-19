@@ -1,5 +1,5 @@
 import type { AttributeValue } from "@opentelemetry/api";
-import { openai } from "@ai-sdk/openai";
+import { createOpenAI, openai } from "@ai-sdk/openai";
 import { experimental_transcribe as aiTranscribe, generateText } from "ai";
 import { Langfuse } from "langfuse";
 import { z } from "zod";
@@ -13,10 +13,33 @@ import {
 
 import { env } from "../env";
 
+// Initialize AI providers
 const oai = openai; // use default provider instance; it reads OPENAI_API_KEY from env
+const moonshotAI = createOpenAI({
+  apiKey: env.MOONSHOT_API_KEY,
+  baseURL: "https://api.moonshot.ai/v1",
+});
 
-const TRANSCRIBE_MODEL = env.OPENAI_TRANSCRIBE_MODEL ?? "whisper-1"; // or "gpt-4o-mini-transcribe"
-const ADVICE_MODEL = env.OPENAI_ADVICE_MODEL ?? "gpt-4o-mini";
+// Get the active AI provider based on configuration
+function getActiveProvider() {
+  return env.AI_PROVIDER === "moonshot" ? moonshotAI : oai;
+}
+
+// Get the active transcription model
+function getTranscribeModel() {
+  if (env.AI_PROVIDER === "moonshot") {
+    return env.MOONSHOT_TRANSCRIBE_MODEL ?? "moonshot-v1";
+  }
+  return env.OPENAI_TRANSCRIBE_MODEL ?? "whisper-1";
+}
+
+// Get the active advice model
+function getAdviceModel() {
+  if (env.AI_PROVIDER === "moonshot") {
+    return env.MOONSHOT_ADVICE_MODEL ?? "kimi-k2-0711-preview";
+  }
+  return env.OPENAI_ADVICE_MODEL ?? "gpt-4o-mini";
+}
 
 // Lazy-initialized Langfuse client and cached prompts per key
 let lf: Langfuse | null = null;
@@ -90,7 +113,7 @@ export async function classifyRelevance(
   const system = await getSystemPrompt(PROMPT_KEYS.CLASSIFIER_RELEVANCE);
   try {
     const { text: out } = await generateText({
-      model: oai(ADVICE_MODEL),
+      model: getActiveProvider()(getAdviceModel()),
       system,
       prompt: `Message: ${text}\nJSON:`,
       temperature: 0.0,
@@ -120,7 +143,7 @@ export async function advise(
 ): Promise<string> {
   const systemPrompt = await getAssistantSystemPrompt();
   const { text } = await generateText({
-    model: oai(ADVICE_MODEL),
+    model: getActiveProvider()(getAdviceModel()),
     system: systemPrompt,
     prompt: input,
     temperature: 0.4,
@@ -139,7 +162,7 @@ export async function transcribe(
   _telemetry?: Telemetry,
 ): Promise<string> {
   const { text } = await aiTranscribe({
-    model: oai.transcription(TRANSCRIBE_MODEL),
+    model: getActiveProvider().transcription(getTranscribeModel()),
     audio: buffer,
     // mimeType: "audio/mpeg", // можно указать при необходимости
   });
@@ -206,7 +229,7 @@ export async function parseTask(
   const system = await getSystemPrompt(PROMPT_KEYS.PARSER_TASK);
   try {
     const { text: out } = await generateText({
-      model: oai(ADVICE_MODEL),
+      model: getActiveProvider()(getAdviceModel()),
       system,
       prompt: `Text: ${text}\nJSON:`,
       temperature: 0.2,
