@@ -4,8 +4,10 @@ import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, MessageSquare, Mic, Play, Sparkles } from "lucide-react";
+import { useTranslations } from 'next-intl';
 
 export default function Hero() {
+  const t = useTranslations('Hero');
   const [currentStep, setCurrentStep] = useState(0);
   const [isRecording, setIsRecording] = useState(false);
 
@@ -59,7 +61,7 @@ export default function Hero() {
         <div className="mb-8">
           <Badge className="bg-primary/10 text-primary border-primary/50 rounded-full px-4 py-2 text-sm font-medium">
             <Sparkles className="mr-2 h-4 w-4" />
-            AI-Powered Smart Assistant
+            {t('badge')}
           </Badge>
         </div>
 
@@ -72,7 +74,7 @@ export default function Hero() {
           </span>
           <br />
           <span className="text-muted-foreground text-4xl font-normal md:text-5xl">
-            Your Smart Home Assistant
+            {t('title')}
           </span>
         </h1>
 
@@ -80,9 +82,7 @@ export default function Hero() {
           className="text-muted-foreground animate-fade-in-up mx-auto mb-12 max-w-3xl text-xl leading-relaxed"
           style={{ animationDelay: "0.4s" }}
         >
-          Transform your daily routine with AI-powered task management. Log
-          activities with voice commands, get intelligent insights, and optimize
-          your time like never before.
+          {t('subtitle')}
         </p>
 
         <div className="mb-16 flex flex-col justify-center gap-6 sm:flex-row">
@@ -91,7 +91,7 @@ export default function Hero() {
             className="bg-primary hover:bg-primary/90 rounded-xl px-8 py-3 font-semibold text-gray-900 shadow-lg transition-all duration-300 hover:shadow-xl"
           >
             <Sparkles className="mr-2 h-4 w-4" />
-            Start Your Free Trial
+            {t('startTrial')}
           </Button>
 
           <Button
@@ -100,7 +100,7 @@ export default function Hero() {
             className="border-primary text-primary hover:bg-primary rounded-xl bg-transparent px-8 py-3 font-semibold shadow-lg transition-all duration-300 hover:text-gray-900 hover:shadow-xl"
           >
             <Play className="mr-2 h-4 w-4" />
-            See Live Demo
+            {t('seeDemo')}
           </Button>
         </div>
 

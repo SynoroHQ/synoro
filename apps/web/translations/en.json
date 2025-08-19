@@ -1,57 +1,89 @@
 {
-  "header": {
-    "features": "Features",
-    "forWhom": "For Whom",
-    "pricing": "Pricing",
-    "faq": "FAQ",
-    "tryFree": "Try Free"
-  },
-  "hero": {
-    "badge": "AI-Powered Smart Assistant",
-    "title": "Synoro",
-    "subtitle1": "Your Smart Home",
-    "subtitle2": "Assistant",
-    "description": "Transform your daily tasks with AI-powered voice and text logging through Telegram. Get intelligent analytics and smart recommendations for better home management.",
-    "startTrial": "Start Free Trial",
-    "watchDemo": "Watch Demo",
-    "telegramChat": "Telegram Chat",
-    "aiActive": "AI Assistant Active",
-    "voiceExample": "Changed oil in my Logan today",
-    "responseExample": "Logged: Car maintenance - Oil change for Logan",
-    "nextService": "Next service due in 3 months"
-  },
-  "howItWorks": {
-    "badge": "How It Works",
-    "title": "Simple. Smart. Seamless.",
-    "subtitle": "Three steps to transform your home management experience",
-    "step1": {
-      "title": "Speak or Type",
-      "description": "Simply message our Telegram bot with voice notes or text about your tasks, purchases, or maintenance activities."
-    },
-    "step2": {
-      "title": "AI Processing",
-      "description": "Our advanced AI understands context, categorizes information, and extracts meaningful data from your natural language."
-    },
-    "step3": {
-      "title": "Smart Insights",
-      "description": "Receive personalized analytics, predictive reminders, and actionable insights to optimize your home management."
+  "Home": {
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "telegram": {
+        "question": "How does it work through Telegram?",
+        "answer": "Simply add our Synoro bot to your Telegram and start chatting. Send text messages or voice notes about your tasks, expenses, or maintenance activities. Our AI will automatically understand and categorize everything for you."
+      },
+      "voice": {
+        "question": "Can I use voice messages?",
+        "answer": "Yes! Voice messages are fully supported. Simply record a voice note in Telegram describing what you did, bought, or need to remember. Our system will transcribe and process your voice message automatically."
+      },
+      "security": {
+        "question": "Is my data secure?",
+        "answer": "Absolutely. We use enterprise-grade encryption to protect your data. Your information is stored securely and never shared with third parties. You maintain full control over your data and can export or delete it at any time."
+      },
+      "family": {
+        "question": "How does family sharing work?",
+        "answer": "With the Family plan, multiple family members can log activities to the same account. Each person gets their own Telegram bot access, and you can see combined analytics and reports for the entire household."
+      }
     }
   },
-  "features": {
-    "badge": "Powerful Features",
-    "title": "Everything You Need",
-    "subtitle": "Comprehensive tools to manage your smart home efficiently"
+  "Header": {
+    "features": "Features",
+    "pricing": "Pricing",
+    "about": "About",
+    "tryFree": "Try Free"
   },
-  "pricing": {
-    "badge": "Simple Pricing",
+  "Hero": {
+    "badge": "AI-Powered Smart Assistant",
+    "title": "Your Smart Home Assistant",
+    "subtitle": "Transform your daily routine with AI-powered task management. Log activities with voice commands, get intelligent insights, and optimize your time like never before.",
+    "startTrial": "Start Your Free Trial",
+    "seeDemo": "See Live Demo"
+  },
+  "Features": {
+    "badge": "Features",
+    "title": "Key Features",
+    "subtitle": "Explore the powerful features that make Synoro the ultimate smart assistant for your daily life.",
+    "smartLogging": {
+      "title": "Smart Task Logging",
+      "description": "Effortlessly log tasks and events via text or voice messages with intelligent categorization."
+    },
+    "aiInsights": {
+      "title": "AI-Powered Insights",
+      "description": "Leverage AI to automatically understand and categorize your entries with context awareness."
+    },
+    "analytics": {
+      "title": "Analytics & Reports",
+      "description": "Gain detailed insights and visual reports of your activities with predictive analytics."
+    },
+    "reminders": {
+      "title": "Smart Reminders",
+      "description": "Receive intelligent notifications based on your patterns and predictive scheduling."
+    },
+    "productivity": {
+      "title": "Gamified Productivity",
+      "description": "Turn your daily tasks into a fun game with rewards and achievements."
+    },
+    "security": {
+      "title": "Secure & Private",
+      "description": "Enterprise-grade security ensures your personal data remains private and encrypted."
+    }
+  },
+  "Pricing": {
+    "badge": "Pricing",
     "title": "Choose Your Plan",
-    "subtitle": "Start free, upgrade when you need more power",
-    "mostPopular": "Most Popular"
-  },
-  "cta": {
-    "title": "Ready to Transform Your Home?",
-    "subtitle": "Join thousands of smart homeowners who are already managing their lives more efficiently with Synoro's AI-powered assistant.",
-    "startTrial": "Start Free Trial",
-    "scheduleDemo": "Schedule Demo"
+    "subtitle": "Find the perfect plan to supercharge your productivity and simplify your life.",
+    "free": {
+      "title": "Free",
+      "subtitle": "Perfect for getting started",
+      "price": "$0",
+      "period": "/month"
+    },
+    "premium": {
+      "title": "Premium",
+      "subtitle": "Advanced features for power users",
+      "price": "$12",
+      "period": "/month",
+      "badge": "Most Popular"
+    },
+    "family": {
+      "title": "Family",
+      "subtitle": "Perfect for families and teams",
+      "price": "$20",
+      "period": "/month"
+    }
   }
 }

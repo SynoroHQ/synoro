@@ -7,23 +7,24 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { CheckCircle, Shield, Sparkles, Zap } from "lucide-react";
+import { useTranslations } from 'next-intl';
 
 export default function Pricing() {
+  const t = useTranslations('Pricing');
   return (
     <section id="pricing" className="bg-muted/30 px-4 py-32">
       <div className="container mx-auto max-w-6xl">
         <div className="mb-20 text-center">
           <Badge className="from-accent/10 to-primary/10 text-accent border-accent/30 hover:from-accent/20 hover:to-primary/20 mb-6 rounded-full border bg-gradient-to-r px-6 py-3 text-sm font-medium shadow-lg backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:bg-gradient-to-r">
-            <Zap className="mr-2 h-4 w-4 animate-pulse" />
-            Pricing
-          </Badge>
-          <h2 className="from-primary via-accent to-primary mb-6 bg-gradient-to-r bg-clip-text font-serif text-5xl font-bold text-transparent transition-transform duration-300 hover:scale-105 md:text-7xl">
-            Choose Your Plan
-          </h2>
-          <p className="text-muted-foreground mx-auto max-w-3xl text-xl leading-relaxed">
-            Find the perfect plan to supercharge your productivity and simplify
-            your life.
-          </p>
+                         <Zap className="mr-2 h-4 w-4 animate-pulse" />
+             {t('badge')}
+           </Badge>
+           <h2 className="from-primary via-accent to-primary mb-6 bg-gradient-to-r bg-clip-text font-serif text-5xl font-bold text-transparent transition-transform duration-300 hover:scale-105 md:text-7xl">
+             {t('title')}
+           </h2>
+           <p className="text-muted-foreground mx-auto max-w-3xl text-xl leading-relaxed">
+             {t('subtitle')}
+           </p>
         </div>
 
         <div className="grid items-stretch gap-8 md:grid-cols-3">
@@ -35,18 +36,18 @@ export default function Pricing() {
                 <div className="bg-muted/50 text-muted-foreground absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold opacity-0 transition-all duration-300 group-hover:opacity-100">
                   1
                 </div>
-                <CardTitle className="group-hover:text-primary mb-2 font-serif text-3xl font-bold transition-colors duration-300">
-                  Free
-                </CardTitle>
-                <CardDescription className="group-hover:text-foreground/80 mb-6 text-base transition-colors duration-300">
-                  Perfect for getting started
-                </CardDescription>
-                <div className="mb-4 text-5xl font-bold transition-transform duration-300 group-hover:scale-110">
-                  $0
-                  <span className="text-muted-foreground text-lg font-normal">
-                    /month
-                  </span>
-                </div>
+                                 <CardTitle className="group-hover:text-primary mb-2 font-serif text-3xl font-bold transition-colors duration-300">
+                   {t('free.title')}
+                 </CardTitle>
+                 <CardDescription className="group-hover:text-foreground/80 mb-6 text-base transition-colors duration-300">
+                   {t('free.subtitle')}
+                 </CardDescription>
+                 <div className="mb-4 text-5xl font-bold transition-transform duration-300 group-hover:scale-110">
+                   {t('free.price')}
+                   <span className="text-muted-foreground text-lg font-normal">
+                     {t('free.period')}
+                   </span>
+                 </div>
               </CardHeader>
               <CardContent className="flex flex-1 flex-col px-6">
                 <ul className="mb-8 flex-1 space-y-4">

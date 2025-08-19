@@ -14,8 +14,10 @@ import {
   Sparkles,
   Target,
 } from "lucide-react";
+import { useTranslations } from 'next-intl';
 
 export default function Features() {
+  const t = useTranslations('Features');
   return (
     <section
       id="features"
@@ -25,14 +27,13 @@ export default function Features() {
         <div className="mb-20 text-center">
           <Badge className="bg-primary/10 text-primary border-primary/30 hover:bg-primary/20 mb-6 rounded-full px-4 py-2 text-sm font-medium transition-all duration-300 hover:scale-105">
             <Sparkles className="mr-2 h-4 w-4 animate-pulse" />
-            Features
+            {t('badge')}
           </Badge>
           <h2 className="mb-6 font-serif text-5xl font-bold md:text-6xl">
-            Key Features
+            {t('title')}
           </h2>
           <p className="text-muted-foreground mx-auto max-w-2xl text-xl">
-            Explore the powerful features that make Synoro the ultimate smart
-            assistant for your daily life.
+            {t('subtitle')}
           </p>
         </div>
 
@@ -44,11 +45,10 @@ export default function Features() {
                 <MessageSquare className="h-6 w-6 text-blue-600 transition-transform duration-300 group-hover:scale-110" />
               </div>
               <CardTitle className="mb-2 text-xl font-bold transition-colors duration-300 group-hover:text-blue-600">
-                Smart Task Logging
+                {t('smartLogging.title')}
               </CardTitle>
               <CardDescription className="group-hover:text-foreground/80 transition-colors duration-300">
-                Effortlessly log tasks and events via text or voice messages
-                with intelligent categorization.
+                {t('smartLogging.description')}
               </CardDescription>
             </CardHeader>
           </Card>
@@ -60,11 +60,10 @@ export default function Features() {
                 <Target className="h-6 w-6 text-purple-600 transition-transform duration-300 group-hover:scale-110" />
               </div>
               <CardTitle className="mb-2 text-xl font-bold transition-colors duration-300 group-hover:text-purple-600">
-                AI-Powered Insights
+                {t('aiInsights.title')}
               </CardTitle>
               <CardDescription className="group-hover:text-foreground/80 transition-colors duration-300">
-                Leverage AI to automatically understand and categorize your
-                entries with context awareness.
+                {t('aiInsights.description')}
               </CardDescription>
             </CardHeader>
           </Card>
@@ -76,11 +75,10 @@ export default function Features() {
                 <BarChart3 className="h-6 w-6 text-teal-600 transition-transform duration-300 group-hover:scale-110" />
               </div>
               <CardTitle className="mb-2 text-xl font-bold transition-colors duration-300 group-hover:text-teal-600">
-                Analytics & Reports
+                {t('analytics.title')}
               </CardTitle>
               <CardDescription className="group-hover:text-foreground/80 transition-colors duration-300">
-                Gain detailed insights and visual reports of your activities
-                with predictive analytics.
+                {t('analytics.description')}
               </CardDescription>
             </CardHeader>
           </Card>
@@ -92,11 +90,10 @@ export default function Features() {
                 <Clock className="h-6 w-6 text-orange-600 transition-transform duration-300 group-hover:scale-110" />
               </div>
               <CardTitle className="mb-2 text-xl font-bold transition-colors duration-300 group-hover:text-orange-600">
-                Smart Reminders
+                {t('reminders.title')}
               </CardTitle>
               <CardDescription className="group-hover:text-foreground/80 transition-colors duration-300">
-                Receive intelligent notifications based on your patterns and
-                predictive scheduling.
+                {t('reminders.description')}
               </CardDescription>
             </CardHeader>
           </Card>
@@ -108,11 +105,10 @@ export default function Features() {
                 <Award className="h-6 w-6 text-green-600 transition-transform duration-300 group-hover:scale-110" />
               </div>
               <CardTitle className="mb-2 text-xl font-bold transition-colors duration-300 group-hover:text-green-600">
-                Gamified Productivity
+                {t('productivity.title')}
               </CardTitle>
               <CardDescription className="group-hover:text-foreground/80 transition-colors duration-300">
-                Turn your daily tasks into a fun game with rewards and
-                achievements.
+                {t('productivity.description')}
               </CardDescription>
             </CardHeader>
           </Card>
@@ -124,11 +120,10 @@ export default function Features() {
                 <Shield className="h-6 w-6 text-indigo-600 transition-transform duration-300 group-hover:scale-110" />
               </div>
               <CardTitle className="mb-2 text-xl font-bold transition-colors duration-300 group-hover:text-indigo-600">
-                Secure & Private
+                {t('security.title')}
               </CardTitle>
               <CardDescription className="group-hover:text-foreground/80 transition-colors duration-300">
-                Enterprise-grade security ensures your personal data remains
-                private and encrypted.
+                {t('security.description')}
               </CardDescription>
             </CardHeader>
           </Card>
