@@ -50,37 +50,35 @@
     "badge": "Features",
     "title": "Key Features",
     "subtitle": "Discover the helpful features that make Synoro the best assistant for your everyday life.",
-    "smartLogging": {
-      "title": "Easy Task Recording",
-      "description": "Record your tasks and events using voice or text messages. The system automatically organizes everything for you."
-    },
-    "aiInsights": {
-      "title": "Smart Processing",
-      "description": "The system automatically understands and organizes your entries into the right categories."
-    },
-    "weatherIntegration": {
-      "title": "Weather Integration",
-      "description": "Considers weather forecasts for smart planning: reschedules outdoor work during rain, reminds about weather preparation."
+    "aiIntelligence": {
+      "title": "Artificial Intelligence",
+      "description": "Advanced AI algorithms automatically understand and classify your records, turning chaos into structured information.",
+      "features": {
+        "smartLogging": "Smart Task Logging",
+        "automaticClassification": "Automatic Classification",
+        "voiceRecognition": "Voice Recognition"
+      }
     },
     "smartPlanning": {
-      "title": "Smart Shopping Planning",
-      "description": "Analyzes your expenses and helps save for major purchases by suggesting optimal saving strategies."
-    },
-    "analytics": {
-      "title": "Reports & Statistics",
-      "description": "Get detailed reports and visual charts of your activities with future predictions."
-    },
-    "reminders": {
-      "title": "Smart Reminders",
-      "description": "Get timely notifications based on your habits, schedule patterns and weather conditions."
+      "title": "Smart Planning",
+      "description": "Intelligent planning system that takes into account weather, your habits and financial goals for optimal results.",
+      "features": {
+        "weatherIntegration": "Weather Integration",
+        "smartReminders": "Smart Reminders",
+        "savingsStrategy": "Savings Strategies"
+      }
     },
     "productivity": {
-      "title": "Game-like Experience",
-      "description": "Turn your daily tasks into an enjoyable game with points and rewards."
+      "title": "Productivity & Security",
+      "description": "Gamified approach to productivity with enterprise-level security for your personal data.",
+      "features": {
+        "gamification": "Gamification",
+        "advancedAnalytics": "Advanced Analytics",
+        "enterpriseSecurity": "Enterprise Security"
+      }
     },
-    "security": {
-      "title": "Safe & Private",
-      "description": "Professional security keeps your personal information safe and private."
+    "cta": {
+      "message": "Start using Synoro today"
     }
   },
   "Pricing": {
