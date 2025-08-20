@@ -37,7 +37,7 @@
     "recording": "Recording voice message...",
     "userMessage1": "🔧 Changed oil and rotated tires on my car. Took 2 hours total.",
     "userMessage2": "📅 Schedule brake inspection for next month",
-    "aiAnalyzing": "Synoro AI is analyzing",
+    "aiAnalyzing": "Synoro AI is analyzing...",
     "aiResponse1": "✅ Car maintenance recorded: Oil change + tire rotation (2h). Next service due in 5,000 km. Great job staying on schedule!",
     "aiSuggestion": "💡 Based on your maintenance pattern, I recommend scheduling brake inspection next month.",
     "scheduling": "Scheduling...",
@@ -206,19 +206,19 @@
       }
     },
     "homeowners": {
-      "title": "Property Owners",
-      "subtitle": "Complete home management made simple",
+      "title": "Builders & Craftsmen",
+      "subtitle": "Professional planning for construction and renovation projects",
       "maintenanceScheduling": {
-        "title": "Maintenance Scheduling",
-        "description": "\"Fixed leaky faucet in main bathroom\" - automatically schedules follow-up checks and tracks warranty information."
+        "title": "Construction Stage Planning",
+        "description": "\"Poured foundation for 6x8 meter house, used 12 cubic meters of concrete\" - system automatically plans next stages: waterproofing, wall masonry, floor slabs."
       },
       "seasonalReminders": {
-        "title": "Seasonal Reminders",
-        "description": "Get smart reminders for seasonal tasks like gutter cleaning, heating system maintenance, and winter preparation based on your location."
+        "title": "Weather Planning for Outdoor Work",
+        "description": "Get smart reminders: reschedule facade painting during rain, plan roofing work in dry weather, consider temperature for concrete work."
       },
       "successStory": {
-        "title": "Property Owner Success",
-        "description": "\"With Synoro I save $300/month on maintenance and repairs. I never miss important home tasks anymore!\" - Jennifer L., Homeowner"
+        "title": "Craftsman Success",
+        "description": "\"With Synoro I save $600/month on stage planning and material purchases. 120 sq.m house delivered 2 weeks ahead of schedule!\" - Michael S., Foreman"
       }
     },
     "freelancers": {
@@ -283,10 +283,10 @@
         "tireRotation": "Tire Rotation - Overdue by 300 km"
       },
       "homeowners": {
-        "propertyDashboard": "Home Dashboard",
-        "tasksCompleted": "Tasks Completed",
-        "maintenanceSaved": "Maintenance Saved",
-        "upcomingTasks": "Upcoming Tasks",
+        "propertyDashboard": "Project Management",
+        "tasksCompleted": "Stages Completed",
+        "maintenanceSaved": "Materials Saved",
+        "upcomingTasks": "Next Stages",
         "tasksCompletedValue": "12",
         "maintenanceSavedValue": "$2.4K"
       },

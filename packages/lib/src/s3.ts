@@ -6,7 +6,8 @@ import {
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 const s3Endpoint = process.env.AWS_S3_ENDPOINT;
-const s3ForcePathStyle = process.env.AWS_S3_FORCE_PATH_STYLE === "true";
+const s3ForcePathStyle =
+  process.env.AWS_S3_FORCE_PATH_STYLE === "false" ? false : true;
 
 const s3Client = new S3Client({
   region: process.env.AWS_REGION || "us-east-1",
@@ -17,7 +18,7 @@ const s3Client = new S3Client({
   ...(s3Endpoint
     ? {
         endpoint: s3Endpoint,
-        forcePathStyle: s3ForcePathStyle ?? true, // MinIO-friendly by default when endpoint provided
+        forcePathStyle: s3ForcePathStyle, // MinIO-friendly by default when endpoint provided
       }
     : {}),
 });
