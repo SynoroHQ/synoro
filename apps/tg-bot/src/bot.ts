@@ -6,6 +6,7 @@ import { env } from "./env";
 import { handleAudio } from "./handlers/audio";
 import { handleOther } from "./handlers/other";
 import { handleText } from "./handlers/text";
+import { buildRateLimitKey, checkRateLimit } from "./lib/rate-limit";
 
 /**
  * Определяет тип сообщения Telegram на основе его содержимого
@@ -53,6 +54,56 @@ function getUserIdentifier(from?: User): string {
 
 export function createBot(): Bot<Context> {
   const bot = new Bot<Context>(env.TELEGRAM_BOT_TOKEN);
+
+  // Parse allowlist of chat IDs (optional)
+  const allowedChats = new Set<string>(
+    (env.TG_ALLOWED_CHAT_IDS ?? "")
+      .split(",")
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0),
+  );
+
+  const rlWindow = env.TG_RATE_LIMIT_WINDOW_MS ?? 60_000; // 1 min
+  const rlLimit = env.TG_RATE_LIMIT_LIMIT ?? 30; // 30 updates per window per user/chat
+
+  // Middleware: allowlist check (if configured)
+  bot.use(async (ctx, next) => {
+    const chatId = ctx.chat?.id ? String(ctx.chat.id) : null;
+    if (allowedChats.size > 0) {
+      if (!chatId || !allowedChats.has(chatId)) {
+        // Политика: отвечаем один раз на любое сообщение из неразрешённого чата
+        try {
+          if (chatId) {
+            await ctx.reply(
+              "Бот недоступен в этом чате. Обратитесь к администратору для доступа.",
+            );
+          }
+        } catch {}
+        return; // stop processing
+      }
+    }
+    await next();
+  });
+
+  // Middleware: basic rate limiting per chat+user
+  bot.use(async (ctx, next) => {
+    const chatId = ctx.chat?.id ? String(ctx.chat.id) : "unknown";
+    const userId = ctx.from?.id ? String(ctx.from.id) : "anon";
+    const key = buildRateLimitKey(["tg", chatId, userId]);
+    const { allowed, remaining, resetMs } = checkRateLimit(key, {
+      windowMs: rlWindow,
+      limit: rlLimit,
+    });
+    if (!allowed) {
+      try {
+        await ctx.reply(
+          `Слишком много запросов. Попробуйте позже (через ${Math.ceil(resetMs / 1000)} с).`,
+        );
+      } catch {}
+      return;
+    }
+    await next();
+  });
 
   // Middleware для логирования входящих сообщений
   bot.use(async (ctx, next) => {

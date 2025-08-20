@@ -13,6 +13,8 @@ import { ZodError } from "zod";
 import type { Session } from "@synoro/auth";
 import { auth } from "@synoro/auth";
 import { db } from "@synoro/db/client";
+import { checkRateLimit, buildRateLimitKey } from "./lib/rate-limit";
+import { env } from "../env";
 
 /**
  * 1. CONTEXT
@@ -32,6 +34,17 @@ export const createTRPCContext = async (opts: {
 }) => {
   const authToken = opts.headers.get("Authorization") ?? null;
   const source = opts.headers.get("x-trpc-source") ?? "unknown";
+  // Try to extract client IP from common proxy headers
+  const xff = opts.headers.get("x-forwarded-for");
+  const realIp =
+    opts.headers.get("x-real-ip") ||
+    opts.headers.get("cf-connecting-ip") ||
+    opts.headers.get("x-client-ip") ||
+    undefined;
+  const clientIp =
+    (xff?.split(",")[0]?.trim() || realIp || undefined) ?? undefined;
+  const origin = opts.headers.get("origin") ?? undefined;
+  const referer = opts.headers.get("referer") ?? undefined;
 
   const session = await auth.api.getSession({
     headers: opts.headers,
@@ -44,6 +57,9 @@ export const createTRPCContext = async (opts: {
     session,
     db,
     token: authToken,
+    clientIp,
+    origin,
+    referer,
   };
 };
 export type TRPCContext = Awaited<ReturnType<typeof createTRPCContext>>;
@@ -106,6 +122,57 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
   return result;
 });
 
+// Basic rate limiting middleware (per user or per IP)
+const rateLimitMiddleware = t.middleware(async ({ ctx, type, path, next }) => {
+  // Disable in test
+  if (process.env.NODE_ENV === "test") {
+    return next();
+  }
+  const windowMs = 60_000; // 1 minute
+  const limit = ctx.session?.user ? 120 : 60; // more generous for authed
+  const identity = ctx.session?.user?.id || ctx.clientIp || "anon";
+  const key = buildRateLimitKey(["trpc", path, identity]);
+  const res = checkRateLimit(key, { windowMs, limit });
+  if (!res.allowed) {
+    throw new TRPCError({
+      code: "TOO_MANY_REQUESTS",
+      message: `Rate limit exceeded. Try again in ${Math.ceil(res.resetMs / 1000)}s`,
+    });
+  }
+  return next();
+});
+
+// CSRF protection for state-changing operations (mutations)
+const csrfMiddleware = t.middleware(async ({ ctx, type, next }) => {
+  if (type !== "mutation") return next();
+  // Allow server-to-server calls without Origin/Referer
+  const { origin, referer } = ctx;
+  const allowed = [env.APP_URL, env.WEB_APP_URL].filter(Boolean) as string[];
+  const allowedOrigins = allowed
+    .map((u) => {
+      try {
+        return new URL(u).origin;
+      } catch {
+        return undefined;
+      }
+    })
+    .filter(Boolean) as string[];
+
+  let refOrigin: string | undefined;
+  if (referer) {
+    try {
+      refOrigin = new URL(referer).origin;
+    } catch {
+      refOrigin = undefined;
+    }
+  }
+  const headerOrigin = origin || refOrigin;
+  if (headerOrigin && !allowedOrigins.includes(headerOrigin)) {
+    throw new TRPCError({ code: "FORBIDDEN", message: "Invalid origin" });
+  }
+  return next();
+});
+
 /**
  * Public (unauthed) procedure
  *
@@ -113,7 +180,10 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
  * tRPC API. It does not guarantee that a user querying is authorized, but you
  * can still access user session data if they are logged in
  */
-export const publicProcedure = t.procedure.use(timingMiddleware);
+export const publicProcedure = t.procedure
+  .use(timingMiddleware)
+  .use(csrfMiddleware)
+  .use(rateLimitMiddleware);
 
 /**
  * Protected (authenticated) procedure
@@ -125,6 +195,8 @@ export const publicProcedure = t.procedure.use(timingMiddleware);
  */
 export const protectedProcedure = t.procedure
   .use(timingMiddleware)
+  .use(csrfMiddleware)
+  .use(rateLimitMiddleware)
   .use(({ ctx, next }) => {
     if (!ctx.session?.user) {
       throw new TRPCError({ code: "UNAUTHORIZED" });
@@ -136,3 +208,21 @@ export const protectedProcedure = t.procedure
       },
     });
   });
+
+// RBAC helpers
+type Role = "user" | "admin";
+const roleRank: Record<Role, number> = { user: 1, admin: 2 };
+
+const requireRole = (minRole: Role) =>
+  t.middleware(({ ctx, next }) => {
+    interface WithRole { role?: Role }
+    let role: Role = "user";
+    const maybeRole = (ctx.session?.user as WithRole | undefined)?.role;
+    if (maybeRole) role = maybeRole;
+    if (roleRank[role] < roleRank[minRole]) {
+      throw new TRPCError({ code: "FORBIDDEN", message: "Insufficient role" });
+    }
+    return next();
+  });
+
+export const adminProcedure = protectedProcedure.use(requireRole("admin"));

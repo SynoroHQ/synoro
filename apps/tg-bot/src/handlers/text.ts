@@ -2,12 +2,29 @@ import { randomUUID } from "node:crypto";
 import type { Context } from "grammy";
 
 import { processClassifiedMessage } from "../lib/messageProcessor";
-import { classifyMessageType, classifyRelevance } from "../services/ai-service";
+import { classifyMessageType } from "../services/ai-service";
 import { logEvent } from "../services/db";
-import { extractTags } from "../services/relevance";
+import { extractTags, isObviousSpam } from "../services/relevance";
+import { env } from "../env";
 
 export async function handleText(ctx: Context): Promise<void> {
   const text = ctx.message?.text ?? "";
+
+  // Basic input constraints
+  const maxLength = env.TG_MESSAGE_MAX_LENGTH ?? 3000;
+  if (text.length > maxLength) {
+    await ctx.reply(
+      `Слишком длинное сообщение (${text.length} символов). Пожалуйста, сократите до ${maxLength}.`,
+    );
+    return;
+  }
+
+  if (isObviousSpam(text)) {
+    await ctx.reply(
+      "Похоже на спам или бессодержательное сообщение. Отправьте, пожалуйста, более осмысленный текст.",
+    );
+    return;
+  }
 
   // Показываем индикатор "печатает..."
   await ctx.replyWithChatAction("typing");

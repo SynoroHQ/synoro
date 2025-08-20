@@ -29,7 +29,7 @@
   "Hero": {
     "badge": "Smart Home Assistant",
     "title": "Your Personal Home Assistant",
-    "subtitle": "Make your daily life easier with smart task management. Record your activities by voice or text, get helpful tips, and organize your time better than ever.",
+    "subtitle": "Make your daily life easier with smart task management. Considers weather, helps plan purchases and savings.",
     "startTrial": "Get Started Free",
     "seeDemo": "Watch Demo",
     "aiName": "Synoro AI",
@@ -42,7 +42,9 @@
     "aiSuggestion": "💡 Based on your maintenance pattern, I recommend scheduling brake inspection next month.",
     "scheduling": "Scheduling...",
     "aiResponse2": "✅ Brake inspection scheduled for March 15th at 10:00 AM. Reminder set for 2 days before.",
-    "inputHint": "Try: \"Washed car, spent $15\" or \"Changed air filter\""
+    "inputHint": "Try: \"Washed car, spent $15\" or \"Changed air filter\"",
+    "weatherExample": "🌤️ Weather consideration: \"Schedule fence painting\" → automatically reschedules during rain",
+    "savingsExample": "💰 Smart planning: \"Want to save $1,200 for vacation\" → suggests saving strategy"
   },
   "Features": {
     "badge": "Features",
@@ -56,13 +58,21 @@
       "title": "Smart Processing",
       "description": "The system automatically understands and organizes your entries into the right categories."
     },
+    "weatherIntegration": {
+      "title": "Weather Integration",
+      "description": "Considers weather forecasts for smart planning: reschedules outdoor work during rain, reminds about weather preparation."
+    },
+    "smartPlanning": {
+      "title": "Smart Shopping Planning",
+      "description": "Analyzes your expenses and helps save for major purchases by suggesting optimal saving strategies."
+    },
     "analytics": {
       "title": "Reports & Statistics",
       "description": "Get detailed reports and visual charts of your activities with future predictions."
     },
     "reminders": {
       "title": "Smart Reminders",
-      "description": "Get timely notifications based on your habits and schedule patterns."
+      "description": "Get timely notifications based on your habits, schedule patterns and weather conditions."
     },
     "productivity": {
       "title": "Game-like Experience",
@@ -172,13 +182,17 @@
         "title": "Chore Management",
         "description": "Track completed household tasks, assign chores to family members, and celebrate achievements with a fun point system."
       },
+      "smartSavings": {
+        "title": "Smart Savings",
+        "description": "Analyzes family expenses and suggests saving strategies for goals: vacation, renovation, children's education."
+      },
       "successStory": {
         "title": "Real Family Success",
         "description": "\"Synoro helped us save $400/month by tracking our spending habits. The kids love earning points for doing chores!\" - Sarah M., Mother of 3"
       }
     },
     "carOwners": {
-      "title": "Car Owners",
+      "title": "Car Enthusiasts",
       "subtitle": "Never miss car maintenance with smart tracking",
       "predictiveMaintenance": {
         "title": "Smart Maintenance Planning",
@@ -189,12 +203,12 @@
         "description": "Track maintenance costs, find the best service deals, and plan your budget for future repairs with smart planning."
       },
       "testimonial": {
-        "title": "Driver Testimonial",
+        "title": "Car Enthusiast Testimonial",
         "description": "\"Synoro saved me $800 by finding a transmission problem early. The maintenance reminders are perfect!\" - Mike R., Daily Driver"
       }
     },
     "homeowners": {
-      "title": "Homeowners",
+      "title": "Property Owners",
       "subtitle": "Complete home management made simple",
       "maintenanceScheduling": {
         "title": "Maintenance Scheduling",
@@ -205,12 +219,12 @@
         "description": "Get smart reminders for seasonal tasks like gutter cleaning, heating system maintenance, and winter preparation based on your location."
       },
       "successStory": {
-        "title": "Homeowner Success",
-        "description": "\"Synoro's maintenance tracking increased my home value by $15,000. I never miss important home tasks anymore!\" - Jennifer L., Homeowner"
+        "title": "Property Owner Success",
+        "description": "\"With Synoro I save $300/month on maintenance and repairs. I never miss important home tasks anymore!\" - Jennifer L., Homeowner"
       }
     },
     "freelancers": {
-      "title": "Freelancers",
+      "title": "Self-Employed",
       "subtitle": "Improve productivity and work-life balance",
       "timeTracking": {
         "title": "Time & Project Tracking",
@@ -221,8 +235,28 @@
         "description": "Track work breaks, exercise routines, and wellness check-ins to maintain good productivity and well-being."
       },
       "successStory": {
-        "title": "Freelancer Success",
+        "title": "Self-Employed Success",
         "description": "\"Synoro helped me increase my hourly rate by 40% through better time tracking and productivity insights. Amazing!\" - Alex K., Graphic Designer"
+      }
+    },
+    "gardeners": {
+      "title": "Gardeners & Gardeners",
+      "subtitle": "Smart planning of garden work and plant care",
+      "seasonalPlanning": {
+        "title": "Seasonal Planning",
+        "description": "\"Planted tomatoes in the greenhouse\" - the system will remind you about watering, fertilizing and harvesting at optimal times."
+      },
+      "plantCare": {
+        "title": "Plant Care",
+        "description": "Track watering schedules, fertilizing and pest control for each type of plant in your garden."
+      },
+      "weatherSmart": {
+        "title": "Weather Consideration",
+        "description": "Automatically reschedules outdoor work during rain, reminds about frost preparation and considers forecasts for watering."
+      },
+      "successStory": {
+        "title": "Gardener Success Story",
+        "description": "\"With Synoro, my harvest doubled! I never miss important garden maintenance tasks.\" - Nicholas V., Gardener with 20 years of experience"
       }
     },
     "cta": {
@@ -267,6 +301,15 @@
         "focusTimePercent": "81%",
         "projectsActiveValue": "15",
         "onTimeDeliveryValue": "92%"
+      },
+      "gardeners": {
+        "gardenDashboard": "Garden Management",
+        "plantsActive": "Active Plants",
+        "wateringSchedule": "Watering Schedule",
+        "harvestForecast": "Harvest Forecast",
+        "plantsActiveValue": "24",
+        "wateringScheduleValue": "In 2 days",
+        "harvestForecastValue": "In 3 weeks"
       }
     }
   },

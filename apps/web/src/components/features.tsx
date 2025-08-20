@@ -9,7 +9,9 @@ import {
   Award,
   BarChart3,
   Clock,
+  Cloud,
   MessageSquare,
+  PiggyBank,
   Shield,
   Sparkles,
   Target,
@@ -37,7 +39,7 @@ export default function Features() {
           </p>
         </div>
 
-        <div className="grid items-stretch gap-6 sm:grid-cols-2 sm:gap-8 lg:grid-cols-3">
+        <div className="grid items-stretch gap-6 sm:grid-cols-2 sm:gap-8 lg:grid-cols-4">
           <Card className="group bg-card/80 relative h-full overflow-hidden border-0 shadow-lg backdrop-blur-sm transition-all duration-500 hover:scale-105 hover:shadow-2xl">
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
             <CardHeader className="relative z-10 p-4 sm:p-6">
@@ -124,6 +126,36 @@ export default function Features() {
               </CardTitle>
               <CardDescription className="group-hover:text-foreground/80 text-sm transition-colors duration-300 sm:text-base">
                 {t("security.description")}
+              </CardDescription>
+            </CardHeader>
+          </Card>
+
+          <Card className="group bg-card/80 relative h-full overflow-hidden border-0 shadow-lg backdrop-blur-sm transition-all duration-500 hover:scale-105 hover:shadow-2xl">
+            <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
+            <CardHeader className="relative z-10 p-4 sm:p-6">
+              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-2xl bg-cyan-500/10 transition-all duration-300 group-hover:scale-110 group-hover:bg-cyan-500/20 sm:mb-4 sm:h-12 sm:w-12">
+                <Cloud className="h-5 w-5 text-cyan-600 transition-transform duration-300 group-hover:scale-110 sm:h-6 sm:w-6" />
+              </div>
+              <CardTitle className="mb-2 text-lg font-bold transition-colors duration-300 group-hover:text-cyan-600 sm:text-xl">
+                {t("weatherIntegration.title")}
+              </CardTitle>
+              <CardDescription className="group-hover:text-foreground/80 text-sm transition-colors duration-300 sm:text-base">
+                {t("weatherIntegration.description")}
+              </CardDescription>
+            </CardHeader>
+          </Card>
+
+          <Card className="group bg-card/80 relative h-full overflow-hidden border-0 shadow-lg backdrop-blur-sm transition-all duration-500 hover:scale-105 hover:shadow-2xl">
+            <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
+            <CardHeader className="relative z-10 p-4 sm:p-6">
+              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-500/10 transition-all duration-300 group-hover:scale-110 group-hover:bg-amber-500/20 sm:mb-4 sm:h-12 sm:w-12">
+                <PiggyBank className="h-5 w-5 text-amber-600 transition-transform duration-300 group-hover:scale-110 sm:h-6 sm:w-6" />
+              </div>
+              <CardTitle className="mb-2 text-lg font-bold transition-colors duration-300 group-hover:text-amber-600 sm:text-xl">
+                {t("smartPlanning.title")}
+              </CardTitle>
+              <CardDescription className="group-hover:text-foreground/80 text-sm transition-colors duration-300 sm:text-base">
+                {t("smartPlanning.description")}
               </CardDescription>
             </CardHeader>
           </Card>

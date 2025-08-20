@@ -5,7 +5,6 @@ import { env } from "../env";
 import { processClassifiedMessage } from "../lib/messageProcessor";
 import {
   classifyMessageType,
-  classifyRelevance,
   transcribe,
 } from "../services/ai-service";
 import { logEvent } from "../services/db";
@@ -30,19 +29,62 @@ export async function handleAudio(ctx: Context): Promise<void> {
         ? String(ctx.message.message_id)
         : undefined;
 
+    // Limits from env
+    const maxDurationSec = env.TG_AUDIO_MAX_DURATION_SEC ?? 120; // 2 min default
+    const maxBytes = env.TG_AUDIO_MAX_BYTES ?? 8 * 1024 * 1024; // 8MB default
+    const fetchTimeoutMs = env.TG_FETCH_TIMEOUT_MS ?? 25_000; // 25s default
+
+    // Validate duration if available
+    const durationSec =
+      (ctx.message?.voice as any)?.duration ?? (ctx.message?.audio as any)?.duration;
+    if (typeof durationSec === "number" && durationSec > maxDurationSec) {
+      await ctx.reply(
+        `Слишком длинное аудио (${durationSec}s). Лимит — ${maxDurationSec}s. Пожалуйста, укоротите запись.`,
+      );
+      return;
+    }
+
     const file = await ctx.api.getFile(fileId);
     if (!file.file_path) throw new Error("Telegram не вернул file_path");
 
+    // If Telegram returned file size, enforce it before downloading
+    const declaredSize = (file as any).file_size as number | undefined;
+    const msgDeclaredSize =
+      (ctx.message?.voice as any)?.file_size ?? (ctx.message?.audio as any)?.file_size;
+    const sizeToCheck = declaredSize ?? msgDeclaredSize;
+    if (typeof sizeToCheck === "number" && sizeToCheck > maxBytes) {
+      await ctx.reply(
+        `Файл слишком большой (${Math.ceil(sizeToCheck / (1024 * 1024))} МБ). Лимит — ${Math.floor(
+          maxBytes / (1024 * 1024),
+        )} МБ.`,
+      );
+      return;
+    }
+
     const url = `https://api.telegram.org/file/bot${env.TELEGRAM_BOT_TOKEN}/${file.file_path}`;
-    const res = await fetch(url);
+
+    // Fetch with timeout
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), fetchTimeoutMs);
+    const res = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeout);
     if (!res.ok) throw new Error(`Ошибка скачивания аудио: ${res.status}`);
     const arrayBuffer = await res.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
+    if (buffer.byteLength > maxBytes) {
+      await ctx.reply(
+        `Файл слишком большой после скачивания (${Math.ceil(
+          buffer.byteLength / (1024 * 1024),
+        )} МБ). Лимит — ${Math.floor(maxBytes / (1024 * 1024))} МБ.`,
+      );
+      return;
+    }
+
     const parts = file.file_path.split("/");
     const filename = parts[parts.length - 1] || "audio.ogg";
 
-    const text = await transcribe(buffer, filename, {
+    let text = await transcribe(buffer, filename, {
       functionId: "tg-transcribe-audio",
       metadata: {
         langfuseTraceId: traceId,
@@ -54,6 +96,12 @@ export async function handleAudio(ctx: Context): Promise<void> {
         filename,
       },
     });
+
+    // Enforce max text length for downstream processing/logging
+    const maxTextLength = env.TG_MESSAGE_MAX_LENGTH ?? 3000;
+    if (text.length > maxTextLength) {
+      text = text.slice(0, maxTextLength);
+    }
 
     if (text.trim().length === 0) {
       await ctx.reply("Голос распознан, но текста не найдено.");
