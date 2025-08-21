@@ -123,50 +123,21 @@ export default function HowItWorks() {
               return (
                 <li key={s.title} className="relative overflow-hidden rounded-lg" aria-current={isActive ? "step" : undefined}>
 
-                  {isActive ? (
-                    <div
-                      className="relative cursor-pointer"
-                      onClick={() => setActiveIndex(i)}
-                      data-state="open"
-                    >
-                      <div className="p-3 sm:p-4">
-                        <div className="relative flex items-start">
-                          {/* Progress bar spanning full text block height */}
-                          <div className="absolute left-0 top-0 bottom-0 h-full w-1 overflow-hidden rounded-lg bg-neutral-300/50 dark:bg-neutral-500/40 pointer-events-none z-20" aria-hidden>
-                            <div
-                              className="absolute left-0 top-0 w-full origin-top bg-green-500 dark:bg-green-400 transition-[height] ease-linear"
-                              style={{ height: isActive ? `${progress * 100}%` : "0%", transitionDuration: `${DURATION_MS}ms` }}
-                            />
-                          </div>
-                          <div className="sm:ml-6 ml-2 sm:mr-3 mr-1 shrink-0">
-                            <div className="item-box w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                              <Icon className="text-primary w-6 h-6" />
-                            </div>
-                          </div>
-                          <div className="ml-1 sm:ml-2">
-                            <h3 className="text-lg font-semibold tracking-tight">
-                              <span className="mr-2">{i + 1}.</span>
-                              {s.title}
-                            </h3>
-                            <p className="mt-1 text-base leading-relaxed text-muted-foreground">{s.description}</p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
+                  {(
                     <button
                       type="button"
                       onClick={() => setActiveIndex(i)}
-                      data-state="closed"
-                      className="group flex w-full cursor-pointer items-center justify-between rounded-lg p-3 text-left outline-none hover:bg-muted/40"
+                      data-state={isActive ? "open" : "closed"}
+                      aria-pressed={isActive}
+                      className="group w-full cursor-pointer rounded-lg p-3 sm:p-4 text-left outline-none hover:bg-muted/40"
                       title={s.title}
                     >
                       <div className="relative flex items-start gap-2">
                         {/* Progress bar spanning full text block height */}
                         <div className="absolute left-0 top-0 bottom-0 h-full w-1 overflow-hidden rounded-lg bg-neutral-300/50 dark:bg-neutral-500/40 pointer-events-none z-20" aria-hidden>
                           <div
-                            className="absolute left-0 top-0 w-full origin-top bg-green-500 dark:bg-green-400 transition-[height] ease-linear"
-                            style={{ height: isActive ? `${progress * 100}%` : "0%", transitionDuration: `${DURATION_MS}ms` }}
+                            className="absolute left-0 top-0 h-full w-full origin-top bg-green-500 dark:bg-green-400 will-change-transform transition-transform ease-linear"
+                            style={{ transform: `scaleY(${isActive ? progress : 0})`, transitionDuration: `${DURATION_MS}ms` }}
                           />
                         </div>
                         <div className="sm:ml-6 ml-2 sm:mr-3 mr-1 shrink-0">
@@ -174,7 +145,7 @@ export default function HowItWorks() {
                             <Icon className="text-primary w-6 h-6" />
                           </div>
                         </div>
-                        <div>
+                        <div className="ml-1 sm:ml-2">
                           <span className="block text-left text-lg font-semibold tracking-tight">
                             <span className="mr-2">{i + 1}.</span>
                             {s.title}
