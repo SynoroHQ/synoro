@@ -157,10 +157,14 @@ export default function HowItWorks() {
                     >
                       <div className="relative flex items-start gap-2">
                         {/* Progress bar spanning full text block height */}
-                        <div className="absolute left-0 top-0 bottom-0 h-full w-1 overflow-hidden rounded-lg bg-neutral-300/50 dark:bg-neutral-500/40 pointer-events-none z-20" aria-hidden>
+                        <div className="absolute left-0 top-0 w-1 h-full overflow-hidden rounded-lg bg-neutral-300/50 dark:bg-neutral-500/40 pointer-events-none z-20" aria-hidden>
                           <div
-                            className={`absolute left-0 top-0 h-full w-full origin-top bg-green-500 dark:bg-green-400 will-change-transform ease-linear ${justReset ? "transition-none" : "transition-transform"}`}
-                            style={{ transform: `scaleY(${isActive ? progress : 0})`, transitionDuration: justReset ? "0ms" : `${DURATION_MS}ms` }}
+                            className={`absolute left-0 top-0 w-full origin-top bg-green-500 dark:bg-green-400 will-change-transform ease-linear ${justReset ? "transition-none" : "transition-transform"}`}
+                            style={{ 
+                              height: `${isActive ? progress * 100 : 0}%`,
+                              transitionProperty: justReset ? "none" : "height",
+                              transitionDuration: justReset ? "0ms" : `${DURATION_MS}ms` 
+                            }}
                           />
                         </div>
                         <div className="sm:ml-6 ml-2 sm:mr-3 mr-1 shrink-0">
