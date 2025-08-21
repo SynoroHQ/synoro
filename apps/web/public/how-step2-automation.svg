@@ -1,0 +1,42 @@
+<svg width="1200" height="800" viewBox="0 0 1200 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="800" rx="28" fill="url(#bg)"/>
+  <g opacity="0.08">
+    <circle cx="170" cy="650" r="90" fill="#22D3EE"/>
+    <circle cx="1030" cy="150" r="80" fill="#A78BFA"/>
+    <circle cx="260" cy="140" r="60" fill="#0EA5E9"/>
+  </g>
+  <g>
+    <rect x="260" y="200" width="680" height="400" rx="20" fill="#FFFFFF"/>
+    <g transform="translate(280 220)">
+      <circle cx="10" cy="10" r="6" fill="#EF4444"/>
+      <circle cx="30" cy="10" r="6" fill="#F59E0B"/>
+      <circle cx="50" cy="10" r="6" fill="#10B981"/>
+    </g>
+    <!-- Conveyor / flow -->
+    <rect x="300" y="360" width="600" height="16" rx="8" fill="#E5E7EB"/>
+    <rect x="300" y="420" width="600" height="16" rx="8" fill="#E5E7EB"/>
+    <!-- Steps -->
+    <g filter="url(#shadow)">
+      <rect x="320" y="300" width="120" height="48" rx="10" fill="#EEF2FF"/>
+      <rect x="470" y="300" width="120" height="48" rx="10" fill="#EEF2FF"/>
+      <rect x="620" y="300" width="120" height="48" rx="10" fill="#EEF2FF"/>
+      <rect x="770" y="300" width="120" height="48" rx="10" fill="#EEF2FF"/>
+    </g>
+    <!-- Bolt icon -->
+    <g transform="translate(560 430)">
+      <path d="M80 0 L30 80 H70 L40 160 L130 70 H90 L120 0 Z" fill="#F59E0B" opacity="0.9"/>
+    </g>
+  </g>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="800" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F8FAFC"/>
+      <stop offset="1" stop-color="#ECFEFF"/>
+    </linearGradient>
+    <filter id="shadow" x="0" y="0" width="200%" height="200%">
+      <feOffset dy="8"/>
+      <feGaussianBlur stdDeviation="10" result="blur"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .12 0"/>
+      <feBlend in2="SourceGraphic" mode="normal"/>
+    </filter>
+  </defs>
+</svg>

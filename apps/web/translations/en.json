@@ -143,7 +143,7 @@
     "newsletterDescription": "Get the latest updates and helpful tips sent to your email.",
     "emailPlaceholder": "Enter your email",
     "subscribe": "Subscribe",
-    "copyright": "© 2025 Synoro. All rights reserved.",
+    "copyright": "2025 Synoro. All rights reserved.",
     "systemStatus": "System Status",
     "apiDocs": "API Docs",
     "allSystemsOperational": "All systems operational"
@@ -153,16 +153,31 @@
     "title": "Simple. Smart. Efficient.",
     "subtitle": "Three simple steps to improve your productivity and learn more about your daily activities.",
     "step1": {
-      "title": "1. Tell Us What You Did",
-      "description": "Simply tell Synoro what you've done. Use voice messages or text - the system understands everyday language perfectly."
+      "title": "Tell Us What You Did",
+      "description": "Simply tell Synoro what you've done. Use voice messages or text - the system understands everyday language perfectly.",
+      "points": [
+        "Speak naturally via text or voice",
+        "Understands everyday language",
+        "Instantly captures tasks and expenses"
+      ]
     },
     "step2": {
-      "title": "2. System Organizes",
-      "description": "The smart system sorts your activities by category, adds timestamps, and finds helpful patterns in your daily routine."
+      "title": "System Organizes",
+      "description": "The smart system sorts your activities by category, adds timestamps, and finds helpful patterns in your daily routine.",
+      "points": [
+        "Auto-categorizes and timestamps",
+        "Detects patterns and groups entries",
+        "Keeps everything organized"
+      ]
     },
     "step3": {
-      "title": "3. Get Helpful Tips",
-      "description": "Receive personal reports, time-saving suggestions, and smart recommendations to improve your daily life."
+      "title": "Get Helpful Tips",
+      "description": "Receive personal reports, time-saving suggestions, and smart recommendations to improve your daily life.",
+      "points": [
+        "Clear reports and insights",
+        "Smart time‑saving suggestions",
+        "Personalized recommendations"
+      ]
     }
   },
   "WhoBenefits": {
