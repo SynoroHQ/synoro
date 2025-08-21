@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { Locale } from "next-intl";
 import type React from "react";
+import { Suspense } from "react";
 import { Geist, Manrope } from "next/font/google";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
@@ -68,7 +69,11 @@ export default async function LocaleLayout({ children, params }: Props) {
     >
       <body className="font-sans">
         <NextIntlClientProvider>{children}</NextIntlClientProvider>
-        {YM_ID ? <YandexMetrika /> : null}
+        {YM_ID ? (
+          <Suspense fallback={null}>
+            <YandexMetrika />
+          </Suspense>
+        ) : null}
         {YM_ID ? (
           <>
             <Script
