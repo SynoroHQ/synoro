@@ -27,8 +27,8 @@
     "joinBeta": "Try Beta"
   },
   "Hero": {
-    "badge": "Smart Home Assistant",
-    "title": "Your Personal Home Assistant",
+    "badge": "Smart Assistant",
+    "title": "Your Personal Smart Assistant",
     "subtitle": "Make your daily life easier with smart task management. Considers weather, helps plan purchases and savings.",
     "startBeta": "Try Beta",
     "seeDemo": "Watch Demo",

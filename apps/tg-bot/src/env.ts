@@ -30,6 +30,10 @@ export const env = createEnv({
       .positive()
       .optional(),
     TG_FETCH_TIMEOUT_MS: z.coerce.number().int().positive().optional(),
+    // New API config for delegating processing instead of local AI
+    NEW_API_URL: z.string().url().optional(),
+    NEW_API_TOKEN: z.string().optional(),
+    TG_DISABLE_AI: z.coerce.boolean().optional(),
   },
   runtimeEnv: {
     NODE_ENV: process.env.NODE_ENV,
@@ -51,6 +55,9 @@ export const env = createEnv({
     TG_AUDIO_MAX_BYTES: process.env.TG_AUDIO_MAX_BYTES,
     TG_AUDIO_MAX_DURATION_SEC: process.env.TG_AUDIO_MAX_DURATION_SEC,
     TG_FETCH_TIMEOUT_MS: process.env.TG_FETCH_TIMEOUT_MS,
+    NEW_API_URL: process.env.NEW_API_URL,
+    NEW_API_TOKEN: process.env.NEW_API_TOKEN,
+    TG_DISABLE_AI: process.env.TG_DISABLE_AI,
   },
   skipValidation:
     !!process.env.CI ||
