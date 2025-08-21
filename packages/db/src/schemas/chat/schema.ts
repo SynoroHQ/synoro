@@ -30,7 +30,9 @@ export const message = pgTable("message", (t) => ({
   content: jsonb("content").$type<Record<string, unknown>>().notNull(),
   model: t.text("model"),
   status: t.text("status").default("completed").notNull(),
-  parentId: t.text("parent_id"),
+  parentId: t
+    .text("parent_id")
+    .references(() => message.id, { onDelete: "set null" }),
   createdAt: t.timestamp("created_at", { withTimezone: true }).notNull(),
 }));
 
