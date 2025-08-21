@@ -37,6 +37,7 @@ export async function startCompletionRun(opts: {
       content: { text: fullText },
       model: opts.model ?? "mock",
       status: "completed",
+     parentId: opts._userMessageId,
       createdAt: now,
     });
     eventBus.publish(runId, { type: "done", data: { messageId: assistantId } });
