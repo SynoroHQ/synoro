@@ -18,27 +18,24 @@ import { useTranslations } from "next-intl";
 export default function Features() {
   const t = useTranslations("Features");
   return (
-    <section
-      id="features"
-      className="from-background to-muted/20 bg-gradient-to-br px-4 py-16 sm:py-24 lg:py-32"
-    >
-      <div className="container mx-auto max-w-6xl">
+    <section id="features" className="section section-gradient">
+      <div className="container-default">
         <div className="mb-12 text-center sm:mb-16 lg:mb-20">
           <Badge className="bg-primary/10 text-primary border-primary/30 hover:bg-primary/20 mb-4 rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-300 hover:scale-105 sm:mb-6 sm:px-4 sm:py-2 sm:text-sm">
             <Sparkles className="mr-1.5 h-3 w-3 animate-pulse sm:mr-2 sm:h-4 sm:w-4" />
             {t("badge")}
           </Badge>
-          <h2 className="mb-4 font-serif text-3xl font-bold sm:mb-6 sm:text-4xl lg:text-5xl xl:text-6xl">
+          <h2 className="heading-title mb-4 text-3xl font-bold sm:mb-6 sm:text-4xl lg:text-5xl xl:text-6xl">
             {t("title")}
           </h2>
-          <p className="text-muted-foreground mx-auto max-w-2xl px-4 text-base sm:px-0 sm:text-lg lg:text-xl">
+          <p className="heading-subtitle text-muted-foreground mx-auto max-w-2xl px-4 text-base sm:px-0 sm:text-lg lg:text-xl">
             {t("subtitle")}
           </p>
         </div>
 
         <div className="grid gap-8 lg:grid-cols-3">
           {/* AI-Powered Intelligence */}
-          <Card className="group bg-card/80 relative overflow-hidden border-0 shadow-lg backdrop-blur-sm transition-all duration-500 hover:scale-105 hover:shadow-2xl">
+          <Card className="group card-magic">
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/5 opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
             <CardHeader className="relative z-10 p-6 sm:p-8">
               <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 transition-all duration-300 group-hover:scale-110 group-hover:from-blue-500/30 group-hover:to-purple-500/30">
@@ -75,7 +72,7 @@ export default function Features() {
           </Card>
 
           {/* Smart Planning & Analytics */}
-          <Card className="group bg-card/80 relative overflow-hidden border-0 shadow-lg backdrop-blur-sm transition-all duration-500 hover:scale-105 hover:shadow-2xl">
+          <Card className="group card-magic">
             <div className="absolute inset-0 bg-gradient-to-br from-teal-500/10 to-green-500/5 opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
             <CardHeader className="relative z-10 p-6 sm:p-8">
               <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-br from-teal-500/20 to-green-500/20 transition-all duration-300 group-hover:scale-110 group-hover:from-teal-500/30 group-hover:to-green-500/30">
@@ -112,7 +109,7 @@ export default function Features() {
           </Card>
 
           {/* Productivity & Security */}
-          <Card className="group bg-card/80 relative overflow-hidden border-0 shadow-lg backdrop-blur-sm transition-all duration-500 hover:scale-105 hover:shadow-2xl">
+          <Card className="group card-magic">
             <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-amber-500/5 opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
             <CardHeader className="relative z-10 p-6 sm:p-8">
               <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-br from-orange-500/20 to-amber-500/20 transition-all duration-300 group-hover:scale-110 group-hover:from-orange-500/30 group-hover:to-amber-500/30">

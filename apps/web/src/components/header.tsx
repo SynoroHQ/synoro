@@ -34,7 +34,7 @@ export default function Header() {
             <span className="from-primary to-accent absolute -bottom-1 left-0 h-0.5 w-0 bg-gradient-to-r transition-all duration-300 group-hover:w-full"></span>
           </a>
           <a
-            href="#about"
+            href="#for-whom"
             className="hover:text-primary group relative text-gray-700 transition-colors duration-300"
           >
             {t("about")}
@@ -85,7 +85,7 @@ export default function Header() {
               {t("pricing")}
             </a>
             <a
-              href="#about"
+              href="#for-whom"
               className="hover:text-primary hover:bg-primary/5 block rounded-lg px-3 py-2 text-gray-700 transition-all duration-300"
               onClick={() => setIsMobileMenuOpen(false)}
             >

@@ -78,9 +78,9 @@ export default function HomePage() {
 
       <Hero />
 
-      <HowItWorks />
-
       <Features />
+
+      <HowItWorks />
 
       <WhoBenefits />
 

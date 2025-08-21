@@ -19,18 +19,18 @@ export default function WhoBenefits() {
   return (
     <section
       id="for-whom"
-      className="from-background to-muted/20 bg-gradient-to-br px-4 py-16 sm:py-24 lg:py-32"
+      className="section section-gradient"
     >
-      <div className="container mx-auto max-w-7xl">
+      <div className="container-default">
         <div className="mb-12 text-center sm:mb-16 lg:mb-20">
-          <Badge className="bg-primary/10 text-primary border-primary/30 hover:bg-primary/20 mb-4 rounded-full px-4 py-2 text-xs font-medium transition-all duration-300 hover:scale-105 sm:mb-6 sm:px-6 sm:py-3 sm:text-sm">
+          <Badge className="bg-primary/10 text-primary border-primary/30 mb-4 rounded-full px-4 py-2 text-xs font-medium sm:mb-6 sm:px-6 sm:py-3 sm:text-sm">
             <Users className="mr-1.5 h-3 w-3 sm:mr-2 sm:h-4 sm:w-4" />
             {t("badge")}
           </Badge>
-          <h2 className="mb-4 font-serif text-3xl font-bold sm:mb-6 sm:text-4xl lg:text-5xl xl:text-6xl">
+          <h2 className="heading-title mb-4 text-3xl font-bold sm:mb-6 sm:text-4xl lg:text-5xl xl:text-6xl">
             {t("title")}
           </h2>
-          <p className="text-muted-foreground mx-auto max-w-3xl px-2 text-base leading-relaxed sm:px-0 sm:text-lg lg:text-xl">
+          <p className="heading-subtitle text-muted-foreground mx-auto max-w-3xl px-2 text-base leading-relaxed sm:px-0 sm:text-lg lg:text-xl">
             {t("subtitle")}
           </p>
         </div>
@@ -41,7 +41,7 @@ export default function WhoBenefits() {
             <div className="grid items-center gap-8 sm:gap-12 lg:grid-cols-2">
               <div className="order-2 lg:order-1">
                 <div className="mb-4 flex items-center gap-3 sm:mb-6 sm:gap-4">
-                  <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-3xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-xl sm:h-16 sm:w-16">
+                  <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-3xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-none sm:h-16 sm:w-16">
                     <Users className="h-6 w-6 text-white sm:h-8 sm:w-8" />
                   </div>
                   <div>
@@ -106,7 +106,7 @@ export default function WhoBenefits() {
               <div className="order-1 lg:order-2">
                 <div className="relative">
                   <div className="absolute -inset-4 rounded-3xl bg-gradient-to-r from-blue-500/20 to-blue-600/20 blur-xl"></div>
-                  <div className="relative rounded-3xl border border-blue-100 bg-white p-8 shadow-2xl">
+                  <div className="relative rounded-3xl border border-blue-100 bg-white p-8 shadow-none">
                     <div className="space-y-4">
                       <div className="flex items-center justify-between rounded-xl bg-blue-50 p-4">
                         <span className="font-medium text-blue-900">
@@ -144,7 +144,7 @@ export default function WhoBenefits() {
             <div className="grid items-center gap-8 sm:gap-12 lg:grid-cols-2">
               <div className="relative">
                 <div className="absolute -inset-4 rounded-3xl bg-gradient-to-r from-purple-500/20 to-purple-600/20 blur-xl"></div>
-                <div className="relative rounded-3xl border border-purple-100 bg-white p-8 shadow-2xl">
+                <div className="relative rounded-3xl border border-purple-100 bg-white p-8 shadow-none">
                   <div className="space-y-4">
                     <div className="mb-6 text-center">
                       <Car className="mx-auto mb-3 h-12 w-12 text-purple-600" />
@@ -178,7 +178,7 @@ export default function WhoBenefits() {
 
               <div>
                 <div className="mb-4 flex items-center gap-3 sm:mb-6 sm:gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-3xl bg-gradient-to-br from-purple-500 to-purple-600 shadow-xl sm:h-16 sm:w-16">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-3xl bg-gradient-to-br from-purple-500 to-purple-600 shadow-none sm:h-16 sm:w-16">
                     <Car className="h-6 w-6 text-white sm:h-8 sm:w-8" />
                   </div>
                   <div>
@@ -237,7 +237,7 @@ export default function WhoBenefits() {
             <div className="grid items-center gap-8 sm:gap-12 lg:grid-cols-2">
               <div className="order-2 lg:order-1">
                 <div className="mb-4 flex items-center gap-3 sm:mb-6 sm:gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-3xl bg-gradient-to-br from-teal-500 to-teal-600 shadow-xl sm:h-16 sm:w-16">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-3xl bg-gradient-to-br from-teal-500 to-teal-600 shadow-none sm:h-16 sm:w-16">
                     <Home className="h-6 w-6 text-white sm:h-8 sm:w-8" />
                   </div>
                   <div>
@@ -292,7 +292,7 @@ export default function WhoBenefits() {
               <div className="order-1 lg:order-2">
                 <div className="relative">
                   <div className="absolute -inset-4 rounded-3xl bg-gradient-to-r from-teal-500/20 to-teal-600/20 blur-xl"></div>
-                  <div className="relative rounded-3xl border border-teal-100 bg-white p-8 shadow-2xl">
+                  <div className="relative rounded-3xl border border-teal-100 bg-white p-8 shadow-none">
                     <div className="mb-6 text-center">
                       <Home className="mx-auto mb-3 h-12 w-12 text-teal-600" />
                       <h4 className="font-bold text-teal-900">
@@ -341,7 +341,7 @@ export default function WhoBenefits() {
             <div className="grid items-center gap-8 sm:gap-12 lg:grid-cols-2">
               <div className="relative">
                 <div className="absolute -inset-4 rounded-3xl bg-gradient-to-r from-orange-500/20 to-orange-600/20 blur-xl"></div>
-                <div className="relative rounded-3xl border border-orange-100 bg-white p-8 shadow-2xl">
+                <div className="relative rounded-3xl border border-orange-100 bg-white p-8 shadow-none">
                   <div className="mb-6 text-center">
                     <User className="mx-auto mb-3 h-12 w-12 text-orange-600" />
                     <h4 className="font-bold text-orange-900">
@@ -391,7 +391,7 @@ export default function WhoBenefits() {
 
               <div>
                 <div className="mb-4 flex items-center gap-3 sm:mb-6 sm:gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-3xl bg-gradient-to-br from-orange-500 to-orange-600 shadow-xl sm:h-16 sm:w-16">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-3xl bg-gradient-to-br from-orange-500 to-orange-600 shadow-none sm:h-16 sm:w-16">
                     <User className="h-6 w-6 text-white sm:h-8 sm:w-8" />
                   </div>
                   <div>
@@ -444,113 +444,113 @@ export default function WhoBenefits() {
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Gardeners Section */}
-        <div className="group">
-          <div className="grid items-center gap-8 sm:gap-12 lg:grid-cols-2">
-            <div className="order-2 lg:order-1">
-              <div className="mb-4 flex items-center gap-3 sm:mb-6 sm:gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-3xl bg-gradient-to-br from-green-500 to-green-600 shadow-xl sm:h-16 sm:w-16">
-                  <Sprout className="h-6 w-6 text-white sm:h-8 sm:w-8" />
-                </div>
-                <div>
-                  <h3 className="mb-1 text-2xl font-bold text-green-600 sm:mb-2 sm:text-3xl">
-                    {t("gardeners.title")}
-                  </h3>
-                  <p className="text-muted-foreground text-sm sm:text-base">
-                    {t("gardeners.subtitle")}
-                  </p>
-                </div>
-              </div>
-
-              <div className="space-y-4 sm:space-y-6">
-                <div className="rounded-2xl border border-green-100 bg-green-50 p-4 sm:p-6">
-                  <h4 className="mb-2 flex items-center gap-2 text-sm font-semibold text-green-900 sm:mb-3 sm:text-base">
-                    <CheckCircle className="h-4 w-4 flex-shrink-0 text-green-600 sm:h-5 sm:w-5" />
-                    {t("gardeners.seasonalPlanning.title")}
-                  </h4>
-                  <p className="text-xs leading-relaxed text-green-800 sm:text-sm">
-                    {t("gardeners.seasonalPlanning.description")}
-                  </p>
-                </div>
-
-                <div className="rounded-2xl border border-green-100 bg-green-50 p-4 sm:p-6">
-                  <h4 className="mb-2 flex items-center gap-2 text-sm font-semibold text-green-900 sm:mb-3 sm:text-base">
-                    <CheckCircle className="h-4 w-4 flex-shrink-0 text-green-600 sm:h-5 sm:w-5" />
-                    {t("gardeners.plantCare.title")}
-                  </h4>
-                  <p className="text-xs leading-relaxed text-green-800 sm:text-sm">
-                    {t("gardeners.plantCare.description")}
-                  </p>
-                </div>
-
-                <div className="rounded-2xl border border-green-100 bg-green-50 p-4 sm:p-6">
-                  <h4 className="mb-2 flex items-center gap-2 text-sm font-semibold text-green-900 sm:mb-3 sm:text-base">
-                    <CheckCircle className="h-4 w-4 flex-shrink-0 text-green-600 sm:h-5 sm:w-5" />
-                    {t("gardeners.weatherSmart.title")}
-                  </h4>
-                  <p className="text-xs leading-relaxed text-green-800 sm:text-sm">
-                    {t("gardeners.weatherSmart.description")}
-                  </p>
-                </div>
-
-                <div className="rounded-2xl bg-gradient-to-r from-green-500 to-green-600 p-4 text-white sm:p-6">
-                  <div className="flex items-start gap-3">
-                    <div className="mt-1 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-white/20">
-                      <span className="text-sm font-bold">🌱</span>
-                    </div>
-                    <div>
-                      <h4 className="mb-2 font-semibold">
-                        {t("gardeners.successStory.title")}
-                      </h4>
-                      <p className="text-sm text-green-100 italic">
-                        {t("gardeners.successStory.description")}
-                      </p>
-                    </div>
+          {/* Gardeners Section */}
+          <div className="group">
+            <div className="grid items-center gap-8 sm:gap-12 lg:grid-cols-2">
+              <div className="order-2 lg:order-1">
+                <div className="mb-4 flex items-center gap-3 sm:mb-6 sm:gap-4">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-3xl bg-gradient-to-br from-green-500 to-green-600 shadow-none sm:h-16 sm:w-16">
+                    <Sprout className="h-6 w-6 text-white sm:h-8 sm:w-8" />
+                  </div>
+                  <div>
+                    <h3 className="mb-1 text-2xl font-bold text-green-600 sm:mb-2 sm:text-3xl">
+                      {t("gardeners.title")}
+                    </h3>
+                    <p className="text-muted-foreground text-sm sm:text-base">
+                      {t("gardeners.subtitle")}
+                    </p>
                   </div>
                 </div>
-              </div>
-            </div>
 
-            <div className="order-1 lg:order-2">
-              <div className="relative">
-                <div className="absolute -inset-4 rounded-3xl bg-gradient-to-r from-green-500/20 to-green-600/20 blur-xl"></div>
-                <div className="relative rounded-3xl border border-green-100 bg-white p-8 shadow-2xl">
-                  <div className="mb-6 text-center">
-                    <Sprout className="mx-auto mb-3 h-12 w-12 text-green-600" />
-                    <h4 className="font-bold text-green-900">
-                      {t("dashboard.gardeners.gardenDashboard")}
+                <div className="space-y-4 sm:space-y-6">
+                  <div className="rounded-2xl border border-green-100 bg-green-50 p-4 sm:p-6">
+                    <h4 className="mb-2 flex items-center gap-2 text-sm font-semibold text-green-900 sm:mb-3 sm:text-base">
+                      <CheckCircle className="h-4 w-4 flex-shrink-0 text-green-600 sm:h-5 sm:w-5" />
+                      {t("gardeners.seasonalPlanning.title")}
                     </h4>
+                    <p className="text-xs leading-relaxed text-green-800 sm:text-sm">
+                      {t("gardeners.seasonalPlanning.description")}
+                    </p>
                   </div>
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="rounded-xl bg-green-50 p-4 text-center">
-                        <div className="text-2xl font-bold text-green-600">
-                          {t("dashboard.gardeners.plantsActiveValue")}
-                        </div>
-                        <div className="text-xs text-green-800">
-                          {t("dashboard.gardeners.plantsActive")}
-                        </div>
+
+                  <div className="rounded-2xl border border-green-100 bg-green-50 p-4 sm:p-6">
+                    <h4 className="mb-2 flex items-center gap-2 text-sm font-semibold text-green-900 sm:mb-3 sm:text-base">
+                      <CheckCircle className="h-4 w-4 flex-shrink-0 text-green-600 sm:h-5 sm:w-5" />
+                      {t("gardeners.plantCare.title")}
+                    </h4>
+                    <p className="text-xs leading-relaxed text-green-800 sm:text-sm">
+                      {t("gardeners.plantCare.description")}
+                    </p>
+                  </div>
+
+                  <div className="rounded-2xl border border-green-100 bg-green-50 p-4 sm:p-6">
+                    <h4 className="mb-2 flex items-center gap-2 text-sm font-semibold text-green-900 sm:mb-3 sm:text-base">
+                      <CheckCircle className="h-4 w-4 flex-shrink-0 text-green-600 sm:h-5 sm:w-5" />
+                      {t("gardeners.weatherSmart.title")}
+                    </h4>
+                    <p className="text-xs leading-relaxed text-green-800 sm:text-sm">
+                      {t("gardeners.weatherSmart.description")}
+                    </p>
+                  </div>
+
+                  <div className="rounded-2xl bg-gradient-to-r from-green-500 to-green-600 p-4 text-white sm:p-6">
+                    <div className="flex items-start gap-3">
+                      <div className="mt-1 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-white/20">
+                        <span className="text-sm font-bold">🌱</span>
                       </div>
-                      <div className="rounded-xl bg-blue-50 p-4 text-center">
-                        <div className="text-2xl font-bold text-blue-600">
-                          {t("dashboard.gardeners.wateringScheduleValue")}
-                        </div>
-                        <div className="text-xs text-blue-800">
-                          {t("dashboard.gardeners.wateringSchedule")}
-                        </div>
+                      <div>
+                        <h4 className="mb-2 font-semibold">
+                          {t("gardeners.successStory.title")}
+                        </h4>
+                        <p className="text-sm text-green-100 italic">
+                          {t("gardeners.successStory.description")}
+                        </p>
                       </div>
                     </div>
-                    <div className="rounded-xl bg-yellow-50 p-4">
-                      <div className="mb-2 flex items-center gap-2">
-                        <Clock className="h-4 w-4 text-yellow-600" />
-                        <span className="text-sm font-medium text-yellow-900">
-                          {t("dashboard.gardeners.harvestForecast")}
-                        </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="order-1 lg:order-2">
+                <div className="relative">
+                  <div className="absolute -inset-4 rounded-3xl bg-gradient-to-r from-green-500/20 to-green-600/20 blur-xl"></div>
+                  <div className="relative rounded-3xl border border-green-100 bg-white p-8 shadow-none">
+                    <div className="mb-6 text-center">
+                      <Sprout className="mx-auto mb-3 h-12 w-12 text-green-600" />
+                      <h4 className="font-bold text-green-900">
+                        {t("dashboard.gardeners.gardenDashboard")}
+                      </h4>
+                    </div>
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="rounded-xl bg-green-50 p-4 text-center">
+                          <div className="text-2xl font-bold text-green-600">
+                            {t("dashboard.gardeners.plantsActiveValue")}
+                          </div>
+                          <div className="text-xs text-green-800">
+                            {t("dashboard.gardeners.plantsActive")}
+                          </div>
+                        </div>
+                        <div className="rounded-xl bg-blue-50 p-4 text-center">
+                          <div className="text-2xl font-bold text-blue-600">
+                            {t("dashboard.gardeners.wateringScheduleValue")}
+                          </div>
+                          <div className="text-xs text-blue-800">
+                            {t("dashboard.gardeners.wateringSchedule")}
+                          </div>
+                        </div>
                       </div>
-                      <div className="text-xs text-yellow-800">
-                        {t("dashboard.gardeners.harvestForecastValue")}
+                      <div className="rounded-xl bg-yellow-50 p-4">
+                        <div className="mb-2 flex items-center gap-2">
+                          <Clock className="h-4 w-4 text-yellow-600" />
+                          <span className="text-sm font-medium text-yellow-900">
+                            {t("dashboard.gardeners.harvestForecast")}
+                          </span>
+                        </div>
+                        <div className="text-xs text-yellow-800">
+                          {t("dashboard.gardeners.harvestForecastValue")}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -559,34 +559,34 @@ export default function WhoBenefits() {
             </div>
           </div>
         </div>
-      </div>
 
-      {/* CTA Section */}
-      <div className="mt-16 text-center sm:mt-20">
-        <div className="from-primary/10 to-accent/10 border-primary/20 rounded-3xl border bg-gradient-to-r p-6 sm:p-8 lg:p-12">
-          <h3 className="mb-3 text-2xl font-bold sm:mb-4 sm:text-3xl">
-            {t("cta.title")}
-          </h3>
-          <p className="text-muted-foreground mx-auto mb-6 max-w-2xl px-2 text-sm sm:mb-8 sm:px-0 sm:text-base">
-            {t("cta.subtitle")}
-          </p>
-          <div className="flex flex-col justify-center gap-4 sm:flex-row">
-            <Button
-              size="lg"
-              className="bg-primary hover:bg-primary/90 w-full rounded-xl px-6 py-3 font-semibold text-gray-900 shadow-lg transition-all duration-300 hover:shadow-xl sm:w-auto sm:px-8"
-            >
-              <Sparkles className="mr-2 h-4 w-4" />
-              {t("cta.startTrial")}
-            </Button>
+        {/* CTA Section */}
+        <div className="mt-16 text-center sm:mt-20">
+          <div className="from-primary/10 to-accent/10 border-primary/20 rounded-3xl border bg-gradient-to-r p-6 sm:p-8 lg:p-12">
+            <h3 className="mb-3 text-2xl font-bold sm:mb-4 sm:text-3xl">
+              {t("cta.title")}
+            </h3>
+            <p className="text-muted-foreground mx-auto mb-6 max-w-2xl px-2 text-sm sm:mb-8 sm:px-0 sm:text-base">
+              {t("cta.subtitle")}
+            </p>
+            <div className="flex flex-col justify-center gap-4 sm:flex-row">
+              <Button
+                size="lg"
+                className="bg-primary w-full rounded-xl px-6 py-3 font-semibold text-gray-900 shadow-none sm:w-auto sm:px-8"
+              >
+                <Sparkles className="mr-2 h-4 w-4" />
+                {t("cta.startTrial")}
+              </Button>
 
-            <Button
-              size="lg"
-              variant="outline"
-              className="border-primary text-primary hover:bg-primary w-full rounded-xl bg-transparent px-6 py-3 font-semibold shadow-lg transition-all duration-300 hover:text-gray-900 hover:shadow-xl sm:w-auto sm:px-8"
-            >
-              <Play className="mr-2 h-4 w-4" />
-              {t("cta.seeDemo")}
-            </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-primary text-primary w-full rounded-xl bg-transparent px-6 py-3 font-semibold shadow-none sm:w-auto sm:px-8"
+              >
+                <Play className="mr-2 h-4 w-4" />
+                {t("cta.seeDemo")}
+              </Button>
+            </div>
           </div>
         </div>
       </div>
