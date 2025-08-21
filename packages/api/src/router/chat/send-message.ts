@@ -23,25 +23,51 @@ export const sendMessageRouter: TRPCRouterRecord = {
 
     // Resolve conversation
     let convId: string;
-    if (!input.conversationId || input.createNew) {
-      convId = createId();
-      await db.insert(conversation).values({
-        id: convId,
-        ownerUserId: userId,
-        channel: input.channel,
-        status: "active",
-        createdAt: now,
-        updatedAt: now,
-        lastMessageAt: now,
-      });
-    } else {
-      convId = input.conversationId;
-      // touch conversation timestamps
-      await db
-        .update(conversation)
-        .set({ updatedAt: now, lastMessageAt: now })
-        .where(eq(conversation.id, convId));
-    }
+// At the top of the file, alongside other imports
+import { TRPCError } from "@trpc/server";
+// …other imports…
+
+// …inside your procedure resolver…
+if (!input.conversationId || input.createNew) {
+  convId = createId();
+  await db.insert(conversation).values({
+    id: convId,
+    ownerUserId: userId,
+    channel: input.channel,
+    status: "active",
+    createdAt: now,
+    updatedAt: now,
+    lastMessageAt: now,
+  });
+} else {
+  convId = input.conversationId;
+  // Проверяем, что диалог принадлежит пользователю
+  const existingConv = await db
+    .select()
+    .from(conversation)
+    .where(eq(conversation.id, convId))
+    .limit(1);
+
+  if (existingConv.length === 0) {
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: "Диалог не найден",
+    });
+  }
+
+  if (existingConv[0].ownerUserId !== userId) {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "Нет доступа к этому диалогу",
+    });
+  }
+
+  // touch conversation timestamps
+  await db
+    .update(conversation)
+    .set({ updatedAt: now, lastMessageAt: now })
+    .where(eq(conversation.id, convId));
+}
 
     // Create user message
     const userMsgId = createId();
