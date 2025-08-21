@@ -1,5 +1,6 @@
 import { createId } from "@paralleldrive/cuid2";
 import {
+  index,
   pgTable,
   primaryKey,
   text,
@@ -18,21 +19,25 @@ export const tag = pgTable(
       .notNull()
       .references(() => household.id, { onDelete: "cascade" }),
     name: text("name").notNull(),
-    // Примечание: убрали FK на саму таблицу, чтобы избежать проблем типизации при само-ссылке.
-    // Можно добавить ограничение отдельной миграцией, если потребуется.
-    parentId: text("parent_id"),
+    description: text("description"),
+    color: text("color"), // для UI цветовой кодировки тегов
+    parentId: text("parent_id"), // самоссылка, FK будет добавлен через relations
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true })
       .notNull()
-      .defaultNow(),
+      .defaultNow()
+      .$onUpdate(() => new Date()),
   },
   (table) => ({
     uniqName: uniqueIndex("tag_household_name_uidx").on(
       table.householdId,
       table.name,
     ),
+    householdIdx: index("tag_household_idx").on(table.householdId),
+    parentIdx: index("tag_parent_idx").on(table.parentId),
+    nameIdx: index("tag_name_idx").on(table.name),
   }),
 );
 
@@ -51,5 +56,7 @@ export const eventTag = pgTable(
   },
   (table) => ({
     pk: primaryKey({ columns: [table.eventId, table.tagId] }),
+    eventIdx: index("event_tag_event_idx").on(table.eventId),
+    tagIdx: index("event_tag_tag_idx").on(table.tagId),
   }),
 );

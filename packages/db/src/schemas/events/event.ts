@@ -1,8 +1,29 @@
 import { createId } from "@paralleldrive/cuid2";
-import { index, jsonb, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import {
+  decimal,
+  index,
+  jsonb,
+  pgEnum,
+  pgTable,
+  text,
+  timestamp,
+} from "drizzle-orm/pg-core";
 
 import { user } from "../auth/schema";
 import { household } from "../core/household";
+
+export const eventStatus = pgEnum("event_status", [
+  "active",
+  "archived",
+  "deleted",
+]);
+
+export const eventPriority = pgEnum("event_priority", [
+  "low",
+  "medium",
+  "high",
+  "urgent",
+]);
 
 export const event = pgTable(
   "event",
@@ -12,14 +33,23 @@ export const event = pgTable(
       .notNull()
       .references(() => household.id, { onDelete: "cascade" }),
     userId: text("user_id").references(() => user.id, { onDelete: "set null" }),
-    source: text("source").notNull(),
-    type: text("type").notNull(),
+    source: text("source").notNull(), // 'telegram', 'web', 'mobile', 'api'
+    type: text("type").notNull(), // 'expense', 'task', 'maintenance', etc.
+    status: eventStatus("status").notNull().default("active"),
+    priority: eventPriority("priority").default("medium"),
     occurredAt: timestamp("occurred_at", { withTimezone: true }).notNull(),
     ingestedAt: timestamp("ingested_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
     title: text("title"),
     notes: text("notes"),
+    // Добавим поле для денежных значений
+    amount: decimal("amount", { precision: 12, scale: 2 }),
+    currency: text("currency").default("RUB"),
     data: jsonb("data").$type<Record<string, unknown> | null>(),
   },
   (table) => ({
@@ -32,5 +62,13 @@ export const event = pgTable(
       table.type,
       table.occurredAt,
     ),
+    byUserOccurred: index("event_user_occurred_idx").on(
+      table.userId,
+      table.occurredAt,
+    ),
+    byStatusType: index("event_status_type_idx").on(table.status, table.type),
+    byPriority: index("event_priority_idx").on(table.priority),
+    byAmount: index("event_amount_idx").on(table.amount),
+    bySource: index("event_source_idx").on(table.source),
   }),
 );
