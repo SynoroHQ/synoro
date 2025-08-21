@@ -1,3 +1,4 @@
+import { Badge } from "@/src/components/ui/badge";
 import { Button } from "@/src/components/ui/button";
 import { useTranslations } from "next-intl";
 
@@ -23,8 +24,13 @@ export default function Footer() {
           <div className="grid gap-6 sm:grid-cols-2 sm:gap-8 lg:grid-cols-4">
             {/* Brand Section */}
             <div className="sm:col-span-2 lg:col-span-1">
-              <div className="gradient-text mb-3 font-serif text-2xl font-bold transition-transform duration-300 hover:scale-105 sm:mb-4 sm:text-3xl">
-                Synoro
+              <div className="mb-3 flex items-center sm:mb-4">
+                <div className="gradient-text font-serif text-2xl font-bold transition-transform duration-300 hover:scale-105 sm:text-3xl">
+                  Synoro
+                </div>
+                <Badge className="from-primary via-accent to-primary text-primary-foreground border-primary-foreground/20 ml-2 inline-flex items-center rounded-full border-2 bg-gradient-to-r px-2 py-1 text-xs font-medium shadow-sm backdrop-blur-sm">
+                  Beta
+                </Badge>
               </div>
               <p className="mb-4 text-sm leading-relaxed text-gray-400 sm:mb-6 sm:text-base">
                 {t("description")}

@@ -24,13 +24,13 @@
     "features": "Features",
     "pricing": "Pricing",
     "about": "About",
-    "tryFree": "Try Free"
+    "joinBeta": "Try Beta"
   },
   "Hero": {
     "badge": "Smart Home Assistant",
     "title": "Your Personal Home Assistant",
     "subtitle": "Make your daily life easier with smart task management. Considers weather, helps plan purchases and savings.",
-    "startTrial": "Get Started Free",
+    "startBeta": "Try Beta",
     "seeDemo": "Watch Demo",
     "aiName": "Synoro AI",
     "aiStatus": "Online • Smart Assistant",
@@ -85,15 +85,18 @@
     "badge": "Pricing",
     "title": "Choose Your Plan",
     "subtitle": "Choose the right plan to boost your productivity and make life easier.",
-    "free": {
-      "title": "Free",
-      "subtitle": "Perfect for getting started",
-      "price": "$0",
-      "period": "/month",
+    "beta": {
+      "title": "Beta",
+      "subtitle": "Full access to all features",
+      "price": "Free",
+      "period": "in beta",
+      "badge": "Beta",
       "features": {
-        "basicLogging": "Basic task logging",
+        "allFeatures": "All features available",
         "telegram": "Telegram integration",
-        "basicReports": "Basic reports"
+        "advancedAnalytics": "Detailed reports",
+        "smartReminders": "Smart reminders",
+        "receiptAnalysis": "Receipt analysis"
       }
     },
     "premium": {
@@ -103,7 +106,7 @@
       "period": "/month",
       "badge": "Most Popular",
       "features": {
-        "everythingFree": "Everything in Free",
+        "everythingBeta": "Everything in Beta",
         "advancedAnalytics": "Detailed reports",
         "smartReminders": "Smart reminders",
         "receiptAnalysis": "Receipt analysis"
@@ -273,10 +276,10 @@
       }
     },
     "cta": {
-      "title": "Ready to Make Your Life Easier?",
-      "subtitle": "Join thousands of users who have already improved their lives with Synoro's smart assistance.",
-      "startTrial": "Get Started Free",
-      "seeDemo": "Watch Demo"
+      "title": "Ready to simplify your life?",
+      "subtitle": "Join thousands of people who have already made their lives better with the smart assistant Synoro.",
+      "startBeta": "Try Beta",
+      "seeDemo": "See Live Demo"
     },
     "dashboard": {
       "families": {

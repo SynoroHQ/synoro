@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Camera, Plus, Receipt, Search, Upload } from "lucide-react";
 
 import {
+  Badge,
   Button,
   Card,
   CardContent,
@@ -36,7 +37,12 @@ export default function ReceiptsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Чеки</h1>
+          <h1 className="text-3xl font-bold">
+            Чеки
+            <Badge className="from-primary via-accent to-primary text-primary-foreground border-primary-foreground/20 ml-3 inline-flex items-center rounded-full border-2 bg-gradient-to-r px-2 py-1 text-xs font-medium shadow-sm backdrop-blur-sm">
+              Beta
+            </Badge>
+          </h1>
           <p className="text-muted-foreground">
             Управление чеками и финансовыми записями
           </p>

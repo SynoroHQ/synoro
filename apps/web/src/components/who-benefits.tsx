@@ -17,10 +17,7 @@ import { useTranslations } from "next-intl";
 export default function WhoBenefits() {
   const t = useTranslations("WhoBenefits");
   return (
-    <section
-      id="for-whom"
-      className="section section-gradient"
-    >
+    <section id="for-whom" className="section section-gradient">
       <div className="container-default">
         <div className="mb-12 text-center sm:mb-16 lg:mb-20">
           <Badge className="bg-primary/10 text-primary border-primary/30 mb-4 rounded-full px-4 py-2 text-xs font-medium sm:mb-6 sm:px-6 sm:py-3 sm:text-sm">
@@ -575,7 +572,7 @@ export default function WhoBenefits() {
                 className="bg-primary text-primary-foreground w-full rounded-xl px-6 py-3 font-semibold shadow-none sm:w-auto sm:px-8"
               >
                 <Sparkles className="mr-2 h-4 w-4" />
-                {t("cta.startTrial")}
+                {t("cta.startBeta")}
               </Button>
 
               <Button

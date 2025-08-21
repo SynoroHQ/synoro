@@ -63,7 +63,7 @@ export default function Hero() {
         ></div>
       </div>
 
-      <div className="relative z-10 container-default text-center">
+      <div className="container-default relative z-10 text-center">
         <div className="mb-6 sm:mb-8">
           <Badge className="bg-primary/10 text-primary border-primary/50 rounded-full px-3 py-1.5 text-xs font-medium sm:px-4 sm:py-2 sm:text-sm">
             <Sparkles className="mr-1.5 h-3 w-3 sm:mr-2 sm:h-4 sm:w-4" />
@@ -85,7 +85,7 @@ export default function Hero() {
         </h1>
 
         <p
-          className="heading-subtitle text-muted-foreground animate-fade-in-up mx-auto max-w-3xl mb-6 sm:mb-8"
+          className="heading-subtitle text-muted-foreground animate-fade-in-up mx-auto mb-6 max-w-3xl sm:mb-8"
           style={{ animationDelay: "0.4s" }}
         >
           {t("subtitle")}
@@ -97,13 +97,13 @@ export default function Hero() {
             className="bg-primary hover:bg-primary/90 w-full rounded-xl px-6 py-3 font-semibold text-gray-900 shadow-lg transition-all duration-300 hover:shadow-xl sm:w-auto sm:px-8"
           >
             <Sparkles className="mr-2 h-4 w-4" />
-            {t("startTrial")}
+            {t("startBeta")}
           </Button>
 
           <Button
             size="lg"
             variant="outline"
-            className="border-primary text-primary hover:bg-primary/10 w-full rounded-xl bg-transparent px-6 py-3 font-semibold shadow-lg transition-all duration-300 hover:text-primary hover:shadow-xl sm:w-auto sm:px-8"
+            className="border-primary text-primary hover:bg-primary/10 hover:text-primary w-full rounded-xl bg-transparent px-6 py-3 font-semibold shadow-lg transition-all duration-300 hover:shadow-xl sm:w-auto sm:px-8"
           >
             <Play className="mr-2 h-4 w-4" />
             {t("seeDemo")}
