@@ -238,9 +238,9 @@ export default function HowItWorks() {
                       <p className="mx-0 max-w-sm text-balance text-sm font-medium leading-relaxed text-muted-foreground">
                         {s.description}
                       </p>
-                      {Array.isArray((s as any).points) && (s as any).points.length > 0 && (
+                      {s.points.length > 0 && (
                         <ul className="mt-2 list-disc space-y-1 pl-5 text-xs text-muted-foreground">
-                          {(s as any).points.map((p: string, idx: number) => (
+                          {s.points.map((p, idx) => (
                             <li key={idx}>{p}</li>
                           ))}
                         </ul>
