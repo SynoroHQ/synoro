@@ -9,20 +9,37 @@ export const getHistoryRouter: TRPCRouterRecord = {
   getHistory: protectedProcedure
     .input(GetHistoryInput)
     .output(z.object({ items: z.array(MessageOutput) }))
-    .query(async ({ ctx, input }) => {
-    const db = ctx.db;
-    const rows = await db
-      .select({
-        id: message.id,
-        conversationId: message.conversationId,
-        role: message.role,
-        content: message.content,
-        createdAt: message.createdAt,
-      })
-      .from(message)
-      .where(eq(message.conversationId, input.conversationId))
-      .orderBy(message.createdAt); // oldest first
+// Update imports
+-import { message } from "@synoro/db";
+import { message, conversation } from "@synoro/db";
+import { and, eq, gt } from "drizzle-orm";
 
+…
+
+// Inside your router definition
+.query(async ({ ctx, input }) => {
+  const db = ctx.db;
+  const userId = ctx.session.user.id;
+  const rows = await db
+    .select({
+      id: message.id,
+      conversationId: message.conversationId,
+      role: message.role,
+      content: message.content,
+      createdAt: message.createdAt,
+    })
+    .from(message)
+    .innerJoin(conversation, eq(conversation.id, message.conversationId))
+    .where(
+      and(
+        eq(message.conversationId, input.conversationId),
+        eq(conversation.ownerUserId, userId),
+      ),
+    )
+    .orderBy(message.createdAt); // oldest first
+
+  return rows;
+})
     // Conform to MessageOutput using validator shapes to avoid any-casts
     const items = rows.map((r) => ({
       id: r.id,
