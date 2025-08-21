@@ -12,9 +12,9 @@ export default function FAQ() {
   const t = useTranslations("Home");
 
   return (
-    <section id="faq" className="bg-gray-50 px-4 py-20">
-      <div className="container mx-auto max-w-3xl">
-        <h2 className="mb-16 text-center text-4xl font-bold">
+    <section id="faq" className="section section-muted">
+      <div className="container-default max-w-3xl">
+        <h2 className="heading-title mb-16 text-center">
           {t("faq.title")}
         </h2>
         <Accordion type="single" collapsible className="space-y-4">

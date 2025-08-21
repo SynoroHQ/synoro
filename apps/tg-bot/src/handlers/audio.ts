@@ -9,6 +9,7 @@ import {
 } from "../services/ai-service";
 import { logEvent } from "../services/db";
 import { extractTags } from "../services/relevance";
+import { generateS3Key, uploadBufferToS3 } from "@synoro/lib";
 
 export async function handleAudio(ctx: Context): Promise<void> {
   const fileId = ctx.message?.voice?.file_id ?? ctx.message?.audio?.file_id;
@@ -83,6 +84,29 @@ export async function handleAudio(ctx: Context): Promise<void> {
 
     const parts = file.file_path.split("/");
     const filename = parts[parts.length - 1] || "audio.ogg";
+    const contentType = filename.endsWith(".ogg") || filename.endsWith(".oga")
+      ? "audio/ogg"
+      : filename.endsWith(".mp3")
+        ? "audio/mpeg"
+        : filename.endsWith(".m4a") || filename.endsWith(".mp4")
+          ? "audio/mp4"
+          : "application/octet-stream";
+
+    // Persist raw audio in S3
+    const s3Key = generateS3Key(`${chatId}/${messageId ?? traceId}-${filename}`);
+    let s3UploadFailed = false;
+    try {
+      await uploadBufferToS3(s3Key, buffer, contentType);
+    } catch (err) {
+      s3UploadFailed = true;
+      console.warn("Failed to upload audio to S3", {
+        s3Key,
+        chatId,
+        messageId: messageId ?? undefined,
+        traceId,
+        error: (err as Error)?.message ?? err,
+      });
+    }
 
     let text = await transcribe(buffer, filename, {
       functionId: "tg-transcribe-audio",
@@ -168,6 +192,17 @@ export async function handleAudio(ctx: Context): Promise<void> {
           text,
           meta: {
             file_path: file.file_path,
+            telegram: {
+              file_id: fileId,
+              duration: durationSec,
+            },
+            storage: {
+              provider: process.env.AWS_S3_ENDPOINT ? "minio" : "s3",
+              ...(s3Key ? { key: s3Key } : {}),
+              content_type: contentType,
+              size_bytes: buffer.byteLength,
+              persisted: !s3UploadFailed,
+            },
             parsed,
             tags,
             messageType: messageType.type,

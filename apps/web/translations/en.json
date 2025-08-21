@@ -37,7 +37,7 @@
     "recording": "Recording voice message...",
     "userMessage1": "🔧 Changed oil and rotated tires on my car. Took 2 hours total.",
     "userMessage2": "📅 Schedule brake inspection for next month",
-    "aiAnalyzing": "Synoro AI is analyzing",
+    "aiAnalyzing": "Synoro AI is analyzing...",
     "aiResponse1": "✅ Car maintenance recorded: Oil change + tire rotation (2h). Next service due in 5,000 km. Great job staying on schedule!",
     "aiSuggestion": "💡 Based on your maintenance pattern, I recommend scheduling brake inspection next month.",
     "scheduling": "Scheduling...",
@@ -50,37 +50,35 @@
     "badge": "Features",
     "title": "Key Features",
     "subtitle": "Discover the helpful features that make Synoro the best assistant for your everyday life.",
-    "smartLogging": {
-      "title": "Easy Task Recording",
-      "description": "Record your tasks and events using voice or text messages. The system automatically organizes everything for you."
-    },
-    "aiInsights": {
-      "title": "Smart Processing",
-      "description": "The system automatically understands and organizes your entries into the right categories."
-    },
-    "weatherIntegration": {
-      "title": "Weather Integration",
-      "description": "Considers weather forecasts for smart planning: reschedules outdoor work during rain, reminds about weather preparation."
+    "aiIntelligence": {
+      "title": "Artificial Intelligence",
+      "description": "Advanced AI algorithms automatically understand and classify your records, turning chaos into structured information.",
+      "features": {
+        "smartLogging": "Smart Task Logging",
+        "automaticClassification": "Automatic Classification",
+        "voiceRecognition": "Voice Recognition"
+      }
     },
     "smartPlanning": {
-      "title": "Smart Shopping Planning",
-      "description": "Analyzes your expenses and helps save for major purchases by suggesting optimal saving strategies."
-    },
-    "analytics": {
-      "title": "Reports & Statistics",
-      "description": "Get detailed reports and visual charts of your activities with future predictions."
-    },
-    "reminders": {
-      "title": "Smart Reminders",
-      "description": "Get timely notifications based on your habits, schedule patterns and weather conditions."
+      "title": "Smart Planning",
+      "description": "Intelligent planning system that takes into account weather, your habits and financial goals for optimal results.",
+      "features": {
+        "weatherIntegration": "Weather Integration",
+        "smartReminders": "Smart Reminders",
+        "savingsStrategy": "Savings Strategies"
+      }
     },
     "productivity": {
-      "title": "Game-like Experience",
-      "description": "Turn your daily tasks into an enjoyable game with points and rewards."
+      "title": "Productivity & Security",
+      "description": "Gamified approach to productivity with enterprise-level security for your personal data.",
+      "features": {
+        "gamification": "Gamification",
+        "advancedAnalytics": "Advanced Analytics",
+        "enterpriseSecurity": "Enterprise Security"
+      }
     },
-    "security": {
-      "title": "Safe & Private",
-      "description": "Professional security keeps your personal information safe and private."
+    "cta": {
+      "message": "Start using Synoro today"
     }
   },
   "Pricing": {
@@ -208,19 +206,19 @@
       }
     },
     "homeowners": {
-      "title": "Property Owners",
-      "subtitle": "Complete home management made simple",
+      "title": "Builders & Craftsmen",
+      "subtitle": "Professional planning for construction and renovation projects",
       "maintenanceScheduling": {
-        "title": "Maintenance Scheduling",
-        "description": "\"Fixed leaky faucet in main bathroom\" - automatically schedules follow-up checks and tracks warranty information."
+        "title": "Construction Stage Planning",
+        "description": "\"Poured foundation for 6x8 meter house, used 12 cubic meters of concrete\" - system automatically plans next stages: waterproofing, wall masonry, floor slabs."
       },
       "seasonalReminders": {
-        "title": "Seasonal Reminders",
-        "description": "Get smart reminders for seasonal tasks like gutter cleaning, heating system maintenance, and winter preparation based on your location."
+        "title": "Weather Planning for Outdoor Work",
+        "description": "Get smart reminders: reschedule facade painting during rain, plan roofing work in dry weather, consider temperature for concrete work."
       },
       "successStory": {
-        "title": "Property Owner Success",
-        "description": "\"With Synoro I save $300/month on maintenance and repairs. I never miss important home tasks anymore!\" - Jennifer L., Homeowner"
+        "title": "Craftsman Success",
+        "description": "\"With Synoro I save $600/month on stage planning and material purchases. 120 sq.m house delivered 2 weeks ahead of schedule!\" - Michael S., Foreman"
       }
     },
     "freelancers": {
@@ -285,10 +283,10 @@
         "tireRotation": "Tire Rotation - Overdue by 300 km"
       },
       "homeowners": {
-        "propertyDashboard": "Home Dashboard",
-        "tasksCompleted": "Tasks Completed",
-        "maintenanceSaved": "Maintenance Saved",
-        "upcomingTasks": "Upcoming Tasks",
+        "propertyDashboard": "Project Management",
+        "tasksCompleted": "Stages Completed",
+        "maintenanceSaved": "Materials Saved",
+        "upcomingTasks": "Next Stages",
         "tasksCompletedValue": "12",
         "maintenanceSavedValue": "$2.4K"
       },

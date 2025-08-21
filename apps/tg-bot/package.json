@@ -22,6 +22,7 @@
     "@opentelemetry/auto-instrumentations-node": "^0.62.1",
     "@opentelemetry/sdk-node": "^0.203.0",
     "@synoro/db": "workspace:*",
+    "@synoro/lib": "workspace:*",
     "@synoro/prompts": "workspace:*",
     "@t3-oss/env-core": "0.13.8",
     "ai": "^5.0.15",
