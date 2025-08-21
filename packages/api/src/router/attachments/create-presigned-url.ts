@@ -23,16 +23,22 @@ export const createPresignedUrlRouter: TRPCRouterRecord = {
         const url = await createPresignedUrl(newKey);
         return { url, key: newKey };
       } catch (e) {
+        // Server-side logging: keep full error details in logs
         console.error("Error creating presigned URL:", e);
+
+        // Client-facing error should be generic and use a 5xx code for service/internal failures
+        const genericMessage = "Failed to create presigned URL";
+
         if (e instanceof Error && e.name === "S3ServiceException") {
           throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: `S3 service error: ${e.message}`,
+            code: "BAD_GATEWAY",
+            message: genericMessage,
           });
         }
+
         throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: e instanceof Error ? e.message : "Error creating S3 presigned url",
+          code: "INTERNAL_SERVER_ERROR",
+          message: genericMessage,
         });
       }
     }),
