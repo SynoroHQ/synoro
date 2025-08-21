@@ -59,13 +59,20 @@ export const sendMessageRouter: TRPCRouterRecord = {
     const runId = createId();
 
     // Fire-and-forget LLM run
-    void startCompletionRun({
+    // Fire-and-forget LLM run
+    startCompletionRun({
       runId,
       conversationId: convId,
       _userMessageId: userMsgId,
       prompt: input.content.text,
       model: input.model,
       userId,
+    }).catch((error) => {
+      console.error("Ошибка при запуске LLM completion:", {
+        runId,
+        conversationId: convId,
+        error: error instanceof Error ? error.message : "Неизвестная ошибка",
+      });
     });
 
     return { runId, conversationId: convId, userMessageId: userMsgId };
