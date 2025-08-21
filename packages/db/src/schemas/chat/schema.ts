@@ -48,14 +48,19 @@ export const messageAttachment = pgTable("message_attachment", (t) => ({
   createdAt: t.timestamp("created_at", { withTimezone: true }).notNull(),
 }));
 
+import { jsonb, integer, pgEnum, pgTable, text, unique } from "drizzle-orm/pg-core";
+
 export const identityLink = pgTable("identity_link", (t) => ({
   id: text("id").primaryKey().$defaultFn(createId),
   userId: t
     .text("user_id")
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
-  provider: t.text("provider").notNull(), // e.g. 'telegram'
+  provider: t.text("provider").notNull(),             // e.g. 'telegram'
   providerUserId: t.text("provider_user_id").notNull(), // e.g. chat_id
   createdAt: t.timestamp("created_at", { withTimezone: true }).notNull(),
   updatedAt: t.timestamp("updated_at", { withTimezone: true }).notNull(),
+}), (table) => ({
+  uniqueProviderUser: unique().on(table.provider, table.providerUserId),
+  uniqueUserProvider: unique().on(table.userId, table.provider),
 }));
