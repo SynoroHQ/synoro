@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 
 import {
+  Badge,
   Button,
   Card,
   CardContent,
@@ -21,7 +22,12 @@ export default function TelegramPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Telegram Bot</h1>
+          <h1 className="text-3xl font-bold">
+            Telegram Bot
+            <Badge className="from-primary via-accent to-primary text-primary-foreground border-primary-foreground/20 ml-3 inline-flex items-center rounded-full border-2 bg-gradient-to-r px-2 py-1 text-xs font-medium shadow-sm backdrop-blur-sm">
+              Beta
+            </Badge>
+          </h1>
           <p className="text-muted-foreground">
             Управление интеграцией с Telegram для удобного ввода событий
           </p>

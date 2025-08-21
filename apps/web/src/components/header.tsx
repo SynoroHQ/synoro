@@ -13,9 +13,11 @@ export default function Header() {
   return (
     <header className="fixed top-2 left-1/2 z-50 w-full max-w-6xl -translate-x-1/2 transform px-2 sm:top-4 sm:px-4">
       <div className="glass-effect border-primary/20 flex items-center justify-between rounded-xl border bg-white/95 px-4 py-3 backdrop-blur-xl transition-all duration-300 hover:bg-white/98 sm:rounded-2xl sm:px-6 sm:py-4">
-        <div className="gradient-text group relative cursor-pointer font-serif text-xl font-bold transition-transform duration-300 sm:text-2xl">
-          Synoro
-          <div className="from-primary/20 to-accent/20 absolute -inset-2 -z-10 rounded-xl bg-gradient-to-r opacity-0 blur transition-opacity duration-300 group-hover:opacity-100"></div>
+        <div className="flex items-center">
+          <div className="gradient-text group relative cursor-pointer font-serif text-xl font-bold transition-transform duration-300 sm:text-2xl">
+            Synoro
+            <div className="from-primary/20 to-accent/20 absolute -inset-2 -z-10 rounded-xl bg-gradient-to-r opacity-0 blur transition-opacity duration-300 group-hover:opacity-100"></div>
+          </div>
         </div>
 
         <nav className="hidden items-center gap-6 md:flex lg:gap-8">
@@ -45,7 +47,7 @@ export default function Header() {
         <div className="flex items-center gap-2 sm:gap-3">
           <Button className="from-primary to-accent group relative hidden overflow-hidden rounded-xl border-2 border-gray-800/20 bg-gradient-to-r px-4 py-2 text-sm font-semibold text-gray-900 backdrop-blur-sm transition-all duration-300 hover:border-gray-800/40 sm:flex sm:items-center sm:px-6 sm:py-3 sm:text-base">
             <span className="relative z-10 flex items-center text-gray-900 drop-shadow-sm">
-              {t("tryFree")}
+              {t("joinBeta")}
             </span>
             <div className="from-accent to-primary absolute inset-0 bg-gradient-to-r opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
             <div className="absolute inset-0 rounded-xl bg-gray-800/10 opacity-0 blur-sm transition-opacity duration-300 group-hover:opacity-50"></div>
@@ -94,7 +96,7 @@ export default function Header() {
             <div className="border-t border-gray-200/50 pt-2">
               <Button className="from-primary to-accent group relative w-full overflow-hidden rounded-xl border-2 border-gray-800/20 bg-gradient-to-r py-3 font-semibold text-gray-900 backdrop-blur-sm transition-all duration-300 hover:border-gray-800/40">
                 <span className="relative z-10 text-gray-900 drop-shadow-sm">
-                  {t("tryFree")}
+                  {t("joinBeta")}
                 </span>
                 <div className="from-accent to-primary absolute inset-0 bg-gradient-to-r opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
                 <div className="absolute inset-0 rounded-xl bg-gray-800/10 opacity-0 blur-sm transition-opacity duration-300 group-hover:opacity-50"></div>
