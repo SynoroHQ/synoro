@@ -93,8 +93,20 @@ export async function handleAudio(ctx: Context): Promise<void> {
           : "application/octet-stream";
 
     // Persist raw audio in S3
-    const s3Key = generateS3Key(`telegram/${chatId}/${messageId ?? traceId}-${filename}`);
-    await uploadBufferToS3(s3Key, buffer, contentType);
+    const s3Key = generateS3Key(`${chatId}/${messageId ?? traceId}-${filename}`);
+    let s3UploadFailed = false;
+    try {
+      await uploadBufferToS3(s3Key, buffer, contentType);
+    } catch (err) {
+      s3UploadFailed = true;
+      console.warn("Failed to upload audio to S3", {
+        s3Key,
+        chatId,
+        messageId: messageId ?? undefined,
+        traceId,
+        error: (err as Error)?.message ?? err,
+      });
+    }
 
     let text = await transcribe(buffer, filename, {
       functionId: "tg-transcribe-audio",
@@ -189,6 +201,7 @@ export async function handleAudio(ctx: Context): Promise<void> {
               ...(s3Key ? { key: s3Key } : {}),
               content_type: contentType,
               size_bytes: buffer.byteLength,
+              persisted: !s3UploadFailed,
             },
             parsed,
             tags,

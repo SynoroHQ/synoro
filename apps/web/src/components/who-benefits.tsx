@@ -572,7 +572,7 @@ export default function WhoBenefits() {
             <div className="flex flex-col justify-center gap-4 sm:flex-row">
               <Button
                 size="lg"
-                className="bg-primary w-full rounded-xl px-6 py-3 font-semibold text-gray-900 shadow-none sm:w-auto sm:px-8"
+                className="bg-primary text-primary-foreground w-full rounded-xl px-6 py-3 font-semibold shadow-none sm:w-auto sm:px-8"
               >
                 <Sparkles className="mr-2 h-4 w-4" />
                 {t("cta.startTrial")}
