@@ -8,14 +8,25 @@ let sdk: NodeSDK | null = null;
 
 export async function startTracing(serviceName = "synoro-api"): Promise<void> {
   if (sdk) return;
+  const haveLangfuse =
+    !!process.env.LANGFUSE_PUBLIC_KEY &&
+    !!process.env.LANGFUSE_SECRET_KEY &&
+    !!process.env.LANGFUSE_BASEURL;
   sdk = new NodeSDK({
-    traceExporter: new LangfuseExporter(),
+    // Если кредов нет — не настраиваем экспортёр (трейсы не будут экспориться, но SDK останется валидным)
+    traceExporter: haveLangfuse ? new LangfuseExporter() : undefined,
     instrumentations: [getNodeAutoInstrumentations()],
     resource: resourceFromAttributes({
       [ATTR_SERVICE_NAME]: serviceName,
     }),
   });
-  await sdk.start();
+  try {
+    await sdk.start();
+  } catch (e) {
+    // не держим невалидный инстанс
+    sdk = null;
+    throw e;
+  }
 }
 
 export async function stopTracing(): Promise<void> {
