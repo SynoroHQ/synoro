@@ -4,29 +4,45 @@ import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { Badge } from "@/src/components/ui/badge";
 import { BarChart3, MessageSquare, Zap } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
+
+type Step = {
+  title: string;
+  description: string;
+  points: string[];
+  Icon: LucideIcon;
+  image: string;
+};
+
+function toStringArray(v: unknown): string[] {
+  if (Array.isArray(v) && v.every((x) => typeof x === "string")) {
+    return v as string[];
+  }
+  return [];
+}
 
 export default function HowItWorks() {
   const t = useTranslations("HowItWorks");
-  const steps = [
+  const steps: Step[] = [
     {
       title: t("step1.title"),
       description: t("step1.description"),
-      points: (t.raw("step1.points") as unknown as string[]) ?? [],
+      points: toStringArray(t.raw("step1.points")),
       Icon: MessageSquare,
       image: "/how-step1-chat.svg",
     },
     {
       title: t("step2.title"),
       description: t("step2.description"),
-      points: (t.raw("step2.points") as unknown as string[]) ?? [],
+      points: toStringArray(t.raw("step2.points")),
       Icon: Zap,
       image: "/how-step2-automation.svg",
     },
     {
       title: t("step3.title"),
       description: t("step3.description"),
-      points: (t.raw("step3.points") as unknown as string[]) ?? [],
+      points: toStringArray(t.raw("step3.points")),
       Icon: BarChart3,
       image: "/how-step3-analytics.svg",
     },
@@ -35,6 +51,7 @@ export default function HowItWorks() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [progress, setProgress] = useState(0); // 0..1
   const [isPaused, setIsPaused] = useState(false);
+  const [justReset, setJustReset] = useState(false);
   const DURATION_MS = 5000;
 
   // refs for precise pause/resume timing
@@ -62,9 +79,12 @@ export default function HowItWorks() {
       setProgress(0);
       return;
     }
+    // snap bars to 0 without animation for a frame
+    setJustReset(true);
     setProgress(0);
     startedAtRef.current = Date.now();
     lastTickRef.current = Date.now();
+    const raf = requestAnimationFrame(() => setJustReset(false));
     const tick = () => {
       const now = Date.now();
       const delta = now - lastTickRef.current;
@@ -82,7 +102,10 @@ export default function HowItWorks() {
       }
     };
     const id = setInterval(tick, 50);
-    return () => clearInterval(id);
+    return () => {
+      clearInterval(id);
+      cancelAnimationFrame(raf);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeIndex, steps.length, prefersReducedMotion]);
   return (
@@ -136,8 +159,8 @@ export default function HowItWorks() {
                         {/* Progress bar spanning full text block height */}
                         <div className="absolute left-0 top-0 bottom-0 h-full w-1 overflow-hidden rounded-lg bg-neutral-300/50 dark:bg-neutral-500/40 pointer-events-none z-20" aria-hidden>
                           <div
-                            className="absolute left-0 top-0 h-full w-full origin-top bg-green-500 dark:bg-green-400 will-change-transform transition-transform ease-linear"
-                            style={{ transform: `scaleY(${isActive ? progress : 0})`, transitionDuration: `${DURATION_MS}ms` }}
+                            className={`absolute left-0 top-0 h-full w-full origin-top bg-green-500 dark:bg-green-400 will-change-transform ease-linear ${justReset ? "transition-none" : "transition-transform"}`}
+                            style={{ transform: `scaleY(${isActive ? progress : 0})`, transitionDuration: justReset ? "0ms" : `${DURATION_MS}ms` }}
                           />
                         </div>
                         <div className="sm:ml-6 ml-2 sm:mr-3 mr-1 shrink-0">
@@ -201,8 +224,8 @@ export default function HowItWorks() {
                 className="absolute left-0 right-0 bottom-0 h-1.5 bg-foreground/10"
               >
                 <div
-                  className="h-full bg-secondary transition-[width] ease-linear"
-                  style={{ width: `${progress * 100}%` }}
+                  className={`h-full bg-secondary ease-linear ${justReset ? "transition-none" : "transition-[width]"}`}
+                  style={{ width: `${progress * 100}%`, transitionDuration: justReset ? "0ms" : `${DURATION_MS}ms` }}
                 />
               </div>
             </div>
@@ -238,9 +261,9 @@ export default function HowItWorks() {
                       <p className="mx-0 max-w-sm text-balance text-sm font-medium leading-relaxed text-muted-foreground">
                         {s.description}
                       </p>
-                      {Array.isArray((s as any).points) && (s as any).points.length > 0 && (
+                      {s.points.length > 0 && (
                         <ul className="mt-2 list-disc space-y-1 pl-5 text-xs text-muted-foreground">
-                          {(s as any).points.map((p: string, idx: number) => (
+                          {s.points.map((p, idx) => (
                             <li key={idx}>{p}</li>
                           ))}
                         </ul>
