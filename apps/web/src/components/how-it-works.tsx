@@ -1,14 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { Badge } from "@/src/components/ui/badge";
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/src/components/ui/card";
 import { BarChart3, MessageSquare, Zap } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -18,33 +12,69 @@ export default function HowItWorks() {
     {
       title: t("step1.title"),
       description: t("step1.description"),
+      points: (t.raw("step1.points") as unknown as string[]) ?? [],
       Icon: MessageSquare,
-      image: "/abstract-tech-pattern.png",
+      image: "/how-step1-chat.svg",
     },
     {
       title: t("step2.title"),
       description: t("step2.description"),
+      points: (t.raw("step2.points") as unknown as string[]) ?? [],
       Icon: Zap,
-      image: "/modern-geometric-pattern.png",
+      image: "/how-step2-automation.svg",
     },
     {
       title: t("step3.title"),
       description: t("step3.description"),
+      points: (t.raw("step3.points") as unknown as string[]) ?? [],
       Icon: BarChart3,
-      image: "/abstract-tech-pattern.png",
+      image: "/how-step3-analytics.svg",
     },
   ];
 
   const [activeIndex, setActiveIndex] = useState(0);
   const [progress, setProgress] = useState(0); // 0..1
+  const [isPaused, setIsPaused] = useState(false);
   const DURATION_MS = 5000;
 
-  // Автоцикличный прогресс и переключение шага
+  // refs for precise pause/resume timing
+  const startedAtRef = useRef<number>(0);
+  const lastTickRef = useRef<number>(0);
+  const isPausedRef = useRef<boolean>(false);
   useEffect(() => {
+    isPausedRef.current = isPaused;
+  }, [isPaused]);
+
+  // Respect prefers-reduced-motion
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const handler = () => setPrefersReducedMotion(mq.matches);
+    handler();
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
+  // Автоцикличный прогресс и переключение шага (с паузой при наведении)
+  useEffect(() => {
+    if (prefersReducedMotion) {
+      setProgress(0);
+      return;
+    }
     setProgress(0);
-    const startedAt = Date.now();
+    startedAtRef.current = Date.now();
+    lastTickRef.current = Date.now();
     const tick = () => {
-      const elapsed = Date.now() - startedAt;
+      const now = Date.now();
+      const delta = now - lastTickRef.current;
+      lastTickRef.current = now;
+      if (isPausedRef.current) {
+        // смещаем начало так, чтобы elapsed оставался замороженным
+        startedAtRef.current += delta;
+        return;
+      }
+      const elapsed = now - startedAtRef.current;
       const p = Math.min(1, elapsed / DURATION_MS);
       setProgress(p);
       if (p >= 1) {
@@ -54,9 +84,9 @@ export default function HowItWorks() {
     const id = setInterval(tick, 50);
     return () => clearInterval(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeIndex, steps.length]);
+  }, [activeIndex, steps.length, prefersReducedMotion]);
   return (
-    <section id="how-it-works" className="section section-muted">
+    <section id="how-it-works" className="section">
       <div className="container-default">
         <div className="mb-12 text-center sm:mb-16 lg:mb-20">
           <Badge className="bg-accent/10 text-accent border-accent/20 mb-4 rounded-full px-3 py-1.5 text-xs font-medium sm:mb-6 sm:px-4 sm:py-2 sm:text-sm">
@@ -71,66 +101,112 @@ export default function HowItWorks() {
           </p>
         </div>
 
-        <div className="grid items-center gap-8 lg:grid-cols-2 lg:min-h-[450px]">
+        <div
+          className="grid items-center gap-8 lg:grid-cols-2 lg:min-h-[480px]"
+          tabIndex={0}
+          aria-label={t("title")}
+          onKeyDown={(e) => {
+            if (e.key === "ArrowRight") {
+              setActiveIndex((i) => (i + 1) % steps.length);
+            } else if (e.key === "ArrowLeft") {
+              setActiveIndex((i) => (i - 1 + steps.length) % steps.length);
+            }
+          }}
+          onFocus={() => setIsPaused(true)}
+          onBlur={() => setIsPaused(false)}
+        >
           {/* Left: vertical steps list */}
-          <div className="hidden lg:flex flex-col gap-6">
+          <ol className="hidden lg:flex flex-col gap-5 list-none" role="list" onMouseEnter={() => setIsPaused(true)} onMouseLeave={() => setIsPaused(false)}>
             {steps.map((s, i) => {
               const Icon = s.Icon;
               const isActive = i === activeIndex;
               return (
-                <div key={s.title} className="relative overflow-hidden rounded-lg">
-                  {/* Progress underline */}
-                  <div className={`absolute left-0 right-0 bottom-0 h-0.5 w-full transition-opacity ${isActive ? "opacity-100" : "opacity-0"} bg-neutral-300/50 dark:bg-neutral-300/30`}
-                       aria-hidden>
-                    <div
-                      className="absolute left-0 top-0 h-full bg-secondary transition-[width] ease-linear"
-                      style={{ width: isActive ? `${progress * 100}%` : "0%" }}
-                    />
-                  </div>
+                <li key={s.title} className="relative overflow-hidden rounded-lg" aria-current={isActive ? "step" : undefined}>
 
                   {isActive ? (
-                    <Card
+                    <div
                       className="relative cursor-pointer"
                       onClick={() => setActiveIndex(i)}
                       data-state="open"
                     >
-                      <CardHeader className="p-3 sm:p-4">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <Icon className="text-primary h-5 w-5 sm:h-6 sm:w-6" />
-                            <CardTitle className="text-lg font-semibold tracking-tight">{s.title}</CardTitle>
+                      <div className="p-3 sm:p-4">
+                        <div className="relative flex items-start">
+                          {/* Progress bar spanning full text block height */}
+                          <div className="absolute left-0 top-0 bottom-0 h-full w-1 overflow-hidden rounded-lg bg-neutral-300/50 dark:bg-neutral-500/40 pointer-events-none z-20" aria-hidden>
+                            <div
+                              className="absolute left-0 top-0 w-full origin-top bg-green-500 dark:bg-green-400 transition-[height] ease-linear"
+                              style={{ height: isActive ? `${progress * 100}%` : "0%", transitionDuration: `${DURATION_MS}ms` }}
+                            />
+                          </div>
+                          <div className="sm:ml-6 ml-2 sm:mr-3 mr-1 shrink-0">
+                            <div className="item-box w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+                              <Icon className="text-primary w-6 h-6" />
+                            </div>
+                          </div>
+                          <div className="ml-1 sm:ml-2">
+                            <h3 className="text-lg font-semibold tracking-tight">
+                              <span className="mr-2">{i + 1}.</span>
+                              {s.title}
+                            </h3>
+                            <p className="mt-1 text-base leading-relaxed text-muted-foreground">{s.description}</p>
                           </div>
                         </div>
-                        {/* Accordion content */}
-                        <div
-                          className="overflow-hidden text-sm font-medium transition-[max-height] duration-300"
-                          style={{ maxHeight: isActive ? 64 : 0 }}
-                        >
-                          <div className="pt-2 text-muted-foreground">{s.description}</div>
-                        </div>
-                      </CardHeader>
-                    </Card>
+                      </div>
+                    </div>
                   ) : (
                     <button
                       type="button"
                       onClick={() => setActiveIndex(i)}
                       data-state="closed"
-                      className="group flex h-[45px] w-full cursor-pointer items-center justify-between rounded-lg p-3 text-left outline-none"
+                      className="group flex w-full cursor-pointer items-center justify-between rounded-lg p-3 text-left outline-none hover:bg-muted/40"
+                      title={s.title}
                     >
-                      <div className="flex items-center gap-3">
-                        <Icon className="text-primary h-5 w-5" />
-                        <span className="text-left text-lg font-semibold tracking-tight">{s.title}</span>
+                      <div className="relative flex items-start gap-2">
+                        {/* Progress bar spanning full text block height */}
+                        <div className="absolute left-0 top-0 bottom-0 h-full w-1 overflow-hidden rounded-lg bg-neutral-300/50 dark:bg-neutral-500/40 pointer-events-none z-20" aria-hidden>
+                          <div
+                            className="absolute left-0 top-0 w-full origin-top bg-green-500 dark:bg-green-400 transition-[height] ease-linear"
+                            style={{ height: isActive ? `${progress * 100}%` : "0%", transitionDuration: `${DURATION_MS}ms` }}
+                          />
+                        </div>
+                        <div className="sm:ml-6 ml-2 sm:mr-3 mr-1 shrink-0">
+                          <div className="item-box w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+                            <Icon className="text-primary w-6 h-6" />
+                          </div>
+                        </div>
+                        <div>
+                          <span className="block text-left text-lg font-semibold tracking-tight">
+                            <span className="mr-2">{i + 1}.</span>
+                            {s.title}
+                          </span>
+                          <p className="mt-1 text-base leading-relaxed text-muted-foreground">{s.description}</p>
+                        </div>
                       </div>
                     </button>
                   )}
-                </div>
+                </li>
               );
             })}
-          </div>
+          </ol>
 
           {/* Right: media preview */}
           <div className="col-span-1">
-            <div className="relative h-[240px] w-full overflow-hidden rounded-2xl border border-foreground/10 bg-gradient-to-b from-muted/40 to-background shadow-xl sm:h-[280px] md:h-[320px] lg:h-[400px]">
+            <div
+              className="relative h-[260px] w-full overflow-hidden rounded-[28px] border border-border/60 bg-background shadow-xl sm:h-[300px] md:h-[340px] lg:h-[420px]"
+              onMouseEnter={() => setIsPaused(true)}
+              onMouseLeave={() => setIsPaused(false)}
+              onTouchStart={() => setIsPaused(true)}
+              onTouchEnd={() => setIsPaused(false)}
+              onTouchCancel={() => setIsPaused(false)}
+            >
+              {/* Top device bar */}
+              <div className="absolute left-0 right-0 top-0 z-10 flex h-10 items-center justify-between px-4">
+                <div className="flex items-center gap-1.5">
+                  <span className="h-2.5 w-2.5 rounded-full bg-red-400/70" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-yellow-400/70" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-green-400/70" />
+                </div>
+              </div>
               {/* Crossfade images */}
               {steps.map((s, i) => (
                 <div
@@ -138,12 +214,12 @@ export default function HowItWorks() {
                   className={`absolute inset-0 transition-opacity duration-300 ${i === activeIndex ? "opacity-100" : "opacity-0"}`}
                   aria-hidden={i !== activeIndex}
                 >
-                  <Image src={s.image} alt={s.title} fill className="object-cover p-1 rounded-2xl" priority={i === 0} />
+                  <Image src={s.image} alt={s.title} fill className="object-cover p-3 rounded-[28px]" priority={i === 0} />
                 </div>
               ))}
               {/* Decorative overlay */}
-              <div className="pointer-events-none absolute inset-0 opacity-30">
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20" />
+              <div className="pointer-events-none absolute inset-0 opacity-25">
+                <div className="absolute inset-0 rounded-[28px] bg-gradient-to-br from-primary/20 to-secondary/20" />
               </div>
               {/* Progress bar for auto-switch */}
               <div
@@ -159,30 +235,45 @@ export default function HowItWorks() {
                 />
               </div>
             </div>
+            {/* Thumbnails navigation removed */}
           </div>
         </div>
 
         {/* Mobile: horizontal cards with snap */}
         <div className="lg:hidden">
-          <ul className="flex snap-x snap-mandatory flex-nowrap overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [-webkit-mask-image:linear-gradient(90deg,transparent,black_10%,white_90%,transparent)] [mask-image:linear-gradient(90deg,transparent,black_10%,white_90%,transparent)]" style={{ padding: "40px 10%" }}>
+          <ul
+            className="flex snap-x snap-mandatory flex-nowrap overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [-webkit-mask-image:linear-gradient(90deg,transparent,black_10%,white_90%,transparent)] [mask-image:linear-gradient(90deg,transparent,black_10%,white_90%,transparent)]"
+            style={{ padding: "40px 10%" }}
+            onMouseEnter={() => setIsPaused(true)}
+            onMouseLeave={() => setIsPaused(false)}
+            onTouchStart={() => setIsPaused(true)}
+            onTouchEnd={() => setIsPaused(false)}
+            onTouchCancel={() => setIsPaused(false)}
+          >
             {steps.map((s, i) => {
               const isActive = i === activeIndex;
               return (
                 <li key={s.title} className="relative grid h-full max-w-64 shrink-0 snap-center items-start justify-center p-3 first:rounded-tl-xl last:rounded-tr-xl">
-                  {/* Progress underline */}
-                  <div className={`absolute left-0 right-0 bottom-0 h-0.5 w-full transition-opacity ${isActive ? "opacity-100" : "opacity-0"} bg-neutral-300/50 dark:bg-neutral-300/30`} aria-hidden>
-                    <div className="absolute left-0 top-0 h-full bg-secondary transition-[width] ease-linear" style={{ width: isActive ? `${progress * 100}%` : "0%" }} />
-                  </div>
                   <button
                     type="button"
                     onClick={() => setActiveIndex(i)}
-                    className="card grid items-start justify-center rounded-xl border border-border bg-background p-3 text-left"
+                    className="grid items-start justify-center p-0 text-left bg-transparent"
                   >
                     <div className="flex flex-col gap-2">
-                      <h3 className="text-lg font-bold">{s.title}</h3>
+                      <h3 className="text-lg font-bold">
+                        <span className="mr-2">{i + 1}.</span>
+                        {s.title}
+                      </h3>
                       <p className="mx-0 max-w-sm text-balance text-sm font-medium leading-relaxed text-muted-foreground">
                         {s.description}
                       </p>
+                      {Array.isArray((s as any).points) && (s as any).points.length > 0 && (
+                        <ul className="mt-2 list-disc space-y-1 pl-5 text-xs text-muted-foreground">
+                          {(s as any).points.map((p: string, idx: number) => (
+                            <li key={idx}>{p}</li>
+                          ))}
+                        </ul>
+                      )}
                     </div>
                   </button>
                 </li>

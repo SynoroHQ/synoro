@@ -84,8 +84,6 @@ export default function HomePage() {
 
       <WhoBenefits />
 
-      <Pricing />
-
       <FAQ />
 
       <Footer />

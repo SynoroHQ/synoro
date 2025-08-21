@@ -8,7 +8,7 @@ import {
 import {
   Brain,
   MessageSquare,
-  Shield,
+  CheckCircle2,
   Sparkles,
   Target,
   Zap,
@@ -33,115 +33,112 @@ export default function Features() {
           </p>
         </div>
 
-        <div className="grid gap-8 lg:grid-cols-3">
+        <div className="grid gap-6 lg:grid-cols-3">
           {/* AI-Powered Intelligence */}
-          <Card className="group card-magic">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/5 opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
-            <CardHeader className="relative z-10 p-6 sm:p-8">
-              <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 transition-all duration-300 group-hover:scale-110 group-hover:from-blue-500/30 group-hover:to-purple-500/30">
-                <Brain className="h-8 w-8 text-blue-600 transition-transform duration-300 group-hover:scale-110" />
+          <Card className="group relative overflow-hidden rounded-2xl border border-border/60 bg-card transition-all duration-200 hover:bg-card/80 hover:shadow-md hover:-translate-y-0.5">
+            <CardHeader className="p-5 sm:p-6">
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-muted/40 transition-colors duration-200 group-hover:bg-muted/60">
+                <Brain className="h-6 w-6 text-primary" />
               </div>
-              <CardTitle className="mb-4 text-2xl font-bold transition-colors duration-300 group-hover:text-blue-600">
+              <CardTitle className="mb-3 text-xl font-semibold">
                 {t("aiIntelligence.title")}
               </CardTitle>
-              <CardDescription className="group-hover:text-foreground/80 mb-6 text-base leading-relaxed transition-colors duration-300">
+              <CardDescription className="text-muted-foreground mb-4 text-sm sm:text-base">
                 {t("aiIntelligence.description")}
               </CardDescription>
 
-              <div className="space-y-3">
-                <div className="flex items-center space-x-3">
-                  <div className="flex h-2 w-2 rounded-full bg-blue-500"></div>
+              <ul className="space-y-2 list-none m-0 p-0">
+                <li className="flex items-center gap-3">
+                  <CheckCircle2 className="h-4 w-4 text-primary shrink-0 transition-transform duration-200 group-hover:scale-110" />
                   <span className="text-sm font-medium">
                     {t("aiIntelligence.features.smartLogging")}
                   </span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="flex h-2 w-2 rounded-full bg-blue-500"></div>
+                </li>
+                <li className="flex items-center gap-3">
+                  <CheckCircle2 className="h-4 w-4 text-primary shrink-0 transition-transform duration-200 group-hover:scale-110" />
                   <span className="text-sm font-medium">
                     {t("aiIntelligence.features.automaticClassification")}
                   </span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="flex h-2 w-2 rounded-full bg-blue-500"></div>
+                </li>
+                <li className="flex items-center gap-3">
+                  <CheckCircle2 className="h-4 w-4 text-primary shrink-0 transition-transform duration-200 group-hover:scale-110" />
                   <span className="text-sm font-medium">
                     {t("aiIntelligence.features.voiceRecognition")}
                   </span>
-                </div>
-              </div>
+                </li>
+              </ul>
             </CardHeader>
           </Card>
 
           {/* Smart Planning & Analytics */}
-          <Card className="group card-magic">
-            <div className="absolute inset-0 bg-gradient-to-br from-teal-500/10 to-green-500/5 opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
-            <CardHeader className="relative z-10 p-6 sm:p-8">
-              <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-br from-teal-500/20 to-green-500/20 transition-all duration-300 group-hover:scale-110 group-hover:from-teal-500/30 group-hover:to-green-500/30">
-                <Target className="h-8 w-8 text-teal-600 transition-transform duration-300 group-hover:scale-110" />
+          <Card className="group relative overflow-hidden rounded-2xl border border-border/60 bg-card transition-all duration-200 hover:bg-card/80 hover:shadow-md hover:-translate-y-0.5">
+            <CardHeader className="p-5 sm:p-6">
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-muted/40 transition-colors duration-200 group-hover:bg-muted/60">
+                <Target className="h-6 w-6 text-primary" />
               </div>
-              <CardTitle className="mb-4 text-2xl font-bold transition-colors duration-300 group-hover:text-teal-600">
+              <CardTitle className="mb-3 text-xl font-semibold">
                 {t("smartPlanning.title")}
               </CardTitle>
-              <CardDescription className="group-hover:text-foreground/80 mb-6 text-base leading-relaxed transition-colors duration-300">
+              <CardDescription className="text-muted-foreground mb-4 text-sm sm:text-base">
                 {t("smartPlanning.description")}
               </CardDescription>
 
-              <div className="space-y-3">
-                <div className="flex items-center space-x-3">
-                  <div className="flex h-2 w-2 rounded-full bg-teal-500"></div>
+              <ul className="space-y-2 list-none m-0 p-0">
+                <li className="flex items-center gap-3">
+                  <CheckCircle2 className="h-4 w-4 text-primary shrink-0 transition-transform duration-200 group-hover:scale-110" />
                   <span className="text-sm font-medium">
                     {t("smartPlanning.features.weatherIntegration")}
                   </span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="flex h-2 w-2 rounded-full bg-teal-500"></div>
+                </li>
+                <li className="flex items-center gap-3">
+                  <CheckCircle2 className="h-4 w-4 text-primary shrink-0 transition-transform duration-200 group-hover:scale-110" />
                   <span className="text-sm font-medium">
                     {t("smartPlanning.features.smartReminders")}
                   </span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="flex h-2 w-2 rounded-full bg-teal-500"></div>
+                </li>
+                <li className="flex items-center gap-3">
+                  <CheckCircle2 className="h-4 w-4 text-primary shrink-0 transition-transform duration-200 group-hover:scale-110" />
                   <span className="text-sm font-medium">
                     {t("smartPlanning.features.savingsStrategy")}
                   </span>
-                </div>
-              </div>
+                </li>
+              </ul>
             </CardHeader>
           </Card>
 
           {/* Productivity & Security */}
-          <Card className="group card-magic">
-            <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-amber-500/5 opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
-            <CardHeader className="relative z-10 p-6 sm:p-8">
-              <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-br from-orange-500/20 to-amber-500/20 transition-all duration-300 group-hover:scale-110 group-hover:from-orange-500/30 group-hover:to-amber-500/30">
-                <Zap className="h-8 w-8 text-orange-600 transition-transform duration-300 group-hover:scale-110" />
+          <Card className="group relative overflow-hidden rounded-2xl border border-border/60 bg-card transition-all duration-200 hover:bg-card/80 hover:shadow-md hover:-translate-y-0.5">
+            <CardHeader className="p-5 sm:p-6">
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-muted/40 transition-colors duration-200 group-hover:bg-muted/60">
+                <Zap className="h-6 w-6 text-primary" />
               </div>
-              <CardTitle className="mb-4 text-2xl font-bold transition-colors duration-300 group-hover:text-orange-600">
+              <CardTitle className="mb-3 text-xl font-semibold">
                 {t("productivity.title")}
               </CardTitle>
-              <CardDescription className="group-hover:text-foreground/80 mb-6 text-base leading-relaxed transition-colors duration-300">
+              <CardDescription className="text-muted-foreground mb-4 text-sm sm:text-base">
                 {t("productivity.description")}
               </CardDescription>
 
-              <div className="space-y-3">
-                <div className="flex items-center space-x-3">
-                  <div className="flex h-2 w-2 rounded-full bg-orange-500"></div>
+              <ul className="space-y-2 list-none m-0 p-0">
+                <li className="flex items-center gap-3">
+                  <CheckCircle2 className="h-4 w-4 text-primary shrink-0 transition-transform duration-200 group-hover:scale-110" />
                   <span className="text-sm font-medium">
                     {t("productivity.features.gamification")}
                   </span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="flex h-2 w-2 rounded-full bg-orange-500"></div>
+                </li>
+                <li className="flex items-center gap-3">
+                  <CheckCircle2 className="h-4 w-4 text-primary shrink-0 transition-transform duration-200 group-hover:scale-110" />
                   <span className="text-sm font-medium">
                     {t("productivity.features.advancedAnalytics")}
                   </span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="flex h-2 w-2 rounded-full bg-orange-500"></div>
+                </li>
+                <li className="flex items-center gap-3">
+                  <CheckCircle2 className="h-4 w-4 text-primary shrink-0 transition-transform duration-200 group-hover:scale-110" />
                   <span className="text-sm font-medium">
                     {t("productivity.features.enterpriseSecurity")}
                   </span>
-                </div>
-              </div>
+                </li>
+              </ul>
             </CardHeader>
           </Card>
         </div>
