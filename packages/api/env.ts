@@ -9,6 +9,10 @@ export const env = createEnv({
     WEB_APP_URL: z.string().url().optional(),
     EMAIL_FROM: z.string().email().optional(),
     APP_URL: z.string().url(),
+    OPENAI_API_KEY: z.string().min(1).optional(),
+    LANGFUSE_PUBLIC_KEY: z.string().min(1).optional(),
+    LANGFUSE_SECRET_KEY: z.string().min(1).optional(),
+    LANGFUSE_BASEURL: z.string().url().optional(),
   },
 
   runtimeEnv: {
@@ -18,6 +22,10 @@ export const env = createEnv({
     APP_URL: process.env.APP_URL,
     WEB_APP_URL: process.env.WEB_APP_URL,
     EMAIL_FROM: process.env.EMAIL_FROM,
+    OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+    LANGFUSE_PUBLIC_KEY: process.env.LANGFUSE_PUBLIC_KEY,
+    LANGFUSE_SECRET_KEY: process.env.LANGFUSE_SECRET_KEY,
+    LANGFUSE_BASEURL: process.env.LANGFUSE_BASEURL,
   },
   skipValidation:
     !!process.env.CI ||

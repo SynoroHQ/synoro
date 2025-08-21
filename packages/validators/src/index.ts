@@ -8,3 +8,4 @@ export * from "./events";
 export * from "./analytics";
 
 export * from "./attachments";
+export * from "./chat";
