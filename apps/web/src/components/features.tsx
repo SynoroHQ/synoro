@@ -1,25 +1,64 @@
+'use client';
 import { Badge } from "@/src/components/ui/badge";
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/src/components/ui/card";
-import {
-  Brain,
-  MessageSquare,
-  CheckCircle2,
-  Sparkles,
-  Target,
-  Zap,
-} from "lucide-react";
+import { Brain, Sparkles, Target, Zap, MessageSquare } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 
 export default function Features() {
   const t = useTranslations("Features");
+  // Reveal-on-scroll animation with reduced-motion support
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [inView, setInView] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const handler = () => setPrefersReducedMotion(mq.matches);
+    handler();
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
+  useEffect(() => {
+    if (prefersReducedMotion) {
+      setInView(true);
+      return;
+    }
+    const node = containerRef.current;
+    if (!node) return;
+    
+    // Сначала устанавливаем false, чтобы элементы были скрыты
+    setInView(false);
+    
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true);
+          observer.disconnect();
+        }
+      },
+      { root: null, threshold: 0.1, rootMargin: '0px 0px -50px 0px' },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [prefersReducedMotion]);
+
+  const getItemStyle = (idx: number) => {
+    if (prefersReducedMotion) return {} as const;
+    const delay = idx * 50; // быстрый stagger: 0/50/100ms
+    return {
+      opacity: inView ? 1 : 0,
+      transform: inView ? "translateY(0px)" : "translateY(20px)",
+      transitionProperty: "opacity, transform",
+      transitionDuration: "200ms", // быстрее
+      transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)", // easeOutExpo
+      transitionDelay: inView ? `${delay}ms` : "0ms",
+    } as const;
+  };
   return (
     <section id="features" className="section section-gradient">
-      <div className="container-default">
+      <div ref={containerRef} className="container-default">
         <div className="mb-12 text-center sm:mb-16 lg:mb-20">
           <Badge className="bg-primary/10 text-primary border-primary/30 hover:bg-primary/20 mb-4 rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-300 hover:scale-105 sm:mb-6 sm:px-4 sm:py-2 sm:text-sm">
             <Sparkles className="mr-1.5 h-3 w-3 animate-pulse sm:mr-2 sm:h-4 sm:w-4" />
@@ -33,114 +72,66 @@ export default function Features() {
           </p>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className="grid gap-8 lg:grid-cols-3">
           {/* AI-Powered Intelligence */}
-          <Card className="group relative overflow-hidden rounded-2xl border border-border/60 bg-card transition-all duration-200 hover:bg-card/80 hover:shadow-md hover:-translate-y-0.5">
-            <CardHeader className="p-5 sm:p-6">
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-muted/40 transition-colors duration-200 group-hover:bg-muted/60">
-                <Brain className="h-6 w-6 text-primary" />
-              </div>
-              <CardTitle className="mb-3 text-xl font-semibold">
+          <div className="group flex items-start gap-4 text-left will-change-transform transition-transform duration-150 hover:-translate-y-1" style={getItemStyle(0)}>
+            <div className="mt-1">
+              <Brain className="h-6 w-6 text-primary transition-transform duration-150 group-hover:scale-110" />
+            </div>
+            <div>
+              <h3 className="text-xl font-semibold tracking-tight">
                 {t("aiIntelligence.title")}
-              </CardTitle>
-              <CardDescription className="text-muted-foreground mb-4 text-sm sm:text-base">
+              </h3>
+              <p className="mt-2 text-sm sm:text-base text-muted-foreground leading-relaxed">
                 {t("aiIntelligence.description")}
-              </CardDescription>
-
-              <ul className="space-y-2 list-none m-0 p-0">
-                <li className="flex items-center gap-3">
-                  <CheckCircle2 className="h-4 w-4 text-primary shrink-0 transition-transform duration-200 group-hover:scale-110" />
-                  <span className="text-sm font-medium">
-                    {t("aiIntelligence.features.smartLogging")}
-                  </span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <CheckCircle2 className="h-4 w-4 text-primary shrink-0 transition-transform duration-200 group-hover:scale-110" />
-                  <span className="text-sm font-medium">
-                    {t("aiIntelligence.features.automaticClassification")}
-                  </span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <CheckCircle2 className="h-4 w-4 text-primary shrink-0 transition-transform duration-200 group-hover:scale-110" />
-                  <span className="text-sm font-medium">
-                    {t("aiIntelligence.features.voiceRecognition")}
-                  </span>
-                </li>
+              </p>
+              <ul className="mt-3 list-disc space-y-1 pl-5 text-sm">
+                <li>{t("aiIntelligence.features.smartLogging")}</li>
+                <li>{t("aiIntelligence.features.automaticClassification")}</li>
+                <li>{t("aiIntelligence.features.voiceRecognition")}</li>
               </ul>
-            </CardHeader>
-          </Card>
+            </div>
+          </div>
 
           {/* Smart Planning & Analytics */}
-          <Card className="group relative overflow-hidden rounded-2xl border border-border/60 bg-card transition-all duration-200 hover:bg-card/80 hover:shadow-md hover:-translate-y-0.5">
-            <CardHeader className="p-5 sm:p-6">
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-muted/40 transition-colors duration-200 group-hover:bg-muted/60">
-                <Target className="h-6 w-6 text-primary" />
-              </div>
-              <CardTitle className="mb-3 text-xl font-semibold">
+          <div className="group flex items-start gap-4 text-left will-change-transform transition-transform duration-150 hover:-translate-y-1" style={getItemStyle(1)}>
+            <div className="mt-1">
+              <Target className="h-6 w-6 text-primary transition-transform duration-150 group-hover:scale-110" />
+            </div>
+            <div>
+              <h3 className="text-xl font-semibold tracking-tight">
                 {t("smartPlanning.title")}
-              </CardTitle>
-              <CardDescription className="text-muted-foreground mb-4 text-sm sm:text-base">
+              </h3>
+              <p className="mt-2 text-sm sm:text-base text-muted-foreground leading-relaxed">
                 {t("smartPlanning.description")}
-              </CardDescription>
-
-              <ul className="space-y-2 list-none m-0 p-0">
-                <li className="flex items-center gap-3">
-                  <CheckCircle2 className="h-4 w-4 text-primary shrink-0 transition-transform duration-200 group-hover:scale-110" />
-                  <span className="text-sm font-medium">
-                    {t("smartPlanning.features.weatherIntegration")}
-                  </span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <CheckCircle2 className="h-4 w-4 text-primary shrink-0 transition-transform duration-200 group-hover:scale-110" />
-                  <span className="text-sm font-medium">
-                    {t("smartPlanning.features.smartReminders")}
-                  </span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <CheckCircle2 className="h-4 w-4 text-primary shrink-0 transition-transform duration-200 group-hover:scale-110" />
-                  <span className="text-sm font-medium">
-                    {t("smartPlanning.features.savingsStrategy")}
-                  </span>
-                </li>
+              </p>
+              <ul className="mt-3 list-disc space-y-1 pl-5 text-sm">
+                <li>{t("smartPlanning.features.weatherIntegration")}</li>
+                <li>{t("smartPlanning.features.smartReminders")}</li>
+                <li>{t("smartPlanning.features.savingsStrategy")}</li>
               </ul>
-            </CardHeader>
-          </Card>
+            </div>
+          </div>
 
           {/* Productivity & Security */}
-          <Card className="group relative overflow-hidden rounded-2xl border border-border/60 bg-card transition-all duration-200 hover:bg-card/80 hover:shadow-md hover:-translate-y-0.5">
-            <CardHeader className="p-5 sm:p-6">
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-muted/40 transition-colors duration-200 group-hover:bg-muted/60">
-                <Zap className="h-6 w-6 text-primary" />
-              </div>
-              <CardTitle className="mb-3 text-xl font-semibold">
+          <div className="group flex items-start gap-4 text-left will-change-transform transition-transform duration-150 hover:-translate-y-1" style={getItemStyle(2)}>
+            <div className="mt-1">
+              <Zap className="h-6 w-6 text-primary transition-transform duration-150 group-hover:scale-110" />
+            </div>
+            <div>
+              <h3 className="text-xl font-semibold tracking-tight">
                 {t("productivity.title")}
-              </CardTitle>
-              <CardDescription className="text-muted-foreground mb-4 text-sm sm:text-base">
+              </h3>
+              <p className="mt-2 text-sm sm:text-base text-muted-foreground leading-relaxed">
                 {t("productivity.description")}
-              </CardDescription>
-
-              <ul className="space-y-2 list-none m-0 p-0">
-                <li className="flex items-center gap-3">
-                  <CheckCircle2 className="h-4 w-4 text-primary shrink-0 transition-transform duration-200 group-hover:scale-110" />
-                  <span className="text-sm font-medium">
-                    {t("productivity.features.gamification")}
-                  </span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <CheckCircle2 className="h-4 w-4 text-primary shrink-0 transition-transform duration-200 group-hover:scale-110" />
-                  <span className="text-sm font-medium">
-                    {t("productivity.features.advancedAnalytics")}
-                  </span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <CheckCircle2 className="h-4 w-4 text-primary shrink-0 transition-transform duration-200 group-hover:scale-110" />
-                  <span className="text-sm font-medium">
-                    {t("productivity.features.enterpriseSecurity")}
-                  </span>
-                </li>
+              </p>
+              <ul className="mt-3 list-disc space-y-1 pl-5 text-sm">
+                <li>{t("productivity.features.gamification")}</li>
+                <li>{t("productivity.features.advancedAnalytics")}</li>
+                <li>{t("productivity.features.enterpriseSecurity")}</li>
               </ul>
-            </CardHeader>
-          </Card>
+            </div>
+          </div>
         </div>
 
         {/* Call to Action */}
