@@ -24,22 +24,22 @@
     "with-env": "dotenv -e ../../.env --"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^2.0.19",
+    "@opentelemetry/auto-instrumentations-node": "^0.62.1",
+    "@opentelemetry/sdk-node": "^0.203.0",
+    "@opentelemetry/semantic-conventions": "^1.36.0",
     "@sindresorhus/slugify": "2.2.1",
     "@synoro/auth": "workspace:*",
     "@synoro/db": "workspace:*",
     "@synoro/lib": "workspace:*",
     "@synoro/validators": "workspace:*",
-    "@trpc/server": "11.4.4",
+    "@trpc/server": "11.5.0",
+    "ai": "^5.0.21",
     "date-fns": "4.1.0",
+    "langfuse-vercel": "^3.38.4",
     "nanoid": "^5.1.5",
     "superjson": "2.2.2",
-    "zod": "4.0.17",
-    "ai": "^5.0.15",
-    "@ai-sdk/openai": "^2.0.15",
-    "langfuse-vercel": "^3.38.4",
-    "@opentelemetry/auto-instrumentations-node": "^0.62.1",
-    "@opentelemetry/sdk-node": "^0.203.0",
-    "@opentelemetry/semantic-conventions": "^1.25.1"
+    "zod": "4.0.17"
   },
   "devDependencies": {
     "@synoro/eslint-config": "workspace:*",
