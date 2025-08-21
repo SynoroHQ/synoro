@@ -186,7 +186,7 @@ export async function handleAudio(ctx: Context): Promise<void> {
             },
             storage: {
               provider: process.env.AWS_S3_ENDPOINT ? "minio" : "s3",
-              key: s3Key,
+              ...(s3Key ? { key: s3Key } : {}),
               content_type: contentType,
               size_bytes: buffer.byteLength,
             },
