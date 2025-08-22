@@ -2,7 +2,10 @@ import { relations } from "drizzle-orm";
 
 import { user } from "../auth/schema";
 import { households } from "../core/household";
-import { attachments, eventProperties, events, eventTags, tags } from "./";
+import { attachments } from "./attachment";
+import { eventProperties } from "./event-property";
+import { events } from "./event";
+import { eventTags, tags } from "./tag";
 
 // Relations for event
 export const eventRelations = relations(events, ({ one, many }) => ({
