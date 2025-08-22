@@ -1,9 +1,11 @@
-import { eventBus } from "./event-bus";
-import { db } from "@synoro/db/client";
-import { message, createId } from "@synoro/db";
-import { env } from "../../env";
-import { streamText } from "ai";
 import { openai } from "@ai-sdk/openai";
+import { streamText } from "ai";
+
+import { createId, messages } from "@synoro/db";
+import { db } from "@synoro/db/client";
+
+import { env } from "../../env";
+import { eventBus } from "./event-bus";
 
 // Very simple mock streaming generator.
 // Replace later with real OpenAI integration while keeping the same interface.
@@ -30,14 +32,14 @@ export async function startCompletionRun(opts: {
 
     const now = new Date();
     const assistantId = createId();
-    await db.insert(message).values({
+    await db.insert(messages).values({
       id: assistantId,
       conversationId,
       role: "assistant",
       content: { text: fullText },
       model: opts.model ?? "mock",
       status: "completed",
-     parentId: opts._userMessageId,
+      parentId: opts._userMessageId,
       createdAt: now,
     });
     eventBus.publish(runId, { type: "done", data: { messageId: assistantId } });
@@ -72,7 +74,7 @@ export async function startCompletionRun(opts: {
 
     const now = new Date();
     const assistantId = createId();
-    await db.insert(message).values({
+    await db.insert(messages).values({
       id: assistantId,
       conversationId,
       role: "assistant",

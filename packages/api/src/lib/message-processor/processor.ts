@@ -1,37 +1,23 @@
-import { advise, answerQuestion, parseTask } from "../services/ai-service";
+import type { MessageTypeResult } from "../ai";
+import type {
+  MessageContext,
+  MessageProcessorOptions,
+  ProcessClassifiedMessageResult,
+} from "./types";
+import { advise, answerQuestion, parseTask } from "../ai";
 
-export interface MessageProcessorOptions {
-  // Function IDs for different message types
-  questionFunctionId: string;
-  chatFunctionId: string;
-  parseFunctionId: string;
-  adviseFunctionId: string;
-  fallbackParseFunctionId: string;
-  fallbackAdviseFunctionId: string;
-
-  // Custom response templates
-  responseTemplates?: {
-    question?: (text: string, answer: string) => string;
-    event?: (text: string, tip?: string) => string;
-    chat?: (text: string, chatResponse: string) => string;
-    irrelevant?: (text: string) => string;
-    fallback?: (text: string, tip?: string) => string;
-  };
-}
-
-export interface ProcessClassifiedMessageResult {
-  response: string;
-  parsed: unknown | null;
-}
-
+/**
+ * Универсальный процессор сообщений
+ * Обрабатывает сообщения независимо от канала (Telegram, Web, Mobile)
+ */
 export async function processClassifiedMessage(
   text: string,
-  messageType: any,
-  telemetryBase: any,
+  messageType: MessageTypeResult,
+  context: MessageContext,
   options: MessageProcessorOptions,
 ): Promise<ProcessClassifiedMessageResult> {
   let response = "";
-  let parsed: unknown = null;
+  let parsed = null;
 
   // Default response templates
   const defaultTemplates = {
@@ -53,7 +39,13 @@ export async function processClassifiedMessage(
       // Answer the question without logging to database
       const answer = await answerQuestion(text, messageType, {
         functionId: options.questionFunctionId,
-        metadata: telemetryBase,
+        metadata: {
+          ...context.metadata,
+          channel: context.channel,
+          userId: context.userId,
+          ...(context.chatId && { chatId: context.chatId }),
+          ...(context.messageId && { messageId: context.messageId }),
+        },
       });
       response = templates.question(text, answer);
       break;
@@ -62,12 +54,24 @@ export async function processClassifiedMessage(
       // Process event: parse and provide advice
       parsed = await parseTask(text, {
         functionId: options.parseFunctionId,
-        metadata: telemetryBase,
+        metadata: {
+          ...context.metadata,
+          channel: context.channel,
+          userId: context.userId,
+          ...(context.chatId && { chatId: context.chatId }),
+          ...(context.messageId && { messageId: context.messageId }),
+        },
       });
 
       const tip = await advise(text, {
         functionId: options.adviseFunctionId,
-        metadata: telemetryBase,
+        metadata: {
+          ...context.metadata,
+          channel: context.channel,
+          userId: context.userId,
+          ...(context.chatId && { chatId: context.chatId }),
+          ...(context.messageId && { messageId: context.messageId }),
+        },
       });
 
       response = templates.event(text, tip);
@@ -77,7 +81,13 @@ export async function processClassifiedMessage(
       // Simple conversation - provide friendly response
       const chatResponse = await answerQuestion(text, messageType, {
         functionId: options.chatFunctionId,
-        metadata: telemetryBase,
+        metadata: {
+          ...context.metadata,
+          channel: context.channel,
+          userId: context.userId,
+          ...(context.chatId && { chatId: context.chatId }),
+          ...(context.messageId && { messageId: context.messageId }),
+        },
       });
       response = templates.chat(text, chatResponse);
       break;
@@ -91,12 +101,24 @@ export async function processClassifiedMessage(
       // Fallback - process as event
       parsed = await parseTask(text, {
         functionId: options.fallbackParseFunctionId,
-        metadata: telemetryBase,
+        metadata: {
+          ...context.metadata,
+          channel: context.channel,
+          userId: context.userId,
+          ...(context.chatId && { chatId: context.chatId }),
+          ...(context.messageId && { messageId: context.messageId }),
+        },
       });
 
       const fallbackTip = await advise(text, {
         functionId: options.fallbackAdviseFunctionId,
-        metadata: telemetryBase,
+        metadata: {
+          ...context.metadata,
+          channel: context.channel,
+          userId: context.userId,
+          ...(context.chatId && { chatId: context.chatId }),
+          ...(context.messageId && { messageId: context.messageId }),
+        },
       });
 
       response = templates.fallback(text, fallbackTip);
