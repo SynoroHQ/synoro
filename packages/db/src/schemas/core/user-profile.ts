@@ -11,6 +11,11 @@ import { user } from "../auth/schema";
 
 export const themeMode = pgEnum("theme_mode", ["light", "dark", "system"]);
 
+/**
+ * Таблица профилей пользователей
+ * Хранит расширенную информацию о пользователях: локализация, настройки UI,
+ * персональные данные, настройки уведомлений и AI предпочтения
+ */
 export const userProfiles = pgTable(
   "user_profiles",
   {

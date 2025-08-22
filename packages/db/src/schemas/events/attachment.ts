@@ -22,6 +22,11 @@ export const attachmentType = pgEnum("attachment_type", [
   "raw",
 ]);
 
+/**
+ * Таблица вложений к событиям
+ * Хранит файлы, изображения, документы и другие медиа
+ * Поддерживает различные типы файлов с метаданными и URL для хранения
+ */
 export const attachments = pgTable(
   "attachments",
   {

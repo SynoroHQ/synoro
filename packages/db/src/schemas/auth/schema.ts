@@ -3,11 +3,11 @@ import { createId } from "@paralleldrive/cuid2";
 import {
   boolean,
   index,
+  integer,
   pgEnum,
   pgTable,
   text,
   timestamp,
-  integer,
 } from "drizzle-orm/pg-core";
 
 export const userRole = pgEnum("user_role", ["user", "admin", "moderator"]);
@@ -19,6 +19,10 @@ export const userStatus = pgEnum("user_status", [
   "pending",
 ]);
 
+/**
+ * Основная таблица пользователей системы
+ * Хранит базовую информацию: имя, email, роль, статус, время последнего входа
+ */
 export const user = pgTable(
   "user",
   (t) => ({
@@ -46,6 +50,10 @@ export const user = pgTable(
   ],
 );
 
+/**
+ * Таблица активных сессий пользователей
+ * Хранит токены аутентификации, IP адреса, user agent и время истечения
+ */
 export const session = pgTable(
   "session",
   (t) => ({
@@ -74,6 +82,10 @@ export const session = pgTable(
   ],
 );
 
+/**
+ * Таблица внешних аккаунтов пользователей
+ * Связывает внутренних пользователей с OAuth провайдерами (Google, GitHub, etc.)
+ */
 export const account = pgTable(
   "account",
   (t) => ({
@@ -116,6 +128,10 @@ export const verificationType = pgEnum("verification_type", [
   "otp",
 ]);
 
+/**
+ * Таблица кодов верификации и OTP
+ * Хранит временные коды для подтверждения email, сброса пароля и двухфакторной аутентификации
+ */
 export const verification = pgTable(
   "verification",
   (t) => ({

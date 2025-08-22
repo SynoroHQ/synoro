@@ -25,6 +25,11 @@ export const memberStatus = pgEnum("member_status", [
   "left",
 ]);
 
+/**
+ * Таблица участников домохозяйств
+ * Связывает пользователей с домохозяйствами, определяет роли и права доступа
+ * Поддерживает различные статусы: активный, приглашенный, приостановленный
+ */
 export const householdMembers = pgTable(
   "household_members",
   {

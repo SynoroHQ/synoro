@@ -14,6 +14,11 @@ export const householdStatus = pgEnum("household_status", [
   "archived",
 ]);
 
+/**
+ * Таблица домохозяйств/семей
+ * Хранит информацию о домохозяйствах: название, описание, настройки, статус
+ * Домохозяйство - это группа пользователей, которые совместно ведут учет
+ */
 export const households = pgTable(
   "households",
   {

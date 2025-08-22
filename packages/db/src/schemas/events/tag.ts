@@ -11,6 +11,11 @@ import {
 import { households } from "../core/household";
 import { events } from "./event";
 
+/**
+ * Таблица тегов для категоризации событий
+ * Поддерживает иерархическую структуру (parent-child) для создания групп тегов
+ * Позволяет цветовое кодирование и описания для лучшей организации
+ */
 export const tags = pgTable(
   "tags",
   {
@@ -21,7 +26,7 @@ export const tags = pgTable(
     name: text("name").notNull(),
     description: text("description"),
     color: text("color"), // для UI цветовой кодировки тегов
-    parentId: text("parent_id"), // самоссылка, FK будет добавлен через relations
+    parentId: text("parent_id"), // самоссылка, FK добавляется через миграцию для ссылочной целостности
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -38,6 +43,11 @@ export const tags = pgTable(
   ],
 );
 
+/**
+ * Связующая таблица событий и тегов
+ * Реализует many-to-many связь между событиями и тегами
+ * Позволяет присваивать несколько тегов одному событию
+ */
 export const eventTags = pgTable(
   "event_tags",
   {

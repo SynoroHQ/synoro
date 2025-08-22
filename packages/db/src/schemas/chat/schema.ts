@@ -24,6 +24,10 @@ export const messageRole = pgEnum("message_role", [
   "tool",
 ]);
 
+/**
+ * Таблица диалогов/бесед между пользователями и AI
+ * Хранит метаданные о беседах: владелец, канал, статус, заголовок
+ */
 export const conversations = pgTable(
   "conversations",
   (t) => ({
@@ -54,6 +58,10 @@ export const conversations = pgTable(
   ],
 );
 
+/**
+ * Таблица сообщений в диалогах
+ * Хранит все сообщения пользователей и AI с поддержкой иерархии (parent-child)
+ */
 export const messages = pgTable(
   "messages",
   {
@@ -83,6 +91,10 @@ export const messages = pgTable(
   ],
 );
 
+/**
+ * Таблица вложений к сообщениям
+ * Хранит файлы, изображения и другие медиа, прикрепленные к сообщениям
+ */
 export const messageAttachments = pgTable(
   "message_attachments",
   (t) => ({
@@ -105,6 +117,10 @@ export const messageAttachments = pgTable(
   ],
 );
 
+/**
+ * Таблица связей пользователей с внешними провайдерами
+ * Связывает внутренних пользователей с Telegram, Discord и другими платформами
+ */
 export const identityLinks = pgTable(
   "identity_links",
   (t) => ({
