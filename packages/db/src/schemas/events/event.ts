@@ -57,7 +57,7 @@ export const events = pgTable(
     source: eventSource("source").notNull(),
     type: eventType("type").notNull(),
     status: eventStatus("status").notNull().default("active"),
-    priority: eventPriority("priority").default("medium"),
+    priority: eventPriority("priority").notNull().default("medium"),
     occurredAt: timestamp("occurred_at", { withTimezone: true }).notNull(),
     ingestedAt: timestamp("ingested_at", { withTimezone: true })
       .notNull()
