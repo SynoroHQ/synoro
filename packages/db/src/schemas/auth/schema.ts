@@ -51,12 +51,11 @@ export const session = pgTable(
   (t) => ({
     id: text("id").primaryKey().$defaultFn(createId),
     expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
-    token: t.text().notNull().unique(),
-    ipAddress: t.text("ip_address"),
-    userAgent: t.text("user_agent"),
+    token: text("token").notNull().unique(),
+    ipAddress: text("ip_address"),
+    userAgent: text("user_agent"),
     isActive: boolean("is_active").notNull().default(true),
-    userId: t
-      .text("user_id")
+    userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
     createdAt: timestamp("created_at", { withTimezone: true })
