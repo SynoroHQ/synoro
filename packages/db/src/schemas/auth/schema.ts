@@ -120,12 +120,12 @@ export const verification = pgTable(
   "verification",
   (t) => ({
     id: text("id").primaryKey().$defaultFn(createId),
-    identifier: t.text().notNull(), // email или phone
-    value: t.text().notNull(), // код верификации
+    identifier: text("identifier").notNull(), // email или phone
+    value: text("value").notNull(), // код верификации
     type: verificationType("type").notNull().default("email"),
     expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
     isUsed: boolean("is_used").notNull().default(false),
-    attempts: t.integer().notNull().default(0),
+    attempts: integer("attempts").notNull().default(0),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
