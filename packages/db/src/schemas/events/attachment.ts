@@ -1,5 +1,6 @@
 import { createId } from "@paralleldrive/cuid2";
 import {
+  bigint,
   index,
   integer,
   jsonb,
@@ -40,7 +41,7 @@ export const attachments = pgTable(
     type: attachmentType("type").notNull(),
     mime: text("mime"),
     filename: text("filename"), // оригинальное имя файла
-    size: integer("size"), // размер в байтах
+    size: bigint("size"), // размер в байтах
     storageUrl: text("storage_url").notNull(),
     thumbnailUrl: text("thumbnail_url"), // для изображений/видео
     meta: jsonb("meta").$type<Record<string, unknown> | null>(),

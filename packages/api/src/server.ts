@@ -1,3 +1,5 @@
+import { pathToFileURL } from "url";
+
 import { startTracing, stopTracing } from "./otel";
 
 async function main() {
@@ -57,7 +59,10 @@ async function main() {
 }
 
 // Start the server if this file is run directly
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (
+  process.argv[1] &&
+  import.meta.url === pathToFileURL(process.argv[1]).href
+) {
   main().catch((error) => {
     console.error("Fatal error:", error);
     process.exit(1);
