@@ -11,6 +11,13 @@ import { user } from "../auth/schema";
 
 export const themeMode = pgEnum("theme_mode", ["light", "dark", "system"]);
 
+// Настройки уведомлений
+export const notificationLevel = pgEnum("notification_level", [
+  "all",
+  "important",
+  "none",
+]);
+
 /**
  * Таблица профилей пользователей
  * Хранит расширенную информацию о пользователях: локализация, настройки UI,
@@ -36,23 +43,12 @@ export const userProfiles = pgTable(
     phone: text("phone"),
     bio: text("bio"),
     website: text("website"),
-
-    // Настройки уведомлений
-export const notificationLevel = pgEnum("notification_level", [
-  "all",
-  "important",
-  "none",
-]);
-
-export const userProfiles = pgTable(
-  "user_profiles",
-  {
-    // ...
-    emailNotifications: notificationLevel("email_notifications").notNull().default("all"),
-    pushNotifications: notificationLevel("push_notifications").notNull().default("all"),
-    // ...
-  }
-);
+    emailNotifications: notificationLevel("email_notifications")
+      .notNull()
+      .default("all"),
+    pushNotifications: notificationLevel("push_notifications")
+      .notNull()
+      .default("all"),
 
     // Расширенные настройки
     preferences: jsonb("preferences").$type<{

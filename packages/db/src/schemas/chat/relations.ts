@@ -1,6 +1,7 @@
 import { relations } from "drizzle-orm";
 
 import { user } from "../auth/schema";
+import { files } from "../core/files";
 import {
   conversations,
   identityLinks,
@@ -44,6 +45,11 @@ export const messageAttachmentRelations = relations(
     message: one(messages, {
       fields: [messageAttachments.messageId],
       references: [messages.id],
+    }),
+    // Связь с новой системой файлов
+    file: one(files, {
+      fields: [messageAttachments.fileId],
+      references: [files.id],
     }),
   }),
 );

@@ -1,5 +1,4 @@
 import { createId } from "@paralleldrive/cuid2";
-// packages/db/src/schemas/auth/schema.ts
 import {
   boolean,
   index,
@@ -114,30 +113,11 @@ export const account = pgTable(
       .defaultNow()
       .$onUpdate(() => new Date()),
   }),
-import {
-  boolean,
-  index,
-  unique,
-  pgEnum,
-  pgTable,
-  text,
-  timestamp,
-  integer,
-} from "drizzle-orm/pg-core";
-
-// ... other imports and definitions ...
-
-export const account = pgTable(
-  "account",
-  {
-    // ... column definitions ...
-  },
   (table) => [
     index("account_user_idx").on(table.userId),
     index("account_provider_idx").on(table.providerId),
-    unique("account_account_provider_uq").on(table.accountId, table.providerId),
+    index("account_created_at_idx").on(table.createdAt),
   ],
-);
 );
 
 export const verificationType = pgEnum("verification_type", [

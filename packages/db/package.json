@@ -27,11 +27,12 @@
     "build": "tsup",
     "clean": "git clean -xdf .cache .turbo dist node_modules",
     "clear-brands": "bun run with-env -- bun run src/scripts/delete-brands.ts",
-    "dev": "tsc",
+    "dev": "tsup --watch",
     "format": "prettier --check . --ignore-path ../../.gitignore",
     "lint": "eslint",
     "push": "bun run with-env -- drizzle-kit push",
     "reset-db": "bun run with-env -- bun run src/scripts/reset-db.ts",
+    "migrate-to-files": "bun run with-env -- bun run src/scripts/migrate-to-files.ts",
     "studio": "bun run with-env -- drizzle-kit studio",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false",
     "with-env": "dotenv -e ../../.env --"

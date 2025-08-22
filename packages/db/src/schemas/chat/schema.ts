@@ -11,6 +11,7 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { user } from "../auth/schema";
+import { files } from "../core/files";
 
 export const chatChannel = pgEnum("chat_channel", [
   "telegram",
@@ -94,11 +95,19 @@ export const messages = pgTable(
 /**
  * Таблица вложений к сообщениям
  * Хранит файлы, изображения и другие медиа, прикрепленные к сообщениям
+ * 
+ * @deprecated Используйте новую систему files + fileRelations
+ * Эта таблица оставлена для обратной совместимости
  */
 export const messageAttachments = pgTable(
   "message_attachments",
   (t) => ({
     id: text("id").primaryKey().$defaultFn(createId),
+    
+    // Связь с новой системой файлов
+    fileId: t.text("file_id").references(() => files.id, { onDelete: "cascade" }),
+    
+    // Существующие поля для обратной совместимости
     messageId: t
       .text("message_id")
       .notNull()
@@ -106,18 +115,32 @@ export const messageAttachments = pgTable(
     key: t.text("key").notNull(),
     mime: t.text("mime"),
     size: integer("size"),
+    
+    // Новые поля для миграции
+    migratedToFiles: t.text("migrated_to_files").default("false"), // флаг миграции
+    
     createdAt: t
       .timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
+    updatedAt: t
+      .timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
   }),
   (table) => [
+    // Существующие индексы
     index("message_attachment_message_idx").on(table.messageId),
     index("message_attachment_key_idx").on(table.key),
     unique("message_attachment_message_key_uidx").on(
       table.messageId,
       table.key,
     ),
+    
+    // Новые индексы для связи с files
+    index("message_attachment_file_idx").on(table.fileId),
+    index("message_attachment_migrated_idx").on(table.migratedToFiles),
   ],
 );
 

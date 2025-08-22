@@ -32,7 +32,7 @@ export async function resolveFileIdOrPath({
   ) {
     return fileIdOrPath;
   }
-  let file = await ctx.db.query.files.findFirst({
+  let file = await ctx.db.query.attachments.findFirst({
     where: (fields, { eq }) => eq(fields.path, fileIdOrPath),
   });
   file ??= await ctx.db

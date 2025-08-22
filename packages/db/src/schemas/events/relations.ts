@@ -6,6 +6,7 @@ import { attachments } from "./attachment";
 import { eventProperties } from "./event-property";
 import { events } from "./event";
 import { eventTags, tags } from "./tag";
+import { files } from "../core/files";
 
 // Relations for event
 export const eventRelations = relations(events, ({ one, many }) => ({
@@ -31,6 +32,11 @@ export const attachmentRelations = relations(attachments, ({ one }) => ({
   event: one(events, {
     fields: [attachments.eventId],
     references: [events.id],
+  }),
+  // Связь с новой системой файлов
+  file: one(files, {
+    fields: [attachments.fileId],
+    references: [files.id],
   }),
 }));
 
