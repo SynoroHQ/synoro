@@ -1,5 +1,7 @@
 import { createId } from "@paralleldrive/cuid2";
+import { sql } from "drizzle-orm";
 import {
+  check,
   decimal,
   index,
   jsonb,
@@ -7,6 +9,7 @@ import {
   pgTable,
   text,
   timestamp,
+  varchar,
 } from "drizzle-orm/pg-core";
 
 import { user } from "../auth/schema";
@@ -25,6 +28,19 @@ export const eventPriority = pgEnum("event_priority", [
   "urgent",
 ]);
 
+export const eventSource = pgEnum("event_source", [
+  "telegram",
+  "web",
+  "mobile",
+  "api",
+]);
+export const eventType = pgEnum("event_type", [
+  "expense",
+  "task",
+  "maintenance",
+  "other",
+]);
+
 /**
  * Основная таблица событий/записей
  * Хранит все типы событий: расходы, задачи, обслуживание, заметки
@@ -38,8 +54,8 @@ export const events = pgTable(
       .notNull()
       .references(() => households.id, { onDelete: "cascade" }),
     userId: text("user_id").references(() => user.id, { onDelete: "set null" }),
-    source: text("source").notNull(), // 'telegram', 'web', 'mobile', 'api'
-    type: text("type").notNull(), // 'expense', 'task', 'maintenance', etc.
+    source: eventSource("source").notNull(),
+    type: eventType("type").notNull(),
     status: eventStatus("status").notNull().default("active"),
     priority: eventPriority("priority").default("medium"),
     occurredAt: timestamp("occurred_at", { withTimezone: true }).notNull(),
@@ -52,12 +68,16 @@ export const events = pgTable(
       .$onUpdate(() => new Date()),
     title: text("title"),
     notes: text("notes"),
-    // Добавим поле для денежных значений
+    // Добавим поле для денежных значений с проверкой на неотрицательность
     amount: decimal("amount", { precision: 12, scale: 2 }),
-    currency: text("currency").default("RUB"),
+    // Валюта в формате ISO-4217 (3 заглавные буквы)
+    currency: varchar("currency", { length: 3 }).default("RUB").notNull(),
     data: jsonb("data").$type<Record<string, unknown> | null>(),
   },
   (table) => [
+    // CHECK constraints для валидации денежных полей
+    check("amount_non_negative", sql`${table.amount} >= 0`),
+    check("currency_iso_format", sql`${table.currency} ~ '^[A-Z]{3}$'`),
     index("event_household_occurred_idx").on(
       table.householdId,
       table.occurredAt,

@@ -73,7 +73,7 @@ export const messages = pgTable(
     content: jsonb("content").$type<Record<string, unknown>>().notNull(),
     model: text("model"),
     status: text("status").default("completed").notNull(),
-    parentId: text("parent_id"),
+    parentId: text("parent_id"), // самоссылка, FK добавляется через миграцию для ссылочной целостности
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -114,6 +114,10 @@ export const messageAttachments = pgTable(
   (table) => [
     index("message_attachment_message_idx").on(table.messageId),
     index("message_attachment_key_idx").on(table.key),
+    unique("message_attachment_message_key_uidx").on(
+      table.messageId,
+      table.key,
+    ),
   ],
 );
 

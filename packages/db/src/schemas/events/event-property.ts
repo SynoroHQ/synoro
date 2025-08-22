@@ -32,7 +32,6 @@ export const eventProperties = pgTable(
   },
   (table) => [
     primaryKey({ columns: [table.eventId, table.key] }),
-    index("event_property_event_idx").on(table.eventId),
     index("event_property_key_idx").on(table.key),
   ],
 );
