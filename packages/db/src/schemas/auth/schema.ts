@@ -78,22 +78,21 @@ export const account = pgTable(
   "account",
   (t) => ({
     id: text("id").primaryKey().$defaultFn(createId),
-    accountId: t.text("account_id").notNull(),
-    providerId: t.text("provider_id").notNull(),
-    userId: t
-      .text("user_id")
+    accountId: text("account_id").notNull(),
+    providerId: text("provider_id").notNull(),
+    userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
-    accessToken: t.text("access_token"),
-    refreshToken: t.text("refresh_token"),
-    idToken: t.text("id_token"),
+    accessToken: text("access_token"),
+    refreshToken: text("refresh_token"),
+    idToken: text("id_token"),
     accessTokenExpiresAt: timestamp("access_token_expires_at", {
       withTimezone: true,
     }),
     refreshTokenExpiresAt: timestamp("refresh_token_expires_at", {
       withTimezone: true,
     }),
-    scope: t.text(),
+    scope: text("scope"),
     password: t.text(), // для password-based провайдеров
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
