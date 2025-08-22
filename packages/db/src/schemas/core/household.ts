@@ -36,9 +36,9 @@ export const household = pgTable(
       .defaultNow()
       .$onUpdate(() => new Date()),
   },
-  (table) => ({
-    nameIdx: index("household_name_idx").on(table.name),
-    statusIdx: index("household_status_idx").on(table.status),
-    createdAtIdx: index("household_created_at_idx").on(table.createdAt),
-  }),
+  (table) => [
+    index("household_name_idx").on(table.name),
+    index("household_status_idx").on(table.status),
+    index("household_created_at_idx").on(table.createdAt),
+  ],
 );

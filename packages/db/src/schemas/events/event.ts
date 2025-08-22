@@ -52,23 +52,20 @@ export const event = pgTable(
     currency: text("currency").default("RUB"),
     data: jsonb("data").$type<Record<string, unknown> | null>(),
   },
-  (table) => ({
-    byHouseholdOccurred: index("event_household_occurred_idx").on(
+  (table) => [
+    index("event_household_occurred_idx").on(
       table.householdId,
       table.occurredAt,
     ),
-    byHouseholdTypeOccurred: index("event_household_type_occurred_idx").on(
+    index("event_household_type_occurred_idx").on(
       table.householdId,
       table.type,
       table.occurredAt,
     ),
-    byUserOccurred: index("event_user_occurred_idx").on(
-      table.userId,
-      table.occurredAt,
-    ),
-    byStatusType: index("event_status_type_idx").on(table.status, table.type),
-    byPriority: index("event_priority_idx").on(table.priority),
-    byAmount: index("event_amount_idx").on(table.amount),
-    bySource: index("event_source_idx").on(table.source),
-  }),
+    index("event_user_occurred_idx").on(table.userId, table.occurredAt),
+    index("event_status_type_idx").on(table.status, table.type),
+    index("event_priority_idx").on(table.priority),
+    index("event_amount_idx").on(table.amount),
+    index("event_source_idx").on(table.source),
+  ],
 );

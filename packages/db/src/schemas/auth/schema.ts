@@ -36,12 +36,12 @@ export const user = pgTable(
       .defaultNow()
       .$onUpdate(() => new Date()),
   }),
-  (table) => ({
-    emailIdx: index("user_email_idx").on(table.email),
-    roleIdx: index("user_role_idx").on(table.role),
-    statusIdx: index("user_status_idx").on(table.status),
-    createdAtIdx: index("user_created_at_idx").on(table.createdAt),
-  }),
+  (table) => [
+    index("user_email_idx").on(table.email),
+    index("user_role_idx").on(table.role),
+    index("user_status_idx").on(table.status),
+    index("user_created_at_idx").on(table.createdAt),
+  ],
 );
 
 export const session = pgTable(
@@ -65,12 +65,12 @@ export const session = pgTable(
       .defaultNow()
       .$onUpdate(() => new Date()),
   }),
-  (table) => ({
-    tokenIdx: index("session_token_idx").on(table.token),
-    userIdx: index("session_user_idx").on(table.userId),
-    expiresIdx: index("session_expires_idx").on(table.expiresAt),
-    activeIdx: index("session_active_idx").on(table.isActive),
-  }),
+  (table) => [
+    index("session_token_idx").on(table.token),
+    index("session_user_idx").on(table.userId),
+    index("session_expires_idx").on(table.expiresAt),
+    index("session_active_idx").on(table.isActive),
+  ],
 );
 
 export const account = pgTable(
@@ -102,14 +102,11 @@ export const account = pgTable(
       .defaultNow()
       .$onUpdate(() => new Date()),
   }),
-  (table) => ({
-    userIdx: index("account_user_idx").on(table.userId),
-    providerIdx: index("account_provider_idx").on(table.providerId),
-    accountProviderIdx: index("account_account_provider_idx").on(
-      table.accountId,
-      table.providerId,
-    ),
-  }),
+  (table) => [
+    index("account_user_idx").on(table.userId),
+    index("account_provider_idx").on(table.providerId),
+    index("account_account_provider_idx").on(table.accountId, table.providerId),
+  ],
 );
 
 export const verificationType = pgEnum("verification_type", [
@@ -137,10 +134,10 @@ export const verification = pgTable(
       .defaultNow()
       .$onUpdate(() => new Date()),
   }),
-  (table) => ({
-    identifierIdx: index("verification_identifier_idx").on(table.identifier),
-    typeIdx: index("verification_type_idx").on(table.type),
-    expiresIdx: index("verification_expires_idx").on(table.expiresAt),
-    usedIdx: index("verification_used_idx").on(table.isUsed),
-  }),
+  (table) => [
+    index("verification_identifier_idx").on(table.identifier),
+    index("verification_type_idx").on(table.type),
+    index("verification_expires_idx").on(table.expiresAt),
+    index("verification_used_idx").on(table.isUsed),
+  ],
 );

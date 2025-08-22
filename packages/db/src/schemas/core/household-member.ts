@@ -52,11 +52,11 @@ export const householdMember = pgTable(
       .defaultNow()
       .$onUpdate(() => new Date()),
   },
-  (table) => ({
-    pk: primaryKey({ columns: [table.householdId, table.userId] }),
-    householdIdx: index("household_member_household_idx").on(table.householdId),
-    userIdx: index("household_member_user_idx").on(table.userId),
-    roleIdx: index("household_member_role_idx").on(table.role),
-    statusIdx: index("household_member_status_idx").on(table.status),
-  }),
+  (table) => [
+    primaryKey({ columns: [table.householdId, table.userId] }),
+    index("household_member_household_idx").on(table.householdId),
+    index("household_member_user_idx").on(table.userId),
+    index("household_member_role_idx").on(table.role),
+    index("household_member_status_idx").on(table.status),
+  ],
 );

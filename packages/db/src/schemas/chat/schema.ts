@@ -46,14 +46,12 @@ export const conversation = pgTable(
       .$onUpdate(() => new Date()),
     lastMessageAt: t.timestamp("last_message_at", { withTimezone: true }),
   }),
-  (table) => ({
-    ownerUserIdx: index("conversation_owner_user_idx").on(table.ownerUserId),
-    channelIdx: index("conversation_channel_idx").on(table.channel),
-    statusIdx: index("conversation_status_idx").on(table.status),
-    lastMessageIdx: index("conversation_last_message_idx").on(
-      table.lastMessageAt,
-    ),
-  }),
+  (table) => [
+    index("conversation_owner_user_idx").on(table.ownerUserId),
+    index("conversation_channel_idx").on(table.channel),
+    index("conversation_status_idx").on(table.status),
+    index("conversation_last_message_idx").on(table.lastMessageAt),
+  ],
 );
 
 export const message = pgTable(
@@ -72,17 +70,17 @@ export const message = pgTable(
       .notNull()
       .defaultNow(),
   },
-  (table) => ({
-    conversationIdx: index("message_conversation_idx").on(table.conversationId),
-    roleIdx: index("message_role_idx").on(table.role),
-    statusIdx: index("message_status_idx").on(table.status),
-    parentIdx: index("message_parent_idx").on(table.parentId),
-    createdAtIdx: index("message_created_at_idx").on(table.createdAt),
-    conversationCreatedIdx: index("message_conversation_created_idx").on(
+  (table) => [
+    index("message_conversation_idx").on(table.conversationId),
+    index("message_role_idx").on(table.role),
+    index("message_status_idx").on(table.status),
+    index("message_parent_idx").on(table.parentId),
+    index("message_created_at_idx").on(table.createdAt),
+    index("message_conversation_created_idx").on(
       table.conversationId,
       table.createdAt,
     ),
-  }),
+  ],
 );
 
 export const messageAttachment = pgTable(
@@ -101,10 +99,10 @@ export const messageAttachment = pgTable(
       .notNull()
       .defaultNow(),
   }),
-  (table) => ({
-    messageIdx: index("message_attachment_message_idx").on(table.messageId),
-    keyIdx: index("message_attachment_key_idx").on(table.key),
-  }),
+  (table) => [
+    index("message_attachment_message_idx").on(table.messageId),
+    index("message_attachment_key_idx").on(table.key),
+  ],
 );
 
 export const identityLink = pgTable(
@@ -127,10 +125,10 @@ export const identityLink = pgTable(
       .defaultNow()
       .$onUpdate(() => new Date()),
   }),
-  (table) => ({
-    uniqueProviderUser: unique().on(table.provider, table.providerUserId),
-    uniqueUserProvider: unique().on(table.userId, table.provider),
-    userIdx: index("identity_link_user_idx").on(table.userId),
-    providerIdx: index("identity_link_provider_idx").on(table.provider),
-  }),
+  (table) => [
+    unique().on(table.provider, table.providerUserId),
+    unique().on(table.userId, table.provider),
+    index("identity_link_user_idx").on(table.userId),
+    index("identity_link_provider_idx").on(table.provider),
+  ],
 );

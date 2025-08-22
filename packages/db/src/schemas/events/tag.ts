@@ -30,15 +30,12 @@ export const tag = pgTable(
       .defaultNow()
       .$onUpdate(() => new Date()),
   },
-  (table) => ({
-    uniqName: uniqueIndex("tag_household_name_uidx").on(
-      table.householdId,
-      table.name,
-    ),
-    householdIdx: index("tag_household_idx").on(table.householdId),
-    parentIdx: index("tag_parent_idx").on(table.parentId),
-    nameIdx: index("tag_name_idx").on(table.name),
-  }),
+  (table) => [
+    uniqueIndex("tag_household_name_uidx").on(table.householdId, table.name),
+    index("tag_household_idx").on(table.householdId),
+    index("tag_parent_idx").on(table.parentId),
+    index("tag_name_idx").on(table.name),
+  ],
 );
 
 export const eventTag = pgTable(
@@ -54,9 +51,9 @@ export const eventTag = pgTable(
       .notNull()
       .defaultNow(),
   },
-  (table) => ({
-    pk: primaryKey({ columns: [table.eventId, table.tagId] }),
-    eventIdx: index("event_tag_event_idx").on(table.eventId),
-    tagIdx: index("event_tag_tag_idx").on(table.tagId),
-  }),
+  (table) => [
+    primaryKey({ columns: [table.eventId, table.tagId] }),
+    index("event_tag_event_idx").on(table.eventId),
+    index("event_tag_tag_idx").on(table.tagId),
+  ],
 );

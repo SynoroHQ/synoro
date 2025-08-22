@@ -43,10 +43,10 @@ export const attachment = pgTable(
       .notNull()
       .defaultNow(),
   },
-  (table) => ({
-    householdIdx: index("attachment_household_idx").on(table.householdId),
-    eventIdx: index("attachment_event_idx").on(table.eventId),
-    typeIdx: index("attachment_type_idx").on(table.type),
-    createdAtIdx: index("attachment_created_at_idx").on(table.createdAt),
-  }),
+  (table) => [
+    index("attachment_household_idx").on(table.householdId),
+    index("attachment_event_idx").on(table.eventId),
+    index("attachment_type_idx").on(table.type),
+    index("attachment_created_at_idx").on(table.createdAt),
+  ],
 );

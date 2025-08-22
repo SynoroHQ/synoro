@@ -65,9 +65,9 @@ export const userProfile = pgTable(
       .defaultNow()
       .$onUpdate(() => new Date()),
   },
-  (table) => ({
-    timezoneIdx: index("user_profile_timezone_idx").on(table.timezone),
-    localeIdx: index("user_profile_locale_idx").on(table.locale),
-    phoneIdx: index("user_profile_phone_idx").on(table.phone),
-  }),
+  (table) => [
+    index("user_profile_timezone_idx").on(table.timezone),
+    index("user_profile_locale_idx").on(table.locale),
+    index("user_profile_phone_idx").on(table.phone),
+  ],
 );
