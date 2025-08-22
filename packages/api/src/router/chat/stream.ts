@@ -35,13 +35,12 @@ export const streamRouter: TRPCRouterRecord = {
         });
       }
 
-      // Создаем async iterable из eventBus
       const events = {
         [Symbol.asyncIterator]: () => {
           let unsubscribe: (() => void) | null = null;
+          const MAX_QUEUE = 1000;
           const queue: StreamEvent[] = [];
-          let resolve: ((value: IteratorResult<StreamEvent>) => void) | null =
-            null;
+          let resolve: ((value: IteratorResult<StreamEvent>) => void) | null = null;
           let done = false;
 
           unsubscribe = eventBus.subscribe(runId, (event) => {
@@ -51,6 +50,10 @@ export const streamRouter: TRPCRouterRecord = {
               resolve({ value: event, done: false });
               resolve = null;
             } else {
+              if (queue.length >= MAX_QUEUE) {
+                // отбрасываем самые старые события
+                queue.shift();
+              }
               queue.push(event);
             }
 
@@ -69,7 +72,7 @@ export const streamRouter: TRPCRouterRecord = {
             }
           });
 
-          return {
+          const iterator = {
             async next(): Promise<IteratorResult<StreamEvent>> {
               if (done) return { value: undefined, done: true };
 
@@ -86,15 +89,31 @@ export const streamRouter: TRPCRouterRecord = {
                 resolve = res;
               });
             },
-            async return() {
+            async return(): Promise<IteratorResult<StreamEvent>> {
               done = true;
               unsubscribe?.();
               return { value: undefined, done: true };
             },
           };
+
+          // гарантированная очистка при завершении итерации
+          return new Proxy(iterator, {
+            get(target, prop, receiver) {
+              if (prop === "next") {
+                const orig = target.next.bind(target);
+                return async (...args: unknown[]) => {
+                  try {
+                    return await orig(...(args as []));
+                  } finally {
+                    if (done) unsubscribe?.();
+                  }
+                };
+              }
+              return Reflect.get(target, prop, receiver);
+            },
+          });
         },
       };
-
       for await (const event of events) {
         yield event;
       }

@@ -38,8 +38,21 @@ export const userProfiles = pgTable(
     website: text("website"),
 
     // Настройки уведомлений
-    emailNotifications: text("email_notifications").notNull().default("all"), // 'all' | 'important' | 'none'
-    pushNotifications: text("push_notifications").notNull().default("all"),
+export const notificationLevel = pgEnum("notification_level", [
+  "all",
+  "important",
+  "none",
+]);
+
+export const userProfiles = pgTable(
+  "user_profiles",
+  {
+    // ...
+    emailNotifications: notificationLevel("email_notifications").notNull().default("all"),
+    pushNotifications: notificationLevel("push_notifications").notNull().default("all"),
+    // ...
+  }
+);
 
     // Расширенные настройки
     preferences: jsonb("preferences").$type<{

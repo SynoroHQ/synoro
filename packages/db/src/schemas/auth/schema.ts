@@ -114,11 +114,30 @@ export const account = pgTable(
       .defaultNow()
       .$onUpdate(() => new Date()),
   }),
+import {
+  boolean,
+  index,
+  unique,
+  pgEnum,
+  pgTable,
+  text,
+  timestamp,
+  integer,
+} from "drizzle-orm/pg-core";
+
+// ... other imports and definitions ...
+
+export const account = pgTable(
+  "account",
+  {
+    // ... column definitions ...
+  },
   (table) => [
     index("account_user_idx").on(table.userId),
     index("account_provider_idx").on(table.providerId),
-    index("account_account_provider_idx").on(table.accountId, table.providerId),
+    unique("account_account_provider_uq").on(table.accountId, table.providerId),
   ],
+);
 );
 
 export const verificationType = pgEnum("verification_type", [
