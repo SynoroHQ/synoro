@@ -15,7 +15,14 @@ async function main() {
     console.log("Server started successfully");
 
     // Graceful shutdown handlers
-    const gracefulShutdown = async (signal: string) => {
+    type ShutdownSignal = NodeJS.Signals | "uncaughtException" | "unhandledRejection";
+    let isShuttingDown = false;
+    const gracefulShutdown = async (signal: ShutdownSignal) => {
+      if (isShuttingDown) {
+        console.log(`Shutdown already in progress (signal: ${signal})`);
+        return;
+      }
+      isShuttingDown = true;
       console.log(`Received ${signal}, starting graceful shutdown...`);
 
       try {
@@ -26,7 +33,7 @@ async function main() {
 
         // TODO: Add your server cleanup here
         // For example:
-        // server.close();
+        // if (server) await new Promise<void>((resolve) => server!.close(() => resolve()));
 
         console.log("Graceful shutdown completed");
         process.exit(0);
