@@ -1,4 +1,5 @@
 import { createId } from "@paralleldrive/cuid2";
+// packages/db/src/schemas/auth/schema.ts
 import {
   boolean,
   index,
@@ -6,6 +7,7 @@ import {
   pgTable,
   text,
   timestamp,
+  integer,
 } from "drizzle-orm/pg-core";
 
 export const userRole = pgEnum("user_role", ["user", "admin", "moderator"]);
