@@ -4,5 +4,5 @@ export * from "./core";
 export * from "./events";
 export * from "./chat";
 
-// Export all relations - IMPORTANT: Import this to ensure all relations are registered
-export * from "./relations";
+// Экспорт агрегатора relations как пространства имён, чтобы избежать конфликтов реэкспортов
+export * as relations from "./relations";
