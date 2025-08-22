@@ -25,7 +25,7 @@
     "@synoro/lib": "workspace:*",
     "@synoro/prompts": "workspace:*",
     "@t3-oss/env-core": "0.13.8",
-    "ai": "^5.0.21",
+    "ai": "^5.0.22",
     "grammy": "^1.38.1",
     "langfuse": "^3.38.4",
     "langfuse-vercel": "^3.38.4",
