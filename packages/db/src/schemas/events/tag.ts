@@ -8,16 +8,16 @@ import {
   uniqueIndex,
 } from "drizzle-orm/pg-core";
 
-import { household } from "../core/household";
-import { event } from "./event";
+import { households } from "../core/household";
+import { events } from "./event";
 
-export const tag = pgTable(
-  "tag",
+export const tags = pgTable(
+  "tags",
   {
     id: text("id").primaryKey().$defaultFn(createId),
     householdId: text("household_id")
       .notNull()
-      .references(() => household.id, { onDelete: "cascade" }),
+      .references(() => households.id, { onDelete: "cascade" }),
     name: text("name").notNull(),
     description: text("description"),
     color: text("color"), // для UI цветовой кодировки тегов
@@ -38,15 +38,15 @@ export const tag = pgTable(
   ],
 );
 
-export const eventTag = pgTable(
-  "event_tag",
+export const eventTags = pgTable(
+  "event_tags",
   {
     eventId: text("event_id")
       .notNull()
-      .references(() => event.id, { onDelete: "cascade" }),
+      .references(() => events.id, { onDelete: "cascade" }),
     tagId: text("tag_id")
       .notNull()
-      .references(() => tag.id, { onDelete: "cascade" }),
+      .references(() => tags.id, { onDelete: "cascade" }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),

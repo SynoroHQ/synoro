@@ -1,80 +1,80 @@
 import { relations } from "drizzle-orm";
 
 import { user } from "../auth/schema";
-import { household } from "../core/household";
-import { attachment, event, eventProperty, eventTag, tag } from "./";
+import { households } from "../core/household";
+import { attachments, eventProperties, events, eventTags, tags } from "./";
 
 // Relations for event
-export const eventRelations = relations(event, ({ one, many }) => ({
-  household: one(household, {
-    fields: [event.householdId],
-    references: [household.id],
+export const eventRelations = relations(events, ({ one, many }) => ({
+  household: one(households, {
+    fields: [events.householdId],
+    references: [households.id],
   }),
   user: one(user, {
-    fields: [event.userId],
+    fields: [events.userId],
     references: [user.id],
   }),
-  attachments: many(attachment),
-  properties: many(eventProperty),
-  eventTags: many(eventTag),
+  attachments: many(attachments),
+  properties: many(eventProperties),
+  eventTags: many(eventTags),
 }));
 
 // Relations for attachment
-export const attachmentRelations = relations(attachment, ({ one }) => ({
-  household: one(household, {
-    fields: [attachment.householdId],
-    references: [household.id],
+export const attachmentRelations = relations(attachments, ({ one }) => ({
+  household: one(households, {
+    fields: [attachments.householdId],
+    references: [households.id],
   }),
-  event: one(event, {
-    fields: [attachment.eventId],
-    references: [event.id],
+  event: one(events, {
+    fields: [attachments.eventId],
+    references: [events.id],
   }),
 }));
 
 // Relations for tag
-export const tagRelations = relations(tag, ({ one, many }) => ({
-  household: one(household, {
-    fields: [tag.householdId],
-    references: [household.id],
+export const tagRelations = relations(tags, ({ one, many }) => ({
+  household: one(households, {
+    fields: [tags.householdId],
+    references: [households.id],
   }),
-  parent: one(tag, {
-    fields: [tag.parentId],
-    references: [tag.id],
+  parent: one(tags, {
+    fields: [tags.parentId],
+    references: [tags.id],
     relationName: "tagHierarchy",
   }),
-  children: many(tag, {
+  children: many(tags, {
     relationName: "tagHierarchy",
   }),
-  eventTags: many(eventTag),
+  eventTags: many(eventTags),
 }));
 
 // Relations for eventTag
-export const eventTagRelations = relations(eventTag, ({ one }) => ({
-  event: one(event, {
-    fields: [eventTag.eventId],
-    references: [event.id],
+export const eventTagRelations = relations(eventTags, ({ one }) => ({
+  event: one(events, {
+    fields: [eventTags.eventId],
+    references: [events.id],
   }),
-  tag: one(tag, {
-    fields: [eventTag.tagId],
-    references: [tag.id],
+  tag: one(tags, {
+    fields: [eventTags.tagId],
+    references: [tags.id],
   }),
 }));
 
 // Relations for eventProperty
-export const eventPropertyRelations = relations(eventProperty, ({ one }) => ({
-  event: one(event, {
-    fields: [eventProperty.eventId],
-    references: [event.id],
+export const eventPropertyRelations = relations(eventProperties, ({ one }) => ({
+  event: one(events, {
+    fields: [eventProperties.eventId],
+    references: [events.id],
   }),
 }));
 
 // Relations from other schemas
 export const userEventRelations = relations(user, ({ many }) => ({
-  events: many(event),
+  events: many(events),
 }));
 
-export const householdEventRelations = relations(household, ({ many }) => ({
-  events: many(event),
-  attachments: many(attachment),
-  tags: many(tag),
+export const householdEventRelations = relations(households, ({ many }) => ({
+  events: many(events),
+  attachments: many(attachments),
+  tags: many(tags),
 }));

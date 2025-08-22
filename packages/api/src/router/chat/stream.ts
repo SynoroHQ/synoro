@@ -3,7 +3,7 @@ import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 
-import { conversation } from "@synoro/db";
+import { conversations } from "@synoro/db";
 
 import type { StreamEvent } from "../../lib/event-bus";
 import { eventBus } from "../../lib/event-bus";
@@ -23,9 +23,9 @@ export const streamRouter: TRPCRouterRecord = {
 
       // Проверка владения диалогом
       const row = await opts.ctx.db
-        .select({ ownerUserId: conversation.ownerUserId })
-        .from(conversation)
-        .where(eq(conversation.id, conversationId))
+        .select({ ownerUserId: conversations.ownerUserId })
+        .from(conversations)
+        .where(eq(conversations.id, conversationId))
         .limit(1);
 
       if (!row[0] || row[0].ownerUserId !== userId) {

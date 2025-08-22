@@ -9,8 +9,8 @@ import {
   timestamp,
 } from "drizzle-orm/pg-core";
 
-import { household } from "../core/household";
-import { event } from "./event";
+import { households } from "../core/household";
+import { events } from "./event";
 
 export const attachmentType = pgEnum("attachment_type", [
   "image",
@@ -22,14 +22,14 @@ export const attachmentType = pgEnum("attachment_type", [
   "raw",
 ]);
 
-export const attachment = pgTable(
-  "attachment",
+export const attachments = pgTable(
+  "attachments",
   {
     id: text("id").primaryKey().$defaultFn(createId),
     householdId: text("household_id")
       .notNull()
-      .references(() => household.id, { onDelete: "cascade" }),
-    eventId: text("event_id").references(() => event.id, {
+      .references(() => households.id, { onDelete: "cascade" }),
+    eventId: text("event_id").references(() => events.id, {
       onDelete: "set null",
     }),
     type: attachmentType("type").notNull(),

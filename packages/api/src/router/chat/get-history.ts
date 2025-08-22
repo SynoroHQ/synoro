@@ -2,7 +2,7 @@ import type { TRPCRouterRecord } from "@trpc/server";
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 
-import { conversation, message } from "@synoro/db";
+import { conversations, messages } from "@synoro/db";
 import {
   GetHistoryInput,
   MessageOutput,
@@ -22,21 +22,24 @@ export const getHistoryRouter: TRPCRouterRecord = {
       // Получаем сообщения из указанной беседы
       const rows = await db
         .select({
-          id: message.id,
-          conversationId: message.conversationId,
-          role: message.role,
-          content: message.content,
-          createdAt: message.createdAt,
+          id: messages.id,
+          role: messages.role,
+          content: messages.content,
+          model: messages.model,
+          status: messages.status,
+          parentId: messages.parentId,
+          createdAt: messages.createdAt,
+          conversationId: messages.conversationId,
         })
-        .from(message)
-        .innerJoin(conversation, eq(conversation.id, message.conversationId))
+        .from(messages)
+        .innerJoin(conversations, eq(conversations.id, messages.conversationId))
         .where(
           and(
-            eq(message.conversationId, input.conversationId),
-            eq(conversation.ownerUserId, userId),
+            eq(messages.conversationId, input.conversationId),
+            eq(conversations.ownerUserId, userId),
           ),
         )
-        .orderBy(message.createdAt); // сначала старые сообщения
+        .orderBy(messages.createdAt); // сначала старые сообщения
 
       // Приводим к формату MessageOutput с валидацией
       const items = rows.map((row) => ({

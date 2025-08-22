@@ -2,62 +2,62 @@ import { relations } from "drizzle-orm";
 
 import { user } from "../auth/schema";
 import {
-  conversation,
-  identityLink,
-  message,
-  messageAttachment,
+  conversations,
+  identityLinks,
+  messageAttachments,
+  messages,
 } from "./schema";
 
 // Relations for conversation
 export const conversationRelations = relations(
-  conversation,
+  conversations,
   ({ one, many }) => ({
     owner: one(user, {
-      fields: [conversation.ownerUserId],
+      fields: [conversations.ownerUserId],
       references: [user.id],
     }),
-    messages: many(message),
+    messages: many(messages),
   }),
 );
 
 // Relations for message
-export const messageRelations = relations(message, ({ one, many }) => ({
-  conversation: one(conversation, {
-    fields: [message.conversationId],
-    references: [conversation.id],
+export const messageRelations = relations(messages, ({ one, many }) => ({
+  conversation: one(conversations, {
+    fields: [messages.conversationId],
+    references: [conversations.id],
   }),
-  parent: one(message, {
-    fields: [message.parentId],
-    references: [message.id],
+  parent: one(messages, {
+    fields: [messages.parentId],
+    references: [messages.id],
     relationName: "messageThread",
   }),
-  children: many(message, {
+  children: many(messages, {
     relationName: "messageThread",
   }),
-  attachments: many(messageAttachment),
+  attachments: many(messageAttachments),
 }));
 
 // Relations for messageAttachment
 export const messageAttachmentRelations = relations(
-  messageAttachment,
+  messageAttachments,
   ({ one }) => ({
-    message: one(message, {
-      fields: [messageAttachment.messageId],
-      references: [message.id],
+    message: one(messages, {
+      fields: [messageAttachments.messageId],
+      references: [messages.id],
     }),
   }),
 );
 
 // Relations for identityLink
-export const identityLinkRelations = relations(identityLink, ({ one }) => ({
+export const identityLinkRelations = relations(identityLinks, ({ one }) => ({
   user: one(user, {
-    fields: [identityLink.userId],
+    fields: [identityLinks.userId],
     references: [user.id],
   }),
 }));
 
 // Relations for user (from auth schema)
 export const userChatRelations = relations(user, ({ many }) => ({
-  conversations: many(conversation),
-  identityLinks: many(identityLink),
+  conversations: many(conversations),
+  identityLinks: many(identityLinks),
 }));

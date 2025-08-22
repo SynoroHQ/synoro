@@ -7,14 +7,14 @@ import {
   timestamp,
 } from "drizzle-orm/pg-core";
 
-import { event } from "./event";
+import { events } from "./event";
 
-export const eventProperty = pgTable(
-  "event_property",
+export const eventProperties = pgTable(
+  "event_properties",
   {
     eventId: text("event_id")
       .notNull()
-      .references(() => event.id, { onDelete: "cascade" }),
+      .references(() => events.id, { onDelete: "cascade" }),
     key: text("key").notNull(),
     value: jsonb("value").$type<unknown>(),
     createdAt: timestamp("created_at", { withTimezone: true })

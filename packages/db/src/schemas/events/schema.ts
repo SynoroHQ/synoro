@@ -23,8 +23,8 @@ export const logStatus = pgEnum("log_status", [
   "failed",
 ]);
 
-export const eventLog = pgTable(
-  "event_log",
+export const eventLogs = pgTable(
+  "event_logs",
   {
     id: text("id").primaryKey().$defaultFn(createId),
     source: text("source").notNull(), // 'telegram', 'web', 'mobile', 'api'

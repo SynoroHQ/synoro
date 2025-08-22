@@ -9,7 +9,7 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { user } from "../auth/schema";
-import { household } from "./household";
+import { households } from "./household";
 
 export const memberRole = pgEnum("member_role", [
   "owner",
@@ -25,12 +25,12 @@ export const memberStatus = pgEnum("member_status", [
   "left",
 ]);
 
-export const householdMember = pgTable(
-  "household_member",
+export const householdMembers = pgTable(
+  "household_members",
   {
     householdId: text("household_id")
       .notNull()
-      .references(() => household.id, { onDelete: "cascade" }),
+      .references(() => households.id, { onDelete: "cascade" }),
     userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),

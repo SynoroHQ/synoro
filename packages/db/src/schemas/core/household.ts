@@ -14,8 +14,8 @@ export const householdStatus = pgEnum("household_status", [
   "archived",
 ]);
 
-export const household = pgTable(
-  "household",
+export const households = pgTable(
+  "households",
   {
     id: text("id").primaryKey().$defaultFn(createId),
     name: text("name").notNull(),

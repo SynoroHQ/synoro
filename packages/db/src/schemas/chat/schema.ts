@@ -24,8 +24,8 @@ export const messageRole = pgEnum("message_role", [
   "tool",
 ]);
 
-export const conversation = pgTable(
-  "conversation",
+export const conversations = pgTable(
+  "conversations",
   (t) => ({
     id: text("id").primaryKey().$defaultFn(createId),
     ownerUserId: t
@@ -54,13 +54,13 @@ export const conversation = pgTable(
   ],
 );
 
-export const message = pgTable(
-  "message",
+export const messages = pgTable(
+  "messages",
   {
     id: text("id").primaryKey().$defaultFn(createId),
     conversationId: text("conversation_id")
       .notNull()
-      .references(() => conversation.id, { onDelete: "cascade" }),
+      .references(() => conversations.id, { onDelete: "cascade" }),
     role: messageRole("role").notNull(),
     content: jsonb("content").$type<Record<string, unknown>>().notNull(),
     model: text("model"),
@@ -83,14 +83,14 @@ export const message = pgTable(
   ],
 );
 
-export const messageAttachment = pgTable(
-  "message_attachment",
+export const messageAttachments = pgTable(
+  "message_attachments",
   (t) => ({
     id: text("id").primaryKey().$defaultFn(createId),
     messageId: t
       .text("message_id")
       .notNull()
-      .references(() => message.id, { onDelete: "cascade" }),
+      .references(() => messages.id, { onDelete: "cascade" }),
     key: t.text("key").notNull(),
     mime: t.text("mime"),
     size: integer("size"),
@@ -105,8 +105,8 @@ export const messageAttachment = pgTable(
   ],
 );
 
-export const identityLink = pgTable(
-  "identity_link",
+export const identityLinks = pgTable(
+  "identity_links",
   (t) => ({
     id: text("id").primaryKey().$defaultFn(createId),
     userId: t

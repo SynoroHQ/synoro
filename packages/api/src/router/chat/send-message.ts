@@ -3,7 +3,7 @@ import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 
-import { conversation, createId, message } from "@synoro/db";
+import { conversations, createId, messages } from "@synoro/db";
 import { SendMessageInput } from "@synoro/validators";
 
 import { startCompletionRun } from "../../lib/llm";
@@ -30,7 +30,7 @@ export const sendMessageRouter: TRPCRouterRecord = {
       if (!input.conversationId || input.createNew) {
         // Создаем новую беседу
         convId = createId();
-        await db.insert(conversation).values({
+        await db.insert(conversations).values({
           id: convId,
           ownerUserId: userId,
           channel: input.channel,
@@ -46,8 +46,8 @@ export const sendMessageRouter: TRPCRouterRecord = {
         // Проверяем, что диалог принадлежит пользователю
         const existingConv = await db
           .select()
-          .from(conversation)
-          .where(eq(conversation.id, convId))
+          .from(conversations)
+          .where(eq(conversations.id, convId))
           .limit(1);
 
         if (existingConv.length === 0) {
@@ -67,14 +67,14 @@ export const sendMessageRouter: TRPCRouterRecord = {
 
         // Обновляем временные метки беседы
         await db
-          .update(conversation)
+          .update(conversations)
           .set({ updatedAt: now, lastMessageAt: now })
-          .where(eq(conversation.id, convId));
+          .where(eq(conversations.id, convId));
       }
 
       // Создаем пользовательское сообщение
       const userMsgId = createId();
-      await db.insert(message).values({
+      await db.insert(messages).values({
         id: userMsgId,
         conversationId: convId,
         role: "user",

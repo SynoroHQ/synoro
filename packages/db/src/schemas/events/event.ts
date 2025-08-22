@@ -10,7 +10,7 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { user } from "../auth/schema";
-import { household } from "../core/household";
+import { households } from "../core/household";
 
 export const eventStatus = pgEnum("event_status", [
   "active",
@@ -25,13 +25,13 @@ export const eventPriority = pgEnum("event_priority", [
   "urgent",
 ]);
 
-export const event = pgTable(
-  "event",
+export const events = pgTable(
+  "events",
   {
     id: text("id").primaryKey().$defaultFn(createId),
     householdId: text("household_id")
       .notNull()
-      .references(() => household.id, { onDelete: "cascade" }),
+      .references(() => households.id, { onDelete: "cascade" }),
     userId: text("user_id").references(() => user.id, { onDelete: "set null" }),
     source: text("source").notNull(), // 'telegram', 'web', 'mobile', 'api'
     type: text("type").notNull(), // 'expense', 'task', 'maintenance', etc.

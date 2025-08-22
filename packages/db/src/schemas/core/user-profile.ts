@@ -11,8 +11,8 @@ import { user } from "../auth/schema";
 
 export const themeMode = pgEnum("theme_mode", ["light", "dark", "system"]);
 
-export const userProfile = pgTable(
-  "user_profile",
+export const userProfiles = pgTable(
+  "user_profiles",
   {
     userId: text("user_id")
       .primaryKey()
