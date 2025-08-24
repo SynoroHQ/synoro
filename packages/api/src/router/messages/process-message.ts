@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { classifyMessageType, classifyRelevance } from "../../lib/ai";
 import { processClassifiedMessage } from "../../lib/message-processor";
-import { protectedProcedure, publicProcedure } from "../../trpc";
+import { botProcedure, protectedProcedure, publicProcedure } from "../../trpc";
 
 // Схема для входящего сообщения
 const ProcessMessageInput = z.object({
@@ -113,7 +113,7 @@ export const processMessageRouter = {
     }),
 
   // Публичный эндпоинт для Telegram бота
-  processMessageFromTelegram: publicProcedure
+  processMessageFromTelegram: botProcedure
     .input(ProcessMessageInput)
     .output(ProcessMessageResponse)
     .mutation(async ({ ctx, input }) => {

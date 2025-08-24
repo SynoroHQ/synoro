@@ -47,18 +47,20 @@ export async function processTextMessage(
     const traceId = randomUUID();
 
     const result =
-      await apiClient.messages.processMessage.processMessage.mutate({
-        text,
-        channel: "telegram",
-        userId: context.userId,
-        chatId: context.chatId,
-        messageId: context.messageId,
-        metadata: {
-          ...context.metadata,
-          traceId,
-          timestamp: new Date().toISOString(),
+      await apiClient.messages.processMessage.processMessageFromTelegram.mutate(
+        {
+          text,
+          channel: "telegram",
+          userId: context.userId,
+          chatId: context.chatId,
+          messageId: context.messageId,
+          metadata: {
+            ...context.metadata,
+            traceId,
+            timestamp: new Date().toISOString(),
+          },
         },
-      });
+      );
 
     return {
       success: result.success,
@@ -98,19 +100,20 @@ export async function transcribeAudio(
   try {
     const traceId = randomUUID();
 
-    const result = await apiClient.messages.transcribe.transcribe.mutate({
-      audio: buffer,
-      filename,
-      channel: "telegram",
-      userId: context.userId,
-      chatId: context.chatId,
-      messageId: context.messageId,
-      metadata: {
-        ...context.metadata,
-        traceId,
-        timestamp: new Date().toISOString(),
-      },
-    });
+    const result =
+      await apiClient.messages.transcribe.transcribeFromTelegram.mutate({
+        audio: buffer,
+        filename,
+        channel: "telegram",
+        userId: context.userId,
+        chatId: context.chatId,
+        messageId: context.messageId,
+        metadata: {
+          ...context.metadata,
+          traceId,
+          timestamp: new Date().toISOString(),
+        },
+      });
 
     return {
       success: result.success,

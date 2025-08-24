@@ -149,26 +149,29 @@ LANGFUSE_BASEURL=https://cloud.langfuse.com
 
 ```typescript
 // Обработка текстового сообщения
-const result = await fetch(`${API_BASE_URL}/api/trpc/messages.processMessage`, {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${API_TOKEN}`,
-  },
-  body: JSON.stringify({
-    json: {
-      text: "Купил хлеб за 50 рублей",
-      channel: "telegram",
-      userId: "12345",
-      chatId: "67890",
-      messageId: "111",
-      metadata: {
-        user: "username",
-        chatType: "private",
-      },
+const result = await fetch(
+  `${API_BASE_URL}/api/trpc/messages.processMessageFromTelegram`,
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${TELEGRAM_BOT_TOKEN}`,
     },
-  }),
-});
+    body: JSON.stringify({
+      json: {
+        text: "Купил хлеб за 50 рублей",
+        channel: "telegram",
+        userId: "12345",
+        chatId: "67890",
+        messageId: "111",
+        metadata: {
+          user: "username",
+          chatType: "private",
+        },
+      },
+    }),
+  },
+);
 
 const response = await result.json();
 await ctx.reply(response.result.data.response);
@@ -214,9 +217,13 @@ const processResult = await api.messages.processMessage.mutate({
   channel: "mobile",
   userId: "user123",
   metadata: {
-    originalAudio: result.filename,
+    device: "iPhone",
+    os: "iOS 17",
+    transcribedFrom: "audio",
   },
 });
+
+console.log(processResult.response); // Ответ бота
 ```
 
 ## Преимущества новой архитектуры

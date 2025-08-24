@@ -11,7 +11,7 @@ export const apiClient = createTRPCClient<AppRouter>({
     httpBatchLink({
       url: `${env.API_BASE_URL}/api/trpc`,
       headers: () => ({
-        ...(env.API_TOKEN ? { Authorization: `Bearer ${env.API_TOKEN}` } : {}),
+        Authorization: `Bearer ${env.TELEGRAM_BOT_TOKEN}`,
       }),
       transformer: superjson,
     }),

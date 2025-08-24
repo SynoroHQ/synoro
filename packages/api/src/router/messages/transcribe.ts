@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { transcribe } from "../../lib/ai";
-import { protectedProcedure, publicProcedure } from "../../trpc";
+import { botProcedure, protectedProcedure, publicProcedure } from "../../trpc";
 
 // Схема для входящего аудио
 const TranscribeInput = z.object({
@@ -54,7 +54,7 @@ export const transcribeRouter = {
     }),
 
   // Публичный эндпоинт для Telegram бота
-  transcribeFromTelegram: publicProcedure
+  transcribeFromTelegram: botProcedure
     .input(TranscribeInput)
     .output(TranscribeResponse)
     .mutation(async ({ input }) => {

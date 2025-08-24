@@ -13,8 +13,9 @@ import { ZodError } from "zod";
 import type { Session } from "@synoro/auth";
 import { auth } from "@synoro/auth";
 import { db } from "@synoro/db/client";
-import { checkRateLimit, buildRateLimitKey } from "./lib/rate-limit";
+
 import { env } from "../env";
+import { buildRateLimitKey, checkRateLimit } from "./lib/rate-limit";
 
 /**
  * 1. CONTEXT
@@ -62,7 +63,10 @@ export const createTRPCContext = async (opts: {
     referer,
   };
 };
-export type TRPCContext = Awaited<ReturnType<typeof createTRPCContext>>;
+export type TRPCContext = Awaited<ReturnType<typeof createTRPCContext>> & {
+  botUserId?: string;
+  isBotRequest?: boolean;
+};
 
 /**
  * 2. INITIALIZATION
@@ -173,6 +177,38 @@ const csrfMiddleware = t.middleware(async ({ ctx, type, next }) => {
   return next();
 });
 
+// Bot authentication middleware
+const botAuthMiddleware = t.middleware(async ({ ctx, next }) => {
+  const authHeader = ctx.token;
+
+  if (!authHeader?.startsWith("Bearer ")) {
+    throw new TRPCError({
+      code: "UNAUTHORIZED",
+      message: "Missing or invalid Authorization header",
+    });
+  }
+
+  const token = authHeader.substring(7); // Remove "Bearer " prefix
+
+  // Validate the bot token
+  if (token !== env.TELEGRAM_BOT_TOKEN) {
+    throw new TRPCError({
+      code: "UNAUTHORIZED",
+      message: "Invalid bot token",
+    });
+  }
+
+  // Extract Telegram user ID from the request context
+  // For bot requests, we'll set a special botUserId context
+  return next({
+    ctx: {
+      ...ctx,
+      botUserId: ctx.session?.user?.id || "bot_user", // Fallback if no session user
+      isBotRequest: true,
+    },
+  });
+});
+
 /**
  * Public (unauthed) procedure
  *
@@ -184,6 +220,18 @@ export const publicProcedure = t.procedure
   .use(timingMiddleware)
   .use(csrfMiddleware)
   .use(rateLimitMiddleware);
+
+/**
+ * Bot (authenticated) procedure
+ *
+ * This procedure is specifically for Telegram bot requests. It validates the bot token
+ * and provides bot-specific context.
+ */
+export const botProcedure = t.procedure
+  .use(timingMiddleware)
+  .use(csrfMiddleware)
+  .use(rateLimitMiddleware)
+  .use(botAuthMiddleware);
 
 /**
  * Protected (authenticated) procedure
@@ -215,7 +263,9 @@ const roleRank: Record<Role, number> = { user: 1, admin: 2 };
 
 const requireRole = (minRole: Role) =>
   t.middleware(({ ctx, next }) => {
-    interface WithRole { role?: Role }
+    interface WithRole {
+      role?: Role;
+    }
     let role: Role = "user";
     const maybeRole = (ctx.session?.user as WithRole | undefined)?.role;
     if (maybeRole) role = maybeRole;

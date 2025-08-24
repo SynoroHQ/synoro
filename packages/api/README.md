@@ -163,26 +163,29 @@ bun run typecheck
 ### Telegram Bot
 
 ```typescript
-const result = await fetch(`${API_BASE_URL}/api/trpc/messages.processMessage`, {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${API_TOKEN}`,
-  },
-  body: JSON.stringify({
-    json: {
-      text: "Купил хлеб за 50 рублей",
-      channel: "telegram",
-      userId: "12345",
-      chatId: "67890",
-      messageId: "111",
-      metadata: {
-        user: "username",
-        chatType: "private",
-      },
+const result = await fetch(
+  `${API_BASE_URL}/api/trpc/messages.processMessageFromTelegram`,
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${TELEGRAM_BOT_TOKEN}`,
     },
-  }),
-});
+    body: JSON.stringify({
+      json: {
+        text: "Купил хлеб за 50 рублей",
+        channel: "telegram",
+        userId: "12345",
+        chatId: "67890",
+        messageId: "111",
+        metadata: {
+          user: "username",
+          chatType: "private",
+        },
+      },
+    }),
+  },
+);
 
 const response = await result.json();
 await ctx.reply(response.result.data.response);
@@ -203,6 +206,37 @@ const result = await api.messages.processMessage.mutate({
 });
 
 console.log(result.response); // Ответ бота
+```
+
+### Mobile Client
+
+```typescript
+// Обработка голосового сообщения
+const audioBuffer = await recordAudio();
+const result = await api.messages.transcribe.mutate({
+  audio: audioBuffer,
+  filename: "voice_message.m4a",
+  channel: "mobile",
+  userId: "user123",
+  metadata: {
+    device: "iPhone",
+    os: "iOS 17",
+  },
+});
+
+// Теперь обрабатываем транскрибированный текст
+const processResult = await api.messages.processMessage.mutate({
+  text: result.text,
+  channel: "mobile",
+  userId: "user123",
+  metadata: {
+    device: "iPhone",
+    os: "iOS 17",
+    transcribedFrom: "audio",
+  },
+});
+
+console.log(processResult.response); // Ответ бота
 ```
 
 ## 🔄 Миграция с TG бота

@@ -13,6 +13,7 @@ export const env = createEnv({
     LANGFUSE_PUBLIC_KEY: z.string().min(1).optional(),
     LANGFUSE_SECRET_KEY: z.string().min(1).optional(),
     LANGFUSE_BASEURL: z.string().url().optional(),
+    TELEGRAM_BOT_TOKEN: z.string().min(10, "TELEGRAM_BOT_TOKEN is required"),
   },
 
   runtimeEnv: {
@@ -26,6 +27,7 @@ export const env = createEnv({
     LANGFUSE_PUBLIC_KEY: process.env.LANGFUSE_PUBLIC_KEY,
     LANGFUSE_SECRET_KEY: process.env.LANGFUSE_SECRET_KEY,
     LANGFUSE_BASEURL: process.env.LANGFUSE_BASEURL,
+    TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN,
   },
   skipValidation:
     !!process.env.CI ||
