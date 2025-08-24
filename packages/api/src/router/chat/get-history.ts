@@ -3,18 +3,25 @@ import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 
 import { conversations, messages } from "@synoro/db";
-import {
-  GetHistoryInput,
-  MessageOutput,
-  MessageRole,
-} from "@synoro/validators";
+import { GetHistoryInput, MessageRole } from "@synoro/validators";
 
 import { protectedProcedure } from "../../trpc";
+
+// Схема для вывода сообщения
+const MessageOutputSchema = z.object({
+  id: z.string(),
+  conversationId: z.string(),
+  role: z.enum(["user", "system", "assistant", "tool"]),
+  content: z.object({
+    text: z.string(),
+  }),
+  createdAt: z.date(),
+});
 
 export const getHistoryRouter: TRPCRouterRecord = {
   getHistory: protectedProcedure
     .input(GetHistoryInput)
-    .output(z.object({ items: z.array(MessageOutput) }))
+    .output(z.object({ items: z.array(MessageOutputSchema) }))
     .query(async ({ ctx, input }) => {
       const db = ctx.db;
       const userId = ctx.session.user.id;
@@ -46,7 +53,7 @@ export const getHistoryRouter: TRPCRouterRecord = {
         id: row.id,
         conversationId: row.conversationId,
         role: MessageRole.parse(row.role),
-        content: MessageOutput.shape.content.parse(row.content),
+        content: MessageOutputSchema.shape.content.parse(row.content),
         createdAt: row.createdAt,
       }));
 
