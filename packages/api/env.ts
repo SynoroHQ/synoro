@@ -3,7 +3,9 @@ import { z } from "zod";
 
 export const env = createEnv({
   server: {
-    NODE_ENV: z.enum(["development", "production", "test"]),
+    NODE_ENV: z
+      .enum(["development", "production", "test"])
+      .default("development"),
     DATABASE_TYPE: z.string().optional(),
     POSTGRES_URL: z.string().url(),
     WEB_APP_URL: z.string().url().optional(),

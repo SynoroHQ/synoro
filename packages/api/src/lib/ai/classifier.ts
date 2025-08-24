@@ -101,6 +101,11 @@ const messageTypeSchema = z.object({
   need_logging: z.boolean(),
 });
 
+const combinedClassificationSchema = z.object({
+  messageType: messageTypeSchema,
+  relevance: relevanceSchema,
+});
+
 export function extractFirstJsonObject(input: string): string | null {
   let depth = 0;
   let startIndex = -1;
@@ -148,50 +153,20 @@ export function extractFirstJsonObject(input: string): string | null {
   return null;
 }
 
-/**
- * Классифицирует релевантность сообщения с помощью AI
- * Использует OpenAI для определения, является ли сообщение релевантным
- */
-export async function classifyRelevance(
-  text: string,
-  telemetry?: Telemetry,
-): Promise<RelevanceResult> {
-  const system = await getSystemPrompt(PROMPT_KEYS.CLASSIFIER_RELEVANCE);
-  try {
-    const { text: out } = await generateText({
-      model: getActiveProvider()(getAdviceModel()),
-      system,
-      prompt: `Message: ${text}\nJSON:`,
-      temperature: 0.0,
-      experimental_telemetry: {
-        isEnabled: true,
-        functionId: telemetry?.functionId ?? "ai-classify-relevance",
-        metadata: telemetry?.metadata,
-      },
-    });
-    const trimmed = out.trim();
-    const candidate = extractFirstJsonObject(trimmed);
-    if (candidate) {
-      const obj = JSON.parse(candidate);
-      const validated = relevanceSchema.safeParse(obj);
-      if (validated.success) return validated.data;
-    }
-  } catch (_e) {
-    // ignore and fallback below
-  }
-  // Fallback: default to not relevant
-  return { relevant: false, score: 0 };
-}
+export type MessageClassificationResult = {
+  messageType: MessageTypeResult;
+  relevance: RelevanceResult;
+};
 
 /**
- * Классифицирует тип сообщения с помощью AI
- * Определяет, является ли сообщение вопросом, событием, чатом или нерелевантным
+ * Классифицирует сообщение - определяет релевантность и тип за один AI вызов
+ * Оптимизированная версия, заменяющая два отдельных классификатора
  */
-export async function classifyMessageType(
+export async function classifyMessage(
   text: string,
   telemetry?: Telemetry,
-): Promise<MessageTypeResult> {
-  const system = await getSystemPrompt(PROMPT_KEYS.CLASSIFIER_MESSAGE_TYPE);
+): Promise<MessageClassificationResult> {
+  const system = await getSystemPrompt(PROMPT_KEYS.MESSAGE_CLASSIFIER);
   try {
     const { text: out } = await generateText({
       model: getActiveProvider()(getAdviceModel()),
@@ -200,7 +175,7 @@ export async function classifyMessageType(
       temperature: 0.1,
       experimental_telemetry: {
         isEnabled: true,
-        functionId: telemetry?.functionId ?? "ai-classify-message-type",
+        functionId: telemetry?.functionId ?? "ai-classify-combined",
         metadata: telemetry?.metadata,
       },
     });
@@ -208,12 +183,22 @@ export async function classifyMessageType(
     const candidate = extractFirstJsonObject(trimmed);
     if (candidate) {
       const obj = JSON.parse(candidate);
-      const validated = messageTypeSchema.safeParse(obj);
+      const validated = combinedClassificationSchema.safeParse(obj);
       if (validated.success) return validated.data;
     }
-  } catch (_e) {
-    // ignore and fallback below
+  } catch (error) {
+    console.error("Error in combined classification:", error);
+    // Fallback below
   }
-  // Fallback: default to chat without logging
-  return { type: "chat", subtype: null, confidence: 0.3, need_logging: false };
+
+  // Fallback: default values for both classifications
+  return {
+    messageType: {
+      type: "chat",
+      subtype: null,
+      confidence: 0.3,
+      need_logging: false,
+    },
+    relevance: { relevant: false, score: 0 },
+  };
 }

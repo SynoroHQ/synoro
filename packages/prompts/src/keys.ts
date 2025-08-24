@@ -1,7 +1,6 @@
 export const PROMPT_KEYS = {
   ASSISTANT: "assistant",
-  CLASSIFIER_RELEVANCE: "classifier.relevance",
-  CLASSIFIER_MESSAGE_TYPE: "classifier.message-type",
+  MESSAGE_CLASSIFIER: "message-classifier",
   PARSER_TASK: "parser.task",
 } as const;
 

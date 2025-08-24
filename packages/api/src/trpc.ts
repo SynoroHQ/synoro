@@ -7,6 +7,7 @@
  * The pieces you will need to use are documented accordingly near the end
  */
 import { initTRPC, TRPCError } from "@trpc/server";
+import type { CreateExpressContextOptions } from "@trpc/server/adapters/express";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
@@ -66,6 +67,28 @@ export const createTRPCContext = async (opts: {
 export type TRPCContext = Awaited<ReturnType<typeof createTRPCContext>> & {
   botUserId?: string;
   isBotRequest?: boolean;
+};
+
+/**
+ * Express adapter context creation
+ * This is used by the Express adapter to create context for each request
+ */
+export const createExpressContext = async (opts: CreateExpressContextOptions) => {
+  const headers = new Headers();
+  
+  // Copy headers from Express request to Headers object
+  Object.entries(opts.req.headers).forEach(([key, value]) => {
+    if (typeof value === "string") {
+      headers.set(key, value);
+    } else if (Array.isArray(value)) {
+      headers.set(key, value.join(", "));
+    }
+  });
+
+  return createTRPCContext({
+    headers,
+    session: null, // Will be populated by auth middleware
+  });
 };
 
 /**

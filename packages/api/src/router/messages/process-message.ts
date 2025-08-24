@@ -1,12 +1,17 @@
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { classifyMessageType, classifyRelevance } from "../../lib/ai";
+import type { MessageTypeResult } from "../../lib/ai/types";
+import { classifyMessage } from "../../lib/ai";
 import { processClassifiedMessage } from "../../lib/message-processor";
-import { botProcedure, protectedProcedure, publicProcedure } from "../../trpc";
+import { botProcedure, protectedProcedure } from "../../trpc";
 
 // Схема для входящего сообщения
 const ProcessMessageInput = z.object({
-  text: z.string().min(1).max(5000),
+  text: z
+    .string()
+    .min(1, "Текст сообщения не может быть пустым")
+    .max(5000, "Текст сообщения слишком длинный"),
   channel: z.enum(["telegram", "web", "mobile"]),
   chatId: z.string().optional(),
   messageId: z.string().optional(),
@@ -37,78 +42,133 @@ const ProcessMessageResponse = z.object({
     .nullable(),
 });
 
+/**
+ * Общая логика обработки сообщения
+ */
+async function processMessageInternal(
+  text: string,
+  channel: "telegram" | "web" | "mobile",
+  userId: string,
+  chatId?: string,
+  messageId?: string,
+  metadata?: Record<string, unknown>,
+) {
+  // Валидация входных данных
+  if (!text.trim()) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "Текст сообщения не может быть пустым",
+    });
+  }
+
+  if (!userId) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "ID пользователя не указан",
+    });
+  }
+
+  try {
+    const commonMetadata = {
+      channel,
+      userId,
+      ...(chatId && { chatId }),
+      ...(messageId && { messageId }),
+      ...metadata,
+    };
+
+    // Используем оптимизированную комбинированную классификацию
+    const classificationStartTime = Date.now();
+
+    console.log("🚀 Using unified message classification");
+    const classification = await classifyMessage(text, {
+      functionId: "api-message-classifier",
+      metadata: commonMetadata,
+    });
+
+    const { messageType, relevance } = classification;
+
+    const classificationTime = Date.now() - classificationStartTime;
+    console.log(`⏱️ Classification took ${classificationTime}ms`);
+
+    // Добавляем метрики в метаданные для анализа
+    (commonMetadata as any).classificationTime = classificationTime;
+
+    // Обрабатываем сообщение
+    const result = await processClassifiedMessage(
+      text,
+      messageType,
+      {
+        channel,
+        userId,
+        chatId,
+        messageId,
+        metadata,
+      },
+      {
+        questionFunctionId: "api-answer-question",
+        chatFunctionId: "api-chat-response",
+        parseFunctionId: "api-parse-text",
+        adviseFunctionId: "api-advise",
+        fallbackParseFunctionId: "api-parse-text-fallback",
+        fallbackAdviseFunctionId: "api-advise-fallback",
+      },
+    );
+
+    return {
+      success: true as const,
+      response: result.response,
+      messageType: {
+        type: messageType.type,
+        subtype: messageType.subtype,
+        confidence: messageType.confidence,
+        need_logging: messageType.need_logging,
+      },
+      relevance: {
+        relevant: relevance.relevant,
+        score: relevance.score,
+        category: relevance.category,
+      },
+      parsed: result.parsed,
+    };
+  } catch (error) {
+    console.error("Ошибка обработки сообщения:", {
+      error,
+      text: text.substring(0, 100), // Логируем только первые 100 символов для безопасности
+      channel,
+      userId,
+      chatId,
+      messageId,
+    });
+
+    if (error instanceof TRPCError) {
+      throw error;
+    }
+
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: error instanceof Error ? error.message : "Неизвестная ошибка",
+      cause: error,
+    });
+  }
+}
+
 export const processMessageRouter = {
   // Универсальный эндпоинт для обработки сообщений (для веб/мобайл клиентов)
   processMessage: protectedProcedure
     .input(ProcessMessageInput)
     .output(ProcessMessageResponse)
     .mutation(async ({ ctx, input }) => {
-      try {
-        // Проверяем релевантность сообщения с помощью AI
-        const relevance = await classifyRelevance(input.text, {
-          functionId: "api-classify-relevance",
-          metadata: {
-            channel: input.channel,
-            userId: input.userId,
-            ...(input.chatId && { chatId: input.chatId }),
-            ...(input.messageId && { messageId: input.messageId }),
-          },
-        });
+      const userId = ctx.session.user.id;
 
-        // Классифицируем тип сообщения
-        const messageType = await classifyMessageType(input.text, {
-          functionId: "api-classify-message-type",
-          metadata: {
-            channel: input.channel,
-            userId: input.userId,
-            ...(input.chatId && { chatId: input.chatId }),
-            ...(input.messageId && { messageId: input.messageId }),
-          },
-        });
-
-        // Обрабатываем сообщение
-        const result = await processClassifiedMessage(
-          input.text,
-          messageType,
-          {
-            channel: input.channel,
-            userId: input.userId,
-            chatId: input.chatId,
-            messageId: input.messageId,
-            metadata: input.metadata,
-          },
-          {
-            questionFunctionId: "api-answer-question",
-            chatFunctionId: "api-chat-response",
-            parseFunctionId: "api-parse-text",
-            adviseFunctionId: "api-advise",
-            fallbackParseFunctionId: "api-parse-text-fallback",
-            fallbackAdviseFunctionId: "api-advise-fallback",
-          },
-        );
-
-        return {
-          success: true,
-          response: result.response,
-          messageType: {
-            type: messageType.type,
-            subtype: messageType.subtype,
-            confidence: messageType.confidence,
-            need_logging: messageType.need_logging,
-          },
-          relevance: {
-            relevant: relevance.relevant,
-            score: relevance.score,
-            category: relevance.category,
-          },
-          parsed: result.parsed,
-        };
-      } catch (error) {
-        console.error("Ошибка обработки сообщения:", error);
-        throw new Error(
-          error instanceof Error ? error.message : "Неизвестная ошибка",
-        );
-      }
+      return processMessageInternal(
+        input.text,
+        input.channel,
+        userId,
+        input.chatId,
+        input.messageId,
+        input.metadata,
+      );
     }),
 
   // Публичный эндпоинт для Telegram бота
@@ -116,71 +176,16 @@ export const processMessageRouter = {
     .input(ProcessMessageInput)
     .output(ProcessMessageResponse)
     .mutation(async ({ ctx, input }) => {
-      try {
-        // Проверяем релевантность сообщения с помощью AI
-        const relevance = await classifyRelevance(input.text, {
-          functionId: "api-classify-relevance",
-          metadata: {
-            channel: input.channel,
-            userId: input.userId,
-            ...(input.chatId && { chatId: input.chatId }),
-            ...(input.messageId && { messageId: input.messageId }),
-          },
-        });
+      // Для bot запросов используем botUserId из контекста
+      const userId = ctx.botUserId || "bot_user";
 
-        // Классифицируем тип сообщения
-        const messageType = await classifyMessageType(input.text, {
-          functionId: "api-classify-message-type",
-          metadata: {
-            channel: input.channel,
-            userId: input.userId,
-            ...(input.chatId && { chatId: input.chatId }),
-            ...(input.messageId && { messageId: input.messageId }),
-          },
-        });
-
-        // Обрабатываем сообщение
-        const result = await processClassifiedMessage(
-          input.text,
-          messageType,
-          {
-            channel: input.channel,
-            userId: input.userId,
-            chatId: input.chatId,
-            messageId: input.messageId,
-            metadata: input.metadata,
-          },
-          {
-            questionFunctionId: "api-answer-question",
-            chatFunctionId: "api-chat-response",
-            parseFunctionId: "api-parse-text",
-            adviseFunctionId: "api-advise",
-            fallbackParseFunctionId: "api-parse-text-fallback",
-            fallbackAdviseFunctionId: "api-advise-fallback",
-          },
-        );
-
-        return {
-          success: true,
-          response: result.response,
-          messageType: {
-            type: messageType.type,
-            subtype: messageType.subtype,
-            confidence: messageType.confidence,
-            need_logging: messageType.need_logging,
-          },
-          relevance: {
-            relevant: relevance.relevant,
-            score: relevance.score,
-            category: relevance.category,
-          },
-          parsed: result.parsed,
-        };
-      } catch (error) {
-        console.error("Ошибка обработки сообщения:", error);
-        throw new Error(
-          error instanceof Error ? error.message : "Неизвестная ошибка",
-        );
-      }
+      return processMessageInternal(
+        input.text,
+        input.channel,
+        userId,
+        input.chatId,
+        input.messageId,
+        input.metadata,
+      );
     }),
 };

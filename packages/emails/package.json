@@ -10,7 +10,7 @@
     "dist/**"
   ],
   "scripts": {
-    "dev": "bun with-env email dev -p 3002",
+    "develop": "bun with-env email dev -p 3002",
     "build": "tsup",
     "export": "email export",
     "with-env": "dotenv -e ../../.env --"
