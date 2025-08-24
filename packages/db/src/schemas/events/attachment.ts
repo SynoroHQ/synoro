@@ -55,7 +55,6 @@ export const attachments = pgTable(
     meta: jsonb("meta").$type<Record<string, unknown> | null>(),
 
     // Новые поля для миграции
-    migratedToFiles: text("migrated_to_files").default("false"), // флаг миграции
 
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
@@ -74,6 +73,5 @@ export const attachments = pgTable(
 
     // Новые индексы для связи с files
     index("attachment_file_idx").on(table.fileId),
-    index("attachment_migrated_idx").on(table.migratedToFiles),
   ],
 );
