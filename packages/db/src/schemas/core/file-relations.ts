@@ -27,6 +27,9 @@ export const entityType = pgEnum("entity_type", [
   "report",
 ]);
 
+// Export enum value type for strict typing
+export type EntityType = (typeof entityType.enumValues)[number];
+
 /**
  * Таблица связей файлов с сущностями системы
  * Позволяет привязывать файлы к различным объектам

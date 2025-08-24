@@ -5,10 +5,9 @@ import { botProcedure, protectedProcedure, publicProcedure } from "../../trpc";
 
 // Схема для входящего аудио
 const TranscribeInput = z.object({
-  audio: z.instanceof(Buffer),
+  audio: z.string(), // base64-encoded audio data
   filename: z.string(),
   channel: z.enum(["telegram", "web", "mobile"]),
-  userId: z.string(),
   chatId: z.string().optional(),
   messageId: z.string().optional(),
   metadata: z.record(z.string(), z.unknown()).optional(),
@@ -26,13 +25,16 @@ export const transcribeRouter = {
   transcribe: protectedProcedure
     .input(TranscribeInput)
     .output(TranscribeResponse)
-    .mutation(async ({ input }) => {
+    .mutation(async ({ ctx, input }) => {
       try {
-        const text = await transcribe(input.audio, input.filename, {
+        // Decode base64 audio string to Buffer
+        const audioBuffer = Buffer.from(input.audio, "base64");
+
+        const text = await transcribe(audioBuffer, input.filename, {
           functionId: "api-transcribe",
           metadata: {
             channel: input.channel,
-            userId: input.userId,
+            userId: ctx.session.user.id,
             ...(input.chatId && { chatId: input.chatId }),
             ...(input.messageId && { messageId: input.messageId }),
             filename: input.filename,
@@ -57,13 +59,19 @@ export const transcribeRouter = {
   transcribeFromTelegram: botProcedure
     .input(TranscribeInput)
     .output(TranscribeResponse)
-    .mutation(async ({ input }) => {
+    .mutation(async ({ ctx, input }) => {
       try {
-        const text = await transcribe(input.audio, input.filename, {
+        // Decode base64 audio string to Buffer
+        const audioBuffer = Buffer.from(input.audio, "base64");
+
+        // For bot requests, use botUserId from context
+        const userId = ctx.botUserId || "bot_user";
+
+        const text = await transcribe(audioBuffer, input.filename, {
           functionId: "api-transcribe",
           metadata: {
             channel: input.channel,
-            userId: input.userId,
+            userId: userId,
             ...(input.chatId && { chatId: input.chatId }),
             ...(input.messageId && { messageId: input.messageId }),
             filename: input.filename,

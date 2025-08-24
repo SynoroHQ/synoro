@@ -1,6 +1,10 @@
+// Use Drizzle inferred types for better compatibility
+import type { InferInsertModel, InferSelectModel } from "drizzle-orm";
 import { and, eq, sql } from "drizzle-orm";
 
 import type { Database } from "../../types";
+import type { EntityType } from "./file-relations";
+import type { FileStatus, FileType } from "./files";
 import { fileRelations } from "./file-relations";
 import { files } from "./files";
 
@@ -10,7 +14,7 @@ import { files } from "./files";
 
 export interface CreateFileInput {
   name: string;
-  type: string;
+  type: FileType;
   mime?: string;
   size?: number;
   extension?: string;
@@ -25,7 +29,7 @@ export interface CreateFileInput {
 
 export interface LinkFileToEntityInput {
   fileId: string;
-  entityType: string;
+  entityType: EntityType;
   entityId: string;
   role?: string;
   order?: number;
@@ -40,7 +44,7 @@ export async function createFile(db: Database, input: CreateFileInput) {
     .insert(files)
     .values({
       name: input.name,
-      type: input.type as any, // TODO: типизировать
+      type: input.type,
       mime: input.mime,
       size: input.size != null ? BigInt(input.size) : null,
       extension: input.extension,
@@ -71,7 +75,7 @@ export async function linkFileToEntity(
       .insert(fileRelations)
       .values({
         fileId: input.fileId,
-        entityType: input.entityType as any, // TODO: типизировать
+        entityType: input.entityType,
         entityId: input.entityId,
         role: input.role,
         order: input.order,
@@ -96,7 +100,7 @@ export async function linkFileToEntity(
         .where(
           and(
             eq(fileRelations.fileId, input.fileId),
-            eq(fileRelations.entityType, input.entityType as any),
+            eq(fileRelations.entityType, input.entityType),
             eq(fileRelations.entityId, input.entityId),
             eq(fileRelations.role, input.role || ""),
           ),
@@ -116,12 +120,12 @@ export async function linkFileToEntity(
  */
 export async function getEntityFiles(
   db: Database,
-  entityType: string,
+  entityType: EntityType,
   entityId: string,
   role?: string,
 ) {
   let query = and(
-    eq(fileRelations.entityType, entityType as any),
+    eq(fileRelations.entityType, entityType),
     eq(fileRelations.entityId, entityId),
   );
 
@@ -177,12 +181,12 @@ export async function getFileByStorageKey(db: Database, storageKey: string) {
 export async function updateFileStatus(
   db: Database,
   fileId: string,
-  status: string,
+  status: FileStatus,
 ) {
   const [file] = await db
     .update(files)
     .set({
-      status: status as any, // TODO: типизировать
+      status: status,
       updatedAt: new Date(),
     })
     .where(eq(files.id, fileId))
@@ -198,7 +202,7 @@ export async function softDeleteFile(db: Database, fileId: string) {
   const [file] = await db
     .update(files)
     .set({
-      status: "deleted" as any,
+      status: "deleted",
       deletedAt: new Date(),
       updatedAt: new Date(),
     })

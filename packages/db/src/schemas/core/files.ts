@@ -21,8 +21,10 @@ export type HouseholdId = string & { readonly __brand: "HouseholdId" };
 
 // Type helpers for creating branded IDs
 export const createFileId = (id: string): FileId => id as FileId;
-export const createStorageKeyId = (key: string): StorageKeyId => key as StorageKeyId;
-export const createUploadedById = (id: string): UploadedById => id as UploadedById;
+export const createStorageKeyId = (key: string): StorageKeyId =>
+  key as StorageKeyId;
+export const createUploadedById = (id: string): UploadedById =>
+  id as UploadedById;
 export const createHouseholdId = (id: string): HouseholdId => id as HouseholdId;
 
 export const fileType = pgEnum("file_type", [
@@ -50,6 +52,10 @@ export const fileStatus = pgEnum("file_status", [
   "failed",
   "deleted",
 ]);
+
+// Export enum value types for strict typing
+export type FileType = (typeof fileType.enumValues)[number];
+export type FileStatus = (typeof fileStatus.enumValues)[number];
 
 /**
  * Универсальная таблица файлов системы

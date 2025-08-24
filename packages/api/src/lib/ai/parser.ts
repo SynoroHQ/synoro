@@ -71,7 +71,7 @@ async function getSystemPrompt(
       const prompt = await lf.getPrompt(key);
       // Compile with empty vars by default; extend if variables are added later
       const compiled = prompt.compile({});
-      const value = (compiled as string).trim();
+      const value = compiled.trim();
       if (value) {
         cachedPrompts[key] = value;
         return value;
@@ -87,13 +87,7 @@ async function getSystemPrompt(
   return local;
 }
 
-// at the top of packages/api/src/lib/ai/parser.ts
-import type { ParsedTask, Telemetry } from "./types";
-import { extractFirstJsonObject } from "./classifier";
-
-// …rest of parser.ts…
-
-// (The entire local definition of extractFirstJsonObject has been removed 
+// (The entire local definition of extractFirstJsonObject has been removed
 //  in favor of the imported one.)
 /**
  * Парсит текст и извлекает структурированную задачу

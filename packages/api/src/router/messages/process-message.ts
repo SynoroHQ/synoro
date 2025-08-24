@@ -8,7 +8,6 @@ import { botProcedure, protectedProcedure, publicProcedure } from "../../trpc";
 const ProcessMessageInput = z.object({
   text: z.string().min(1).max(5000),
   channel: z.enum(["telegram", "web", "mobile"]),
-  userId: z.string(),
   chatId: z.string().optional(),
   messageId: z.string().optional(),
   metadata: z.record(z.string(), z.unknown()).optional(),
