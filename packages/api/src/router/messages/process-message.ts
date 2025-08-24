@@ -1,7 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import type { MessageTypeResult } from "../../lib/ai/types";
 import { classifyMessage } from "../../lib/ai";
 import { processClassifiedMessage } from "../../lib/message-processor";
 import { botProcedure, protectedProcedure } from "../../trpc";
@@ -90,9 +89,6 @@ async function processMessageInternal(
 
     const classificationTime = Date.now() - classificationStartTime;
     console.log(`⏱️ Classification took ${classificationTime}ms`);
-
-    // Добавляем метрики в метаданные для анализа
-    (commonMetadata as any).classificationTime = classificationTime;
 
     // Обрабатываем сообщение
     const result = await processClassifiedMessage(

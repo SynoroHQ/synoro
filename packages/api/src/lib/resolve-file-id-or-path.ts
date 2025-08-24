@@ -8,7 +8,7 @@ import type { TRPCContext } from "../trpc";
 /**
  * Разрешает ID файла или путь к файлу, возвращая ID файла.
  * Если файл не найден - создает новую запись в таблице files.
- * 
+ *
  * Реализует upsert-safe логику для предотвращения race conditions:
  * - Сначала пытается найти существующий файл
  * - При создании нового файла обрабатывает ошибки уникальности на storage_key
@@ -95,17 +95,34 @@ export async function resolveFileIdOrPath({
       }
     }
 
-    // 3) Если файл не найден - создаём новую запись
+    // 3) Если файл все еще не найден, создаем новый
     if (!file) {
-      const fileName = meta?.name ?? fileIdOrPath.split("/").pop() ?? "file";
-      const fileExtension =
-        meta?.extension ?? fileName.split(".").pop() ?? null;
+      // Корректно извлекаем имя/расширение/ключ из URL или пути
+      const tryUrl = (() => {
+        try {
+          return new URL(fileIdOrPath);
+        } catch {
+          return null;
+        }
+      })();
 
-      // Определяем storageKey и storageUrl
-      const isUrl = fileIdOrPath.startsWith("http");
+      const isUrl = !!tryUrl && ["http:", "https:"].includes(tryUrl.protocol);
+      const lastPathSegment =
+        (isUrl ? tryUrl.pathname : fileIdOrPath)
+          .split("/")
+          .filter(Boolean)
+          .pop() ?? "file";
+
+      const fileName = meta?.name ?? decodeURIComponent(lastPathSegment);
+      const fileExtension =
+        meta?.extension ??
+        (fileName.includes(".")
+          ? fileName.slice(fileName.lastIndexOf(".") + 1).toLowerCase()
+          : null);
+
       const storageKey = isUrl
         ? (fileIdOrPath.split("/").pop() ?? fileIdOrPath)
-        : fileIdOrPath;
+        : lastPathSegment;
       const storageUrl = isUrl ? fileIdOrPath : null;
 
       // Дополнительная проверка: возможно, файл был создан между нашими запросами
