@@ -44,12 +44,28 @@ export const fileRelations = pgTable(
     entityType: entityType("entity_type").notNull(),
     entityId: text("entity_id").notNull(),
 
-    // Контекст связи
-    role: text("role"), // например: "main", "thumbnail", "attachment", "preview"
-    order: text("order"), // порядок файлов для сущности
+// В начале файла: расширяем импорт для integer и jsonb
+import {
+  index,
+  integer,
+  jsonb,
+  pgEnum,
+  pgTable,
+  text,
+  timestamp,
+  unique,
+} from "drizzle-orm/pg-core";
 
-    // Метаданные связи
-    meta: text("meta"), // дополнительные данные о связи
+// … остальной код …
+
+// Контекст связи
+role: text("role"), // например: "main", "thumbnail", "attachment", "preview"
+order: integer("order"), // порядок файлов для сущности
+
+// Метаданные связи
+meta: jsonb("meta").$type<Record<string, unknown> | null>(), // дополнительные данные о связи
+
+// … остальной код …
 
     // Временные метки
     createdAt: timestamp("created_at", { withTimezone: true })
