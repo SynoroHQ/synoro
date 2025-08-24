@@ -1,6 +1,10 @@
 import { pathToFileURL } from "url";
+import * as trpcExpress from "@trpc/server/adapters/express";
+import express from "express";
 
 import { startTracing, stopTracing } from "./otel";
+import { appRouter } from "./root";
+import { createExpressContext } from "./trpc";
 
 async function main() {
   try {
@@ -9,15 +13,41 @@ async function main() {
     await startTracing("synoro-api");
     console.log("OpenTelemetry tracing started successfully");
 
-    // TODO: Add your HTTP server initialization here
-    // For example:
-    // const app = express();
-    // const server = app.listen(process.env.PORT || 3000);
+    // Initialize Express app
+    const app = express();
+
+    // Add basic middleware
+    app.use(express.json());
+    app.use(express.urlencoded({ extended: true }));
+
+    // Health check endpoint
+    app.get("/health", (req, res) => {
+      res.json({ status: "ok", timestamp: new Date().toISOString() });
+    });
+
+    // Add tRPC middleware
+    app.use(
+      "/api/trpc",
+      trpcExpress.createExpressMiddleware({
+        router: appRouter,
+        createContext: createExpressContext,
+      }),
+    );
+
+    // Start the server
+    const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 4000;
+    const server = app.listen(port, () => {
+      console.log(`🚀 Server running on http://localhost:${port}`);
+      console.log(`📡 tRPC API available at http://localhost:${port}/api/trpc`);
+    });
 
     console.log("Server started successfully");
 
     // Graceful shutdown handlers
-    type ShutdownSignal = NodeJS.Signals | "uncaughtException" | "unhandledRejection";
+    type ShutdownSignal =
+      | NodeJS.Signals
+      | "uncaughtException"
+      | "unhandledRejection";
     let isShuttingDown = false;
     const gracefulShutdown = async (signal: ShutdownSignal) => {
       if (isShuttingDown) {
@@ -33,9 +63,16 @@ async function main() {
         await stopTracing();
         console.log("OpenTelemetry tracing stopped successfully");
 
-        // TODO: Add your server cleanup here
-        // For example:
-        // if (server) await new Promise<void>((resolve) => server!.close(() => resolve()));
+        // Close Express server
+        if (server) {
+          console.log("Closing Express server...");
+          await new Promise<void>((resolve) => {
+            server.close(() => {
+              console.log("Express server closed");
+              resolve();
+            });
+          });
+        }
 
         console.log("Graceful shutdown completed");
         process.exit(0);

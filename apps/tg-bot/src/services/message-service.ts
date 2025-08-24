@@ -51,7 +51,6 @@ export async function processTextMessage(
         {
           text,
           channel: "telegram",
-          userId: context.userId,
           chatId: context.chatId,
           messageId: context.messageId,
           metadata: {
@@ -102,10 +101,9 @@ export async function transcribeAudio(
 
     const result =
       await apiClient.messages.transcribe.transcribeFromTelegram.mutate({
-        audio: buffer,
+        audio: buffer.toString("base64"),
         filename,
         channel: "telegram",
-        userId: context.userId,
         chatId: context.chatId,
         messageId: context.messageId,
         metadata: {

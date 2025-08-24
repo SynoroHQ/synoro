@@ -6,7 +6,7 @@ export const env = createEnv({
     NODE_ENV: z.enum(["development", "production", "test"]).optional(),
     TELEGRAM_BOT_TOKEN: z.string().min(10, "TELEGRAM_BOT_TOKEN is required"),
     // API configuration
-    API_BASE_URL: z.string().url().default("http://localhost:3000"),
+    API_BASE_URL: z.string().url().default("http://localhost:4000"),
     API_TOKEN: z.string().optional(),
     // Security-related options for the Telegram bot
     TG_ALLOWED_CHAT_IDS: z.string().optional(), // comma-separated chat IDs
