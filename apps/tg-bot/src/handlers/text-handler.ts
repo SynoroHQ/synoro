@@ -50,8 +50,14 @@ export async function handleText(ctx: Context): Promise<void> {
     }
 
     // Отправляем ответ пользователю
-    await ctx.reply(result.response);
-
+    {
+      const MAX_TG_MESSAGE = 4096;
+      const reply =
+        result.response.length > MAX_TG_MESSAGE
+          ? result.response.slice(0, MAX_TG_MESSAGE - 1) + "…"
+          : result.response;
+      await ctx.reply(reply);
+    }
     // Логируем результат обработки
     console.log(
       `✅ Сообщение обработано: тип=${result.messageType?.type}, релевантность=${result.relevance?.relevant}`,
