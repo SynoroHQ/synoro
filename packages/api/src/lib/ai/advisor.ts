@@ -71,7 +71,7 @@ async function getSystemPrompt(
       const prompt = await lf.getPrompt(key);
       // Compile with empty vars by default; extend if variables are added later
       const compiled = prompt.compile({});
-      const value = (compiled as string).trim();
+      const value = compiled.trim();
       if (value) {
         cachedPrompts[key] = value;
         return value;
@@ -92,17 +92,42 @@ async function getAssistantSystemPrompt(): Promise<string> {
 }
 
 /**
- * Предоставляет совет по тексту сообщения
+ * Предоставляет совет по тексту сообщения с учетом контекста беседы
  */
 export async function advise(
   input: string,
   telemetry?: Telemetry,
 ): Promise<string> {
   const systemPrompt = await getAssistantSystemPrompt();
+
+  // Извлекаем контекст из метаданных
+  const contextString = telemetry?.metadata?.context as string;
+  const context: {
+    id: string;
+    role: string;
+    content: { text: string };
+    createdAt: Date;
+  }[] = contextString ? JSON.parse(contextString) : [];
+
+  // Формируем историю беседы для промпта
+  let conversationHistory = "";
+  if (context.length > 0) {
+    conversationHistory = "Контекст беседы:\n";
+    context.forEach((msg, index) => {
+      const role = msg.role === "user" ? "Пользователь" : "Ассистент";
+      conversationHistory += `${index + 1}. ${role}: ${msg.content.text}\n`;
+    });
+    conversationHistory += "\n";
+  }
+
+  const contextualPrompt = `${conversationHistory}Текущее событие: "${input}"
+
+Дай краткий полезный совет, учитывая контекст предыдущих сообщений и это событие.`;
+
   const { text } = await generateText({
     model: getActiveProvider()(getAdviceModel()),
     system: systemPrompt,
-    prompt: input,
+    prompt: contextualPrompt,
     temperature: 0.4,
     experimental_telemetry: {
       isEnabled: true,
@@ -114,7 +139,7 @@ export async function advise(
 }
 
 /**
- * Отвечает на вопрос пользователя
+ * Отвечает на вопрос пользователя с учетом контекста беседы
  */
 export async function answerQuestion(
   question: string,
@@ -123,21 +148,46 @@ export async function answerQuestion(
 ): Promise<string> {
   const systemPrompt = await getAssistantSystemPrompt();
 
+  // Извлекаем контекст из метаданных
+  const contextString = telemetry?.metadata?.context as string;
+  const context: {
+    id: string;
+    role: string;
+    content: { text: string };
+    createdAt: Date;
+  }[] = contextString ? JSON.parse(contextString) : [];
+
+  // Формируем историю беседы для промпта
+  let conversationHistory = "";
+  if (context.length > 0) {
+    conversationHistory = "\n\nИстория беседы:\n";
+    context.forEach((msg, index) => {
+      const role = msg.role === "user" ? "Пользователь" : "Ассистент";
+      conversationHistory += `${index + 1}. ${role}: ${msg.content.text}\n`;
+    });
+    conversationHistory += "\n";
+  }
+
   // Создаем контекстный промпт в зависимости от типа вопроса
   let contextPrompt = question;
 
   if (messageType.subtype === "about_bot") {
-    contextPrompt = `Пользователь спрашивает о тебе как о боте. Вопрос: "${question}"
+    contextPrompt = `${conversationHistory}Пользователь спрашивает о тебе как о боте. Вопрос: "${question}"
     
-Ответь дружелюбно, расскажи о своих возможностях согласно системному промпту.`;
+Ответь дружелюбно, расскажи о своих возможностях согласно системному промпту. Учитывай контекст предыдущих сообщений.`;
   } else if (messageType.subtype === "data_query") {
-    contextPrompt = `Пользователь спрашивает о своих данных/статистике. Вопрос: "${question}"
+    contextPrompt = `${conversationHistory}Пользователь спрашивает о своих данных/статистике. Вопрос: "${question}"
     
-Объясни, что для получения статистики нужно сначала накопить данные, записывая события. Предложи начать с записи покупок, задач или других событий.`;
+Объясни, что для получения статистики нужно сначала накопить данные, записывая события. Предложи начать с записи покупок, задач или других событий. Учитывай контекст предыдущих сообщений.`;
   } else if (messageType.subtype === "general") {
-    contextPrompt = `Пользователь задает общий вопрос. Вопрос: "${question}"
+    contextPrompt = `${conversationHistory}Пользователь задает общий вопрос. Вопрос: "${question}"
     
-Ответь полезно и по возможности покажи, как Synoro может помочь в этой ситуации.`;
+Ответь полезно и по возможности покажи, как Synoro может помочь в этой ситуации. Учитывай контекст предыдущих сообщений.`;
+  } else {
+    // Для chat и других типов просто добавляем контекст
+    contextPrompt = `${conversationHistory}Текущее сообщение пользователя: "${question}"
+    
+Ответь дружелюбно и полезно, учитывая контекст предыдущих сообщений. Поддерживай естественный диалог.`;
   }
 
   const { text } = await generateText({

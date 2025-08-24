@@ -2,6 +2,11 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { classifyMessage } from "../../lib/ai";
+import {
+  getConversationContext,
+  saveMessageToConversation,
+  trimContextByTokens,
+} from "../../lib/context-manager";
 import { processClassifiedMessage } from "../../lib/message-processor";
 import { botProcedure, protectedProcedure } from "../../trpc";
 
@@ -48,6 +53,7 @@ async function processMessageInternal(
   text: string,
   channel: "telegram" | "web" | "mobile",
   userId: string,
+  ctx: any, // TRPCContext
   chatId?: string,
   messageId?: string,
   metadata?: Record<string, unknown>,
@@ -68,9 +74,45 @@ async function processMessageInternal(
   }
 
   try {
+    // Получаем контекст беседы
+    const conversationContext = await getConversationContext(
+      ctx,
+      userId,
+      channel,
+      chatId,
+      {
+        maxMessages: 20, // Берем больше сообщений
+        includeSystemMessages: false,
+        maxAgeHours: 48, // Увеличиваем время
+      },
+    );
+
+    // Умная обрезка контекста:
+    // - До 2000 токенов для вопросов и чата (больше контекста)
+    // - До 1000 токенов для событий (меньше контекста нужен)
+    const maxTokens = text.includes("?") || text.length < 50 ? 2000 : 1000;
+    const trimmedContext = trimContextByTokens(
+      conversationContext.messages,
+      maxTokens,
+    );
+
+    console.log(
+      `📚 Контекст беседы: ${trimmedContext.length} сообщений (ID: ${conversationContext.conversationId})`,
+    );
+
+    // Сохраняем пользовательское сообщение в беседу
+    await saveMessageToConversation(
+      ctx,
+      conversationContext.conversationId,
+      "user",
+      { text },
+    );
+
     const commonMetadata = {
       channel,
       userId,
+      conversationId: conversationContext.conversationId,
+      context: JSON.stringify(trimmedContext),
       ...(chatId && { chatId }),
       ...(messageId && { messageId }),
       ...metadata,
@@ -79,7 +121,7 @@ async function processMessageInternal(
     // Используем оптимизированную комбинированную классификацию
     const classificationStartTime = Date.now();
 
-    console.log("🚀 Using unified message classification");
+    console.log("🚀 Using unified message classification with context");
     const classification = await classifyMessage(text, {
       functionId: "api-message-classifier",
       metadata: commonMetadata,
@@ -90,7 +132,7 @@ async function processMessageInternal(
     const classificationTime = Date.now() - classificationStartTime;
     console.log(`⏱️ Classification took ${classificationTime}ms`);
 
-    // Обрабатываем сообщение
+    // Обрабатываем сообщение с контекстом
     const result = await processClassifiedMessage(
       text,
       messageType,
@@ -99,7 +141,9 @@ async function processMessageInternal(
         userId,
         chatId,
         messageId,
-        metadata,
+        metadata: commonMetadata,
+        conversationId: conversationContext.conversationId,
+        context: trimmedContext,
       },
       {
         questionFunctionId: "api-answer-question",
@@ -109,6 +153,15 @@ async function processMessageInternal(
         fallbackParseFunctionId: "api-parse-text-fallback",
         fallbackAdviseFunctionId: "api-advise-fallback",
       },
+    );
+
+    // Сохраняем ответ ассистента в беседу
+    await saveMessageToConversation(
+      ctx,
+      conversationContext.conversationId,
+      "assistant",
+      { text: result.response },
+      "gpt-4", // или получать из конфигурации
     );
 
     return {
@@ -161,6 +214,7 @@ export const processMessageRouter = {
         input.text,
         input.channel,
         userId,
+        ctx,
         input.chatId,
         input.messageId,
         input.metadata,
@@ -185,6 +239,7 @@ export const processMessageRouter = {
         input.text,
         input.channel,
         userId,
+        ctx,
         input.chatId,
         input.messageId,
         input.metadata,
