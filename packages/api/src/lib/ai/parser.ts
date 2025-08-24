@@ -11,6 +11,7 @@ import {
 } from "@synoro/prompts";
 
 import type { ParsedTask, Telemetry } from "./types";
+import { extractFirstJsonObject } from "./classifier";
 
 // Initialize AI providers
 const oai = openai; // use default provider instance; it reads OPENAI_API_KEY from env

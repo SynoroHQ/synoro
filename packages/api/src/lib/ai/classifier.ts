@@ -101,7 +101,7 @@ const messageTypeSchema = z.object({
   need_logging: z.boolean(),
 });
 
-function extractFirstJsonObject(input: string): string | null {
+export function extractFirstJsonObject(input: string): string | null {
   let depth = 0;
   let startIndex = -1;
   let inString = false;
