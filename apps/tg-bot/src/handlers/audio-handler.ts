@@ -54,7 +54,11 @@ export async function handleAudio(ctx: Context): Promise<void> {
       messageContext,
     );
 
-    if (!transcriptionResult.success || !transcriptionResult.text.trim()) {
+    if (!transcriptionResult.success) {
+      await ctx.reply("Не удалось распознать аудио. Попробуйте ещё раз позже.");
+      return;
+    }
+    if (!transcriptionResult.text.trim()) {
       await ctx.reply("Голос распознан, но текста не найдено.");
       return;
     }
