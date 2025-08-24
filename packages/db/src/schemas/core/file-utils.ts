@@ -28,8 +28,8 @@ export interface LinkFileToEntityInput {
   entityType: string;
   entityId: string;
   role?: string;
-  order?: string;
-  meta?: string;
+  order?: number;
+  meta?: Record<string, unknown>;
 }
 
 /**
@@ -42,7 +42,7 @@ export async function createFile(db: Database, input: CreateFileInput) {
       name: input.name,
       type: input.type as any, // TODO: типизировать
       mime: input.mime,
-      size: input.size ? BigInt(input.size) : null,
+      size: input.size != null ? BigInt(input.size) : null,
       extension: input.extension,
       storageKey: input.storageKey,
       storageUrl: input.storageUrl,
@@ -59,24 +59,56 @@ export async function createFile(db: Database, input: CreateFileInput) {
 
 /**
  * Связывает файл с сущностью
+ * Идемпотентная функция: при повторном вызове обновляет существующую связь
  */
 export async function linkFileToEntity(
   db: Database,
   input: LinkFileToEntityInput,
 ) {
-  const [relation] = await db
-    .insert(fileRelations)
-    .values({
-      fileId: input.fileId,
-      entityType: input.entityType as any, // TODO: типизировать
-      entityId: input.entityId,
-      role: input.role,
-      order: input.order,
-      meta: input.meta,
-    })
-    .returning();
+  try {
+    // Попытка вставить новую связь
+    const [relation] = await db
+      .insert(fileRelations)
+      .values({
+        fileId: input.fileId,
+        entityType: input.entityType as any, // TODO: типизировать
+        entityId: input.entityId,
+        role: input.role,
+        order: input.order,
+        meta: input.meta,
+      })
+      .returning();
 
-  return relation;
+    return relation;
+  } catch (error: any) {
+    // Если произошла ошибка уникальности, обновляем существующую связь
+    if (
+      error.code === "23505" &&
+      error.constraint === "file_relation_file_entity_role_uidx"
+    ) {
+      const [updatedRelation] = await db
+        .update(fileRelations)
+        .set({
+          order: input.order,
+          meta: input.meta,
+          updatedAt: new Date(),
+        })
+        .where(
+          and(
+            eq(fileRelations.fileId, input.fileId),
+            eq(fileRelations.entityType, input.entityType as any),
+            eq(fileRelations.entityId, input.entityId),
+            eq(fileRelations.role, input.role || ""),
+          ),
+        )
+        .returning();
+
+      return updatedRelation;
+    }
+
+    // Если это не ошибка уникальности, пробрасываем ошибку дальше
+    throw error;
+  }
 }
 
 /**

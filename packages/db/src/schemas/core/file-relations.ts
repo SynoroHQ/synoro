@@ -1,6 +1,8 @@
 import { createId } from "@paralleldrive/cuid2";
 import {
   index,
+  integer,
+  jsonb,
   pgEnum,
   pgTable,
   text,
@@ -44,28 +46,12 @@ export const fileRelations = pgTable(
     entityType: entityType("entity_type").notNull(),
     entityId: text("entity_id").notNull(),
 
-// В начале файла: расширяем импорт для integer и jsonb
-import {
-  index,
-  integer,
-  jsonb,
-  pgEnum,
-  pgTable,
-  text,
-  timestamp,
-  unique,
-} from "drizzle-orm/pg-core";
+    // Контекст связи
+    role: text("role"), // например: "main", "thumbnail", "attachment", "preview"
+    order: integer("order"), // порядок файлов для сущности
 
-// … остальной код …
-
-// Контекст связи
-role: text("role"), // например: "main", "thumbnail", "attachment", "preview"
-order: integer("order"), // порядок файлов для сущности
-
-// Метаданные связи
-meta: jsonb("meta").$type<Record<string, unknown> | null>(), // дополнительные данные о связи
-
-// … остальной код …
+    // Метаданные связи
+    meta: jsonb("meta").$type<Record<string, unknown> | null>(), // дополнительные данные о связи
 
     // Временные метки
     createdAt: timestamp("created_at", { withTimezone: true })

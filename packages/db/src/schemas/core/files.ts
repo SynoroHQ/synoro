@@ -13,6 +13,18 @@ import {
 import { user } from "../auth/schema";
 import { households } from "./household";
 
+// Branded types for better type safety
+export type FileId = string & { readonly __brand: "FileId" };
+export type StorageKeyId = string & { readonly __brand: "StorageKeyId" };
+export type UploadedById = string & { readonly __brand: "UploadedById" };
+export type HouseholdId = string & { readonly __brand: "HouseholdId" };
+
+// Type helpers for creating branded IDs
+export const createFileId = (id: string): FileId => id as FileId;
+export const createStorageKeyId = (key: string): StorageKeyId => key as StorageKeyId;
+export const createUploadedById = (id: string): UploadedById => id as UploadedById;
+export const createHouseholdId = (id: string): HouseholdId => id as HouseholdId;
+
 export const fileType = pgEnum("file_type", [
   // Общие типы
   "image",
