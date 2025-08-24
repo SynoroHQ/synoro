@@ -177,7 +177,13 @@ export const processMessageRouter = {
     .output(ProcessMessageResponse)
     .mutation(async ({ ctx, input }) => {
       // Для bot запросов используем botUserId из контекста
-      const userId = ctx.botUserId || "bot_user";
+      const userId = ctx.botUserId;
+      if (!userId) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "ID пользователя бота не указан в контексте",
+        });
+      }
 
       return processMessageInternal(
         input.text,

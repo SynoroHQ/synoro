@@ -8,6 +8,11 @@ import type { TRPCContext } from "../trpc";
 /**
  * Разрешает ID файла или путь к файлу, возвращая ID файла.
  * Если файл не найден - создает новую запись в таблице files.
+ * 
+ * Реализует upsert-safe логику для предотвращения race conditions:
+ * - Сначала пытается найти существующий файл
+ * - При создании нового файла обрабатывает ошибки уникальности на storage_key
+ * - Возвращает существующий или новый файл без ошибок unique_violation
  *
  * @param ctx - Контекст TRPC с базой данных
  * @param fileIdOrPath - ID файла или путь/URL к файлу
@@ -103,31 +108,71 @@ export async function resolveFileIdOrPath({
         : fileIdOrPath;
       const storageUrl = isUrl ? fileIdOrPath : null;
 
-      const newFileData = {
-        name: fileName,
-        type: fileType,
-        mime: meta?.mimeType ?? null,
-        size: meta?.size !== undefined ? BigInt(meta.size) : null,
-        extension: fileExtension,
-        storageKey,
-        storageUrl,
-        uploadedBy,
-        // Добавляем метаданные для изображений
-        meta:
-          meta && (meta.width || meta.height)
-            ? {
-                width: meta.width,
-                height: meta.height,
-              }
-            : null,
-      };
+      // Дополнительная проверка: возможно, файл был создан между нашими запросами
+      // Проверяем еще раз по storageKey перед попыткой создания
+      const existingFileByStorageKey = await ctx.db.query.files.findFirst({
+        where: (fields, { eq }) => eq(fields.storageKey, storageKey),
+      });
 
-      const insertResult = await ctx.db
-        .insert(files)
-        .values(newFileData)
-        .returning();
+      if (existingFileByStorageKey) {
+        file = existingFileByStorageKey;
+      } else {
+        const newFileData = {
+          name: fileName,
+          type: fileType,
+          mime: meta?.mimeType ?? null,
+          size: meta?.size !== undefined ? BigInt(meta.size) : null,
+          extension: fileExtension,
+          storageKey,
+          storageUrl,
+          uploadedBy,
+          // Добавляем метаданные для изображений
+          meta:
+            meta && (meta.width || meta.height)
+              ? {
+                  width: meta.width,
+                  height: meta.height,
+                }
+              : null,
+        };
 
-      file = insertResult[0];
+        try {
+          // Пытаемся вставить новый файл
+          const insertResult = await ctx.db
+            .insert(files)
+            .values(newFileData)
+            .returning();
+
+          file = insertResult[0];
+        } catch (error: any) {
+          // Если произошла ошибка уникальности на storage_key, получаем существующий файл
+          if (
+            error.code === "23505" &&
+            error.constraint === "file_storage_key_uidx"
+          ) {
+            // Получаем существующий файл по storage_key
+            const existingFile = await ctx.db.query.files.findFirst({
+              where: (fields, { eq }) => eq(fields.storageKey, storageKey),
+            });
+
+            if (existingFile) {
+              file = existingFile;
+            } else {
+              // Это не должно произойти, но на всякий случай логируем
+              console.warn(
+                `Файл с storage_key "${storageKey}" не найден после ошибки уникальности`,
+              );
+              throw new TRPCError({
+                code: "INTERNAL_SERVER_ERROR",
+                message: "Ошибка при получении существующего файла",
+              });
+            }
+          } else {
+            // Если это не ошибка уникальности, пробрасываем ошибку дальше
+            throw error;
+          }
+        }
+      }
     }
 
     if (!file) {
