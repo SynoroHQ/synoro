@@ -1,56 +1,12 @@
 import type { Context } from "grammy";
-import type { Message, User } from "grammy/types";
 import { Bot } from "grammy";
 
 import { env } from "./env";
-import { handleAudio } from "./handlers/audio";
-import { handleOther } from "./handlers/other";
-import { handleText } from "./handlers/text";
+import { handleAudio } from "./handlers/audio-handler";
+import { handleOther } from "./handlers/other-handler";
+import { handleText } from "./handlers/text-handler";
 import { buildRateLimitKey, checkRateLimit } from "./lib/rate-limit";
-
-/**
- * Определяет тип сообщения Telegram на основе его содержимого
- * @param message - объект сообщения Telegram
- * @returns строка, представляющая тип сообщения
- */
-function getMessageType(message?: Message): string {
-  if (!message) {
-    return "unknown";
-  }
-
-  // Карта свойств сообщения к их типам в порядке приоритета
-  const messageTypeMap: Array<[keyof Message, string]> = [
-    ["text", "text"],
-    ["voice", "voice"],
-    ["audio", "audio"],
-    ["photo", "photo"],
-    ["video", "video"],
-    ["document", "document"],
-    ["sticker", "sticker"],
-    ["contact", "contact"],
-    ["location", "location"],
-  ];
-
-  // Итерируем по карте в порядке приоритета
-  for (const [property, type] of messageTypeMap) {
-    if (message[property]) {
-      return type;
-    }
-  }
-
-  return "other";
-}
-
-/**
- * Получает идентификатор пользователя с fallback логикой
- * @param from - объект пользователя Telegram
- * @returns строка, представляющая идентификатор пользователя
- */
-function getUserIdentifier(from?: User): string {
-  return (
-    from?.username || from?.first_name || from?.id?.toString() || "unknown"
-  );
-}
+import { getMessageType, getUserIdentifier } from "./utils/telegram-utils";
 
 export function createBot(): Bot<Context> {
   const bot = new Bot<Context>(env.TELEGRAM_BOT_TOKEN);
@@ -122,14 +78,18 @@ export function createBot(): Bot<Context> {
     console.log(`👋 Команда /start от пользователя: ${user}`);
 
     await ctx.reply(
-      "Привет! Я цифровой мозг для дома: логирую события, понимаю текст и голос, помогаю советами.\n\n" +
-        "Отправь текст или голосовое сообщение — я всё пойму.",
+      "Привет! Я умный помощник для дома.\n\n" +
+        "💬 Отправь текстовое сообщение — я его проанализирую\n" +
+        "🎤 Отправь голосовое — транскрибирую и обработаю\n" +
+        "📋 Помогу с задачами, вопросами и советами\n\n" +
+        "Просто начни общаться!",
     );
   });
 
+  // Обработчики сообщений
   bot.on("message:text", handleText);
   bot.on(["message:voice", "message:audio"], handleAudio);
-  // Fallback for any other message types
+  // Fallback для всех остальных типов сообщений
   bot.on("message", handleOther);
 
   bot.catch((err: unknown) => {

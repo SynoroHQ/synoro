@@ -1,9 +1,11 @@
 import type { TRPCRouterRecord } from "@trpc/server";
-import { z } from "zod";
-import { protectedProcedure } from "../../trpc";
-import { conversation } from "@synoro/db";
 import { desc, eq } from "drizzle-orm";
+import { z } from "zod";
+
+import { conversations } from "@synoro/db";
 import { ListConversationsInput } from "@synoro/validators";
+
+import { protectedProcedure } from "../../trpc";
 
 export const listConversationsRouter: TRPCRouterRecord = {
   listConversations: protectedProcedure
@@ -26,15 +28,15 @@ export const listConversationsRouter: TRPCRouterRecord = {
       const userId = ctx.session.user.id;
       const rows = await db
         .select({
-          id: conversation.id,
-          title: conversation.title,
-          channel: conversation.channel,
-          updatedAt: conversation.updatedAt,
-          lastMessageAt: conversation.lastMessageAt,
+          id: conversations.id,
+          title: conversations.title,
+          channel: conversations.channel,
+          updatedAt: conversations.updatedAt,
+          lastMessageAt: conversations.lastMessageAt,
         })
-        .from(conversation)
-        .where(eq(conversation.ownerUserId, userId))
-        .orderBy(desc(conversation.updatedAt))
+        .from(conversations)
+        .where(eq(conversations.ownerUserId, userId))
+        .orderBy(desc(conversations.updatedAt))
         .limit(50);
 
       return { items: rows };

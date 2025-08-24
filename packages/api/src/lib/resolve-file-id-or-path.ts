@@ -32,9 +32,39 @@ export async function resolveFileIdOrPath({
   ) {
     return fileIdOrPath;
   }
-  let file = await ctx.db.query.files.findFirst({
-    where: (fields, { eq }) => eq(fields.path, fileIdOrPath),
-  });
+  // 1) Пытаемся найти файл по новой системе
+  let file =
+    (await ctx.db.query.files.findFirst({
+      where: (fields, { or, eq }) =>
+        or(eq(fields.storageKey, fileIdOrPath), eq(fields.storageUrl, fileIdOrPath)),
+    })) ??
+    // 2) Пытаемся найти legacy-вложение по storageUrl и вернуть связанный fileId
+    (await (async () => {
+      const att = await ctx.db.query.attachments.findFirst({
+        where: (fields, { eq }) => eq(fields.storageUrl, fileIdOrPath),
+      });
+      if (att?.fileId) {
+        return ctx.db.query.files.findFirst({
+          where: (f, { eq }) => eq(f.id, att.fileId!),
+        });
+      }
+      return null;
+    })());
+
+  // 3) Если не нашли — создаём новую запись в files
+  file ??= await ctx.db
+    .insert(files)
+    .values({
+      name: meta?.name ?? fileIdOrPath.split("/").pop() ?? "file",
+      type: fileType as any, // см. ниже рекомендацию по строгой типизации
+      mime: meta?.mimeType ?? null,
+      size: meta?.size !== undefined ? BigInt(meta.size) : null,
+      storageKey: fileIdOrPath, // если это URL — допустимо продублировать в storageUrl
+      storageUrl: fileIdOrPath.startsWith("http") ? fileIdOrPath : null,
+      uploadedBy,
+    })
+    .returning()
+    .then((r: (typeof files.$inferSelect)[]) => r[0]);
   file ??= await ctx.db
     .insert(files)
     .values({

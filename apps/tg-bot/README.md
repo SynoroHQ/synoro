@@ -1,87 +1,112 @@
 # Telegram Bot
 
-A Telegram bot that supports both OpenAI and Moonshot AI providers for AI-powered conversations and task management.
+Умный Telegram бот с интеграцией API для обработки сообщений с использованием AI.
 
-## Features
+## 🚀 Возможности
 
-- **Multi-AI Provider Support**: Switch between OpenAI and Moonshot AI
-- **Voice Transcription**: Convert voice messages to text
-- **Task Parsing**: Extract structured tasks from natural language
-- **Relevance Classification**: Determine if messages are relevant for logging
-- **Telemetry**: Built-in observability with Langfuse support
+- **🤖 AI-обработка сообщений**: Классификация, анализ релевантности и интеллектуальные ответы
+- **🎤 Транскрипция аудио**: Конвертация голосовых сообщений в текст через OpenAI Whisper
+- **📋 Парсинг задач**: Извлечение структурированных задач из естественного языка
+- **💬 Умные ответы**: Контекстуальные ответы на вопросы и общение
+- **🔒 Rate Limiting**: Защита от спама и перегрузки
+- **📝 Allowlist**: Ограничение доступа по ID чатов
+- **🗂️ Логирование событий**: Сохранение релевантных сообщений в базу данных
 
-## Quick Start
+## Быстрый старт
 
-1. **Install dependencies**:
+1. **Установка зависимостей**:
 
    ```bash
    bun install
    ```
 
-2. **Set up environment variables**:
+2. **Настройка переменных окружения**:
 
    ```bash
-   # Required
+   # Обязательно
    TELEGRAM_BOT_TOKEN=your_bot_token
-   AI_PROVIDER=openai  # or "moonshot"
 
-   # OpenAI (if using OpenAI)
-   OPENAI_API_KEY=your_openai_key
+   # API конфигурация
+   API_BASE_URL=http://localhost:3000       # URL API сервера
+   API_TOKEN=your_api_token                 # Токен для доступа к API (опционально)
 
-   # Moonshot AI (if using Moonshot)
-   MOONSHOT_API_KEY=your_moonshot_key
+   # Опционально - настройки безопасности
+   TG_ALLOWED_CHAT_IDS=123456789,987654321  # ID разрешенных чатов через запятую
+   TG_RATE_LIMIT_WINDOW_MS=60000            # Окно rate limiting в миллисекундах
+   TG_RATE_LIMIT_LIMIT=30                   # Лимит сообщений в окне
+   TG_MESSAGE_MAX_LENGTH=3000               # Максимальная длина сообщения
+
+   # Опционально - настройки аудио
+   TG_AUDIO_MAX_BYTES=8388608               # Максимальный размер аудио (8MB)
+   TG_AUDIO_MAX_DURATION_SEC=120            # Максимальная длительность аудио (2 мин)
+   TG_FETCH_TIMEOUT_MS=25000                # Таймаут скачивания файлов (25 сек)
    ```
 
-3. **Run the bot**:
+3. **Запуск бота**:
    ```bash
-   bun run dev    # Development mode
-   bun run start  # Production mode
+   bun run dev    # Режим разработки
+   bun run start  # Продакшн режим
    ```
 
-## AI Providers
+## Разработка
 
-### OpenAI
+- **Проверка типов**: `bun run typecheck`
+- **Линтинг**: `bun run lint`
+- **Сборка**: `bun run build`
 
-- **Default Provider**: Uses OpenAI's API
-- **Models**: GPT-4o-mini, Whisper-1
-- **Environment Variables**: `OPENAI_API_KEY`, `OPENAI_TRANSCRIBE_MODEL`, `OPENAI_ADVICE_MODEL`
+## 🏗️ Архитектура
 
-### Moonshot AI
+Бот использует модульную архитектуру с интеграцией API:
 
-- **Alternative Provider**: Uses Moonshot AI's API
-- **Models**: Kimi K2, Moonshot transcription models
-- **Environment Variables**: `MOONSHOT_API_KEY`, `MOONSHOT_TRANSCRIBE_MODEL`, `MOONSHOT_ADVICE_MODEL`
-- **Base URL**: `https://api.moonshot.ai/v1`
-- **Note**: Audio transcription currently falls back to OpenAI due to API limitations
-
-## Switching Providers
-
-To switch between AI providers, simply change the `AI_PROVIDER` environment variable:
-
-```bash
-# For OpenAI
-AI_PROVIDER=openai
-
-# For Moonshot AI
-AI_PROVIDER=moonshot
+```
+┌─────────────────┐
+│   Telegram Bot  │
+└─────────────────┘
+         │
+         ▼
+┌─────────────────┐
+│  Rate Limiting  │
+│   & Security    │
+└─────────────────┘
+         │
+         ▼
+┌─────────────────┐    ┌─────────────────┐
+│   Text Handler  │    │  Audio Handler  │
+└─────────────────┘    └─────────────────┘
+         │                       │
+         ▼                       ▼
+┌─────────────────────────────────────────┐
+│          Message Service                │
+│  ┌─────────────────┐  ┌─────────────────┐│
+│  │  Process Text   │  │  Transcribe     ││
+│  │    Messages     │  │     Audio       ││
+│  └─────────────────┘  └─────────────────┘│
+└─────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────┐
+│   tRPC Client   │
+└─────────────────┘
+         │
+         ▼
+┌─────────────────┐
+│  Universal API  │
+│   (AI Services) │
+└─────────────────┘
 ```
 
-The bot will automatically use the appropriate provider for all AI operations.
+### Компоненты
 
-## Development
-
-- **Type Checking**: `bun run typecheck`
-- **Linting**: `bun run lint`
-- **Build**: `bun run build`
-
-## Architecture
-
-The bot uses a modular architecture with:
-
-- **Handlers**: Process different message types (text, audio, other)
-- **Services**: AI operations, database operations, relevance analysis
-- **Providers**: Abstracted AI provider interface supporting multiple backends
-
-## Documentation
-
-For detailed configuration information, see [AI_PROVIDERS.md](./AI_PROVIDERS.md).
+- **`src/bot.ts`** - Основная настройка бота и middleware
+- **`src/handlers/`** - Обработчики разных типов сообщений
+  - `text-handler.ts` - Обработка текстовых сообщений
+  - `audio-handler.ts` - Обработка голосовых сообщений
+  - `other-handler.ts` - Fallback для остальных типов
+- **`src/services/`** - Бизнес-логика
+  - `message-service.ts` - Интеграция с API для обработки сообщений
+- **`src/api/`** - API клиенты
+  - `client.ts` - tRPC клиент для взаимодействия с API
+- **`src/utils/`** - Утилиты
+  - `telegram-utils.ts` - Вспомогательные функции для работы с Telegram
+- **`src/lib/`** - Общие библиотеки
+  - `rate-limit.ts` - Rate limiting

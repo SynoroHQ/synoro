@@ -17,18 +17,11 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@ai-sdk/openai": "^2.0.15",
-    "@ai-sdk/openai-compatible": "^1.0.8",
-    "@opentelemetry/auto-instrumentations-node": "^0.62.1",
-    "@opentelemetry/sdk-node": "^0.203.0",
-    "@synoro/db": "workspace:*",
-    "@synoro/lib": "workspace:*",
-    "@synoro/prompts": "workspace:*",
+    "@synoro/api": "workspace:*",
     "@t3-oss/env-core": "0.13.8",
-    "ai": "^5.0.15",
-    "grammy": "^1.38.0",
-    "langfuse": "^3.38.4",
-    "langfuse-vercel": "^3.38.4",
+    "@trpc/client": "11.5.0",
+    "grammy": "^1.38.1",
+    "superjson": "2.2.2",
     "zod": "4.0.17"
   },
   "devDependencies": {
