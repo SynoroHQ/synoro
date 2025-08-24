@@ -87,53 +87,14 @@ async function getSystemPrompt(
   return local;
 }
 
-function extractFirstJsonObject(input: string): string | null {
-  let depth = 0;
-  let startIndex = -1;
-  let inString = false;
-  let escapeNext = false;
-  let quoteChar: '"' | "'" | "" = "";
+// at the top of packages/api/src/lib/ai/parser.ts
+import type { ParsedTask, Telemetry } from "./types";
+import { extractFirstJsonObject } from "./classifier";
 
-  for (let i = 0; i < input.length; i++) {
-    const ch = input[i];
+// …rest of parser.ts…
 
-    if (inString) {
-      if (escapeNext) {
-        escapeNext = false;
-        continue;
-      }
-      if (ch === "\\") {
-        escapeNext = true;
-        continue;
-      }
-      if (ch === quoteChar) {
-        inString = false;
-        quoteChar = "";
-      }
-      continue;
-    }
-
-    if (ch === '"' || ch === "'") {
-      inString = true;
-      quoteChar = ch as '"' | "'";
-      continue;
-    }
-
-    if (ch === "{") {
-      if (depth === 0) startIndex = i;
-      depth++;
-    } else if (ch === "}") {
-      if (depth > 0) {
-        depth--;
-        if (depth === 0 && startIndex !== -1) {
-          return input.slice(startIndex, i + 1);
-        }
-      }
-    }
-  }
-  return null;
-}
-
+// (The entire local definition of extractFirstJsonObject has been removed 
+//  in favor of the imported one.)
 /**
  * Парсит текст и извлекает структурированную задачу
  */
