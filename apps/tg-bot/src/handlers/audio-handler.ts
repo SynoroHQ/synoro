@@ -87,14 +87,26 @@ export async function handleAudio(ctx: Context): Promise<void> {
     });
 
     if (!result.success) {
-      await ctx.reply(`Распознал: "${text}"\n\n${result.response}`);
+      const prefix = `Распознал: "${text}"\n\n`;
+      const MAX_TG_MESSAGE = 4096;
+      const room = MAX_TG_MESSAGE - prefix.length;
+      const body =
+        result.response.length > room
+          ? result.response.slice(0, room - 1) + "…"
+          : result.response;
+      await ctx.reply(prefix + body);
       return;
     }
 
     // Формируем ответ с указанием распознанного текста
-    const response = `Распознал: "${text}"\n\n${result.response}`;
-    await ctx.reply(response);
-
+    const prefix = `Распознал: "${text}"\n\n`;
+    const MAX_TG_MESSAGE = 4096;
+    const room = MAX_TG_MESSAGE - prefix.length;
+    const body =
+      result.response.length > room
+        ? result.response.slice(0, room - 1) + "…"
+        : result.response;
+    await ctx.reply(prefix + body);
     // Логируем результат обработки
     console.log(
       `✅ Аудио обработано: тип=${result.messageType?.type}, релевантность=${result.relevance?.relevant}`,
