@@ -15,6 +15,8 @@ export const SendMessageInput = z
     conversationId: z.string().min(1).optional(),
     createNew: z.boolean().default(false),
     channel: Channel,
+    // Для анонимных пользователей Telegram
+    telegramChatId: z.string().optional(),
     content: z.object({
       text: z.string().trim().min(1).max(16000),
     }),
@@ -33,6 +35,8 @@ export const SendMessageInput = z
   .superRefine((data, ctx) => {
     const hasId = !!data.conversationId;
     const wantsNew = data.createNew === true;
+    const hasTelegramChatId = !!data.telegramChatId;
+
     if (hasId && wantsNew) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -41,10 +45,21 @@ export const SendMessageInput = z
           "Либо указывайте conversationId, либо createNew=true — выберите одно.",
       });
     }
+
     if (!hasId && !wantsNew) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "Укажите conversationId или установите createNew=true.",
+      });
+    }
+
+    // Для Telegram анонимных пользователей требуется telegramChatId
+    if (data.channel === "telegram" && !data.telegramChatId && !hasId) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["telegramChatId"],
+        message:
+          "Для анонимных пользователей Telegram требуется указать telegramChatId.",
       });
     }
   });

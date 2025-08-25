@@ -28,6 +28,8 @@ export const messageRole = pgEnum("message_role", [
 /**
  * Таблица диалогов/бесед между пользователями и AI
  * Хранит метаданные о беседах: владелец, канал, статус, заголовок
+ * Поддерживает как зарегистрированных пользователей (ownerUserId),
+ * так и анонимных пользователей Telegram (telegramChatId)
  */
 export const conversations = pgTable(
   "conversations",
@@ -35,8 +37,9 @@ export const conversations = pgTable(
     id: text("id").primaryKey().$defaultFn(createId),
     ownerUserId: t
       .text("owner_user_id")
-      .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
+    // Для анонимных пользователей в Telegram
+    telegramChatId: t.text("telegram_chat_id"),
     channel: chatChannel("channel").notNull(),
     title: t.text("title"),
     status: t.text("status").default("active").notNull(),
@@ -52,10 +55,18 @@ export const conversations = pgTable(
     lastMessageAt: t.timestamp("last_message_at", { withTimezone: true }),
   }),
   (table) => [
+    // Индекс для зарегистрированных пользователей
     index("conversation_owner_user_idx").on(table.ownerUserId),
+    // Индекс для анонимных пользователей Telegram
+    index("conversation_telegram_chat_idx").on(table.telegramChatId),
     index("conversation_channel_idx").on(table.channel),
     index("conversation_status_idx").on(table.status),
     index("conversation_last_message_idx").on(table.lastMessageAt),
+    // Уникальный индекс: либо ownerUserId, либо telegramChatId должен быть заполнен
+    unique("conversation_owner_or_telegram_uidx").on(
+      table.ownerUserId,
+      table.telegramChatId,
+    ),
   ],
 );
 

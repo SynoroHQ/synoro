@@ -13,6 +13,7 @@ import {
 export const conversationRelations = relations(
   conversations,
   ({ one, many }) => ({
+    // Владелец может быть опциональным для анонимных пользователей
     owner: one(user, {
       fields: [conversations.ownerUserId],
       references: [user.id],
