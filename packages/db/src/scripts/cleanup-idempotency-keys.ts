@@ -1,3 +1,5 @@
+import { lt } from "drizzle-orm";
+
 import { db } from "../client";
 import { processedIdempotencyKeys } from "../schemas/chat/schema";
 
@@ -12,10 +14,11 @@ export async function cleanupIdempotencyKeys() {
   try {
     const result = await db
       .delete(processedIdempotencyKeys)
-      .where(processedIdempotencyKeys.createdAt < cutoffTime);
+      .where(lt(processedIdempotencyKeys.createdAt, cutoffTime))
+      .returning();
 
-    console.log(`Удалено ${result.rowCount} старых ключей идемпотентности`);
-    return result.rowCount;
+    console.log(`Удалено ${result.length} старых ключей идемпотентности`);
+    return result.length;
   } catch (error) {
     console.error("Ошибка при очистке ключей идемпотентности:", error);
     throw error;

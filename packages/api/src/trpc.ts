@@ -270,11 +270,20 @@ const telegramAnonymousAuthMiddleware = t.middleware(
         });
       }
 
-      // Validate the hash using HMAC-SHA256
-      const secretKey = crypto
-        .createHmac("sha256", "WebAppData")
-        .update(env.TELEGRAM_BOT_TOKEN)
-        .digest();
+      // Check auth_date freshness (within 5 minutes)
+      const authDate = urlParams.get("auth_date");
+      if (authDate) {
+        const authTimestamp = parseInt(authDate, 10);
+        const currentTimestamp = Math.floor(Date.now() / 1000);
+        const timeDiff = Math.abs(currentTimestamp - authTimestamp);
+        
+        if (timeDiff > 300) { // 5 minutes = 300 seconds
+          throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message: "Telegram initData is too old (auth_date expired)",
+          });
+        }
+      }
 
       // Create data check string by sorting all parameters except hash
       const params = new URLSearchParams(telegramInitData);
@@ -282,8 +291,15 @@ const telegramAnonymousAuthMiddleware = t.middleware(
       const dataCheckString = Array.from(params.entries())
         .sort(([a], [b]) => a.localeCompare(b))
         .map(([key, value]) => `${key}=${value}`)
-        .join("&");
+        .join("\n"); // Use newline separator as per Telegram docs
 
+      // Derive secret key: HMAC-SHA256 with bot token as key and "WebAppData" as message
+      const secretKey = crypto
+        .createHmac("sha256", env.TELEGRAM_BOT_TOKEN)
+        .update("WebAppData")
+        .digest();
+
+      // Calculate hash using HMAC-SHA256 with derived secret key
       const calculatedHash = crypto
         .createHmac("sha256", secretKey)
         .update(dataCheckString)

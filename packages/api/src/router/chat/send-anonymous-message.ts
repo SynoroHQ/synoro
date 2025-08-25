@@ -30,56 +30,90 @@ export const sendAnonymousMessageRouter: TRPCRouterRecord = {
         });
       }
 
-      // Проверяем идемпотентность, если предоставлен ключ
-      if (input.idempotencyKey) {
-        const existingIdempotency = await db
-          .select()
-          .from(processedIdempotencyKeys)
-          .where(
-            and(
-              eq(processedIdempotencyKeys.telegramChatId, ctx.telegramChatId),
-              eq(processedIdempotencyKeys.idempotencyKey, input.idempotencyKey),
-            ),
-          )
-          .limit(1);
+      // Предварительно генерируем ID для избежания дублирования
+      const userMsgId = createId();
+      const runId = createId();
 
-        if (existingIdempotency.length > 0) {
-          const existingIdempotencyRecord = existingIdempotency[0];
-          if (!existingIdempotencyRecord) {
-            throw new TRPCError({
-              code: "INTERNAL_SERVER_ERROR",
-              message: "Invalid idempotency record",
-            });
-          }
+      // Используем одну транзакцию для всех операций
+      return await db.transaction(async (tx) => {
+        // Проверяем идемпотентность внутри транзакции
+        if (input.idempotencyKey) {
+          // Пытаемся вставить ключ идемпотентности, если он уже существует - получаем существующий
+          const idempotencyResult = await tx
+            .insert(processedIdempotencyKeys)
+            .values({
+              telegramChatId: ctx.telegramChatId,
+              idempotencyKey: input.idempotencyKey,
+              messageId: userMsgId, // Временно используем новый ID
+              createdAt: now,
+            })
+            .onConflictDoUpdate({
+              target: [
+                processedIdempotencyKeys.telegramChatId,
+                processedIdempotencyKeys.idempotencyKey,
+              ],
+              set: {
+                // Не обновляем существующую запись
+              },
+            })
+            .returning();
 
-          // Получаем информацию о существующем сообщении
-          const existingMessage = await db
-            .select({ conversationId: messages.conversationId })
-            .from(messages)
-            .where(eq(messages.id, existingIdempotencyRecord.messageId))
-            .limit(1);
+          // Если запись уже существовала (onConflict сработал), получаем существующую
+          if (idempotencyResult.length === 0) {
+            // Запись уже существует, получаем её
+            const existingIdempotency = await tx
+              .select()
+              .from(processedIdempotencyKeys)
+              .where(
+                and(
+                  eq(
+                    processedIdempotencyKeys.telegramChatId,
+                    ctx.telegramChatId,
+                  ),
+                  eq(
+                    processedIdempotencyKeys.idempotencyKey,
+                    input.idempotencyKey,
+                  ),
+                ),
+              )
+              .limit(1);
 
-          if (existingMessage.length > 0) {
-            const existingMessageRecord = existingMessage[0];
-            if (!existingMessageRecord) {
-              throw new TRPCError({
-                code: "INTERNAL_SERVER_ERROR",
-                message: "Invalid message record",
-              });
+            if (existingIdempotency.length > 0) {
+              const existingIdempotencyRecord = existingIdempotency[0];
+              if (!existingIdempotencyRecord) {
+                throw new TRPCError({
+                  code: "INTERNAL_SERVER_ERROR",
+                  message: "Invalid idempotency record",
+                });
+              }
+
+              // Получаем информацию о существующем сообщении
+              const existingMessage = await tx
+                .select({ conversationId: messages.conversationId })
+                .from(messages)
+                .where(eq(messages.id, existingIdempotencyRecord.messageId))
+                .limit(1);
+
+              if (existingMessage.length > 0) {
+                const existingMessageRecord = existingMessage[0];
+                if (!existingMessageRecord) {
+                  throw new TRPCError({
+                    code: "INTERNAL_SERVER_ERROR",
+                    message: "Invalid message record",
+                  });
+                }
+
+                // Возвращаем существующий результат
+                return {
+                  runId: createId(), // Новый runId для каждого запроса
+                  conversationId: existingMessageRecord.conversationId,
+                  userMessageId: existingIdempotencyRecord.messageId,
+                };
+              }
             }
-
-            // Возвращаем существующий результат
-            return {
-              runId: createId(), // Новый runId для каждого запроса
-              conversationId: existingMessageRecord.conversationId,
-              userMessageId: existingIdempotencyRecord.messageId,
-            };
           }
         }
-      }
 
-      // Используем транзакцию для атомарности операций
-      return await db.transaction(async (tx) => {
         // Resolve conversation
         let convId: string;
 
@@ -126,7 +160,6 @@ export const sendAnonymousMessageRouter: TRPCRouterRecord = {
         }
 
         // Создаем пользовательское сообщение с полным содержимым
-        const userMsgId = createId();
         const messageContent: Record<string, unknown> = {
           text: input.content.text,
         };
@@ -152,17 +185,33 @@ export const sendAnonymousMessageRouter: TRPCRouterRecord = {
           createdAt: now,
         });
 
-        // Сохраняем ключ идемпотентности если он предоставлен
+        // Если ключ идемпотентности не был вставлен ранее (новый запрос), вставляем его
         if (input.idempotencyKey) {
-          await tx.insert(processedIdempotencyKeys).values({
-            telegramChatId: ctx.telegramChatId,
-            idempotencyKey: input.idempotencyKey,
-            messageId: userMsgId,
-            createdAt: now,
-          });
-        }
+          // Проверяем, не был ли уже вставлен ключ
+          const existingKey = await tx
+            .select()
+            .from(processedIdempotencyKeys)
+            .where(
+              and(
+                eq(processedIdempotencyKeys.telegramChatId, ctx.telegramChatId),
+                eq(
+                  processedIdempotencyKeys.idempotencyKey,
+                  input.idempotencyKey,
+                ),
+              ),
+            )
+            .limit(1);
 
-        const runId = createId();
+          if (existingKey.length === 0) {
+            // Вставляем ключ идемпотентности
+            await tx.insert(processedIdempotencyKeys).values({
+              telegramChatId: ctx.telegramChatId,
+              idempotencyKey: input.idempotencyKey,
+              messageId: userMsgId,
+              createdAt: now,
+            });
+          }
+        }
 
         // Запускаем LLM completion в фоновом режиме
         startCompletionRun({
