@@ -11,6 +11,7 @@ import {
 } from "@synoro/prompts";
 
 import type { ParsedTask, Telemetry } from "./types";
+import { parseContextSafely } from "./advisor";
 import { extractFirstJsonObject } from "./classifier";
 
 // Initialize AI providers
@@ -98,11 +99,29 @@ export async function parseTask(
   telemetry?: Telemetry,
 ): Promise<ParsedTask | null> {
   const system = await getSystemPrompt(PROMPT_KEYS.PARSER_TASK);
+
+  // Извлекаем контекст из метаданных
+  const context = parseContextSafely(telemetry);
+
+  // Формируем контекстный промпт
+  let contextualPrompt = `Text: ${text}`;
+
+  if (context.length > 0) {
+    contextualPrompt = `Контекст беседы:\n`;
+    context.forEach((msg: any, index: number) => {
+      const role = msg.role === "user" ? "Пользователь" : "Ассистент";
+      contextualPrompt += `${index + 1}. ${role}: ${msg.content.text}\n`;
+    });
+    contextualPrompt += `\nТекущий текст для парсинга: ${text}`;
+  }
+
+  contextualPrompt += `\nJSON:`;
+
   try {
     const { text: out } = await generateText({
       model: getActiveProvider()(getAdviceModel()),
       system,
-      prompt: `Text: ${text}\nJSON:`,
+      prompt: contextualPrompt,
       temperature: 0.2,
       experimental_telemetry: {
         isEnabled: true,

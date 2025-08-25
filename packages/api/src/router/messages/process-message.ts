@@ -64,7 +64,7 @@ export const processMessageRouter = {
         channel: input.channel,
         userId: userContext.userId ?? null, // null для анонимных пользователей
         ctx,
-        chatId: userContext.conversationId, // Используем conversationId вместо chatId
+        chatId: chatId, // Используем Telegram chatId для поиска conversation
         messageId: input.messageId,
         metadata: {
           ...input.metadata,

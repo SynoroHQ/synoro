@@ -72,9 +72,7 @@ export const transcribeRouter = {
           metadata: {
             channel: input.channel,
             userId: userContext.userId || "anonymous", // "anonymous" для null userId
-            ...(userContext.conversationId && {
-              chatId: userContext.conversationId,
-            }),
+            chatId: chatId, // Используем Telegram chatId
             ...(input.messageId && { messageId: input.messageId }),
             filename: input.filename,
             telegramUserId,

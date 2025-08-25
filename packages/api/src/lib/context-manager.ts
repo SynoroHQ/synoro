@@ -59,9 +59,10 @@ export async function getConversationContext(
       eq(conversations.channel, channel),
     ];
 
-    if (chatId) {
-      conditions.push(eq(conversations.title, chatId));
-    }
+    // Убираем поиск по title, так как chatId это Telegram chatId, а не заголовок conversation
+    // if (chatId) {
+    //   conditions.push(eq(conversations.title, chatId));
+    // }
 
     conversation =
       (await ctx.db.query.conversations.findFirst({
@@ -82,7 +83,7 @@ export async function getConversationContext(
   if (!conversation) {
     const conversationData: typeof conversations.$inferInsert = {
       channel,
-      title: chatId ?? `${channel}_conversation`,
+      title: `${channel}_conversation_${Date.now()}`, // Уникальный заголовок, не связанный с chatId
       status: "active",
       lastMessageAt: new Date(),
     };

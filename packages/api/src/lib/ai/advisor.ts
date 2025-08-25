@@ -24,7 +24,7 @@ const moonshotAI = createOpenAICompatible({
  * Безопасно парсит контекст из метаданных телеметрии
  * Включает валидацию, нормализацию дат и обработку ошибок
  */
-function parseContextSafely(telemetry?: Telemetry): {
+export function parseContextSafely(telemetry?: Telemetry): {
   id: string;
   role: string;
   content: { text: string };
