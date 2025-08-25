@@ -20,6 +20,112 @@ const moonshotAI = createOpenAICompatible({
   baseURL: "https://api.moonshot.ai/v1",
 });
 
+/**
+ * Безопасно парсит контекст из метаданных телеметрии
+ * Включает валидацию, нормализацию дат и обработку ошибок
+ */
+function parseContextSafely(telemetry?: Telemetry): {
+  id: string;
+  role: string;
+  content: { text: string };
+  createdAt: Date;
+}[] {
+  const contextString = telemetry?.metadata?.context as string;
+
+  if (!contextString) {
+    return [];
+  }
+
+  try {
+    // Проверяем размер строки (максимум 1MB)
+    if (contextString.length > 1024 * 1024) {
+      console.warn("Context string too large, skipping context");
+      return [];
+    }
+
+    // Парсим JSON
+    const rawContext = JSON.parse(contextString);
+
+    // Валидируем, что это массив
+    if (!Array.isArray(rawContext)) {
+      console.warn("Context is not an array, using empty context");
+      return [];
+    }
+
+    return rawContext
+      .map((item, index) => {
+        try {
+          // Проверяем базовую структуру
+          if (!item || typeof item !== "object") {
+            console.warn(
+              `Skipping invalid context item at index ${index}: not an object`,
+            );
+            return null;
+          }
+
+          // Валидируем обязательные поля
+          if (typeof item.id !== "string" || !item.id.trim()) {
+            console.warn(`Skipping context item at index ${index}: invalid id`);
+            return null;
+          }
+
+          if (typeof item.role !== "string" || !item.role.trim()) {
+            console.warn(
+              `Skipping context item at index ${index}: invalid role`,
+            );
+            return null;
+          }
+
+          if (
+            !item.content ||
+            typeof item.content !== "object" ||
+            typeof item.content.text !== "string"
+          ) {
+            console.warn(
+              `Skipping context item at index ${index}: invalid content`,
+            );
+            return null;
+          }
+
+          // Нормализуем createdAt
+          let createdAt: Date;
+          if (item.createdAt instanceof Date) {
+            createdAt = item.createdAt;
+          } else if (typeof item.createdAt === "string") {
+            createdAt = new Date(item.createdAt);
+          } else if (typeof item.createdAt === "number") {
+            createdAt = new Date(item.createdAt);
+          } else {
+            // Если createdAt отсутствует или невалиден, используем текущее время
+            createdAt = new Date();
+          }
+
+          // Проверяем, что дата валидна
+          if (isNaN(createdAt.getTime())) {
+            createdAt = new Date();
+          }
+
+          return {
+            id: item.id.trim(),
+            role: item.role.trim(),
+            content: { text: item.content.text.trim() },
+            createdAt,
+          };
+        } catch (error) {
+          console.warn(
+            `Error processing context item at index ${index}:`,
+            error,
+          );
+          return null;
+        }
+      })
+      .filter((item): item is NonNullable<typeof item> => item !== null);
+  } catch (error) {
+    console.warn("Error parsing context JSON, using empty context:", error);
+    return [];
+  }
+}
+
 // Get the active AI provider based on configuration
 function getActiveProvider() {
   return process.env.AI_PROVIDER === "moonshot" ? moonshotAI : oai;
@@ -100,14 +206,8 @@ export async function advise(
 ): Promise<string> {
   const systemPrompt = await getAssistantSystemPrompt();
 
-  // Извлекаем контекст из метаданных
-  const contextString = telemetry?.metadata?.context as string;
-  const context: {
-    id: string;
-    role: string;
-    content: { text: string };
-    createdAt: Date;
-  }[] = contextString ? JSON.parse(contextString) : [];
+  // Извлекаем контекст из метаданных с безопасным парсингом
+  const context = parseContextSafely(telemetry);
 
   // Формируем историю беседы для промпта
   let conversationHistory = "";
@@ -148,14 +248,8 @@ export async function answerQuestion(
 ): Promise<string> {
   const systemPrompt = await getAssistantSystemPrompt();
 
-  // Извлекаем контекст из метаданных
-  const contextString = telemetry?.metadata?.context as string;
-  const context: {
-    id: string;
-    role: string;
-    content: { text: string };
-    createdAt: Date;
-  }[] = contextString ? JSON.parse(contextString) : [];
+  // Извлекаем контекст из метаданных с безопасным парсингом
+  const context = parseContextSafely(telemetry);
 
   // Формируем историю беседы для промпта
   let conversationHistory = "";

@@ -62,12 +62,19 @@ export async function getConversationContext(
   } = options;
 
   // Находим или создаем беседу для данного пользователя и канала
+  // Строим массив условий явно, чтобы избежать undefined в and()
+  const conditions = [
+    eq(conversations.ownerUserId, userId),
+    eq(conversations.channel, channel),
+  ];
+
+  // Добавляем условие для chatId только если он присутствует
+  if (chatId) {
+    conditions.push(eq(conversations.title, chatId));
+  }
+
   let conversation = await ctx.db.query.conversations.findFirst({
-    where: and(
-      eq(conversations.ownerUserId, userId),
-      eq(conversations.channel, channel),
-      chatId ? eq(conversations.title, chatId) : undefined, // Используем title для хранения chatId для Telegram
-    ),
+    where: conditions.length === 1 ? conditions[0] : and(...conditions),
   });
 
   // Если беседа не найдена, создаем новую
@@ -92,11 +99,7 @@ export async function getConversationContext(
 
   // Получаем сообщения из беседы
   const allMessages = await ctx.db.query.messages.findMany({
-    where: and(
-      eq(messages.conversationId, conversation.id),
-      // Фильтруем по времени
-      // gte(messages.createdAt, cutoffTime)
-    ),
+    where: eq(messages.conversationId, conversation.id),
     orderBy: [desc(messages.createdAt)],
     limit: maxMessages + 1, // +1 для проверки наличия еще сообщений
   });
