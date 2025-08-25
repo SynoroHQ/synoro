@@ -33,6 +33,7 @@ export const SendMessageInput = z
   .superRefine((data, ctx) => {
     const hasId = !!data.conversationId;
     const wantsNew = data.createNew === true;
+
     if (hasId && wantsNew) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -41,6 +42,7 @@ export const SendMessageInput = z
           "Либо указывайте conversationId, либо createNew=true — выберите одно.",
       });
     }
+
     if (!hasId && !wantsNew) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -65,6 +67,12 @@ export const GetHistoryInput = z.object({
 
 export const ListConversationsInput = z.object({
   cursor: z.string().optional(),
+  limit: z.number().int().min(1).max(100).default(20).optional(),
+});
+
+// Input schema for anonymous Telegram users
+export const ListAnonymousConversationsInput = z.object({
+  telegramInitData: z.string().min(1, "Telegram initData is required"),
   limit: z.number().int().min(1).max(100).default(20).optional(),
 });
 
@@ -103,6 +111,9 @@ export type TSendMessageInput = z.infer<typeof SendMessageInput>;
 export type TMessageOutput = z.infer<typeof MessageOutput>;
 export type TGetHistoryInput = z.infer<typeof GetHistoryInput>;
 export type TListConversationsInput = z.infer<typeof ListConversationsInput>;
+export type TListAnonymousConversationsInput = z.infer<
+  typeof ListAnonymousConversationsInput
+>;
 export type TSendMessageOutput = z.infer<typeof SendMessageOutput>;
 export type TStreamInput = z.infer<typeof StreamInput>;
 export type TListConversationsOutput = z.infer<typeof ListConversationsOutput>;

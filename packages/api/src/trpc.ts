@@ -6,8 +6,9 @@
  * tl;dr - this is where all the tRPC server stuff is created and plugged in.
  * The pieces you will need to use are documented accordingly near the end
  */
-import { initTRPC, TRPCError } from "@trpc/server";
+import crypto from "crypto";
 import type { CreateExpressContextOptions } from "@trpc/server/adapters/express";
+import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
@@ -67,15 +68,20 @@ export const createTRPCContext = async (opts: {
 export type TRPCContext = Awaited<ReturnType<typeof createTRPCContext>> & {
   botUserId?: string;
   isBotRequest?: boolean;
+  telegramUserId?: string;
+  telegramChatId?: string;
+  isTelegramAnonymous?: boolean;
 };
 
 /**
  * Express adapter context creation
  * This is used by the Express adapter to create context for each request
  */
-export const createExpressContext = async (opts: CreateExpressContextOptions) => {
+export const createExpressContext = async (
+  opts: CreateExpressContextOptions,
+) => {
   const headers = new Headers();
-  
+
   // Copy headers from Express request to Headers object
   Object.entries(opts.req.headers).forEach(([key, value]) => {
     if (typeof value === "string") {
@@ -232,6 +238,141 @@ const botAuthMiddleware = t.middleware(async ({ ctx, next }) => {
   });
 });
 
+// Telegram anonymous authentication middleware
+const telegramAnonymousAuthMiddleware = t.middleware(
+  async ({ ctx, input, next }) => {
+    // Check if this is a Telegram anonymous request
+    if (!input || typeof input !== "object" || !("telegramInitData" in input)) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Telegram initData is required for anonymous access",
+      });
+    }
+
+    const { telegramInitData } = input as { telegramInitData: string };
+
+    if (!telegramInitData) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "Telegram initData is required",
+      });
+    }
+
+    try {
+      // Parse and validate Telegram WebApp initData
+      const urlParams = new URLSearchParams(telegramInitData);
+      const hash = urlParams.get("hash");
+
+      if (!hash) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Invalid Telegram initData format - missing hash",
+        });
+      }
+
+      // Check auth_date freshness (within 5 minutes)
+      const authDate = urlParams.get("auth_date");
+      if (authDate) {
+        const authTimestamp = parseInt(authDate, 10);
+        const currentTimestamp = Math.floor(Date.now() / 1000);
+        const timeDiff = Math.abs(currentTimestamp - authTimestamp);
+        
+        if (timeDiff > 300) { // 5 minutes = 300 seconds
+          throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message: "Telegram initData is too old (auth_date expired)",
+          });
+        }
+      }
+
+      // Create data check string by sorting all parameters except hash
+      const params = new URLSearchParams(telegramInitData);
+      params.delete("hash");
+      const dataCheckString = Array.from(params.entries())
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([key, value]) => `${key}=${value}`)
+        .join("\n"); // Use newline separator as per Telegram docs
+
+      // Derive secret key: HMAC-SHA256 with bot token as key and "WebAppData" as message
+      const secretKey = crypto
+        .createHmac("sha256", env.TELEGRAM_BOT_TOKEN)
+        .update("WebAppData")
+        .digest();
+
+      // Calculate hash using HMAC-SHA256 with derived secret key
+      const calculatedHash = crypto
+        .createHmac("sha256", secretKey)
+        .update(dataCheckString)
+        .digest("hex");
+
+      if (calculatedHash !== hash) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Invalid Telegram initData signature",
+        });
+      }
+
+      // Extract user information from validated data
+      const userData = Object.fromEntries(
+        Array.from(params.entries()).map(([key, value]) => [
+          key,
+          decodeURIComponent(value || ""),
+        ]),
+      );
+
+      // Parse user data - Telegram WebApp initData содержит user как JSON строку
+      let telegramUserId: string | undefined;
+      let chatId: string | undefined;
+
+      try {
+        if (userData.user) {
+          const userObj = JSON.parse(userData.user);
+          telegramUserId = userObj.id;
+        }
+        if (userData.chat) {
+          const chatObj = JSON.parse(userData.chat);
+          chatId = chatObj.id;
+        }
+        // Fallback to direct values if JSON parsing fails
+        if (!telegramUserId && userData.user_id) {
+          telegramUserId = userData.user_id;
+        }
+        if (!chatId && userData.chat_instance) {
+          chatId = userData.chat_instance;
+        }
+      } catch (parseError) {
+        // If JSON parsing fails, try direct access
+        telegramUserId = userData.user_id || userData.user;
+        chatId = userData.chat_instance || userData.chat;
+      }
+
+      if (!telegramUserId || !chatId) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Invalid Telegram user data",
+        });
+      }
+
+      return next({
+        ctx: {
+          ...ctx,
+          telegramUserId,
+          telegramChatId: chatId,
+          isTelegramAnonymous: true,
+        },
+      });
+    } catch (error) {
+      if (error instanceof TRPCError) {
+        throw error;
+      }
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "Failed to validate Telegram initData",
+      });
+    }
+  },
+);
+
 /**
  * Public (unauthed) procedure
  *
@@ -243,6 +384,18 @@ export const publicProcedure = t.procedure
   .use(timingMiddleware)
   .use(csrfMiddleware)
   .use(rateLimitMiddleware);
+
+/**
+ * Telegram anonymous procedure
+ *
+ * This procedure validates Telegram WebApp initData and provides
+ * telegram-specific context for anonymous users.
+ */
+export const telegramAnonymousProcedure = t.procedure
+  .use(timingMiddleware)
+  .use(csrfMiddleware)
+  .use(rateLimitMiddleware)
+  .use(telegramAnonymousAuthMiddleware);
 
 /**
  * Bot (authenticated) procedure
