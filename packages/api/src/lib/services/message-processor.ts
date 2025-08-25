@@ -19,7 +19,7 @@ import {
 export interface ProcessMessageParams {
   text: string;
   channel: "telegram" | "web" | "mobile";
-  userId: string;
+  userId: string | null; // null для анонимных пользователей
   ctx: TRPCContext;
   chatId?: string;
   messageId?: string;
@@ -59,7 +59,8 @@ export async function processMessageInternal(
     });
   }
 
-  if (!userId) {
+  // Для Telegram канала userId может быть null (анонимные пользователи)
+  if (channel !== "telegram" && !userId) {
     throw new TRPCError({
       code: "BAD_REQUEST",
       message: "ID пользователя не указан",

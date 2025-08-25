@@ -1,6 +1,7 @@
 import { TranscribeInput, TranscribeResponse } from "@synoro/validators";
 
 import { transcribe } from "../../lib/ai";
+import { TelegramUserService } from "../../lib/services/telegram-user-service";
 import { botProcedure, protectedProcedure, publicProcedure } from "../../trpc";
 
 export const transcribeRouter = {
@@ -44,20 +45,42 @@ export const transcribeRouter = {
     .output(TranscribeResponse)
     .mutation(async ({ ctx, input }) => {
       try {
+        // Получаем telegramUserId из input
+        const telegramUserId = input.telegramUserId;
+        if (!telegramUserId) {
+          throw new Error("ID пользователя Telegram не указан в запросе");
+        }
+
+        // Получаем chatId из input
+        const chatId = input.chatId;
+        if (!chatId) {
+          throw new Error("ID чата Telegram не указан в запросе");
+        }
+
+        // Получаем контекст пользователя через TelegramUserService
+        const userContext = await TelegramUserService.getUserContext(
+          telegramUserId,
+          chatId,
+          input.messageId,
+        );
+
         // Decode base64 audio string to Buffer
         const audioBuffer = Buffer.from(input.audio, "base64");
-
-        // For bot requests, use botUserId from context
-        const userId = ctx.botUserId || "bot_user";
 
         const text = await transcribe(audioBuffer, input.filename, {
           functionId: "api-transcribe",
           metadata: {
             channel: input.channel,
-            userId: userId,
-            ...(input.chatId && { chatId: input.chatId }),
+            userId: userContext.userId || "anonymous", // "anonymous" для null userId
+            ...(userContext.conversationId && {
+              chatId: userContext.conversationId,
+            }),
             ...(input.messageId && { messageId: input.messageId }),
             filename: input.filename,
+            telegramUserId,
+            telegramChatId: chatId,
+            isAnonymous: userContext.isAnonymous,
+            conversationId: userContext.conversationId,
             ...input.metadata,
           },
         });

@@ -4,16 +4,31 @@ import { z } from "zod";
 import { Channel } from "./chat";
 
 // Schema for incoming message processing
-export const ProcessMessageInput = z.object({
-  text: z
-    .string()
-    .min(1, "Текст сообщения не может быть пустым")
-    .max(5000, "Текст сообщения слишком длинный"),
-  channel: Channel,
-  chatId: z.string().optional(),
-  messageId: z.string().optional(),
-  metadata: z.record(z.string(), z.unknown()).optional(),
-});
+export const ProcessMessageInput = z
+  .object({
+    text: z
+      .string()
+      .min(1, "Текст сообщения не может быть пустым")
+      .max(5000, "Текст сообщения слишком длинный"),
+    channel: Channel,
+    chatId: z.string().optional(),
+    messageId: z.string().optional(),
+    metadata: z.record(z.string(), z.unknown()).optional(),
+    telegramUserId: z.string().optional(), // ID пользователя Telegram (не связан с таблицей users)
+  })
+  .refine(
+    (data) => {
+      // Для Telegram канала telegramUserId и chatId обязательны
+      if (data.channel === "telegram") {
+        return data.telegramUserId && data.chatId;
+      }
+      return true;
+    },
+    {
+      message: "Для Telegram канала telegramUserId и chatId обязательны",
+      path: ["telegramUserId", "chatId"],
+    },
+  );
 
 // Schema for message processing response
 export const ProcessMessageResponse = z.object({
@@ -40,14 +55,29 @@ export const ProcessMessageResponse = z.object({
 });
 
 // Schema for audio transcription input
-export const TranscribeInput = z.object({
-  audio: z.string(), // base64-encoded audio data
-  filename: z.string(),
-  channel: Channel,
-  chatId: z.string().optional(),
-  messageId: z.string().optional(),
-  metadata: z.record(z.string(), z.unknown()).optional(),
-});
+export const TranscribeInput = z
+  .object({
+    audio: z.string(), // base64-encoded audio data
+    filename: z.string(),
+    channel: Channel,
+    chatId: z.string().optional(),
+    messageId: z.string().optional(),
+    metadata: z.record(z.string(), z.unknown()).optional(),
+    telegramUserId: z.string().optional(), // ID пользователя Telegram (не связан с таблицей users)
+  })
+  .refine(
+    (data) => {
+      // Для Telegram канала telegramUserId и chatId обязательны
+      if (data.channel === "telegram") {
+        return data.telegramUserId && data.chatId;
+      }
+      return true;
+    },
+    {
+      message: "Для Telegram канала telegramUserId и chatId обязательны",
+      path: ["telegramUserId", "chatId"],
+    },
+  );
 
 // Schema for transcription response
 export const TranscribeResponse = z.object({

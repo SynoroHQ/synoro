@@ -17,7 +17,7 @@ export function determineMaxTokens(text: string): number {
  */
 export function createCommonMetadata(params: {
   channel: string;
-  userId: string;
+  userId: string | null; // null для анонимных пользователей
   conversationId: string;
   context: string;
   chatId?: string;
@@ -36,7 +36,7 @@ export function createCommonMetadata(params: {
 
   return {
     channel,
-    userId,
+    userId: userId || "anonymous", // Используем "anonymous" для null userId
     conversationId,
     context,
     ...(chatId && { chatId }),
