@@ -95,7 +95,7 @@ export const messages = pgTable(
 /**
  * Таблица вложений к сообщениям
  * Хранит файлы, изображения и другие медиа, прикрепленные к сообщениям
- * 
+ *
  * @deprecated Используйте новую систему files + fileRelations
  * Эта таблица оставлена для обратной совместимости
  */
@@ -103,10 +103,12 @@ export const messageAttachments = pgTable(
   "message_attachments",
   (t) => ({
     id: text("id").primaryKey().$defaultFn(createId),
-    
+
     // Связь с новой системой файлов
-    fileId: t.text("file_id").references(() => files.id, { onDelete: "cascade" }),
-    
+    fileId: t
+      .text("file_id")
+      .references(() => files.id, { onDelete: "cascade" }),
+
     // Существующие поля для обратной совместимости
     messageId: t
       .text("message_id")
@@ -115,10 +117,7 @@ export const messageAttachments = pgTable(
     key: t.text("key").notNull(),
     mime: t.text("mime"),
     size: integer("size"),
-    
-    // Новые поля для миграции
-    migratedToFiles: t.text("migrated_to_files").default("false"), // флаг миграции
-    
+
     createdAt: t
       .timestamp("created_at", { withTimezone: true })
       .notNull()
@@ -137,10 +136,9 @@ export const messageAttachments = pgTable(
       table.messageId,
       table.key,
     ),
-    
+
     // Новые индексы для связи с files
     index("message_attachment_file_idx").on(table.fileId),
-    index("message_attachment_migrated_idx").on(table.migratedToFiles),
   ],
 );
 

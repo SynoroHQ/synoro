@@ -2,7 +2,6 @@ import { openai } from "@ai-sdk/openai";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { generateText } from "ai";
 import { Langfuse } from "langfuse";
-import { z } from "zod";
 
 import type { PromptKey } from "@synoro/prompts";
 import {
@@ -10,6 +9,11 @@ import {
   getPromptSafe,
   PROMPT_KEYS,
 } from "@synoro/prompts";
+import {
+  combinedClassificationSchema,
+  messageTypeSchema,
+  relevanceSchema,
+} from "@synoro/validators";
 
 import type { MessageTypeResult, RelevanceResult, Telemetry } from "./types";
 
@@ -40,7 +44,7 @@ function getModelFromEnv(
 }
 
 // Get the active advice model
-function getAdviceModel() {
+export function getAdviceModel() {
   return getModelFromEnv(
     process.env.MOONSHOT_ADVICE_MODEL,
     process.env.OPENAI_ADVICE_MODEL,
@@ -72,7 +76,7 @@ async function getSystemPrompt(
       const prompt = await lf.getPrompt(key);
       // Compile with empty vars by default; extend if variables are added later
       const compiled = prompt.compile({});
-      const value = (compiled as string).trim();
+      const value = compiled.trim();
       if (value) {
         cachedPrompts[key] = value;
         return value;
@@ -87,24 +91,6 @@ async function getSystemPrompt(
   cachedPrompts[key] = local;
   return local;
 }
-
-const relevanceSchema = z.object({
-  relevant: z.boolean(),
-  score: z.number().min(0).max(1).optional(),
-  category: z.enum(["relevant", "irrelevant", "spam"]).optional(),
-});
-
-const messageTypeSchema = z.object({
-  type: z.enum(["question", "event", "chat", "irrelevant"]),
-  subtype: z.string().nullable().optional(),
-  confidence: z.number().min(0).max(1),
-  need_logging: z.boolean(),
-});
-
-const combinedClassificationSchema = z.object({
-  messageType: messageTypeSchema,
-  relevance: relevanceSchema,
-});
 
 export function extractFirstJsonObject(input: string): string | null {
   let depth = 0;
@@ -134,7 +120,7 @@ export function extractFirstJsonObject(input: string): string | null {
 
     if (ch === '"' || ch === "'") {
       inString = true;
-      quoteChar = ch as '"' | "'";
+      quoteChar = ch;
       continue;
     }
 
@@ -153,10 +139,10 @@ export function extractFirstJsonObject(input: string): string | null {
   return null;
 }
 
-export type MessageClassificationResult = {
+export interface MessageClassificationResult {
   messageType: MessageTypeResult;
   relevance: RelevanceResult;
-};
+}
 
 /**
  * Классифицирует сообщение - определяет релевантность и тип за один AI вызов

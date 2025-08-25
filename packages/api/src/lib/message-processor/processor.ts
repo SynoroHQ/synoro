@@ -4,7 +4,7 @@ import type {
   MessageProcessorOptions,
   ProcessClassifiedMessageResult,
 } from "./types";
-import { advise, answerQuestion, parseTask } from "../ai";
+import { advise, answerQuestion, getAdviceModel, parseTask } from "../ai";
 
 /**
  * Универсальный процессор сообщений
@@ -18,6 +18,9 @@ export async function processClassifiedMessage(
 ): Promise<ProcessClassifiedMessageResult> {
   let response = "";
   let parsed = null;
+
+  // Получаем модель, которая будет использоваться
+  const model = getAdviceModel();
 
   // Default response templates
   const defaultTemplates = {
@@ -124,5 +127,5 @@ export async function processClassifiedMessage(
       response = templates.fallback(text, fallbackTip);
   }
 
-  return { response, parsed };
+  return { response, parsed, model };
 }

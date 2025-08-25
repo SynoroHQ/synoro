@@ -20,6 +20,112 @@ const moonshotAI = createOpenAICompatible({
   baseURL: "https://api.moonshot.ai/v1",
 });
 
+/**
+ * Безопасно парсит контекст из метаданных телеметрии
+ * Включает валидацию, нормализацию дат и обработку ошибок
+ */
+function parseContextSafely(telemetry?: Telemetry): {
+  id: string;
+  role: string;
+  content: { text: string };
+  createdAt: Date;
+}[] {
+  const contextString = telemetry?.metadata?.context as string;
+
+  if (!contextString) {
+    return [];
+  }
+
+  try {
+    // Проверяем размер строки (максимум 1MB)
+    if (contextString.length > 1024 * 1024) {
+      console.warn("Context string too large, skipping context");
+      return [];
+    }
+
+    // Парсим JSON
+    const rawContext = JSON.parse(contextString);
+
+    // Валидируем, что это массив
+    if (!Array.isArray(rawContext)) {
+      console.warn("Context is not an array, using empty context");
+      return [];
+    }
+
+    return rawContext
+      .map((item, index) => {
+        try {
+          // Проверяем базовую структуру
+          if (!item || typeof item !== "object") {
+            console.warn(
+              `Skipping invalid context item at index ${index}: not an object`,
+            );
+            return null;
+          }
+
+          // Валидируем обязательные поля
+          if (typeof item.id !== "string" || !item.id.trim()) {
+            console.warn(`Skipping context item at index ${index}: invalid id`);
+            return null;
+          }
+
+          if (typeof item.role !== "string" || !item.role.trim()) {
+            console.warn(
+              `Skipping context item at index ${index}: invalid role`,
+            );
+            return null;
+          }
+
+          if (
+            !item.content ||
+            typeof item.content !== "object" ||
+            typeof item.content.text !== "string"
+          ) {
+            console.warn(
+              `Skipping context item at index ${index}: invalid content`,
+            );
+            return null;
+          }
+
+          // Нормализуем createdAt
+          let createdAt: Date;
+          if (item.createdAt instanceof Date) {
+            createdAt = item.createdAt;
+          } else if (typeof item.createdAt === "string") {
+            createdAt = new Date(item.createdAt);
+          } else if (typeof item.createdAt === "number") {
+            createdAt = new Date(item.createdAt);
+          } else {
+            // Если createdAt отсутствует или невалиден, используем текущее время
+            createdAt = new Date();
+          }
+
+          // Проверяем, что дата валидна
+          if (isNaN(createdAt.getTime())) {
+            createdAt = new Date();
+          }
+
+          return {
+            id: item.id.trim(),
+            role: item.role.trim(),
+            content: { text: item.content.text.trim() },
+            createdAt,
+          };
+        } catch (error) {
+          console.warn(
+            `Error processing context item at index ${index}:`,
+            error,
+          );
+          return null;
+        }
+      })
+      .filter((item): item is NonNullable<typeof item> => item !== null);
+  } catch (error) {
+    console.warn("Error parsing context JSON, using empty context:", error);
+    return [];
+  }
+}
+
 // Get the active AI provider based on configuration
 function getActiveProvider() {
   return process.env.AI_PROVIDER === "moonshot" ? moonshotAI : oai;
@@ -71,7 +177,7 @@ async function getSystemPrompt(
       const prompt = await lf.getPrompt(key);
       // Compile with empty vars by default; extend if variables are added later
       const compiled = prompt.compile({});
-      const value = (compiled as string).trim();
+      const value = compiled.trim();
       if (value) {
         cachedPrompts[key] = value;
         return value;
@@ -92,17 +198,36 @@ async function getAssistantSystemPrompt(): Promise<string> {
 }
 
 /**
- * Предоставляет совет по тексту сообщения
+ * Предоставляет совет по тексту сообщения с учетом контекста беседы
  */
 export async function advise(
   input: string,
   telemetry?: Telemetry,
 ): Promise<string> {
   const systemPrompt = await getAssistantSystemPrompt();
+
+  // Извлекаем контекст из метаданных с безопасным парсингом
+  const context = parseContextSafely(telemetry);
+
+  // Формируем историю беседы для промпта
+  let conversationHistory = "";
+  if (context.length > 0) {
+    conversationHistory = "Контекст беседы:\n";
+    context.forEach((msg, index) => {
+      const role = msg.role === "user" ? "Пользователь" : "Ассистент";
+      conversationHistory += `${index + 1}. ${role}: ${msg.content.text}\n`;
+    });
+    conversationHistory += "\n";
+  }
+
+  const contextualPrompt = `${conversationHistory}Текущее событие: "${input}"
+
+Дай краткий полезный совет, учитывая контекст предыдущих сообщений и это событие.`;
+
   const { text } = await generateText({
     model: getActiveProvider()(getAdviceModel()),
     system: systemPrompt,
-    prompt: input,
+    prompt: contextualPrompt,
     temperature: 0.4,
     experimental_telemetry: {
       isEnabled: true,
@@ -114,7 +239,7 @@ export async function advise(
 }
 
 /**
- * Отвечает на вопрос пользователя
+ * Отвечает на вопрос пользователя с учетом контекста беседы
  */
 export async function answerQuestion(
   question: string,
@@ -123,21 +248,40 @@ export async function answerQuestion(
 ): Promise<string> {
   const systemPrompt = await getAssistantSystemPrompt();
 
+  // Извлекаем контекст из метаданных с безопасным парсингом
+  const context = parseContextSafely(telemetry);
+
+  // Формируем историю беседы для промпта
+  let conversationHistory = "";
+  if (context.length > 0) {
+    conversationHistory = "\n\nИстория беседы:\n";
+    context.forEach((msg, index) => {
+      const role = msg.role === "user" ? "Пользователь" : "Ассистент";
+      conversationHistory += `${index + 1}. ${role}: ${msg.content.text}\n`;
+    });
+    conversationHistory += "\n";
+  }
+
   // Создаем контекстный промпт в зависимости от типа вопроса
   let contextPrompt = question;
 
   if (messageType.subtype === "about_bot") {
-    contextPrompt = `Пользователь спрашивает о тебе как о боте. Вопрос: "${question}"
+    contextPrompt = `${conversationHistory}Пользователь спрашивает о тебе как о боте. Вопрос: "${question}"
     
-Ответь дружелюбно, расскажи о своих возможностях согласно системному промпту.`;
+Ответь дружелюбно, расскажи о своих возможностях согласно системному промпту. Учитывай контекст предыдущих сообщений.`;
   } else if (messageType.subtype === "data_query") {
-    contextPrompt = `Пользователь спрашивает о своих данных/статистике. Вопрос: "${question}"
+    contextPrompt = `${conversationHistory}Пользователь спрашивает о своих данных/статистике. Вопрос: "${question}"
     
-Объясни, что для получения статистики нужно сначала накопить данные, записывая события. Предложи начать с записи покупок, задач или других событий.`;
+Объясни, что для получения статистики нужно сначала накопить данные, записывая события. Предложи начать с записи покупок, задач или других событий. Учитывай контекст предыдущих сообщений.`;
   } else if (messageType.subtype === "general") {
-    contextPrompt = `Пользователь задает общий вопрос. Вопрос: "${question}"
+    contextPrompt = `${conversationHistory}Пользователь задает общий вопрос. Вопрос: "${question}"
     
-Ответь полезно и по возможности покажи, как Synoro может помочь в этой ситуации.`;
+Ответь полезно и по возможности покажи, как Synoro может помочь в этой ситуации. Учитывай контекст предыдущих сообщений.`;
+  } else {
+    // Для chat и других типов просто добавляем контекст
+    contextPrompt = `${conversationHistory}Текущее сообщение пользователя: "${question}"
+    
+Ответь дружелюбно и полезно, учитывая контекст предыдущих сообщений. Поддерживай естественный диалог.`;
   }
 
   const { text } = await generateText({

@@ -1,22 +1,9 @@
 import { createEnv } from "@t3-oss/env-core";
-import { z } from "zod";
+
+import { envSchema } from "@synoro/validators";
 
 export const env = createEnv({
-  server: {
-    NODE_ENV: z
-      .enum(["development", "production", "test"])
-      .default("development"),
-    DATABASE_TYPE: z.string().optional(),
-    POSTGRES_URL: z.string().url(),
-    WEB_APP_URL: z.string().url().optional(),
-    EMAIL_FROM: z.string().email().optional(),
-    APP_URL: z.string().url(),
-    OPENAI_API_KEY: z.string().min(1).optional(),
-    LANGFUSE_PUBLIC_KEY: z.string().min(1).optional(),
-    LANGFUSE_SECRET_KEY: z.string().min(1).optional(),
-    LANGFUSE_BASEURL: z.string().url().optional(),
-    TELEGRAM_BOT_TOKEN: z.string().min(10, "TELEGRAM_BOT_TOKEN is required"),
-  },
+  server: envSchema,
 
   runtimeEnv: {
     NODE_ENV: process.env.NODE_ENV,

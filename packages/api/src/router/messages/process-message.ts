@@ -1,46 +1,19 @@
 import { TRPCError } from "@trpc/server";
-import { z } from "zod";
 
-import type { MessageTypeResult } from "../../lib/ai/types";
+import {
+  ProcessMessageInput,
+  ProcessMessageResponse,
+} from "@synoro/validators";
+
+import type { TRPCContext } from "../../trpc";
 import { classifyMessage } from "../../lib/ai";
+import {
+  getConversationContext,
+  saveMessageToConversation,
+  trimContextByTokens,
+} from "../../lib/context-manager";
 import { processClassifiedMessage } from "../../lib/message-processor";
 import { botProcedure, protectedProcedure } from "../../trpc";
-
-// Схема для входящего сообщения
-const ProcessMessageInput = z.object({
-  text: z
-    .string()
-    .min(1, "Текст сообщения не может быть пустым")
-    .max(5000, "Текст сообщения слишком длинный"),
-  channel: z.enum(["telegram", "web", "mobile"]),
-  chatId: z.string().optional(),
-  messageId: z.string().optional(),
-  metadata: z.record(z.string(), z.unknown()).optional(),
-});
-
-// Схема для ответа
-const ProcessMessageResponse = z.object({
-  success: z.boolean(),
-  response: z.string(),
-  messageType: z.object({
-    type: z.string(),
-    subtype: z.string().nullable().optional(),
-    confidence: z.number(),
-    need_logging: z.boolean(),
-  }),
-  relevance: z.object({
-    relevant: z.boolean(),
-    score: z.number().optional(),
-    category: z.string().optional(),
-  }),
-  parsed: z
-    .object({
-      action: z.string(),
-      object: z.string(),
-      confidence: z.number().optional(),
-    })
-    .nullable(),
-});
 
 /**
  * Общая логика обработки сообщения
@@ -49,6 +22,7 @@ async function processMessageInternal(
   text: string,
   channel: "telegram" | "web" | "mobile",
   userId: string,
+  ctx: TRPCContext,
   chatId?: string,
   messageId?: string,
   metadata?: Record<string, unknown>,
@@ -69,9 +43,45 @@ async function processMessageInternal(
   }
 
   try {
+    // Получаем контекст беседы
+    const conversationContext = await getConversationContext(
+      ctx,
+      userId,
+      channel,
+      chatId,
+      {
+        maxMessages: 20, // Берем больше сообщений
+        includeSystemMessages: false,
+        maxAgeHours: 48, // Увеличиваем время
+      },
+    );
+
+    // Умная обрезка контекста:
+    // - До 2000 токенов для вопросов и чата (больше контекста)
+    // - До 1000 токенов для событий (меньше контекста нужен)
+    const maxTokens = text.includes("?") || text.length < 50 ? 2000 : 1000;
+    const trimmedContext = trimContextByTokens(
+      conversationContext.messages,
+      maxTokens,
+    );
+
+    console.log(
+      `📚 Контекст беседы: ${trimmedContext.length} сообщений (ID: ${conversationContext.conversationId})`,
+    );
+
+    // Сохраняем пользовательское сообщение в беседу
+    await saveMessageToConversation(
+      ctx,
+      conversationContext.conversationId,
+      "user",
+      { text },
+    );
+
     const commonMetadata = {
       channel,
       userId,
+      conversationId: conversationContext.conversationId,
+      context: JSON.stringify(trimmedContext),
       ...(chatId && { chatId }),
       ...(messageId && { messageId }),
       ...metadata,
@@ -80,7 +90,7 @@ async function processMessageInternal(
     // Используем оптимизированную комбинированную классификацию
     const classificationStartTime = Date.now();
 
-    console.log("🚀 Using unified message classification");
+    console.log("🚀 Используется унифицированная классификация сообщений с контекстом");
     const classification = await classifyMessage(text, {
       functionId: "api-message-classifier",
       metadata: commonMetadata,
@@ -91,10 +101,7 @@ async function processMessageInternal(
     const classificationTime = Date.now() - classificationStartTime;
     console.log(`⏱️ Classification took ${classificationTime}ms`);
 
-    // Добавляем метрики в метаданные для анализа
-    (commonMetadata as any).classificationTime = classificationTime;
-
-    // Обрабатываем сообщение
+    // Обрабатываем сообщение с контекстом
     const result = await processClassifiedMessage(
       text,
       messageType,
@@ -103,7 +110,9 @@ async function processMessageInternal(
         userId,
         chatId,
         messageId,
-        metadata,
+        metadata: commonMetadata,
+        conversationId: conversationContext.conversationId,
+        context: trimmedContext,
       },
       {
         questionFunctionId: "api-answer-question",
@@ -113,6 +122,15 @@ async function processMessageInternal(
         fallbackParseFunctionId: "api-parse-text-fallback",
         fallbackAdviseFunctionId: "api-advise-fallback",
       },
+    );
+
+    // Сохраняем ответ ассистента в беседу
+    await saveMessageToConversation(
+      ctx,
+      conversationContext.conversationId,
+      "assistant",
+      { text: result.response },
+      result.model, // Используем модель из результата вместо хардкода
     );
 
     return {
@@ -165,6 +183,7 @@ export const processMessageRouter = {
         input.text,
         input.channel,
         userId,
+        ctx,
         input.chatId,
         input.messageId,
         input.metadata,
@@ -189,6 +208,7 @@ export const processMessageRouter = {
         input.text,
         input.channel,
         userId,
+        ctx,
         input.chatId,
         input.messageId,
         input.metadata,

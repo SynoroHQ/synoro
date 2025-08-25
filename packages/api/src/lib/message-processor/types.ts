@@ -1,4 +1,13 @@
-import type { MessageTypeResult, ParsedTask } from "../ai";
+import type { ParsedTask } from "../ai";
+
+export interface ContextMessage {
+  id: string;
+  role: "user" | "assistant" | "system" | "tool";
+  content: {
+    text: string;
+  };
+  createdAt: Date;
+}
 
 export interface MessageProcessorOptions {
   // Function IDs for different message types
@@ -22,6 +31,7 @@ export interface MessageProcessorOptions {
 export interface ProcessClassifiedMessageResult {
   response: string;
   parsed: ParsedTask | null;
+  model: string; // Добавляем информацию о используемой модели
 }
 
 export interface MessageContext {
@@ -30,4 +40,6 @@ export interface MessageContext {
   chatId?: string;
   messageId?: string;
   metadata?: Record<string, unknown>;
+  conversationId?: string;
+  context?: ContextMessage[];
 }

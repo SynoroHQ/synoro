@@ -1,11 +1,10 @@
 import type { TRPCRouterRecord } from "@trpc/server";
 import { and, eq } from "drizzle-orm";
-import { z } from "zod";
 
 import { conversations, messages } from "@synoro/db";
 import {
   GetHistoryInput,
-  MessageOutput,
+  GetHistoryOutput,
   MessageRole,
 } from "@synoro/validators";
 
@@ -14,13 +13,13 @@ import { protectedProcedure } from "../../trpc";
 export const getHistoryRouter: TRPCRouterRecord = {
   getHistory: protectedProcedure
     .input(GetHistoryInput)
-    .output(z.object({ items: z.array(MessageOutput) }))
+    .output(GetHistoryOutput)
     .query(async ({ ctx, input }) => {
       const db = ctx.db;
       const userId = ctx.session.user.id;
 
       // Получаем сообщения из указанной беседы
-      const rows = await db
+      const query = db
         .select({
           id: messages.id,
           role: messages.role,
@@ -41,12 +40,27 @@ export const getHistoryRouter: TRPCRouterRecord = {
         )
         .orderBy(messages.createdAt); // сначала старые сообщения
 
+      // Применяем пагинацию
+      if (input.cursor) {
+        // TODO: Implement cursor-based pagination
+        // query = query.where(gt(messages.createdAt, input.cursor));
+      }
+
+      const rows = await query.limit(input.limit ?? 100);
+
       // Приводим к формату MessageOutput с валидацией
       const items = rows.map((row) => ({
         id: row.id,
         conversationId: row.conversationId,
         role: MessageRole.parse(row.role),
-        content: MessageOutput.shape.content.parse(row.content),
+        content: {
+          text:
+            typeof row.content === "object" &&
+            row.content &&
+            "text" in row.content
+              ? String(row.content.text)
+              : String(row.content),
+        },
         createdAt: row.createdAt,
       }));
 

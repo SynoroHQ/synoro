@@ -1,10 +1,10 @@
 import type { TRPCRouterRecord } from "@trpc/server";
+import { createId } from "@paralleldrive/cuid2";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
-import { z } from "zod";
 
-import { conversations, createId, messages } from "@synoro/db";
-import { SendMessageInput } from "@synoro/validators";
+import { conversations, messages } from "@synoro/db";
+import { SendMessageInput, SendMessageOutput } from "@synoro/validators";
 
 import { startCompletionRun } from "../../lib/llm";
 import { protectedProcedure } from "../../trpc";
@@ -12,13 +12,7 @@ import { protectedProcedure } from "../../trpc";
 export const sendMessageRouter: TRPCRouterRecord = {
   sendMessage: protectedProcedure
     .input(SendMessageInput)
-    .output(
-      z.object({
-        runId: z.string(),
-        conversationId: z.string(),
-        userMessageId: z.string(),
-      }),
-    )
+    .output(SendMessageOutput)
     .mutation(async ({ ctx, input }) => {
       const db = ctx.db;
       const now = new Date();

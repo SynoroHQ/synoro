@@ -37,7 +37,8 @@ export const SendMessageInput = z
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["createNew"],
-        message: "Либо указывайте conversationId, либо createNew=true — выберите одно.",
+        message:
+          "Либо указывайте conversationId, либо createNew=true — выберите одно.",
       });
     }
     if (!hasId && !wantsNew) {
@@ -67,9 +68,42 @@ export const ListConversationsInput = z.object({
   limit: z.number().int().min(1).max(100).default(20).optional(),
 });
 
+// New schemas for chat operations
+export const SendMessageOutput = z.object({
+  runId: z.string(),
+  conversationId: z.string(),
+  userMessageId: z.string(),
+});
+
+export const StreamInput = z.object({
+  runId: z.string(),
+  conversationId: z.string().min(1),
+});
+
+export const ListConversationsOutput = z.object({
+  items: z.array(
+    z.object({
+      id: z.string(),
+      title: z.string().nullable().optional(),
+      channel: z.string(),
+      updatedAt: z.date(),
+      lastMessageAt: z.date().nullable().optional(),
+    }),
+  ),
+});
+
+export const GetHistoryOutput = z.object({
+  items: z.array(MessageOutput),
+});
+
+// Type exports
 export type TChannel = z.infer<typeof Channel>;
 export type TMessageRole = z.infer<typeof MessageRole>;
 export type TSendMessageInput = z.infer<typeof SendMessageInput>;
 export type TMessageOutput = z.infer<typeof MessageOutput>;
 export type TGetHistoryInput = z.infer<typeof GetHistoryInput>;
 export type TListConversationsInput = z.infer<typeof ListConversationsInput>;
+export type TSendMessageOutput = z.infer<typeof SendMessageOutput>;
+export type TStreamInput = z.infer<typeof StreamInput>;
+export type TListConversationsOutput = z.infer<typeof ListConversationsOutput>;
+export type TGetHistoryOutput = z.infer<typeof GetHistoryOutput>;

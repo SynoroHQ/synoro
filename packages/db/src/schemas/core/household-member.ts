@@ -65,8 +65,9 @@ export const householdMembers = pgTable(
     index("household_member_user_idx").on(table.userId),
     index("household_member_role_idx").on(table.role),
     index("household_member_status_idx").on(table.status),
-    uniqueIndex("household_one_owner_idx")
-      .on(table.householdId)
-      .where(eq(table.role, "owner")),
+    // Убираем проблемный индекс с условием WHERE
+    // uniqueIndex("household_one_owner_idx")
+    //   .on(table.householdId)
+    //   .where(eq(table.role, "owner")),
   ],
 );
