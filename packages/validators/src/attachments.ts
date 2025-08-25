@@ -6,6 +6,12 @@ export const CreatePresignedUrlSchema = z.object({
   temporary: z.boolean().default(false),
 });
 
+// Schema for presigned URL response
+export const CreatePresignedUrlOutput = z.object({
+  url: z.string(),
+  key: z.string(),
+});
+
 // Schema for attachment metadata
 export const attachmentSchema = z.object({
   id: z.string().uuid(),
@@ -21,4 +27,5 @@ export const attachmentSchema = z.object({
 
 // Type exports
 export type CreatePresignedUrlInput = z.infer<typeof CreatePresignedUrlSchema>;
+export type CreatePresignedUrlOutput = z.infer<typeof CreatePresignedUrlOutput>;
 export type AttachmentData = z.infer<typeof attachmentSchema>;

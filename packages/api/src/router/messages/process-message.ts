@@ -1,6 +1,11 @@
 import { TRPCError } from "@trpc/server";
-import { z } from "zod";
 
+import {
+  ProcessMessageInput,
+  ProcessMessageResponse,
+} from "@synoro/validators";
+
+import type { TRPCContext } from "../../trpc";
 import { classifyMessage } from "../../lib/ai";
 import {
   getConversationContext,
@@ -10,42 +15,6 @@ import {
 import { processClassifiedMessage } from "../../lib/message-processor";
 import { botProcedure, protectedProcedure } from "../../trpc";
 
-// Схема для входящего сообщения
-const ProcessMessageInput = z.object({
-  text: z
-    .string()
-    .min(1, "Текст сообщения не может быть пустым")
-    .max(5000, "Текст сообщения слишком длинный"),
-  channel: z.enum(["telegram", "web", "mobile"]),
-  chatId: z.string().optional(),
-  messageId: z.string().optional(),
-  metadata: z.record(z.string(), z.unknown()).optional(),
-});
-
-// Схема для ответа
-const ProcessMessageResponse = z.object({
-  success: z.boolean(),
-  response: z.string(),
-  messageType: z.object({
-    type: z.string(),
-    subtype: z.string().nullable().optional(),
-    confidence: z.number(),
-    need_logging: z.boolean(),
-  }),
-  relevance: z.object({
-    relevant: z.boolean(),
-    score: z.number().optional(),
-    category: z.string().optional(),
-  }),
-  parsed: z
-    .object({
-      action: z.string(),
-      object: z.string(),
-      confidence: z.number().optional(),
-    })
-    .nullable(),
-});
-
 /**
  * Общая логика обработки сообщения
  */
@@ -53,7 +22,7 @@ async function processMessageInternal(
   text: string,
   channel: "telegram" | "web" | "mobile",
   userId: string,
-  ctx: any, // TRPCContext
+  ctx: TRPCContext,
   chatId?: string,
   messageId?: string,
   metadata?: Record<string, unknown>,
@@ -161,7 +130,7 @@ async function processMessageInternal(
       conversationContext.conversationId,
       "assistant",
       { text: result.response },
-      "gpt-4", // или получать из конфигурации
+      result.model, // Используем модель из результата вместо хардкода
     );
 
     return {

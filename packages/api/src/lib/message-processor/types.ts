@@ -31,6 +31,7 @@ export interface MessageProcessorOptions {
 export interface ProcessClassifiedMessageResult {
   response: string;
   parsed: ParsedTask | null;
+  model: string; // Добавляем информацию о используемой модели
 }
 
 export interface MessageContext {

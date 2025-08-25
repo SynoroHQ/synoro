@@ -1,24 +1,7 @@
-import { z } from "zod";
+import { TranscribeInput, TranscribeResponse } from "@synoro/validators";
 
 import { transcribe } from "../../lib/ai";
 import { botProcedure, protectedProcedure, publicProcedure } from "../../trpc";
-
-// Схема для входящего аудио
-const TranscribeInput = z.object({
-  audio: z.string(), // base64-encoded audio data
-  filename: z.string(),
-  channel: z.enum(["telegram", "web", "mobile"]),
-  chatId: z.string().optional(),
-  messageId: z.string().optional(),
-  metadata: z.record(z.string(), z.unknown()).optional(),
-});
-
-// Схема для ответа
-const TranscribeResponse = z.object({
-  success: z.boolean(),
-  text: z.string(),
-  filename: z.string(),
-});
 
 export const transcribeRouter = {
   // Универсальный эндпоинт для транскрипции аудио (для веб/мобайл клиентов)

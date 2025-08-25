@@ -7,5 +7,17 @@ export * from "./events";
 // Analytics validators
 export * from "./analytics";
 
+// Attachment validators
 export * from "./attachments";
+
+// Chat validators
 export * from "./chat";
+
+// Message validators
+export * from "./messages";
+
+// AI validators
+export * from "./ai";
+
+// Environment validators
+export * from "./env";

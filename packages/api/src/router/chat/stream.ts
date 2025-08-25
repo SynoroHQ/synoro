@@ -1,9 +1,9 @@
 import type { TRPCRouterRecord } from "@trpc/server";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
-import { z } from "zod";
 
 import { conversations } from "@synoro/db";
+import { StreamInput } from "@synoro/validators";
 
 import type { StreamEvent } from "../../lib/event-bus";
 import { eventBus } from "../../lib/event-bus";
@@ -11,12 +11,7 @@ import { protectedProcedure } from "../../trpc";
 
 export const streamRouter: TRPCRouterRecord = {
   stream: protectedProcedure
-    .input(
-      z.object({
-        runId: z.string(),
-        conversationId: z.string().min(1),
-      }),
-    )
+    .input(StreamInput)
     .subscription(async function* (opts) {
       const { runId, conversationId } = opts.input;
       const userId = opts.ctx.session.user.id;
@@ -40,7 +35,8 @@ export const streamRouter: TRPCRouterRecord = {
           let unsubscribe: (() => void) | null = null;
           const MAX_QUEUE = 1000;
           const queue: StreamEvent[] = [];
-          let resolve: ((value: IteratorResult<StreamEvent>) => void) | null = null;
+          let resolve: ((value: IteratorResult<StreamEvent>) => void) | null =
+            null;
           let done = false;
 
           unsubscribe = eventBus.subscribe(runId, (event) => {
