@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import {
   index,
   jsonb,
@@ -65,9 +65,9 @@ export const householdMembers = pgTable(
     index("household_member_user_idx").on(table.userId),
     index("household_member_role_idx").on(table.role),
     index("household_member_status_idx").on(table.status),
-    // Убираем проблемный индекс с условием WHERE
-    // uniqueIndex("household_one_owner_idx")
-    //   .on(table.householdId)
-    //   .where(eq(table.role, "owner")),
+    // Частичный уникальный индекс: только один активный владелец на домохозяйство
+    uniqueIndex("household_one_active_owner_idx")
+      .on(table.householdId)
+      .where(and(eq(table.role, "owner"), eq(table.status, "active"))),
   ],
 );
