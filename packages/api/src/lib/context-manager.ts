@@ -3,18 +3,7 @@ import { and, desc, eq } from "drizzle-orm";
 import { conversations, messages } from "@synoro/db/schema";
 
 import type { TRPCContext } from "../trpc";
-
-/**
- * Интерфейс для сообщения в контексте
- */
-export interface ContextMessage {
-  id: string;
-  role: "user" | "assistant" | "system" | "tool";
-  content: {
-    text: string;
-  };
-  createdAt: Date;
-}
+import type { ContextMessage } from "./message-processor";
 
 /**
  * Настройки для получения контекста
