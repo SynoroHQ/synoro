@@ -90,7 +90,7 @@ async function processMessageInternal(
     // Используем оптимизированную комбинированную классификацию
     const classificationStartTime = Date.now();
 
-    console.log("🚀 Using unified message classification with context");
+    console.log("🚀 Используется унифицированная классификация сообщений с контекстом");
     const classification = await classifyMessage(text, {
       functionId: "api-message-classifier",
       metadata: commonMetadata,
