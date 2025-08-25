@@ -16,7 +16,7 @@ export async function startCompletionRun(opts: {
   _userMessageId: string;
   prompt: string;
   model?: string;
-  userId?: string;
+  userId?: string | null;
   telegramChatId?: string; // Для анонимных пользователей Telegram
 }) {
   const { runId, conversationId, prompt } = opts;
@@ -63,7 +63,7 @@ export async function startCompletionRun(opts: {
           runId,
           conversationId,
           userId: opts.userId ?? "unknown",
-          telegramChatId: opts.telegramChatId ?? null,
+          telegramChatId: opts.telegramChatId ?? "unknown",
         },
       },
     });

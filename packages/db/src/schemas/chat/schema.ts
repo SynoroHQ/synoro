@@ -184,3 +184,36 @@ export const identityLinks = pgTable(
     index("identity_link_provider_idx").on(table.provider),
   ],
 );
+
+/**
+ * Таблица для предотвращения дублирования сообщений (идемпотентность)
+ * Хранит обработанные ключи идемпотентности для анонимных пользователей
+ */
+export const processedIdempotencyKeys = pgTable(
+  "processed_idempotency_keys",
+  (t) => ({
+    id: text("id").primaryKey().$defaultFn(createId),
+    // Для анонимных пользователей Telegram
+    telegramChatId: t.text("telegram_chat_id").notNull(),
+    // Ключ идемпотентности из запроса
+    idempotencyKey: t.text("idempotency_key").notNull(),
+    // ID созданного сообщения для возврата при повторном запросе
+    messageId: t.text("message_id").notNull(),
+    // Время создания для очистки старых записей
+    createdAt: t
+      .timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  }),
+  (table) => [
+    // Уникальный индекс по telegramChatId + idempotencyKey
+    unique("idempotency_telegram_key_uidx").on(
+      table.telegramChatId,
+      table.idempotencyKey,
+    ),
+    // Индексы для быстрого поиска
+    index("idempotency_telegram_chat_idx").on(table.telegramChatId),
+    index("idempotency_key_idx").on(table.idempotencyKey),
+    index("idempotency_created_at_idx").on(table.createdAt),
+  ],
+);

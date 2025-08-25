@@ -61,7 +61,7 @@ export async function getConversationContext(
     maxAgeHours = 24,
   } = options;
 
-  let conversation: any;
+  let conversation: typeof conversations.$inferSelect | null = null;
 
   if (userId) {
     // Для зарегистрированных пользователей
@@ -74,24 +74,26 @@ export async function getConversationContext(
       conditions.push(eq(conversations.title, chatId));
     }
 
-    conversation = await ctx.db.query.conversations.findFirst({
-      where: conditions.length === 1 ? conditions[0] : and(...conditions),
-    });
+    conversation =
+      (await ctx.db.query.conversations.findFirst({
+        where: conditions.length === 1 ? conditions[0] : and(...conditions),
+      })) ?? null;
   } else if (channel === "telegram" && chatId) {
     // Для анонимных пользователей Telegram
-    conversation = await ctx.db.query.conversations.findFirst({
-      where: and(
-        eq(conversations.telegramChatId, chatId),
-        eq(conversations.channel, "telegram")
-      ),
-    });
+    conversation =
+      (await ctx.db.query.conversations.findFirst({
+        where: and(
+          eq(conversations.telegramChatId, chatId),
+          eq(conversations.channel, "telegram"),
+        ),
+      })) ?? null;
   }
 
   // Если беседа не найдена, создаем новую
   if (!conversation) {
-    const conversationData: any = {
+    const conversationData: typeof conversations.$inferInsert = {
       channel,
-      title: chatId || `${channel}_conversation`,
+      title: chatId ?? `${channel}_conversation`,
       status: "active",
       lastMessageAt: new Date(),
     };
@@ -101,7 +103,6 @@ export async function getConversationContext(
     } else if (channel === "telegram" && chatId) {
       conversationData.telegramChatId = chatId;
     }
-
     const [newConversation] = await ctx.db
       .insert(conversations)
       .values(conversationData)
@@ -136,7 +137,7 @@ export async function getConversationContext(
     .reverse() // Возвращаем в хронологическом порядке
     .map((msg) => ({
       id: msg.id,
-      role: msg.role as "user" | "assistant" | "system" | "tool",
+      role: msg.role,
       content: {
         text:
           typeof msg.content === "object" &&

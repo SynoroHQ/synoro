@@ -4,11 +4,12 @@ import { z } from "zod";
 
 import { conversations } from "@synoro/db";
 import {
+  ListAnonymousConversationsInput,
   ListConversationsInput,
   ListConversationsOutput,
 } from "@synoro/validators";
 
-import { protectedProcedure, publicProcedure } from "../../trpc";
+import { protectedProcedure, telegramAnonymousProcedure } from "../../trpc";
 
 export const listConversationsRouter: TRPCRouterRecord = {
   listConversations: protectedProcedure
@@ -33,17 +34,18 @@ export const listConversationsRouter: TRPCRouterRecord = {
       return { items: rows };
     }),
 
-  // Для анонимных пользователей Telegram
-  listAnonymousConversations: publicProcedure
-    .input(
-      z.object({
-        telegramChatId: z.string().min(1),
-        limit: z.number().int().min(1).max(100).default(20).optional(),
-      }),
-    )
+  // Для анонимных пользователей Telegram с валидацией initData
+  listAnonymousConversations: telegramAnonymousProcedure
+    .input(ListAnonymousConversationsInput)
     .output(ListConversationsOutput)
     .query(async ({ ctx, input }) => {
       const db = ctx.db;
+
+      // Используем telegramChatId из контекста middleware
+      if (!ctx.telegramChatId) {
+        throw new Error("Telegram chat ID not found in context");
+      }
+
       const rows = await db
         .select({
           id: conversations.id,
@@ -53,7 +55,7 @@ export const listConversationsRouter: TRPCRouterRecord = {
           lastMessageAt: conversations.lastMessageAt,
         })
         .from(conversations)
-        .where(eq(conversations.telegramChatId, input.telegramChatId))
+        .where(eq(conversations.telegramChatId, ctx.telegramChatId))
         .orderBy(desc(conversations.updatedAt))
         .limit(input.limit ?? 20);
 
