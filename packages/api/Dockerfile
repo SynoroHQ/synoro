@@ -28,7 +28,7 @@ RUN bun install
 COPY --from=builder /app/out/full/ .
 ENV CI=true
 ENV npm_lifecycle_event=build
-RUN bun turbo run build --filter=@synoro/api
+RUN bun turbo run build --filter=@synoro/api --filter=@synoro/db --filter=@synoro/auth --filter=@synoro/validators --filter=@synoro/lib --filter=@synoro/prompts
 
 FROM base AS runner
 WORKDIR /app
@@ -38,10 +38,24 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 bunjs
 USER bunjs
 
-# Copy built application
+# Copy built application and dependencies
 COPY --from=installer --chown=bunjs:nodejs /app/packages/api/dist ./dist
 COPY --from=installer --chown=bunjs:nodejs /app/packages/api/package.json ./package.json
 COPY --from=installer --chown=bunjs:nodejs /app/node_modules ./node_modules
+
+# Copy built workspace packages
+COPY --from=installer --chown=bunjs:nodejs /app/packages/db/dist ./node_modules/@synoro/db/dist
+COPY --from=installer --chown=bunjs:nodejs /app/packages/auth/dist ./node_modules/@synoro/auth/dist
+COPY --from=installer --chown=bunjs:nodejs /app/packages/validators/dist ./node_modules/@synoro/validators/dist
+COPY --from=installer --chown=bunjs:nodejs /app/packages/lib/dist ./node_modules/@synoro/lib/dist
+COPY --from=installer --chown=bunjs:nodejs /app/packages/prompts/dist ./node_modules/@synoro/prompts/dist
+
+# Copy package.json files for workspace packages
+COPY --from=installer --chown=bunjs:nodejs /app/packages/db/package.json ./node_modules/@synoro/db/package.json
+COPY --from=installer --chown=bunjs:nodejs /app/packages/auth/package.json ./node_modules/@synoro/auth/package.json
+COPY --from=installer --chown=bunjs:nodejs /app/packages/validators/package.json ./node_modules/@synoro/validators/package.json
+COPY --from=installer --chown=bunjs:nodejs /app/packages/lib/package.json ./node_modules/@synoro/lib/package.json
+COPY --from=installer --chown=bunjs:nodejs /app/packages/prompts/package.json ./node_modules/@synoro/prompts/package.json
 
 # Expose port
 EXPOSE 8080

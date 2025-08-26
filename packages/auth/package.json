@@ -5,13 +5,13 @@
   "type": "module",
   "exports": {
     ".": {
-      "react-server": "./src/index.rsc.ts",
-      "default": "./src/index.ts"
+      "react-server": "./dist/index.rsc.js",
+      "default": "./dist/index.js"
     },
     "./env": "./env.ts",
-    "./client": "./src/client.ts",
-    "./middleware": "./src/middleware.ts",
-    "./util": "./src/util.ts"
+    "./client": "./dist/client.js",
+    "./middleware": "./dist/middleware.js",
+    "./util": "./dist/util.js"
   },
   "license": "MIT",
   "scripts": {

@@ -5,19 +5,19 @@
   "type": "module",
   "exports": {
     ".": {
-      "default": "./src/index.ts"
+      "default": "./dist/index.js"
     },
     "./client": {
-      "default": "./src/client.ts"
+      "default": "./dist/client.js"
     },
     "./client-ws": {
-      "default": "./src/client-ws.ts"
+      "default": "./dist/client-ws.js"
     },
     "./schema": {
-      "default": "./src/schema.ts"
+      "default": "./dist/schema.js"
     },
     "./types": {
-      "default": "./src/types.ts"
+      "default": "./dist/types.js"
     }
   },
   "license": "MIT",
