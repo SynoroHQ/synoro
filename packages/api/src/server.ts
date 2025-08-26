@@ -2,7 +2,6 @@ import { pathToFileURL } from "url";
 import * as trpcExpress from "@trpc/server/adapters/express";
 import express from "express";
 
-import { uploadRouter } from "./lib/upload";
 import { startTracing, stopTracing } from "./otel";
 import { appRouter } from "./root";
 import { createExpressContext } from "./trpc";
@@ -32,9 +31,6 @@ async function main() {
     app.get("/health", (req, res) => {
       res.json({ status: "ok", timestamp: new Date().toISOString() });
     });
-
-    // Add file upload routes
-    app.use("/api/upload", uploadRouter);
 
     // Add tRPC middleware
     app.use(

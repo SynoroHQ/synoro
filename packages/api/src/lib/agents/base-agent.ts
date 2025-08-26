@@ -1,4 +1,4 @@
-import type { LanguageModelV1 } from "ai";
+import type { LanguageModel } from "ai";
 import { openai } from "@ai-sdk/openai";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 
@@ -49,7 +49,7 @@ export abstract class AbstractAgent implements BaseAgent {
   /**
    * Получение модели для агента
    */
-  getModel(): LanguageModelV1 {
+  getModel(): LanguageModel {
     return getActiveProvider()(getModelName(this.defaultModel));
   }
 
