@@ -8,9 +8,9 @@ import {
 } from "../utils/message-utils";
 import {
   createMessageContext,
+  escapeTelegramMarkdownV2,
   getUserIdentifier,
   isObviousSpam,
-  escapeTelegramMarkdownV2,
 } from "../utils/telegram-utils";
 
 /**
@@ -41,15 +41,8 @@ export async function handleSmartText(ctx: Context): Promise<void> {
 
   // Определяем, нужна ли агентная обработка
   const shouldUseAgents = shouldUseAgentProcessing(text);
-
-  const processingMessage = shouldUseAgents
-    ? "🤖 Обрабатываю через агентную систему..."
-    : "⚙️ Обрабатываю сообщение...";
-
-  const processingMessageId = await sendProcessingMessage(
-    ctx,
-    processingMessage,
-  );
+  const messageType = shouldUseAgents ? "запрос" : "сообщение";
+  const processingMessageId = await sendProcessingMessage(ctx, messageType);
 
   try {
     const messageContext = createMessageContext(ctx);
@@ -115,7 +108,9 @@ export async function handleSmartText(ctx: Context): Promise<void> {
       reply += `\n\n🔬 _Debug: ${agentInfo.processingMode} | ${agentInfo.agentsUsed.join("→")} | Q:${(agentInfo.qualityScore * 100).toFixed(0)}%_`;
     }
 
-    await ctx.reply(escapeTelegramMarkdownV2(reply), { parse_mode: "MarkdownV2" });
+    await ctx.reply(escapeTelegramMarkdownV2(reply), {
+      parse_mode: "MarkdownV2",
+    });
 
     // Логируем результат обработки
     if ("agentMetadata" in result && result.agentMetadata) {

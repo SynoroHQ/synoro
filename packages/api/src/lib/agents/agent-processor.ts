@@ -1,10 +1,11 @@
+import type { MessageTypeResult } from "../ai/types";
 import type {
   MessageContext,
   MessageProcessorOptions,
   ProcessClassifiedMessageResult,
 } from "../message-processor/types";
-import type { MessageTypeResult } from "../ai/types";
-import { AgentManager, type AgentContext } from "./index";
+import type { AgentContext } from "./types";
+import { AgentManager } from "./agent-manager";
 
 /**
  * Новый процессор сообщений с использованием мультиагентной системы
@@ -28,15 +29,17 @@ export class AgentMessageProcessor {
       useQualityControl?: boolean;
       maxQualityIterations?: number;
       targetQuality?: number;
-    } = {}
-  ): Promise<ProcessClassifiedMessageResult & {
-    agentMetadata?: {
-      agentsUsed: string[];
-      totalSteps: number;
-      qualityScore: number;
-      processingTime: number;
-    };
-  }> {
+    } = {},
+  ): Promise<
+    ProcessClassifiedMessageResult & {
+      agentMetadata?: {
+        agentsUsed: string[];
+        totalSteps: number;
+        qualityScore: number;
+        processingTime: number;
+      };
+    }
+  > {
     try {
       // Преобразуем контекст для агентной системы
       const agentContext: AgentContext = {
@@ -67,14 +70,17 @@ export class AgentMessageProcessor {
           maxQualityIterations: options.maxQualityIterations ?? 2,
           targetQuality: options.targetQuality ?? 0.8,
         },
-        telemetry
+        telemetry,
       );
 
       // Извлекаем данные для совместимости с существующим API
       let parsed = null;
-      
+
       // Если это событие и у нас есть парсированные данные
-      if (messageType.type === "event" && orchestrationResult.metadata?.agentData) {
+      if (
+        messageType.type === "event" &&
+        orchestrationResult.metadata?.agentData
+      ) {
         const agentData = orchestrationResult.metadata.agentData;
         if (agentData.parsedEvent) {
           parsed = agentData.parsedEvent;
@@ -99,10 +105,11 @@ export class AgentMessageProcessor {
       };
     } catch (error) {
       console.error("Error in agent message processing:", error);
-      
+
       // Fallback к простому ответу
       return {
-        response: "Извините, произошла ошибка при обработке сообщения. Попробуйте еще раз.",
+        response:
+          "Извините, произошла ошибка при обработке сообщения. Попробуйте еще раз.",
         parsed: null,
         model: "gpt-4o-mini",
         agentMetadata: {
@@ -116,7 +123,7 @@ export class AgentMessageProcessor {
   }
 
   /**
-   * Гибридный процессор: использует агентов для сложных задач, 
+   * Гибридный процессор: использует агентов для сложных задач,
    * старую систему для простых
    */
   async processHybrid(
@@ -126,25 +133,43 @@ export class AgentMessageProcessor {
     options: MessageProcessorOptions & {
       forceAgentMode?: boolean;
       useQualityControl?: boolean;
-    } = {}
-  ): Promise<ProcessClassifiedMessageResult & {
-    processingMode: "agents" | "legacy";
-    agentMetadata?: any;
-  }> {
+    } = {},
+  ): Promise<
+    ProcessClassifiedMessageResult & {
+      processingMode: "agents" | "legacy";
+      agentMetadata?: any;
+    }
+  > {
     // Определяем, нужно ли использовать агентов
-    const shouldUseAgents = this.shouldUseAgentProcessing(text, messageType, options.forceAgentMode);
+    const shouldUseAgents = this.shouldUseAgentProcessing(
+      text,
+      messageType,
+      options.forceAgentMode,
+    );
 
     if (shouldUseAgents) {
-      const result = await this.processWithAgents(text, messageType, context, options);
+      const result = await this.processWithAgents(
+        text,
+        messageType,
+        context,
+        options,
+      );
       return {
         ...result,
         processingMode: "agents",
       };
     } else {
       // Используем существующую систему для простых случаев
-      const { processClassifiedMessage } = await import("../message-processor/processor");
-      const result = await processClassifiedMessage(text, messageType, context, options);
-      
+      const { processClassifiedMessage } = await import(
+        "../message-processor/processor"
+      );
+      const result = await processClassifiedMessage(
+        text,
+        messageType,
+        context,
+        options,
+      );
+
       return {
         ...result,
         processingMode: "legacy",
@@ -158,32 +183,38 @@ export class AgentMessageProcessor {
   private shouldUseAgentProcessing(
     text: string,
     messageType: MessageTypeResult,
-    forceAgentMode?: boolean
+    forceAgentMode?: boolean,
   ): boolean {
     if (forceAgentMode) return true;
 
     // Критерии для использования агентов:
-    
+
     // 1. Сложные вопросы
     const complexQuestionKeywords = [
-      "анализ", "статистика", "сравни", "найди паттерн", 
-      "оптимизируй", "улучши", "план", "стратегия"
+      "анализ",
+      "статистика",
+      "сравни",
+      "найди паттерн",
+      "оптимизируй",
+      "улучши",
+      "план",
+      "стратегия",
     ];
-    
+
     // 2. Длинные сообщения (обычно более сложные)
     const isLongMessage = text.length > 100;
-    
+
     // 3. Низкая уверенность классификации
     const lowConfidence = messageType.confidence < 0.7;
-    
+
     // 4. Определенные типы сообщений
     const complexTypes = ["complex_task", "analysis"];
-    
+
     const textLower = text.toLowerCase();
-    const hasComplexKeywords = complexQuestionKeywords.some(keyword => 
-      textLower.includes(keyword)
+    const hasComplexKeywords = complexQuestionKeywords.some((keyword) =>
+      textLower.includes(keyword),
     );
-    
+
     return (
       hasComplexKeywords ||
       isLongMessage ||

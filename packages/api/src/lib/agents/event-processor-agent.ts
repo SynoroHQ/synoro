@@ -213,27 +213,51 @@ export class EventProcessorAgent extends AbstractAgent {
         text: z.string(),
       }),
       execute: async ({ text }) => {
-        // Регулярные выражения для поиска сумм
+        // Функция для нормализации числовой строки
+        const normalizeNumberString = (numStr: string): string => {
+          return numStr
+            // Убираем все типы пробелов (обычные, неразрывные, тонкие) как разделители тысяч
+            .replace(/[\s\u00A0\u2009\u200A\u200B\u200C\u200D\uFEFF]/g, "")
+            // Заменяем запятую на точку как десятичный разделитель
+            .replace(/,/g, ".")
+            // Убираем лишние символы валют и пробелы
+            .replace(/[^\d.]/g, "");
+        };
+
+        // Улучшенные регулярные выражения для поиска сумм
+        // Поддерживают пробелы как разделители тысяч и запятые как десятичные разделители
         const rublePatterns = [
-          /(\d+(?:\.\d+)?)\s*(?:руб|рублей?|р\.?|₽)/i,
-          /(\d+(?:\.\d+)?)\s*р(?:\s|$)/i,
+          // Формат: "1 299,90 ₽" или "1 299.90 ₽"
+          /([\d\s\u00A0\u2009\u200A\u200B\u200C\u200D\uFEFF]+(?:[.,]\d+)?)\s*(?:руб|рублей?|р\.?|₽)/i,
+          // Формат: "1 299,90 р" или "1 299.90 р"
+          /([\d\s\u00A0\u2009\u200A\u200B\u200C\u200D\uFEFF]+(?:[.,]\d+)?)\s*р(?:\s|$)/i,
+          // Формат: "₽1 299,90"
+          /₽\s*([\d\s\u00A0\u2009\u200A\u200B\u200C\u200D\uFEFF]+(?:[.,]\d+)?)/i,
         ];
 
         const dollarPatterns = [
-          /\$(\d+(?:\.\d+)?)/i,
-          /(\d+(?:\.\d+)?)\s*(?:доллар|долларов|usd)/i,
+          // Формат: "$1,299.90" или "$1 299,90"
+          /\$\s*([\d\s\u00A0\u2009\u200A\u200B\u200C\u200D\uFEFF]+(?:[.,]\d+)?)/i,
+          // Формат: "1 299,90 доллар" или "1 299.90 USD"
+          /([\d\s\u00A0\u2009\u200A\u200B\u200C\u200D\uFEFF]+(?:[.,]\d+)?)\s*(?:доллар|долларов|usd)/i,
         ];
 
         const euroPatterns = [
-          /€(\d+(?:\.\d+)?)/i,
-          /(\d+(?:\.\d+)?)\s*(?:евро|eur)/i,
+          // Формат: "€1.299,90" или "€1 299,90"
+          /€\s*([\d\s\u00A0\u2009\u200A\u200B\u200C\u200D\uFEFF]+(?:[.,]\d+)?)/i,
+          // Формат: "1 299,90 евро" или "1 299,90 EUR"
+          /([\d\s\u00A0\u2009\u200A\u200B\u200C\u200D\uFEFF]+(?:[.,]\d+)?)\s*(?:евро|eur)/i,
         ];
 
         // Проверяем рубли
         for (const pattern of rublePatterns) {
           const match = text.match(pattern);
           if (match) {
-            return { amount: parseFloat(match[1]), currency: "RUB" };
+            const normalizedAmount = normalizeNumberString(match[1]);
+            const amount = parseFloat(normalizedAmount);
+            if (!isNaN(amount)) {
+              return { amount, currency: "RUB" };
+            }
           }
         }
 
@@ -241,7 +265,11 @@ export class EventProcessorAgent extends AbstractAgent {
         for (const pattern of dollarPatterns) {
           const match = text.match(pattern);
           if (match) {
-            return { amount: parseFloat(match[1]), currency: "USD" };
+            const normalizedAmount = normalizeNumberString(match[1]);
+            const amount = parseFloat(normalizedAmount);
+            if (!isNaN(amount)) {
+              return { amount, currency: "USD" };
+            }
           }
         }
 
@@ -249,14 +277,23 @@ export class EventProcessorAgent extends AbstractAgent {
         for (const pattern of euroPatterns) {
           const match = text.match(pattern);
           if (match) {
-            return { amount: parseFloat(match[1]), currency: "EUR" };
+            const normalizedAmount = normalizeNumberString(match[1]);
+            const amount = parseFloat(normalizedAmount);
+            if (!isNaN(amount)) {
+              return { amount, currency: "EUR" };
+            }
           }
         }
 
-        // Если не нашли валюту, но есть число
-        const numberMatch = /(\d+(?:\.\d+)?)/.exec(text);
+        // Если не нашли валюту, но есть число с пробелами
+        const numberPattern = /([\d\s\u00A0\u2009\u200A\u200B\u200C\u200D\uFEFF]+(?:[.,]\d+)?)/;
+        const numberMatch = numberPattern.exec(text);
         if (numberMatch) {
-          return { amount: parseFloat(numberMatch[1]), currency: "RUB" }; // По умолчанию рубли
+          const normalizedAmount = normalizeNumberString(numberMatch[1]);
+          const amount = parseFloat(normalizedAmount);
+          if (!isNaN(amount)) {
+            return { amount, currency: "RUB" }; // По умолчанию рубли
+          }
         }
 
         return null;

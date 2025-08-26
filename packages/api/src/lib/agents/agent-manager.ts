@@ -1,18 +1,17 @@
 import type {
-  BaseAgent,
-  AgentTask,
-  AgentResult,
-  AgentTelemetry,
-  OrchestrationResult,
   AgentContext,
+  AgentResult,
+  AgentTask,
+  AgentTelemetry,
+  BaseAgent,
+  OrchestrationResult,
 } from "./types";
-
+import { EventProcessorAgent } from "./event-processor-agent";
+import { QASpecialistAgent } from "./qa-specialist-agent";
+import { QualityEvaluatorAgent } from "./quality-evaluator-agent";
 // Импорт всех агентов
 import { RouterAgent } from "./router-agent";
-import { QASpecialistAgent } from "./qa-specialist-agent";
-import { EventProcessorAgent } from "./event-processor-agent";
 import { TaskOrchestratorAgent } from "./task-orchestrator-agent";
-import { QualityEvaluatorAgent } from "./quality-evaluator-agent";
 
 /**
  * Менеджер агентов - центральная точка управления мультиагентной системой
@@ -39,18 +38,31 @@ export class AgentManager {
       new TaskOrchestratorAgent(),
     ];
 
-    agentInstances.forEach(agent => {
+    agentInstances.forEach((agent) => {
       this.agents.set(this.getAgentKey(agent.name), agent);
     });
 
-    console.log(`Initialized ${this.agents.size} agents:`, Array.from(this.agents.keys()));
+    console.log(
+      `Initialized ${this.agents.size} agents:`,
+      Array.from(this.agents.keys()),
+    );
   }
 
   /**
    * Нормализация ключа агента
+   * Удаляет все не-латинские буквы и цифры (кроме пробелов),
+   * затем заменяет последовательности пробелов на дефисы и приводит к нижнему регистру
    */
   private getAgentKey(agentName: string): string {
-    return agentName.toLowerCase().replace(/\s+/g, "-");
+    if (!agentName || !agentName.trim()) {
+      return "";
+    }
+
+    return agentName
+      .replace(/[^a-zA-Z0-9\s]/g, "") // Удаляем все символы кроме букв, цифр и пробелов
+      .replace(/\s+/g, "-") // Заменяем последовательности пробелов на дефисы
+      .replace(/^-+|-+$/g, "") // Убираем дефисы в начале и конце
+      .toLowerCase(); // Приводим к нижнему регистру
   }
 
   /**
@@ -67,7 +79,7 @@ export class AgentManager {
     input: string,
     type: string,
     context: AgentContext,
-    priority: number = 1
+    priority: number = 1,
   ): AgentTask {
     return {
       id: `task-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -90,7 +102,7 @@ export class AgentManager {
       maxQualityIterations?: number;
       targetQuality?: number;
     } = {},
-    telemetry?: AgentTelemetry
+    telemetry?: AgentTelemetry,
   ): Promise<OrchestrationResult> {
     const startTime = Date.now();
     const agentsUsed: string[] = [];
@@ -99,7 +111,7 @@ export class AgentManager {
     try {
       // 1. Создаем задачу для роутера
       const routingTask = this.createAgentTask(input, "routing", context);
-      
+
       // 2. Классифицируем и маршрутизируем сообщение
       console.log("🤖 Starting message routing...");
       const routingResult = await this.router.process(routingTask, telemetry);
@@ -111,7 +123,9 @@ export class AgentManager {
       }
 
       const { classification, routing } = routingResult.data;
-      console.log(`📋 Classification: ${classification.messageType} (${classification.complexity})`);
+      console.log(
+        `📋 Classification: ${classification.messageType} (${classification.complexity})`,
+      );
       console.log(`🎯 Routed to: ${routing.targetAgent}`);
 
       // 3. Получаем целевого агента
@@ -124,21 +138,28 @@ export class AgentManager {
       const processingTask = this.createAgentTask(
         input,
         classification.messageType,
-        context
+        context,
       );
 
       const canHandle = await targetAgent.canHandle(processingTask);
       if (!canHandle) {
-        console.warn(`⚠️ Agent ${routing.targetAgent} cannot handle task, using fallback`);
+        console.warn(
+          `⚠️ Agent ${routing.targetAgent} cannot handle task, using fallback`,
+        );
         // Fallback к QA агенту
         const fallbackAgent = this.getAgent("qa-specialist");
         if (fallbackAgent) {
-          const fallbackResult = await fallbackAgent.process(processingTask, telemetry);
+          const fallbackResult = await fallbackAgent.process(
+            processingTask,
+            telemetry,
+          );
           agentsUsed.push(fallbackAgent.name);
           totalSteps++;
-          
+
           return {
-            finalResponse: fallbackResult.data || "Извините, произошла ошибка при обработке запроса.",
+            finalResponse:
+              fallbackResult.data ||
+              "Извините, произошла ошибка при обработке запроса.",
             agentsUsed,
             totalSteps,
             qualityScore: fallbackResult.confidence || 0.5,
@@ -154,7 +175,10 @@ export class AgentManager {
 
       // 5. Обрабатываем задачу основным агентом
       console.log(`⚙️ Processing with ${targetAgent.name}...`);
-      const processingResult = await targetAgent.process(processingTask, telemetry);
+      const processingResult = await targetAgent.process(
+        processingTask,
+        telemetry,
+      );
       agentsUsed.push(targetAgent.name);
       totalSteps++;
 
@@ -174,20 +198,23 @@ export class AgentManager {
         finalResponse = processingResult.data.finalSummary;
       } else {
         // Формируем ответ на основе данных
-        finalResponse = this.formatAgentResponse(classification.messageType, processingResult.data);
+        finalResponse = this.formatAgentResponse(
+          classification.messageType,
+          processingResult.data,
+        );
       }
 
       // 6. Контроль качества (если включен)
       if (options.useQualityControl && finalResponse) {
         console.log("🔍 Running quality control...");
-        
+
         const qualityResult = await this.qualityEvaluator.evaluateAndImprove(
           input,
           finalResponse,
           options.maxQualityIterations || 2,
           options.targetQuality || 0.8,
           { classification, routing, agentData: processingResult.data },
-          telemetry
+          telemetry,
         );
 
         agentsUsed.push(this.qualityEvaluator.name);
@@ -195,7 +222,9 @@ export class AgentManager {
         finalResponse = qualityResult.finalResponse;
         qualityScore = qualityResult.finalQuality;
 
-        console.log(`✨ Quality improved: ${qualityScore.toFixed(2)} (${qualityResult.iterationsUsed} iterations)`);
+        console.log(
+          `✨ Quality improved: ${qualityScore.toFixed(2)} (${qualityResult.iterationsUsed} iterations)`,
+        );
       }
 
       // 7. Формируем окончательный результат
@@ -213,17 +242,20 @@ export class AgentManager {
         },
       };
 
-      console.log(`✅ Processing completed in ${result.metadata.processingTime}ms`);
+      console.log(
+        `✅ Processing completed in ${result.metadata.processingTime}ms`,
+      );
       console.log(`📊 Agents used: ${agentsUsed.join(" → ")}`);
       console.log(`⭐ Quality score: ${qualityScore.toFixed(2)}`);
 
       return result;
     } catch (error) {
       console.error("❌ Error in agent orchestration:", error);
-      
+
       // Fallback к простому ответу
       return {
-        finalResponse: "Извините, произошла ошибка при обработке вашего запроса. Попробуйте переформулировать вопрос.",
+        finalResponse:
+          "Извините, произошла ошибка при обработке вашего запроса. Попробуйте переформулировать вопрос.",
         agentsUsed: agentsUsed.length > 0 ? agentsUsed : ["error-handler"],
         totalSteps: totalSteps + 1,
         qualityScore: 0.3,
@@ -242,10 +274,10 @@ export class AgentManager {
     switch (messageType) {
       case "event":
         if (agentData?.advice && agentData?.parsedEvent) {
-          return `Записал событие: "${agentData.parsedEvent.object || 'событие'}". ${agentData.advice}`;
+          return `Записал событие: "${agentData.parsedEvent.object || "событие"}". ${agentData.advice}`;
         }
         if (agentData?.parsedEvent) {
-          return `Записал: "${agentData.parsedEvent.object || 'событие'}".`;
+          return `Записал: "${agentData.parsedEvent.object || "событие"}".`;
         }
         return "Событие записано.";
 
@@ -269,9 +301,14 @@ export class AgentManager {
   /**
    * Получение информации о доступных агентах
    */
-  getAvailableAgents(): Array<{ key: string; name: string; description: string; capabilities: any[] }> {
+  getAvailableAgents(): Array<{
+    key: string;
+    name: string;
+    description: string;
+    capabilities: any[];
+  }> {
     const result = [];
-    
+
     for (const [key, agent] of this.agents) {
       result.push({
         key,
