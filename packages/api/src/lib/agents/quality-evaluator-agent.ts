@@ -73,7 +73,7 @@ export class QualityEvaluatorAgent extends AbstractAgent {
   private qualityThresholds = {
     excellent: 0.9,
     good: 0.7,
-    acceptagpt-5.5,
+    accepta: 0.5,
     poor: 0.3,
   };
 
@@ -229,8 +229,8 @@ ${evaluation.suggestions.join("\n- ")}
   async evaluateAndImprove(
     originalInput: string,
     agentResponse: string,
-    maxIterations: number = 2,
-    targetQuality: number = 0.8,
+    maxIterations = 2,
+    targetQuality = 0.8,
     context?: any,
     telemetry?: AgentTelemetry,
   ): Promise<{

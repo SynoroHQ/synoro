@@ -13,7 +13,7 @@ import {
   RouterAgent,
   TaskManagerAgent,
   TaskOrchestratorAgent,
-} from "./index";
+} from "../../src/lib/agents/index";
 
 describe("Agent Exports", () => {
   it("should export AbstractAgent", () => {

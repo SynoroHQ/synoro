@@ -20,7 +20,7 @@ export class ChatAssistantAgent extends AbstractAgent {
       confidence: 0.85,
     },
   ];
-  constructgpt-5
+  constructor() {
     super("gpt-5o", 0.8);
   }
 

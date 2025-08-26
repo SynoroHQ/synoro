@@ -1,15 +1,13 @@
 import type {
+  AgentCapability,
   AgentContext,
-  AgentResult,
   AgentTask,
   AgentTelemetry,
   BaseAgent,
   OrchestrationResult,
 } from "./types";
-import { ChatAssistantAgent } from "./chat-assistant-agent";
 import { DataAnalystAgent } from "./data-analyst-agent";
 import { EventProcessorAgent } from "./event-processor-agent";
-import { FinancialAdvisorAgent } from "./financial-advisor-agent";
 import { GeneralAssistantAgent } from "./general-assistant-agent";
 import { QASpecialistAgent } from "./qa-specialist-agent";
 import { QualityEvaluatorAgent } from "./quality-evaluator-agent";
@@ -62,7 +60,7 @@ export class AgentManager {
    * затем заменяет последовательности пробелов на дефисы и приводит к нижнему регистру
    */
   private getAgentKey(agentName: string): string {
-    if (!agentName?.trim()) {
+    if (!agentName.trim()) {
       return "";
     }
 
@@ -78,6 +76,28 @@ export class AgentManager {
    */
   private getAgent(agentKey: string): BaseAgent | undefined {
     return this.agents.get(agentKey);
+  }
+
+  /**
+   * Узкий type guard для объектов
+   */
+  private isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === "object" && value !== null;
+  }
+
+  /**
+   * Пытается извлечь строковый ответ из результата агента произвольного типа
+   */
+  private extractStringResponse(data: unknown): string | null {
+    if (typeof data === "string") return data;
+    if (this.isRecord(data)) {
+      const maybeResponse = data.response;
+      if (typeof maybeResponse === "string") return maybeResponse;
+
+      const maybeFinal = data.finalSummary;
+      if (typeof maybeFinal === "string") return maybeFinal;
+    }
+    return null;
   }
 
   /**
@@ -166,11 +186,11 @@ export class AgentManager {
 
           return {
             finalResponse:
-              fallbackResult.data ||
+              this.extractStringResponse(fallbackResult.data) ??
               "Извините, произошла ошибка при обработке запроса.",
             agentsUsed,
             totalSteps,
-            qualityScore: fallbackResult.confidence || 0.5,
+            qualityScore: fallbackResult.confidence ?? 0.5,
             metadata: {
               classification,
               routing,
@@ -195,15 +215,12 @@ export class AgentManager {
       }
 
       let finalResponse = "";
-      let qualityScore = processingResult.confidence || 0.7;
+      let qualityScore = processingResult.confidence ?? 0.7;
 
       // Извлекаем ответ в зависимости от типа агента
-      if (typeof processingResult.data === "string") {
-        finalResponse = processingResult.data;
-      } else if (processingResult.data?.response) {
-        finalResponse = processingResult.data.response;
-      } else if (processingResult.data?.finalSummary) {
-        finalResponse = processingResult.data.finalSummary;
+      const extracted = this.extractStringResponse(processingResult.data);
+      if (extracted !== null) {
+        finalResponse = extracted;
       } else {
         // Формируем ответ на основе данных
         finalResponse = this.formatAgentResponse(
@@ -216,22 +233,32 @@ export class AgentManager {
       if (options.useQualityControl && finalResponse) {
         console.log("🔍 Running quality control...");
 
-        const qualityResult = await this.qualityEvaluator.evaluateAndImprove(
+        const {
+          iterationsUsed,
+          finalResponse: improvedResponse,
+          finalQuality,
+        } = await this.qualityEvaluator.evaluateAndImprove(
           input,
           finalResponse,
-          options.maxQualityIterations || 2,
-          options.targetQuality || 0.8,
-          { classification, routing, agentData: processingResult.data },
+          options.maxQualityIterations ?? 2,
+          options.targetQuality ?? 0.8,
+          {
+            classification,
+            routing,
+            agentData: this.isRecord(processingResult.data)
+              ? processingResult.data
+              : undefined,
+          },
           telemetry,
         );
 
         agentsUsed.push(this.qualityEvaluator.name);
-        totalSteps += qualityResult.iterationsUsed;
-        finalResponse = qualityResult.finalResponse;
-        qualityScore = qualityResult.finalQuality;
+        totalSteps += iterationsUsed;
+        finalResponse = improvedResponse;
+        qualityScore = finalQuality;
 
         console.log(
-          `✨ Quality improved: ${qualityScore.toFixed(2)} (${qualityResult.iterationsUsed} iterations)`,
+          `✨ Quality improved: ${qualityScore.toFixed(2)} (${iterationsUsed} iterations)`,
         );
       }
 
@@ -245,8 +272,10 @@ export class AgentManager {
           classification,
           routing,
           processingTime: Date.now() - startTime,
-          agentData: processingResult.data,
-          qualityControlUsed: options.useQualityControl || false,
+          agentData: this.isRecord(processingResult.data)
+            ? processingResult.data
+            : undefined,
+          qualityControlUsed: options.useQualityControl ?? false,
         },
       };
 
@@ -278,28 +307,39 @@ export class AgentManager {
   /**
    * Форматирование ответа агента в зависимости от типа
    */
-  private formatAgentResponse(messageType: string, agentData: any): string {
+  private formatAgentResponse(messageType: string, agentData: unknown): string {
     switch (messageType) {
       case "event":
-        if (agentData?.advice && agentData?.parsedEvent) {
-          return `Записал событие: "${agentData.parsedEvent.object || "событие"}". ${agentData.advice}`;
-        }
-        if (agentData?.parsedEvent) {
-          return `Записал: "${agentData.parsedEvent.object || "событие"}".`;
+        if (this.isRecord(agentData)) {
+          const adv = agentData.advice;
+          const parsed = agentData.parsedEvent;
+          let objectName = "событие";
+          if (this.isRecord(parsed)) {
+            const objVal = (parsed as { object?: unknown }).object;
+            if (typeof objVal === "string") objectName = objVal;
+            const adviceStr = typeof adv === "string" ? adv : null;
+            if (adviceStr) {
+              return `Записал событие: "${objectName}". ${adviceStr}`;
+            }
+            return `Записал: "${objectName}".`;
+          }
         }
         return "Событие записано.";
 
       case "question":
-        return agentData || "Ответ получен.";
+        return typeof agentData === "string" ? agentData : "Ответ получен.";
 
       case "complex_task":
-        if (agentData?.finalSummary) {
-          return agentData.finalSummary;
+        if (this.isRecord(agentData)) {
+          const final = agentData.finalSummary;
+          if (typeof final === "string") return final;
         }
         return "Сложная задача обработана.";
 
       case "chat":
-        return agentData || "Понял, спасибо за сообщение!";
+        return typeof agentData === "string"
+          ? agentData
+          : "Понял, спасибо за сообщение!";
 
       default:
         return typeof agentData === "string" ? agentData : "Запрос обработан.";
@@ -313,7 +353,7 @@ export class AgentManager {
     key: string;
     name: string;
     description: string;
-    capabilities: any[];
+    capabilities: AgentCapability[];
   }[] {
     const result = [];
 
