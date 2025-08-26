@@ -22,7 +22,7 @@ WORKDIR /app
 # First install the dependencies (as they change less often)
 COPY --from=builder /app/out/json/ .
 COPY --from=builder /app/bun.lock .
-RUN bun install --frozen-lockfile --production
+RUN bun install
 
 # Build the project
 COPY --from=builder /app/out/full/ .
