@@ -3,6 +3,7 @@ import type { Context } from "grammy";
 import { apiClient } from "../api/client";
 import {
   createMessageContext,
+  escapeTelegramMarkdownV2,
   getUserIdentifier,
 } from "../utils/telegram-utils";
 
@@ -14,22 +15,24 @@ export async function handleAgentsCommand(ctx: Context): Promise<void> {
     await ctx.replyWithChatAction("typing");
 
     const messageContext = createMessageContext(ctx);
-    console.log(`🤖 Команда /agents от ${getUserIdentifier(ctx.from)} в чате ${messageContext.chatId}`);
+    console.log(
+      `🤖 Команда /agents от ${getUserIdentifier(ctx.from)} в чате ${messageContext.chatId}`,
+    );
 
     // Получаем статистику агентов
-    const agentStats = await apiClient.messages.processMessageAgents.getAgentStatsForBot.query();
+    const agentStats =
+      await apiClient.messages.processMessageAgents.getAgentStatsForBot.query();
 
     const response = `🤖 *Агентная система Synoro AI активна*
 
 📊 *Статистика системы:*
 • Всего агентов: ${agentStats.totalAgents}
 • Доступные агенты: ${agentStats.agentList.join(", ")}
-
-🔍 *Как это работает:*
-Система автоматически выбирает лучших агентов для обработки ваших сообщений:
-
-• *Router Agent* - классифицирует сообщения и выбирает подходящего агента
-• *Q&A Specialist* - отвечает на вопросы о системе и функциях
+• *Маршрутизатор сообщений* — классифицирует и выбирает подходящего агента
+• *Специалист по вопросам (Q&A)* — отвечает на вопросы о системе и функциях
+• *Обработчик событий* — фиксирует покупки, задачи, встречи и др.
+• *Оркестратор задач* — координирует сложные многоэтапные задачи
+• *Оценщик качества* — проверяет и улучшает качество ответов
 • *Event Processor* - обрабатывает события (покупки, задачи, встречи)
 • *Task Orchestrator* - координирует сложные многоэтапные задачи
 • *Quality Evaluator* - проверяет и улучшает качество ответов
@@ -43,8 +46,9 @@ export async function handleAgentsCommand(ctx: Context): Promise<void> {
 📝 *Попробуйте прямо сейчас:*
 Отправьте любое сообщение, и система автоматически выберет лучший способ его обработки!`;
 
-    await ctx.reply(response, { parse_mode: "Markdown" });
-
+    await ctx.reply(escapeTelegramMarkdownV2(response), {
+      parse_mode: "MarkdownV2",
+    });
   } catch (error) {
     console.error("Error in agents command:", error);
     await ctx.reply("Произошла ошибка при получении информации об агентах.");
@@ -57,37 +61,49 @@ export async function handleAgentsCommand(ctx: Context): Promise<void> {
 export async function handleAgentTestCommand(ctx: Context): Promise<void> {
   try {
     await ctx.replyWithChatAction("typing");
-    
+
     const messageContext = createMessageContext(ctx);
-    console.log(`🧪 Команда /agent_test от ${getUserIdentifier(ctx.from)} в чате ${messageContext.chatId}`);
+    console.log(
+      `🧪 Команда /agent_test от ${getUserIdentifier(ctx.from)} в чате ${messageContext.chatId}`,
+    );
 
     // Отправляем тестовое сообщение через агентную систему
-    const testMessage = "Проанализируй мои возможности экономии и дай советы по управлению финансами";
-    
-    await ctx.reply("🧪 *Тестирование агентной системы...*\n\nОтправляю тестовый запрос: \"" + testMessage + "\"", 
-      { parse_mode: "Markdown" });
+    const testMessage =
+      "Проанализируй мои возможности экономии и дай советы по управлению финансами";
 
-    const result = await apiClient.messages.processMessageAgents.processMessageFromTelegramWithAgents.mutate({
-      text: testMessage,
-      channel: "telegram",
-      chatId: messageContext.chatId,
-      messageId: messageContext.messageId,
-      telegramUserId: messageContext.userId,
-      agentOptions: {
-        forceAgentMode: true,
-        useQualityControl: true,
-        maxQualityIterations: 2,
-        targetQuality: 0.8,
-      },
-      metadata: {
-        testMode: true,
-        timestamp: new Date().toISOString(),
-      },
-    });
+    await ctx.reply(
+      escapeTelegramMarkdownV2(
+        '🧪 *Тестирование агентной системы...*\n\nОтправляю тестовый запрос: "' +
+          testMessage +
+          '"',
+      ),
+      { parse_mode: "MarkdownV2" },
+    );
+
+    const result =
+      await apiClient.messages.processMessageAgents.processMessageFromTelegramWithAgents.mutate(
+        {
+          text: testMessage,
+          channel: "telegram",
+          chatId: messageContext.chatId,
+          messageId: messageContext.messageId,
+          telegramUserId: messageContext.userId,
+          agentOptions: {
+            forceAgentMode: true,
+            useQualityControl: true,
+            maxQualityIterations: 2,
+            targetQuality: 0.8,
+          },
+          metadata: {
+            testMode: true,
+            timestamp: new Date().toISOString(),
+          },
+        },
+      );
 
     let response = `🎯 *Результат тестирования агентной системы:*\n\n`;
     response += `📝 *Ответ:*\n${result.response}\n\n`;
-    
+
     if (result.agentMetadata) {
       response += `🤖 *Информация о процессе:*\n`;
       response += `• Режим обработки: ${result.agentMetadata.processingMode}\n`;
@@ -96,7 +112,7 @@ export async function handleAgentTestCommand(ctx: Context): Promise<void> {
       response += `• Качество ответа: ${(result.agentMetadata.qualityScore * 100).toFixed(1)}%\n`;
       response += `• Время обработки: ${result.agentMetadata.processingTime}мс\n\n`;
     }
-    
+
     response += `📊 *Классификация:*\n`;
     response += `• Тип: ${result.messageType.type}\n`;
     response += `• Уверенность: ${(result.messageType.confidence * 100).toFixed(1)}%\n`;
@@ -108,7 +124,7 @@ export async function handleAgentTestCommand(ctx: Context): Promise<void> {
       const parts = [];
       let currentPart = "";
       const lines = response.split("\n");
-      
+
       for (const line of lines) {
         if (currentPart.length + line.length + 1 > MAX_TG_MESSAGE) {
           parts.push(currentPart);
@@ -118,17 +134,22 @@ export async function handleAgentTestCommand(ctx: Context): Promise<void> {
         }
       }
       if (currentPart) parts.push(currentPart);
-      
+
       for (const part of parts) {
-        await ctx.reply(part, { parse_mode: "Markdown" });
+        await ctx.reply(escapeTelegramMarkdownV2(part), {
+          parse_mode: "MarkdownV2",
+        });
       }
     } else {
-      await ctx.reply(response, { parse_mode: "Markdown" });
+      await ctx.reply(escapeTelegramMarkdownV2(response), {
+        parse_mode: "MarkdownV2",
+      });
     }
-
   } catch (error) {
     console.error("Error in agent test command:", error);
-    await ctx.reply("Произошла ошибка при тестировании агентной системы: " + 
-      (error instanceof Error ? error.message : "Unknown error"));
+    await ctx.reply(
+      "Произошла ошибка при тестировании агентной системы: " +
+        (error instanceof Error ? error.message : "Unknown error"),
+    );
   }
 }

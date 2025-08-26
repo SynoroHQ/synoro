@@ -10,6 +10,7 @@ import {
   createMessageContext,
   getUserIdentifier,
   isObviousSpam,
+  escapeTelegramMarkdownV2,
 } from "../utils/telegram-utils";
 
 /**
@@ -114,7 +115,7 @@ export async function handleSmartText(ctx: Context): Promise<void> {
       reply += `\n\n🔬 _Debug: ${agentInfo.processingMode} | ${agentInfo.agentsUsed.join("→")} | Q:${(agentInfo.qualityScore * 100).toFixed(0)}%_`;
     }
 
-    await ctx.reply(reply, { parse_mode: "Markdown" });
+    await ctx.reply(escapeTelegramMarkdownV2(reply), { parse_mode: "MarkdownV2" });
 
     // Логируем результат обработки
     if ("agentMetadata" in result && result.agentMetadata) {
