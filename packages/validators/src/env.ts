@@ -6,7 +6,7 @@ export const envSchema = {
     .enum(["development", "production", "test"])
     .default("development"),
   DATABASE_TYPE: z.string().optional(),
-  POSTGRES_URL: z.string().url(),
+  POSTGRES_URL: z.string().url().optional(),
   WEB_APP_URL: z.string().url().optional(),
   EMAIL_FROM: z.string().email().optional(),
   APP_URL: z.string().url(),

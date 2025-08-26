@@ -31,6 +31,7 @@ RUN bun install
 # Build the project
 COPY --from=builder /app/out/full/ .
 ENV CI=true
+ENV npm_lifecycle_event=build
 RUN bun turbo run build --filter=@synoro/app
 
 FROM base AS runner
