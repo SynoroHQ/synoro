@@ -1,4 +1,4 @@
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { FileText, Plus, Search } from "lucide-react";
 
@@ -36,12 +36,7 @@ export default function EventsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">
-            События
-            <Badge className="from-primary via-accent to-primary text-primary-foreground border-primary-foreground/20 ml-3 inline-flex items-center rounded-full border-2 bg-gradient-to-r px-2 py-1 text-xs font-medium shadow-sm backdrop-blur-sm">
-              Beta
-            </Badge>
-          </h1>
+          <h1 className="text-3xl font-bold">События</h1>
           <p className="text-muted-foreground">
             Управление жизненными событиями и записями
           </p>

@@ -47,9 +47,6 @@ export function AppSidebar({ ...props }) {
                   <span className="w-auto min-w-0 text-lg font-bold">S</span>
                 </div>
                 <span className="w-auto min-w-0 text-lg font-bold">Synoro</span>
-                <Badge className="from-primary via-accent to-primary text-primary-foreground border-primary-foreground/20 ml-2 inline-flex items-center rounded-full border-2 bg-gradient-to-r px-1.5 py-0.5 text-xs font-medium shadow-sm backdrop-blur-sm">
-                  Beta
-                </Badge>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
