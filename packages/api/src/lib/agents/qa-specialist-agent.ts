@@ -9,7 +9,7 @@ import type {
   AgentTask,
   AgentTelemetry,
 } from "./types";
-import { parseContextSafely } from "../ai/advisor";
+
 import { AbstractAgent } from "./base-agent";
 
 /**
@@ -247,19 +247,8 @@ export class QASpecialistAgent extends AbstractAgent {
       // Определяем подтип вопроса
       const subtype = await this.classifyQuestionSubtype(task.input);
 
-      // Извлекаем контекст из метаданных телеметрии
-      const context = parseContextSafely(telemetry);
-
-      // Формируем историю беседы
+      // Формируем историю беседы (пока без контекста)
       let conversationHistory = "";
-      if (context.length > 0) {
-        conversationHistory = "\n\nИстория беседы:\n";
-        context.forEach((msg, index) => {
-          const role = msg.role === "user" ? "Пользователь" : "Ассистент";
-          conversationHistory += `${index + 1}. ${role}: ${msg.content.text}\n`;
-        });
-        conversationHistory += "\n";
-      }
 
       // Создаем контекстный промпт в зависимости от подтипа вопроса
       let contextPrompt = task.input;

@@ -34,7 +34,7 @@ const ProcessMessageWithAgentsResponse = ProcessMessageResponse.safeExtend({
       totalSteps: z.number(),
       qualityScore: z.number(),
       processingTime: z.number(),
-      processingMode: z.enum(["agents", "legacy"]),
+      processingMode: z.enum(["agents"]),
     })
     .optional(),
 });

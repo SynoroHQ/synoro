@@ -2,7 +2,6 @@ import { TRPCError } from "@trpc/server";
 
 import type { TRPCContext } from "../../trpc";
 import { AgentMessageProcessor } from "../agents/agent-processor";
-import { classifyMessage } from "../ai";
 import { MESSAGE_PROCESSING_CONFIG } from "../constants/message-processing";
 import {
   getConversationContext,
@@ -52,7 +51,7 @@ export interface ProcessAgentMessageResult {
     totalSteps: number;
     qualityScore: number;
     processingTime: number;
-    processingMode: "agents" | "legacy";
+    processingMode: "agents";
   };
 }
 
@@ -148,55 +147,29 @@ export async function processMessageWithAgents(
       },
     });
 
-    // Классифицируем сообщение
-    const classificationStartTime = Date.now();
-    console.log("🔍 [AGENTS] Классификация сообщения с контекстом...");
-
-    const classification = await classifyMessage(text, {
-      functionId: MESSAGE_PROCESSING_CONFIG.FUNCTION_IDS.CLASSIFIER,
-      metadata: commonMetadata,
-    });
-
-    const { messageType, relevance } = classification;
-    const classificationTime = formatExecutionTime(classificationStartTime);
-    console.log(
-      `⏱️ [AGENTS] Классификация: ${classificationTime} → ${messageType.type} (${messageType.confidence.toFixed(2)})`,
-    );
-
     // Обрабатываем сообщение через агентную систему
     const agentProcessingStartTime = Date.now();
     const processor = getAgentProcessor();
 
-    const result = await processor.processHybrid(
+    const result = await processor.processMessage(
       text,
-      messageType,
       {
-        channel,
-        userId,
+        userId: userId || undefined,
         chatId,
         messageId,
+        channel,
         metadata: commonMetadata,
-        conversationId: conversationContext.conversationId,
-        context: trimmedContext,
       },
       {
-        ...options,
-        questionFunctionId: MESSAGE_PROCESSING_CONFIG.FUNCTION_IDS.QUESTION,
-        chatFunctionId: MESSAGE_PROCESSING_CONFIG.FUNCTION_IDS.CHAT,
-        parseFunctionId: MESSAGE_PROCESSING_CONFIG.FUNCTION_IDS.PARSE,
-        adviseFunctionId: MESSAGE_PROCESSING_CONFIG.FUNCTION_IDS.ADVISE,
-        fallbackParseFunctionId:
-          MESSAGE_PROCESSING_CONFIG.FUNCTION_IDS.FALLBACK_PARSE,
-        fallbackAdviseFunctionId:
-          MESSAGE_PROCESSING_CONFIG.FUNCTION_IDS.FALLBACK_ADVISE,
         useQualityControl: options.useQualityControl ?? true,
-        forceAgentMode: true,
+        maxQualityIterations: options.maxQualityIterations ?? 2,
+        targetQuality: options.targetQuality ?? 0.8,
       },
     );
 
     const agentProcessingTime = formatExecutionTime(agentProcessingStartTime);
     console.log(
-      `🚀 [AGENTS] Обработка агентами: ${agentProcessingTime} (режим: ${result.processingMode})`,
+      `🚀 [AGENTS] Обработка агентами: ${agentProcessingTime}`,
     );
 
     // Логируем информацию об агентах
@@ -224,28 +197,28 @@ export async function processMessageWithAgents(
       success: true as const,
       response: result.response,
       messageType: {
-        type: messageType.type,
-        subtype: messageType.subtype ?? "",
-        confidence: messageType.confidence,
-        need_logging: messageType.need_logging,
+        type: "processed",
+        subtype: "",
+        confidence: 0.9,
+        need_logging: false,
       },
       relevance: {
-        relevant: relevance.relevant,
-        score: relevance.score ?? 0,
-        category: relevance.category ?? "",
+        relevant: true,
+        score: 0.9,
+        category: "agent-processed",
       },
       parsed: result.parsed,
       agentMetadata: result.agentMetadata
         ? {
             ...result.agentMetadata,
-            processingMode: result.processingMode,
+            processingMode: "agents",
           }
         : {
-            agentsUsed: ["legacy-processor"],
+            agentsUsed: ["agent-processor"],
             totalSteps: 1,
             qualityScore: 0.7,
             processingTime: totalProcessingTime,
-            processingMode: result.processingMode,
+            processingMode: "agents",
           },
     };
   } catch (error) {

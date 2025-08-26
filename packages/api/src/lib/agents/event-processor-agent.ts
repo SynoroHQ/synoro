@@ -9,8 +9,7 @@ import type {
   AgentTask,
   AgentTelemetry,
 } from "./types";
-import { advise } from "../ai/advisor";
-import { parseTask } from "../ai/parser";
+
 import { AbstractAgent } from "./base-agent";
 
 // Схемы для структурированного парсинга событий
@@ -295,11 +294,7 @@ export class EventProcessorAgent extends AbstractAgent {
     }>
   > {
     try {
-      // Используем существующую функцию парсинга как fallback
-      const legacyParsed = await parseTask(
-        task.input,
-        this.createTelemetry("legacy-parse", task, telemetry),
-      );
+      // Структурированный парсинг с помощью AI
 
       // Структурированный парсинг с помощью AI
       const { object: structuredEvent } = await generateObject({
@@ -327,10 +322,17 @@ export class EventProcessorAgent extends AbstractAgent {
       // Генерируем совет, если нужно
       if (structuredEvent.needsAdvice) {
         try {
-          advice = await advise(
-            task.input,
-            this.createTelemetry("generate-advice", task, telemetry),
-          );
+          const { text: adviceText } = await generateText({
+            model: this.getModel(),
+            system: getPromptSafe(PROMPT_KEYS.EVENT_PROCESSOR),
+            prompt: `Дай краткий полезный совет для события: "${task.input}"`,
+            temperature: 0.4,
+            experimental_telemetry: {
+              isEnabled: true,
+              ...this.createTelemetry("generate-advice", task, telemetry),
+            },
+          });
+          advice = adviceText;
         } catch (error) {
           console.warn("Failed to generate advice:", error);
         }
@@ -338,7 +340,6 @@ export class EventProcessorAgent extends AbstractAgent {
 
       // Комбинируем структурированные данные
       const combinedData = {
-        ...legacyParsed,
         structured: structuredEvent,
         metadata: {
           processingTimestamp: new Date().toISOString(),
@@ -349,7 +350,7 @@ export class EventProcessorAgent extends AbstractAgent {
 
       return this.createSuccessResult(
         {
-          parsedEvent: legacyParsed,
+          parsedEvent: structuredEvent,
           advice,
           structuredData: combinedData,
         },
