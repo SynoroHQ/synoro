@@ -1,6 +1,8 @@
 import { generateObject, generateText, tool } from "ai";
 import { z } from "zod";
 
+import { getPromptSafe, PROMPT_KEYS } from "@synoro/prompts";
+
 import type {
   AgentCapability,
   AgentResult,
@@ -303,21 +305,7 @@ export class EventProcessorAgent extends AbstractAgent {
       const { object: structuredEvent } = await generateObject({
         model: this.getModel(),
         schema: eventSchema,
-        system: `Ты - специалист по парсингу событий в системе Synoro AI.
-
-Твоя задача - извлечь структурированную информацию из описания события.
-
-ТИПЫ СОБЫТИЙ:
-- purchase: покупки, трата денег
-- task: задачи, дела, планы
-- meeting: встречи, собрания, созвоны
-- note: заметки, записи, идеи
-- expense: расходы без конкретного товара
-- income: доходы, поступления
-- other: прочие события
-
-Всегда указывай уровень уверенности в правильности парсинга.
-Определи, нужен ли совет пользователю по этому событию.`,
+        system: getPromptSafe(PROMPT_KEYS.EVENT_PROCESSOR),
         prompt: `Проанализируй и распарси это событие: "${task.input}"
         
 Контекст: пользователь ${task.context.userId || "anonymous"} в канале ${task.context.channel}

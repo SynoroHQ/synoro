@@ -1,6 +1,8 @@
 import { generateObject, generateText } from "ai";
 import { z } from "zod";
 
+import { getPromptSafe, PROMPT_KEYS } from "@synoro/prompts";
+
 import type {
   AgentCapability,
   AgentResult,
@@ -195,23 +197,7 @@ export class TaskOrchestratorAgent extends AbstractAgent {
   ) {
     const { text } = await generateText({
       model: this.getModel(),
-      system: `Ты - архитектор задач в системе Synoro AI. Твоя задача - разбить сложную задачу на управляемые этапы.
-
-ДОСТУПНЫЕ АГЕНТЫ:
-- qa-specialist: Ответы на вопросы, информация о системе
-- event-processor: Обработка и парсинг событий
-- data-analyst: Анализ данных и выявление паттернов  
-- financial-advisor: Финансовые советы и анализ расходов
-- task-manager: Управление задачами и планирование
-- chat-assistant: Общение и поддержка пользователя
-
-ПРИНЦИПЫ ПЛАНИРОВАНИЯ:
-1. Разбивай сложные задачи на простые этапы
-2. Используй параллельное выполнение для независимых задач
-3. Учитывай зависимости между этапами
-4. Назначай подходящих агентов для каждого этапа
-5. Оценивай сложность задачи (medium/high)
-6. Объясняй логику планирования в поле reasoning`,
+      system: getPromptSafe(PROMPT_KEYS.TASK_ORCHESTRATOR),
       prompt: `Создай план выполнения задачи: "${task.input}"
 
 Контекст: пользователь ${task.context.userId || "anonymous"} в канале ${task.context.channel}

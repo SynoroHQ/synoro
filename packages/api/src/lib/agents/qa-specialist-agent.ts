@@ -1,4 +1,4 @@
-import { generateText, tool } from "ai";
+import { generateObject, generateText, tool } from "ai";
 import { z } from "zod";
 
 import { getPromptSafe, PROMPT_KEYS } from "@synoro/prompts";
@@ -215,17 +215,7 @@ export class QASpecialistAgent extends AbstractAgent {
           // Используем AI для поиска системной информации
           const { text: systemInfo } = await generateText({
             model: this.getModel(),
-            system: `Ты - эксперт по системе Synoro AI. Отвечай на вопросы пользователей о возможностях системы.
-
-СИСТЕМА SYNORO AI:
-- Логирование жизненных событий (покупки, задачи, встречи, заметки, расходы, доходы)
-- Финансовая аналитика и анализ паттернов поведения
-- Управление задачами и планирование
-- Умные советы и рекомендации
-- Поддержка Telegram бота, веб-приложения и мобильного приложения
-
-ТВОЯ ЗАДАЧА:
-Отвечай на вопросы пользователей о возможностях системы, давай конкретные примеры использования, объясняй как начать работу с системой.`,
+            system: getPromptSafe(PROMPT_KEYS.QA_SPECIALIST),
             prompt: `Пользователь спрашивает: "${query}"
 
 Дай подробный и полезный ответ о возможностях Synoro AI.`,
