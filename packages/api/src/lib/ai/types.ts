@@ -28,3 +28,10 @@ export type ParsedTask = {
   object: string;
   confidence?: number;
 };
+
+export type ParsedMessage = {
+  id: string;
+  role: "user" | "assistant";
+  content: { text: string };
+  createdAt: Date;
+};

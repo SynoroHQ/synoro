@@ -10,7 +10,7 @@ import {
   PROMPT_KEYS,
 } from "@synoro/prompts";
 
-import type { ParsedTask, Telemetry } from "./types";
+import type { ParsedMessage, ParsedTask, Telemetry } from "./types";
 import { parseContextSafely } from "./advisor";
 import { extractFirstJsonObject } from "./classifier";
 
@@ -104,15 +104,17 @@ export async function parseTask(
   const context = parseContextSafely(telemetry);
 
   // Формируем контекстный промпт
-  let contextualPrompt = `Text: ${text}`;
+  let contextualPrompt = `Текст: ${text}`;
 
   if (context.length > 0) {
     contextualPrompt = `Контекст беседы:\n`;
-    context.forEach((msg: any, index: number) => {
-      const role = msg.role === "user" ? "Пользователь" : "Ассистент";
-      contextualPrompt += `${index + 1}. ${role}: ${msg.content.text}\n`;
-    });
-    contextualPrompt += `\nТекущий текст для парсинга: ${text}`;
+    contextualPrompt += context
+      .map((msg: ParsedMessage, index: number) => {
+        const role = msg.role === "user" ? "Пользователь" : "Ассистент";
+        return `${index + 1}. ${role}: ${msg.content.text}`;
+      })
+      .join("\n");
+    contextualPrompt += `\n\nТекущий текст для парсинга: ${text}`;
   }
 
   contextualPrompt += `\nJSON:`;
@@ -160,7 +162,7 @@ export async function parseTask(
     ) {
       console.warn("parseTask: invalid or missing 'action'", {
         functionId: telemetry?.functionId ?? "ai-parse-task",
-        valueType: typeof (parsed as any)?.action,
+        valueType: typeof parsed?.action,
       });
       return null;
     }
@@ -170,12 +172,12 @@ export async function parseTask(
     ) {
       console.warn("parseTask: invalid or missing 'object'", {
         functionId: telemetry?.functionId ?? "ai-parse-task",
-        valueType: typeof (parsed as any)?.object,
+        valueType: typeof parsed?.object,
       });
       return null;
     }
 
-    const raw = Number((parsed as any).confidence);
+    const raw = Number(parsed.confidence);
     let confidence = 0.5;
     if (Number.isFinite(raw)) {
       confidence = Math.min(1, Math.max(0, raw));

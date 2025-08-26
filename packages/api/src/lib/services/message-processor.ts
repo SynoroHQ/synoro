@@ -106,12 +106,14 @@ export async function processMessageInternal(
       channel,
       userId,
       conversationId: conversationContext.conversationId,
-      context: JSON.stringify(trimmedContext),
       chatId,
       messageId,
-      metadata,
+      metadata: {
+        ...metadata,
+        contextMessageCount: trimmedContext.length,
+      },
+      context: "",
     });
-
     // Используем оптимизированную комбинированную классификацию
     const classificationStartTime = Date.now();
 

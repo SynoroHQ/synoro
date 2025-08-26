@@ -10,7 +10,7 @@ import {
   PROMPT_KEYS,
 } from "@synoro/prompts";
 
-import type { MessageTypeResult, Telemetry } from "./types";
+import type { MessageTypeResult, ParsedMessage, Telemetry } from "./types";
 
 // Initialize AI providers
 const oai = openai; // use default provider instance; it reads OPENAI_API_KEY from env
@@ -24,12 +24,7 @@ const moonshotAI = createOpenAICompatible({
  * Безопасно парсит контекст из метаданных телеметрии
  * Включает валидацию, нормализацию дат и обработку ошибок
  */
-export function parseContextSafely(telemetry?: Telemetry): {
-  id: string;
-  role: string;
-  content: { text: string };
-  createdAt: Date;
-}[] {
+export function parseContextSafely(telemetry?: Telemetry): ParsedMessage[] {
   const contextString = telemetry?.metadata?.context as string;
 
   if (!contextString) {
@@ -76,6 +71,15 @@ export function parseContextSafely(telemetry?: Telemetry): {
             return null;
           }
 
+          // Проверяем, что роль соответствует ожидаемым значениям
+          const normalizedRole = item.role.trim().toLowerCase();
+          if (normalizedRole !== "user" && normalizedRole !== "assistant") {
+            console.warn(
+              `Skipping context item at index ${index}: invalid role "${item.role}"`,
+            );
+            return null;
+          }
+
           if (
             !item.content ||
             typeof item.content !== "object" ||
@@ -107,7 +111,7 @@ export function parseContextSafely(telemetry?: Telemetry): {
 
           return {
             id: item.id.trim(),
-            role: item.role.trim(),
+            role: normalizedRole as "user" | "assistant",
             content: { text: item.content.text.trim() },
             createdAt,
           };

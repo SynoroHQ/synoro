@@ -1,11 +1,11 @@
 import { z } from "zod";
 
 import { TelegramUserService } from "../../lib/services/telegram-user-service";
-import { protectedProcedure, publicProcedure } from "../../trpc";
+import { botProcedure, protectedProcedure, publicProcedure } from "../../trpc";
 
 export const telegramUsersRouter = {
-  // Получить информацию о связанном пользователе Telegram
-  getLinkedUser: publicProcedure
+  // Получить информацию о связанном пользователе Telegram (только для авторизованных ботов)
+  getLinkedUser: botProcedure
     .input(
       z.object({
         telegramUserId: z.string(),
@@ -13,6 +13,23 @@ export const telegramUsersRouter = {
     )
     .query(async ({ input }) => {
       return TelegramUserService.getLinkedUser(input.telegramUserId);
+    }),
+
+  // Проверить статус связи пользователя Telegram (публичный, без PII)
+  checkUserLinkStatus: publicProcedure
+    .input(
+      z.object({
+        telegramUserId: z.string(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const isLinked = await TelegramUserService.checkUserLinkStatus(
+        input.telegramUserId,
+      );
+      return {
+        isLinked,
+        // Не возвращаем name, email или другие PII
+      };
     }),
 
   // Связать Telegram пользователя с внутренним пользователем (требует аутентификации)

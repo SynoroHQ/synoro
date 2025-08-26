@@ -52,6 +52,8 @@
     "feature2": "Voice notes are automatically transcribed and analyzed",
     "feature3": "Instant responses and smart recommendations from AI",
     "startBot": "Start with bot",
+    "aiStatus": "Online • Smart Assistant",
+    "online": "Online",
     "bottomText": "Don't wait - try Synoro right now in Telegram!",
     "tryNow": "Try now"
   },

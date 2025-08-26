@@ -11,11 +11,15 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-export default function TelegramCTA() {
+interface TelegramCTAProps {
+  id?: string;
+}
+
+export default function TelegramCTA({ id = "cta-section" }: TelegramCTAProps) {
   const t = useTranslations("TelegramCTA");
 
   return (
-    <section className="section relative overflow-hidden">
+    <section id={id} className="section relative overflow-hidden">
       {/* Background Elements */}
       <div className="absolute inset-0">
         <div className="absolute top-0 left-0 h-full w-full bg-gradient-to-br from-blue-500/5 to-purple-500/5"></div>
@@ -68,7 +72,13 @@ export default function TelegramCTA() {
               <Button
                 size="lg"
                 className="group rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all duration-300 hover:from-blue-700 hover:to-purple-700 hover:shadow-xl"
-                onClick={() => window.open("https://t.me/synoro_bot", "_blank")}
+                onClick={() =>
+                  window.open(
+                    "https://t.me/synoro_bot",
+                    "_blank",
+                    "noopener,noreferrer",
+                  )
+                }
               >
                 <MessageCircle className="mr-3 h-5 w-5" />
                 {t("startBot")}
@@ -88,12 +98,12 @@ export default function TelegramCTA() {
                 <div className="flex-1">
                   <h3 className="text-foreground font-semibold">@synoro_bot</h3>
                   <p className="text-muted-foreground text-sm">
-                    Online • Smart Assistant
+                    {t("aiStatus")}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="h-3 w-3 animate-pulse rounded-full bg-green-500"></div>
-                  <span className="text-xs text-green-600">Online</span>
+                  <span className="text-xs text-green-600">{t("online")}</span>
                 </div>
               </div>
 
@@ -102,25 +112,21 @@ export default function TelegramCTA() {
                 <div className="flex justify-start">
                   <div className="max-w-[80%] rounded-2xl rounded-tl-md border border-blue-500/20 bg-blue-500/10 px-4 py-3">
                     <p className="text-sm text-blue-700">
-                      👋 Привет! Я Synoro - ваш умный помощник. Отправьте мне
-                      сообщение о том, что вы сделали или планируете!
+                      {t("telegramCta.greeting")}
                     </p>
                   </div>
                 </div>
 
                 <div className="flex justify-end">
                   <div className="max-w-[80%] rounded-2xl rounded-tr-md bg-blue-500 px-4 py-3 text-white">
-                    <p className="text-sm">
-                      🔧 Поменял масло в машине, потратил 2 часа
-                    </p>
+                    <p className="text-sm">{t("telegramCta.userExample")}</p>
                   </div>
                 </div>
 
                 <div className="flex justify-start">
                   <div className="max-w-[80%] rounded-2xl rounded-tl-md border border-blue-500/20 bg-blue-500/10 px-4 py-3">
                     <p className="text-sm text-blue-700">
-                      ✅ Техобслуживание записано! Замена масла (2ч) добавлена в
-                      ваш профиль. Следующее ТО через 5000 км.
+                      {t("telegramCta.confirmation")}
                     </p>
                   </div>
                 </div>
@@ -132,7 +138,7 @@ export default function TelegramCTA() {
                       <MessageCircle className="h-4 w-4 text-blue-600" />
                     </div>
                     <span className="text-sm italic">
-                      Напишите сообщение...
+                      {t("telegramCta.inputPlaceholder")}
                     </span>
                   </div>
                 </div>
@@ -159,7 +165,13 @@ export default function TelegramCTA() {
             variant="outline"
             size="lg"
             className="rounded-xl border-blue-500 px-6 py-3 font-medium text-blue-600 hover:bg-blue-500/10"
-            onClick={() => window.open("https://t.me/synoro_bot", "_blank")}
+            onClick={() =>
+              window.open(
+                "https://t.me/synoro_bot",
+                "_blank",
+                "noopener,noreferrer",
+              )
+            }
           >
             <MessageCircle className="mr-2 h-4 w-4" />
             {t("tryNow")}

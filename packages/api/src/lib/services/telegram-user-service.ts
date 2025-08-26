@@ -235,6 +235,10 @@ export class TelegramUserService {
 
   /**
    * Получает информацию о связанном пользователе
+   * ⚠️ ВНИМАНИЕ: Этот метод возвращает PII (имя, email) и должен использоваться
+   * только авторизованными источниками (бот, внутренние сервисы)
+   * @param telegramUserId - ID пользователя в Telegram
+   * @returns Объект с данными пользователя или null если связь не найдена
    */
   static async getLinkedUser(telegramUserId: string) {
     const link = await db
@@ -257,5 +261,25 @@ export class TelegramUserService {
       .limit(1);
 
     return link.length > 0 ? link[0] : null;
+  }
+
+  /**
+   * Проверяет статус связи пользователя Telegram (без возврата PII)
+   * @param telegramUserId - ID пользователя в Telegram
+   * @returns true если пользователь связан, false если нет
+   */
+  static async checkUserLinkStatus(telegramUserId: string): Promise<boolean> {
+    const link = await db
+      .select({ userId: identityLinks.userId })
+      .from(identityLinks)
+      .where(
+        and(
+          eq(identityLinks.provider, "telegram"),
+          eq(identityLinks.providerUserId, telegramUserId),
+        ),
+      )
+      .limit(1);
+
+    return link.length > 0;
   }
 }
