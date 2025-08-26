@@ -18,7 +18,7 @@ export const env = createEnv({
     TG_AUDIO_MAX_DURATION_SEC: z.coerce.number().int().positive().optional(),
     TG_FETCH_TIMEOUT_MS: z.coerce.number().int().positive().optional(),
     // Agent system options
-    TG_USE_AGENT_SYSTEM: z.boolean().default(false),
+    TG_USE_AGENT_SYSTEM: z.boolean().default(true),
     TG_AGENT_AUTO_MODE: z.boolean().default(true),
   },
   runtimeEnv: {
