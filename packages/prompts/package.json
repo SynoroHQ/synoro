@@ -22,7 +22,7 @@
     "gen": "bun src/scripts/gen-registry.ts",
     "prebuild": "bun run gen",
     "upload-prompts": "bun run with-env -- bun src/scripts/upload-prompts.ts",
-    "dev": "tsup --watch",
+    "dev": "tsc",
     "format": "prettier --check . --ignore-path ../../.gitignore",
     "lint": "eslint",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false",
@@ -35,7 +35,7 @@
     "@synoro/prettier-config": "workspace:*",
     "@synoro/tsconfig": "workspace:*",
     "dotenv-cli": "10.0.0",
-    "eslint": "9.33.0",
+    "eslint": "9.34.0",
     "prettier": "3.6.2",
     "tsup": "8.5.0",
     "typescript": "5.9.2"

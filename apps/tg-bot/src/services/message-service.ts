@@ -53,6 +53,7 @@ export async function processTextMessage(
           channel: "telegram",
           chatId: context.chatId,
           messageId: context.messageId,
+          telegramUserId: context.userId, // Передаем ID пользователя Telegram
           metadata: {
             ...context.metadata,
             traceId,
@@ -106,6 +107,7 @@ export async function transcribeAudio(
         channel: "telegram",
         chatId: context.chatId,
         messageId: context.messageId,
+        telegramUserId: context.userId, // Передаем ID пользователя Telegram
         metadata: {
           ...context.metadata,
           traceId,

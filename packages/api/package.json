@@ -14,7 +14,7 @@
   "scripts": {
     "build": "tsup",
     "clean": "git clean -xdf .cache .turbo dist node_modules",
-    "dev": "tsc",
+    "dev": "bun with-env bun run src/server.ts",
     "start": "bun with-env bun run src/server.ts",
     "format": "prettier --check . --ignore-path ../../.gitignore",
     "lint": "eslint",
@@ -25,7 +25,7 @@
     "with-env": "dotenv -e ../../.env --"
   },
   "dependencies": {
-    "@ai-sdk/openai": "^2.0.19",
+    "@ai-sdk/openai": "^2.0.20",
     "@ai-sdk/openai-compatible": "^1.0.11",
     "@opentelemetry/auto-instrumentations-node": "^0.62.1",
     "@opentelemetry/sdk-node": "^0.203.0",
@@ -37,7 +37,7 @@
     "@synoro/prompts": "workspace:*",
     "@synoro/validators": "workspace:*",
     "@trpc/server": "^11.5.0",
-    "ai": "^5.0.22",
+    "ai": "^5.0.23",
     "date-fns": "4.1.0",
     "express": "^5.1.0",
     "langfuse": "^3.38.4",
@@ -52,7 +52,7 @@
     "@synoro/tests": "workspace:*",
     "@synoro/tsconfig": "workspace:*",
     "@types/express": "^5.0.3",
-    "eslint": "9.33.0",
+    "eslint": "9.34.0",
     "prettier": "3.6.2",
     "tsup": "8.5.0",
     "typescript": "5.9.2",

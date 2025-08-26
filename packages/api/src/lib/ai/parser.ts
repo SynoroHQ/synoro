@@ -10,7 +10,8 @@ import {
   PROMPT_KEYS,
 } from "@synoro/prompts";
 
-import type { ParsedTask, Telemetry } from "./types";
+import type { ParsedMessage, ParsedTask, Telemetry } from "./types";
+import { parseContextSafely } from "./advisor";
 import { extractFirstJsonObject } from "./classifier";
 
 // Initialize AI providers
@@ -98,11 +99,31 @@ export async function parseTask(
   telemetry?: Telemetry,
 ): Promise<ParsedTask | null> {
   const system = await getSystemPrompt(PROMPT_KEYS.PARSER_TASK);
+
+  // Извлекаем контекст из метаданных
+  const context = parseContextSafely(telemetry);
+
+  // Формируем контекстный промпт
+  let contextualPrompt = `Текст: ${text}`;
+
+  if (context.length > 0) {
+    contextualPrompt = `Контекст беседы:\n`;
+    contextualPrompt += context
+      .map((msg: ParsedMessage, index: number) => {
+        const role = msg.role === "user" ? "Пользователь" : "Ассистент";
+        return `${index + 1}. ${role}: ${msg.content.text}`;
+      })
+      .join("\n");
+    contextualPrompt += `\n\nТекущий текст для парсинга: ${text}`;
+  }
+
+  contextualPrompt += `\nJSON:`;
+
   try {
     const { text: out } = await generateText({
       model: getActiveProvider()(getAdviceModel()),
       system,
-      prompt: `Text: ${text}\nJSON:`,
+      prompt: contextualPrompt,
       temperature: 0.2,
       experimental_telemetry: {
         isEnabled: true,
@@ -141,7 +162,7 @@ export async function parseTask(
     ) {
       console.warn("parseTask: invalid or missing 'action'", {
         functionId: telemetry?.functionId ?? "ai-parse-task",
-        valueType: typeof (parsed as any)?.action,
+        valueType: typeof parsed?.action,
       });
       return null;
     }
@@ -151,12 +172,12 @@ export async function parseTask(
     ) {
       console.warn("parseTask: invalid or missing 'object'", {
         functionId: telemetry?.functionId ?? "ai-parse-task",
-        valueType: typeof (parsed as any)?.object,
+        valueType: typeof parsed?.object,
       });
       return null;
     }
 
-    const raw = Number((parsed as any).confidence);
+    const raw = Number(parsed.confidence);
     let confidence = 0.5;
     if (Number.isFinite(raw)) {
       confidence = Math.min(1, Math.max(0, raw));

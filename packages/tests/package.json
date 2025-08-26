@@ -12,7 +12,7 @@
   "scripts": {
     "build": "tsup",
     "clean": "git clean -xdf .cache .turbo dist node_modules",
-    "dev": "tsup --watch",
+    "dev": "tsc",
     "format": "prettier --check . --ignore-path ../../.gitignore",
     "lint": "eslint",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false"
@@ -24,7 +24,7 @@
     "@synoro/eslint-config": "workspace:*",
     "@synoro/prettier-config": "workspace:*",
     "@synoro/tsconfig": "workspace:*",
-    "eslint": "9.33.0",
+    "eslint": "9.34.0",
     "prettier": "3.6.2",
     "tsup": "8.5.0",
     "typescript": "5.9.2"
