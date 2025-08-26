@@ -143,7 +143,6 @@ export class RouterAgent extends AbstractAgent {
         confidence: 0.3,
         needsLogging: false,
         complexity: "simple",
-        reasoning: "Fallback due to classification error",
         suggestedAgents: ["qa-specialist"],
       };
     }
