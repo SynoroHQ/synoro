@@ -4,11 +4,7 @@ import { generateText } from "ai";
 import { Langfuse } from "langfuse";
 
 import type { PromptKey } from "@synoro/prompts";
-import {
-  DEFAULT_PROMPT_KEY,
-  getPromptSafe,
-  PROMPT_KEYS,
-} from "@synoro/prompts";
+import { PROMPT_KEYS } from "@synoro/prompts";
 import {
   combinedClassificationSchema,
   messageTypeSchema,
@@ -58,39 +54,38 @@ export function getAdviceModel() {
 let lf: Langfuse | null = null;
 const cachedPrompts: Record<string, string> = {};
 
-async function getSystemPrompt(
-  key: PromptKey = DEFAULT_PROMPT_KEY,
-): Promise<string> {
+async function getSystemPrompt(key: PromptKey): Promise<string> {
   if (cachedPrompts[key]) return cachedPrompts[key];
 
-  // Try Langfuse first if creds are present
-  if (process.env.LANGFUSE_PUBLIC_KEY && process.env.LANGFUSE_SECRET_KEY) {
-    try {
-      if (!lf) {
-        lf = new Langfuse({
-          publicKey: process.env.LANGFUSE_PUBLIC_KEY,
-          secretKey: process.env.LANGFUSE_SECRET_KEY,
-          baseUrl: process.env.LANGFUSE_BASEURL,
-        });
-      }
-
-      const prompt = await lf.getPrompt(key);
-      // Compile with empty vars by default; extend if variables are added later
-      const compiled = prompt.compile({});
-      const value = compiled.trim();
-      if (value) {
-        cachedPrompts[key] = value;
-        return value;
-      }
-    } catch (_e) {
-      // Fallback below
-    }
+  // Проверяем наличие Langfuse credentials
+  if (!process.env.LANGFUSE_PUBLIC_KEY || !process.env.LANGFUSE_SECRET_KEY) {
+    throw new Error("Langfuse credentials not configured");
   }
 
-  // Fallback to local registry prompt (defaults internally)
-  const local = getPromptSafe(key).trim();
-  cachedPrompts[key] = local;
-  return local;
+  try {
+    if (!lf) {
+      lf = new Langfuse({
+        publicKey: process.env.LANGFUSE_PUBLIC_KEY,
+        secretKey: process.env.LANGFUSE_SECRET_KEY,
+        baseUrl: process.env.LANGFUSE_BASEURL,
+      });
+    }
+
+    const prompt = await lf.getPrompt(key);
+    // Compile with empty vars by default; extend if variables are added later
+    const compiled = prompt.compile({});
+    const value = compiled.trim();
+    if (value) {
+      cachedPrompts[key] = value;
+      return value;
+    }
+    throw new Error(`Empty prompt returned for key: ${key}`);
+  } catch (error) {
+    console.error(`Failed to get prompt from Langfuse for key ${key}:`, error);
+    throw new Error(
+      `Failed to get prompt from Langfuse: ${error instanceof Error ? error.message : "Unknown error"}`,
+    );
+  }
 }
 
 export function extractFirstJsonObject(input: string): string | null {

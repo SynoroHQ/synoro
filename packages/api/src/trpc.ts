@@ -276,8 +276,9 @@ const telegramAnonymousAuthMiddleware = t.middleware(
         const authTimestamp = parseInt(authDate, 10);
         const currentTimestamp = Math.floor(Date.now() / 1000);
         const timeDiff = Math.abs(currentTimestamp - authTimestamp);
-        
-        if (timeDiff > 300) { // 5 minutes = 300 seconds
+
+        if (timeDiff > 300) {
+          // 5 minutes = 300 seconds
           throw new TRPCError({
             code: "UNAUTHORIZED",
             message: "Telegram initData is too old (auth_date expired)",
