@@ -1,4 +1,4 @@
-import type { MessageTypeResult } from "../ai/types";
+import type { MessageTypeResult, ParsedTask } from "../ai/types";
 import type {
   MessageContext,
   MessageProcessorOptions,
@@ -13,6 +13,11 @@ import { AgentManager } from "./agent-manager";
  */
 export class AgentMessageProcessor {
   private agentManager: AgentManager;
+  private isParsedTask(value: unknown): value is ParsedTask {
+    if (typeof value !== "object" || value === null) return false;
+    const v = value as Record<string, unknown>;
+    return typeof v.action === "string" && typeof v.object === "string";
+  }
 
   constructor() {
     this.agentManager = new AgentManager();
@@ -74,18 +79,27 @@ export class AgentMessageProcessor {
       );
 
       // Извлекаем данные для совместимости с существующим API
-      let parsed = null;
+      let parsed: ParsedTask | null = null;
 
       // Если это событие и у нас есть парсированные данные
       if (
         messageType.type === "event" &&
         orchestrationResult.metadata?.agentData
       ) {
-        const agentData = orchestrationResult.metadata.agentData;
-        if (agentData.parsedEvent) {
-          parsed = agentData.parsedEvent;
-        } else if (agentData.structuredData) {
-          parsed = agentData.structuredData;
+        const agentData = orchestrationResult.metadata
+          .agentData as Record<string, unknown>;
+        const parsedEvent =
+          typeof agentData === "object" && agentData
+            ? (agentData as { parsedEvent?: unknown }).parsedEvent
+            : undefined;
+        const structuredData =
+          typeof agentData === "object" && agentData
+            ? (agentData as { structuredData?: unknown }).structuredData
+            : undefined;
+        if (this.isParsedTask(parsedEvent)) {
+          parsed = parsedEvent;
+        } else if (this.isParsedTask(structuredData)) {
+          parsed = structuredData;
         }
       }
 
