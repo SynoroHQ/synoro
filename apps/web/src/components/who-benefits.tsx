@@ -1,5 +1,3 @@
-import { Badge } from "@/src/components/ui/badge";
-import { Button } from "@/src/components/ui/button";
 import {
   Car,
   CheckCircle,
@@ -13,6 +11,8 @@ import {
   Users,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
+
+import { Badge, Button } from "@synoro/ui";
 
 export default function WhoBenefits() {
   const t = useTranslations("WhoBenefits");

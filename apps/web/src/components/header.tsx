@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/src/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
+
+import { Button } from "@synoro/ui";
 
 export default function Header() {
   const t = useTranslations("Header");

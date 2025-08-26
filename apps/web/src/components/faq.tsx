@@ -1,12 +1,13 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/src/components/ui/accordion";
-import { useTranslations } from "next-intl";
+} from "@synoro/ui";
 
 export default function FAQ() {
   const t = useTranslations("Home");
@@ -14,9 +15,7 @@ export default function FAQ() {
   return (
     <section id="faq" className="section section-muted">
       <div className="container-default max-w-3xl">
-        <h2 className="heading-title mb-16 text-center">
-          {t("faq.title")}
-        </h2>
+        <h2 className="heading-title mb-16 text-center">{t("faq.title")}</h2>
         <Accordion type="single" collapsible className="space-y-4">
           <AccordionItem value="telegram">
             <AccordionTrigger>{t("faq.telegram.question")}</AccordionTrigger>

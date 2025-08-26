@@ -1,7 +1,5 @@
 "use client";
 
-import { Badge } from "@/src/components/ui/badge";
-import { Button } from "@/src/components/ui/button";
 import {
   ArrowRight,
   Bot,
@@ -10,6 +8,8 @@ import {
   Sparkles,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
+
+import { Badge, Button } from "@synoro/ui";
 
 interface TelegramCTAProps {
   id?: string;
