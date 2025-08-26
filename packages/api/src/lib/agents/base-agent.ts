@@ -1,4 +1,5 @@
-import type { LanguageModelV1 } from "ai";
+import type { LanguageModel } from "ai";
+import { generateText } from "ai";
 import { openai } from "@ai-sdk/openai";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 
@@ -24,9 +25,9 @@ function getActiveProvider() {
 
 function getModelName(defaultModel = "gpt-4o-mini"): string {
   if (process.env.AI_PROVIDER === "moonshot") {
-    return process.env.MOONSHOT_ADVICE_MODEL || "moonshot-v1-8k";
+    return process.env.MOONSHOT_ADVICE_MODEL ?? "moonshot-v1-8k";
   }
-  return process.env.OPENAI_ADVICE_MODEL || defaultModel;
+  return process.env.OPENAI_ADVICE_MODEL ?? defaultModel;
 }
 
 /**
@@ -49,7 +50,7 @@ export abstract class AbstractAgent implements BaseAgent {
   /**
    * Получение модели для агента
    */
-  getModel(): LanguageModelV1 {
+  getModel(): LanguageModel {
     return getActiveProvider()(getModelName(this.defaultModel));
   }
 
@@ -64,7 +65,7 @@ export abstract class AbstractAgent implements BaseAgent {
   abstract process(
     task: AgentTask,
     telemetry?: AgentTelemetry,
-  ): Promise<AgentResult>;
+  ): Promise<AgentResult<string>>;
 
   /**
    * Генерация уникального ID для телеметрии
@@ -83,13 +84,13 @@ export abstract class AbstractAgent implements BaseAgent {
   ): AgentTelemetry {
     return {
       functionId:
-        baseTelemetry?.functionId || this.generateFunctionId(operation),
+        baseTelemetry?.functionId ?? this.generateFunctionId(operation),
       metadata: {
         ...baseTelemetry?.metadata,
         agentName: this.name,
         taskType: task.type,
         taskId: task.id,
-        userId: task.context.userId || "anonymous",
+        userId: task.context.userId ?? "anonymous",
         channel: task.context.channel,
         ...(task.context.chatId && { chatId: task.context.chatId }),
         ...(task.context.messageId && { messageId: task.context.messageId }),
@@ -100,7 +101,10 @@ export abstract class AbstractAgent implements BaseAgent {
   /**
    * Создание результата с ошибкой
    */
-  protected createErrorResult(error: string, confidence = 0): AgentResult {
+  protected createErrorResult<T = string>(
+    error: string,
+    confidence = 0,
+  ): AgentResult<T> {
     return {
       success: false,
       error,
@@ -150,5 +154,27 @@ export abstract class AbstractAgent implements BaseAgent {
     return matching.reduce((best, current) =>
       current.confidence > best.confidence ? current : best,
     );
+  }
+
+  /**
+   * Унифицированная генерация ответа с телеметрией
+   */
+  protected async generateResponse(
+    input: string,
+    system: string,
+    task: AgentTask,
+    telemetry?: AgentTelemetry,
+  ): Promise<string> {
+    const { text } = await generateText({
+      model: this.getModel(),
+      system,
+      prompt: input,
+      temperature: this.defaultTemperature,
+      experimental_telemetry: {
+        isEnabled: true,
+        ...this.createTelemetry("respond", task, telemetry),
+      },
+    });
+    return text.trim();
   }
 }

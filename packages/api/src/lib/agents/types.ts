@@ -1,5 +1,5 @@
 import type { AttributeValue } from "@opentelemetry/api";
-import type { LanguageModelV1 } from "ai";
+import type { LanguageModel } from "ai";
 
 // Базовые типы для агентов
 export interface AgentContext {
@@ -18,7 +18,7 @@ export interface AgentTelemetry {
   };
 }
 
-export interface AgentResult<T = any> {
+export interface AgentResult<T = unknown> {
   success: boolean;
   data?: T;
   error?: string;
@@ -48,8 +48,11 @@ export interface BaseAgent {
   description: string;
   capabilities: AgentCapability[];
   canHandle(task: AgentTask): Promise<boolean>;
-  process(task: AgentTask, telemetry?: AgentTelemetry): Promise<AgentResult>;
-  getModel(): LanguageModelV1;
+  process(
+    task: AgentTask,
+    telemetry?: AgentTelemetry,
+  ): Promise<AgentResult<string>>;
+  getModel(): LanguageModel;
 }
 
 // Типы специализированных агентов
@@ -81,9 +84,9 @@ export interface QualityMetrics {
 
 export interface TaskResult {
   response: string;
-  data?: any;
+  data?: unknown;
   quality: QualityMetrics;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 // Результат оркестрации
@@ -92,5 +95,13 @@ export interface OrchestrationResult {
   agentsUsed: string[];
   totalSteps: number;
   qualityScore: number;
-  metadata: Record<string, any>;
+  metadata: {
+    processingTime: number;
+    agentData?: {
+      parsedEvent?: unknown;
+      structuredData?: unknown;
+      [key: string]: unknown;
+    };
+    [key: string]: unknown;
+  };
 }

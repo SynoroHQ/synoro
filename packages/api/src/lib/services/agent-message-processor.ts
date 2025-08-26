@@ -72,7 +72,16 @@ function getAgentProcessor(): AgentMessageProcessor {
 export async function processMessageWithAgents(
   params: ProcessAgentMessageParams,
 ): Promise<ProcessAgentMessageResult> {
-  const { text, channel, userId, ctx, chatId, messageId, metadata, options = {} } = params;
+  const {
+    text,
+    channel,
+    userId,
+    ctx,
+    chatId,
+    messageId,
+    metadata,
+    options = {},
+  } = params;
 
   // Валидация входных данных
   if (!text.trim()) {
@@ -100,7 +109,8 @@ export async function processMessageWithAgents(
       chatId,
       {
         maxMessages: MESSAGE_PROCESSING_CONFIG.CONTEXT.MAX_MESSAGES,
-        includeSystemMessages: MESSAGE_PROCESSING_CONFIG.CONTEXT.INCLUDE_SYSTEM_MESSAGES,
+        includeSystemMessages:
+          MESSAGE_PROCESSING_CONFIG.CONTEXT.INCLUDE_SYSTEM_MESSAGES,
         maxAgeHours: MESSAGE_PROCESSING_CONFIG.CONTEXT.MAX_AGE_HOURS,
       },
     );
@@ -136,13 +146,12 @@ export async function processMessageWithAgents(
         contextMessageCount: trimmedContext.length,
         agentMode: true,
       },
-      context: JSON.stringify(trimmedContext),
     });
 
     // Классифицируем сообщение
     const classificationStartTime = Date.now();
     console.log("🔍 [AGENTS] Классификация сообщения с контекстом...");
-    
+
     const classification = await classifyMessage(text, {
       functionId: MESSAGE_PROCESSING_CONFIG.FUNCTION_IDS.CLASSIFIER,
       metadata: commonMetadata,
@@ -150,12 +159,14 @@ export async function processMessageWithAgents(
 
     const { messageType, relevance } = classification;
     const classificationTime = formatExecutionTime(classificationStartTime);
-    console.log(`⏱️ [AGENTS] Классификация: ${classificationTime} → ${messageType.type} (${messageType.confidence.toFixed(2)})`);
+    console.log(
+      `⏱️ [AGENTS] Классификация: ${classificationTime} → ${messageType.type} (${messageType.confidence.toFixed(2)})`,
+    );
 
     // Обрабатываем сообщение через агентную систему
     const agentProcessingStartTime = Date.now();
     const processor = getAgentProcessor();
-    
+
     const result = await processor.processHybrid(
       text,
       messageType,
@@ -174,8 +185,10 @@ export async function processMessageWithAgents(
         chatFunctionId: MESSAGE_PROCESSING_CONFIG.FUNCTION_IDS.CHAT,
         parseFunctionId: MESSAGE_PROCESSING_CONFIG.FUNCTION_IDS.PARSE,
         adviseFunctionId: MESSAGE_PROCESSING_CONFIG.FUNCTION_IDS.ADVISE,
-        fallbackParseFunctionId: MESSAGE_PROCESSING_CONFIG.FUNCTION_IDS.FALLBACK_PARSE,
-        fallbackAdviseFunctionId: MESSAGE_PROCESSING_CONFIG.FUNCTION_IDS.FALLBACK_ADVISE,
+        fallbackParseFunctionId:
+          MESSAGE_PROCESSING_CONFIG.FUNCTION_IDS.FALLBACK_PARSE,
+        fallbackAdviseFunctionId:
+          MESSAGE_PROCESSING_CONFIG.FUNCTION_IDS.FALLBACK_ADVISE,
         useQualityControl: options.useQualityControl ?? true,
         maxQualityIterations: options.maxQualityIterations ?? 2,
         targetQuality: options.targetQuality ?? 0.8,
@@ -183,12 +196,18 @@ export async function processMessageWithAgents(
     );
 
     const agentProcessingTime = formatExecutionTime(agentProcessingStartTime);
-    console.log(`🚀 [AGENTS] Обработка агентами: ${agentProcessingTime} (режим: ${result.processingMode})`);
+    console.log(
+      `🚀 [AGENTS] Обработка агентами: ${agentProcessingTime} (режим: ${result.processingMode})`,
+    );
 
     // Логируем информацию об агентах
     if (result.agentMetadata) {
-      console.log(`🤖 [AGENTS] Использованы агенты: ${result.agentMetadata.agentsUsed.join(" → ")}`);
-      console.log(`📊 [AGENTS] Качество: ${result.agentMetadata.qualityScore.toFixed(2)}, шагов: ${result.agentMetadata.totalSteps}`);
+      console.log(
+        `🤖 [AGENTS] Использованы агенты: ${result.agentMetadata.agentsUsed.join(" → ")}`,
+      );
+      console.log(
+        `📊 [AGENTS] Качество: ${result.agentMetadata.qualityScore.toFixed(2)}, шагов: ${result.agentMetadata.totalSteps}`,
+      );
     }
 
     // Сохраняем ответ ассистента
@@ -217,16 +236,18 @@ export async function processMessageWithAgents(
         category: relevance.category ?? "",
       },
       parsed: result.parsed,
-      agentMetadata: result.agentMetadata ? {
-        ...result.agentMetadata,
-        processingMode: result.processingMode,
-      } : {
-        agentsUsed: ["legacy-processor"],
-        totalSteps: 1,
-        qualityScore: 0.7,
-        processingTime: totalProcessingTime,
-        processingMode: result.processingMode,
-      },
+      agentMetadata: result.agentMetadata
+        ? {
+            ...result.agentMetadata,
+            processingMode: result.processingMode,
+          }
+        : {
+            agentsUsed: ["legacy-processor"],
+            totalSteps: 1,
+            qualityScore: 0.7,
+            processingTime: totalProcessingTime,
+            processingMode: result.processingMode,
+          },
     };
   } catch (error) {
     console.error("❌ [AGENTS] Ошибка агентной обработки:", {
@@ -244,7 +265,10 @@ export async function processMessageWithAgents(
 
     throw new TRPCError({
       code: "INTERNAL_SERVER_ERROR",
-      message: error instanceof Error ? error.message : "Неизвестная ошибка в агентной системе",
+      message:
+        error instanceof Error
+          ? error.message
+          : "Неизвестная ошибка в агентной системе",
       cause: error,
     });
   }
