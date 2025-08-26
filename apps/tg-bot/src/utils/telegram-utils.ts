@@ -168,3 +168,114 @@ export function isObviousSpam(text: string): boolean {
 
   return false;
 }
+
+/**
+ * Экранирует специальные символы для Telegram MarkdownV2
+ * Специальные символы: _ * [ ] ( ) ~ ` > # + - = | { } . !
+ */
+export function escapeTelegramMarkdownV2(text: string): string {
+  if (!text) return text;
+
+  // Символы, которые нужно экранировать в MarkdownV2
+  const specialChars = [
+    "_",
+    "*",
+    "[",
+    "]",
+    "(",
+    ")",
+    "~",
+    "`",
+    ">",
+    "#",
+    "+",
+    "-",
+    "=",
+    "|",
+    "{",
+    "}",
+    ".",
+    "!",
+  ];
+
+  let escapedText = text;
+
+  // Экранируем каждый специальный символ
+  for (const char of specialChars) {
+    escapedText = escapedText.replace(
+      new RegExp(`\\${char}`, "g"),
+      `\\${char}`,
+    );
+  }
+
+  return escapedText;
+}
+
+/**
+ * Альтернативная функция для экранирования HTML в Telegram
+ * Используется если предпочитаете HTML форматирование
+ */
+export function sanitizeHTML(text: string): string {
+  if (!text) return text;
+
+  // Заменяем потенциально опасные HTML символы
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+/**
+ * Проверяет, содержит ли текст специальные символы MarkdownV2
+ */
+export function containsMarkdownV2Chars(text: string): boolean {
+  if (!text) return false;
+
+  const specialChars = [
+    "_",
+    "*",
+    "[",
+    "]",
+    "(",
+    ")",
+    "~",
+    "`",
+    ">",
+    "#",
+    "+",
+    "-",
+    "=",
+    "|",
+    "{",
+    "}",
+    ".",
+    "!",
+  ];
+  return specialChars.some((char) => text.includes(char));
+}
+
+/**
+ * Безопасно форматирует текст для отправки в Telegram
+ * Автоматически выбирает между MarkdownV2 и обычным текстом
+ */
+export function formatTelegramText(
+  text: string,
+  preferMarkdown: boolean = true,
+): {
+  text: string;
+  parse_mode?: "MarkdownV2" | "HTML";
+} {
+  if (!text) return { text };
+
+  if (preferMarkdown && containsMarkdownV2Chars(text)) {
+    return {
+      text: escapeTelegramMarkdownV2(text),
+      parse_mode: "MarkdownV2",
+    };
+  }
+
+  // Если нет специальных символов или не предпочитаем Markdown, возвращаем как есть
+  return { text };
+}

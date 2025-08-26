@@ -1,6 +1,9 @@
 // AI модули
 export * from "./ai";
 
+// Агентная система
+export * from "./agents";
+
 // Константы
 export * from "./constants";
 

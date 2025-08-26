@@ -17,6 +17,9 @@ export const env = createEnv({
     TG_AUDIO_MAX_BYTES: z.coerce.number().int().positive().optional(),
     TG_AUDIO_MAX_DURATION_SEC: z.coerce.number().int().positive().optional(),
     TG_FETCH_TIMEOUT_MS: z.coerce.number().int().positive().optional(),
+    // Agent system options
+    TG_USE_AGENT_SYSTEM: z.boolean().default(false),
+    TG_AGENT_AUTO_MODE: z.boolean().default(true),
   },
   runtimeEnv: {
     NODE_ENV: process.env.NODE_ENV,
@@ -30,6 +33,8 @@ export const env = createEnv({
     TG_AUDIO_MAX_BYTES: process.env.TG_AUDIO_MAX_BYTES,
     TG_AUDIO_MAX_DURATION_SEC: process.env.TG_AUDIO_MAX_DURATION_SEC,
     TG_FETCH_TIMEOUT_MS: process.env.TG_FETCH_TIMEOUT_MS,
+    TG_USE_AGENT_SYSTEM: process.env.TG_USE_AGENT_SYSTEM === "true",
+    TG_AGENT_AUTO_MODE: process.env.TG_AGENT_AUTO_MODE !== "false",
   },
   skipValidation:
     !!process.env.CI ||

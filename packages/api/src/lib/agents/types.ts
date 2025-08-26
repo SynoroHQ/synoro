@@ -1,0 +1,96 @@
+import type { AttributeValue } from "@opentelemetry/api";
+import type { LanguageModelV1 } from "ai";
+
+// Базовые типы для агентов
+export interface AgentContext {
+  userId?: string;
+  chatId?: string;
+  messageId?: string;
+  channel: string;
+  metadata?: Record<string, AttributeValue>;
+}
+
+export interface AgentTelemetry {
+  functionId?: string;
+  metadata?: Record<string, AttributeValue> & {
+    langfuseTraceId?: string;
+    langfuseUpdateParent?: boolean;
+  };
+}
+
+export interface AgentResult<T = any> {
+  success: boolean;
+  data?: T;
+  error?: string;
+  confidence?: number;
+  reasoning?: string;
+}
+
+export interface AgentTask {
+  id: string;
+  type: string;
+  input: string;
+  context: AgentContext;
+  priority: number;
+  createdAt: Date;
+}
+
+export interface AgentCapability {
+  name: string;
+  description: string;
+  category: string;
+  confidence: number;
+}
+
+// Базовый интерфейс агента
+export interface BaseAgent {
+  name: string;
+  description: string;
+  capabilities: AgentCapability[];
+  canHandle(task: AgentTask): Promise<boolean>;
+  process(task: AgentTask, telemetry?: AgentTelemetry): Promise<AgentResult>;
+  getModel(): LanguageModelV1;
+}
+
+// Типы специализированных агентов
+export interface RoutingDecision {
+  targetAgent: string;
+  confidence: number;
+  reasoning: string;
+  shouldParallel?: boolean;
+  followUpAgents?: string[];
+}
+
+export interface ClassificationResult {
+  messageType: "question" | "event" | "chat" | "complex_task" | "irrelevant";
+  subtype?: string;
+  confidence: number;
+  needsLogging: boolean;
+  complexity: "simple" | "medium" | "complex";
+  suggestedAgents: string[];
+}
+
+export interface QualityMetrics {
+  accuracy: number;
+  relevance: number;
+  completeness: number;
+  clarity: number;
+  helpfulness: number;
+  overallScore: number;
+}
+
+export interface TaskResult {
+  response: string;
+  data?: any;
+  quality: QualityMetrics;
+  metadata?: Record<string, any>;
+}
+
+// Результат оркестрации
+export interface OrchestrationResult {
+  finalResponse: string;
+  agentsUsed: string[];
+  totalSteps: number;
+  qualityScore: number;
+  metadata: Record<string, any>;
+}

@@ -6,6 +6,10 @@ import {
   transcribeAudio,
 } from "../services/message-service";
 import {
+  removeProcessingMessage,
+  sendProcessingMessage,
+} from "../utils/message-utils";
+import {
   createMessageContext,
   downloadTelegramFile,
   getUserIdentifier,
@@ -24,6 +28,12 @@ export async function handleAudio(ctx: Context): Promise<void> {
   // Показываем индикатор "печатает..." для аудио сообщений
   await ctx.replyWithChatAction("typing");
 
+  // Отправляем сообщение "Обрабатываем..." и сохраняем его ID для последующего удаления
+  const processingMessageId = await sendProcessingMessage(
+    ctx,
+    "аудио сообщение",
+  );
+
   try {
     const messageContext = createMessageContext(ctx);
 
@@ -38,6 +48,9 @@ export async function handleAudio(ctx: Context): Promise<void> {
       (ctx.message?.audio as any)?.duration;
 
     if (typeof durationSec === "number" && durationSec > maxDurationSec) {
+      // Удаляем сообщение "Обрабатываем..." перед отправкой ошибки
+      await removeProcessingMessage(ctx, processingMessageId, ctx.chat!.id);
+
       await ctx.reply(
         `Слишком длинное аудио (${durationSec}s). Лимит — ${maxDurationSec}s. Пожалуйста, укоротите запись.`,
       );
@@ -55,10 +68,16 @@ export async function handleAudio(ctx: Context): Promise<void> {
     );
 
     if (!transcriptionResult.success) {
+      // Удаляем сообщение "Обрабатываем..." перед отправкой ошибки
+      await removeProcessingMessage(ctx, processingMessageId, ctx.chat!.id);
+
       await ctx.reply("Не удалось распознать аудио. Попробуйте ещё раз позже.");
       return;
     }
     if (!transcriptionResult.text.trim()) {
+      // Удаляем сообщение "Обрабатываем..." перед отправкой ошибки
+      await removeProcessingMessage(ctx, processingMessageId, ctx.chat!.id);
+
       await ctx.reply("Голос распознан, но текста не найдено.");
       return;
     }
@@ -86,6 +105,9 @@ export async function handleAudio(ctx: Context): Promise<void> {
       },
     });
 
+    // Удаляем сообщение "Обрабатываем..." если оно было отправлено
+    await removeProcessingMessage(ctx, processingMessageId, ctx.chat!.id);
+
     if (!result.success) {
       const prefix = `Распознал: "${text}"\n\n`;
       const MAX_TG_MESSAGE = 4096;
@@ -112,6 +134,9 @@ export async function handleAudio(ctx: Context): Promise<void> {
       `✅ Аудио обработано: тип=${result.messageType?.type}, релевантность=${result.relevance?.relevant}`,
     );
   } catch (error) {
+    // Удаляем сообщение "Обрабатываем..." в случае ошибки
+    await removeProcessingMessage(ctx, processingMessageId, ctx.chat!.id);
+
     console.error("Audio handling error:", error);
 
     if (error instanceof Error && error.message.includes("слишком большой")) {
