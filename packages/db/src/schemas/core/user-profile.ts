@@ -1,19 +1,87 @@
-import { jsonb, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import {
+  index,
+  jsonb,
+  pgEnum,
+  pgTable,
+  text,
+  timestamp,
+} from "drizzle-orm/pg-core";
 
 import { user } from "../auth/schema";
 
-export const userProfile = pgTable("user_profile", {
-  userId: text("user_id")
-    .primaryKey()
-    .references(() => user.id, { onDelete: "cascade" }),
-  timezone: text("timezone").notNull().default("UTC"),
-  locale: text("locale").notNull().default("ru-RU"),
-  preferences: jsonb("preferences").$type<Record<string, unknown> | null>(),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true })
-    .notNull()
-    .defaultNow()
-    .$onUpdate(() => new Date()),
-});
+export const themeMode = pgEnum("theme_mode", ["light", "dark", "system"]);
+
+// Настройки уведомлений
+export const notificationLevel = pgEnum("notification_level", [
+  "all",
+  "important",
+  "none",
+]);
+
+/**
+ * Таблица профилей пользователей
+ * Хранит расширенную информацию о пользователях: локализация, настройки UI,
+ * персональные данные, настройки уведомлений и AI предпочтения
+ */
+export const userProfiles = pgTable(
+  "user_profiles",
+  {
+    userId: text("user_id")
+      .primaryKey()
+      .references(() => user.id, { onDelete: "cascade" }),
+    // Локализация
+    timezone: text("timezone").notNull().default("UTC"),
+    locale: text("locale").notNull().default("ru-RU"),
+    currency: text("currency").notNull().default("RUB"),
+
+    // UI настройки
+    theme: themeMode("theme").notNull().default("system"),
+
+    // Персональная информация
+    firstName: text("first_name"),
+    lastName: text("last_name"),
+    phone: text("phone"),
+    bio: text("bio"),
+    website: text("website"),
+    emailNotifications: notificationLevel("email_notifications")
+      .notNull()
+      .default("all"),
+    pushNotifications: notificationLevel("push_notifications")
+      .notNull()
+      .default("all"),
+
+    // Расширенные настройки
+    preferences: jsonb("preferences").$type<{
+      // AI настройки
+      aiModel?: string;
+      aiTemperature?: number;
+
+      // Приватность
+      profileVisibility?: "public" | "private";
+      analyticsOptOut?: boolean;
+
+      // Рабочие настройки
+      workingHours?: {
+        start: string;
+        end: string;
+        timezone: string;
+      };
+
+      // Другие настройки
+      [key: string]: unknown;
+    } | null>(),
+
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => [
+    index("user_profile_timezone_idx").on(table.timezone),
+    index("user_profile_locale_idx").on(table.locale),
+    index("user_profile_phone_idx").on(table.phone),
+  ],
+);

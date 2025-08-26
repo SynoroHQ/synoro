@@ -19,7 +19,7 @@
     "build": "tsup",
     "build:watch": "tsup --watch",
     "clean": "git clean -xdf .cache .turbo dist node_modules",
-    "dev": "tsc -w",
+    "dev": "tsc",
     "format": "prettier --check . --ignore-path ../../.gitignore",
     "lint": "eslint",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false",
@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "@t3-oss/env-core": "0.13.8",
-    "zod": "4.0.17"
+    "zod": "4.1.1"
   },
   "devDependencies": {
     "@synoro/eslint-config": "workspace:*",

@@ -1,8 +1,10 @@
 import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 
 import type { AppRouter } from "./root";
+import { startTracing, stopTracing } from "./otel";
 import { appRouter } from "./root";
-import { createCallerFactory, createTRPCContext } from "./trpc";
+import { main } from "./server";
+import { createCallerFactory, createTRPCContext, createExpressContext } from "./trpc";
 
 /**
  * Create a server-side caller for the tRPC API
@@ -29,5 +31,13 @@ type RouterInputs = inferRouterInputs<AppRouter>;
  **/
 type RouterOutputs = inferRouterOutputs<AppRouter>;
 
-export { createTRPCContext, appRouter, createCaller };
+export {
+  createTRPCContext,
+  createExpressContext,
+  appRouter,
+  createCaller,
+  startTracing,
+  stopTracing,
+  main as startServer,
+};
 export type { AppRouter, RouterInputs, RouterOutputs };

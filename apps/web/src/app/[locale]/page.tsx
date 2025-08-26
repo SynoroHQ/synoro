@@ -78,13 +78,11 @@ export default function HomePage() {
 
       <Hero />
 
-      <HowItWorks />
-
       <Features />
 
-      <WhoBenefits />
+      <HowItWorks />
 
-      <Pricing />
+      <WhoBenefits />
 
       <FAQ />
 

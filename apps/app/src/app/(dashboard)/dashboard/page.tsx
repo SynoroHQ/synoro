@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 
 import {
+  Badge,
   Card,
   CardContent,
   CardDescription,
@@ -40,7 +41,12 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Панель управления Synoro</h1>
+        <h1 className="text-3xl font-bold">
+          Панель управления Synoro
+          <Badge className="from-primary via-accent to-primary text-primary-foreground border-primary-foreground/20 ml-3 inline-flex items-center rounded-full border-2 bg-gradient-to-r px-2 py-1 text-xs font-medium shadow-sm backdrop-blur-sm">
+            Beta
+          </Badge>
+        </h1>
         <p className="text-muted-foreground">
           Добро пожаловать в ваш персональный цифровой ассистент
         </p>

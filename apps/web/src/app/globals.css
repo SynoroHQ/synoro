@@ -468,3 +468,63 @@
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 200ms;
 }
+
+/* MagicUI-inspired structural utilities (structure only, keeps existing copy/colors) */
+.section {
+  padding: 4rem 1rem;
+}
+@media (min-width: 640px) {
+  .section {
+    padding: 6rem 1.25rem;
+  }
+}
+@media (min-width: 1024px) {
+  .section {
+    padding: 8rem 1.5rem;
+  }
+}
+
+.container-default {
+  max-width: 72rem; /* ~1152px */
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.heading-title {
+  font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.heading-subtitle {
+  color: var(--muted-foreground, #374151);
+  opacity: 0.9;
+}
+
+.card-magic {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1.25rem;
+  background: color-mix(in srgb, var(--card) 92%, white 8%);
+  border: 1px solid color-mix(in srgb, var(--border) 80%, transparent 20%);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
+  backdrop-filter: saturate(140%) blur(6px);
+  transition: transform 300ms ease, box-shadow 300ms ease, border-color 300ms ease;
+}
+.card-magic:hover {
+  transform: translateY(-6px) scale(1.01);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
+  border-color: color-mix(in srgb, var(--primary) 30%, var(--border) 70%);
+}
+
+.section-gradient {
+  background:
+    radial-gradient(40rem 40rem at 20% 20%, rgba(34, 197, 94, 0.06), transparent 60%),
+    radial-gradient(36rem 36rem at 80% 0%, rgba(132, 204, 22, 0.06), transparent 60%);
+}
+
+.section-muted {
+  background-color: rgba(240, 253, 244, 0.5);
+}

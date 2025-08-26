@@ -1,0 +1,235 @@
+// Use Drizzle inferred types for better compatibility
+import type { InferInsertModel, InferSelectModel } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
+
+import type { Database } from "../../types";
+import type { EntityType } from "./file-relations";
+import type { FileStatus, FileType } from "./files";
+import { fileRelations } from "./file-relations";
+import { files } from "./files";
+
+/**
+ * Утилиты для работы с новой системой файлов
+ */
+
+export interface CreateFileInput {
+  name: string;
+  type: FileType;
+  mime?: string;
+  size?: number;
+  extension?: string;
+  storageKey: string;
+  storageUrl?: string;
+  thumbnailKey?: string;
+  thumbnailUrl?: string;
+  uploadedBy: string;
+  householdId?: string;
+  meta?: Record<string, unknown>;
+}
+
+export interface LinkFileToEntityInput {
+  fileId: string;
+  entityType: EntityType;
+  entityId: string;
+  role?: string;
+  order?: number;
+  meta?: Record<string, unknown>;
+}
+
+/**
+ * Создает новый файл в системе
+ */
+export async function createFile(db: Database, input: CreateFileInput) {
+  const [file] = await db
+    .insert(files)
+    .values({
+      name: input.name,
+      type: input.type,
+      mime: input.mime,
+      size: input.size != null ? BigInt(input.size) : null,
+      extension: input.extension,
+      storageKey: input.storageKey,
+      storageUrl: input.storageUrl,
+      thumbnailKey: input.thumbnailKey,
+      thumbnailUrl: input.thumbnailUrl,
+      uploadedBy: input.uploadedBy,
+      householdId: input.householdId,
+      meta: input.meta,
+    })
+    .returning();
+
+  return file;
+}
+
+/**
+ * Связывает файл с сущностью
+ * Идемпотентная функция: при повторном вызове обновляет существующую связь
+ */
+export async function linkFileToEntity(
+  db: Database,
+  input: LinkFileToEntityInput,
+) {
+  try {
+    // Попытка вставить новую связь
+    const [relation] = await db
+      .insert(fileRelations)
+      .values({
+        fileId: input.fileId,
+        entityType: input.entityType,
+        entityId: input.entityId,
+        role: input.role,
+        order: input.order,
+        meta: input.meta,
+      })
+      .returning();
+
+    return relation;
+  } catch (error: any) {
+    // Если произошла ошибка уникальности, обновляем существующую связь
+    if (
+      error.code === "23505" &&
+      error.constraint === "file_relation_file_entity_role_uidx"
+    ) {
+      const [updatedRelation] = await db
+        .update(fileRelations)
+        .set({
+          order: input.order,
+          meta: input.meta,
+          updatedAt: new Date(),
+        })
+        .where(
+          and(
+            eq(fileRelations.fileId, input.fileId),
+            eq(fileRelations.entityType, input.entityType),
+            eq(fileRelations.entityId, input.entityId),
+            eq(fileRelations.role, input.role || ""),
+          ),
+        )
+        .returning();
+
+      return updatedRelation;
+    }
+
+    // Если это не ошибка уникальности, пробрасываем ошибку дальше
+    throw error;
+  }
+}
+
+/**
+ * Получает все файлы для сущности
+ */
+export async function getEntityFiles(
+  db: Database,
+  entityType: EntityType,
+  entityId: string,
+  role?: string,
+) {
+  let query = and(
+    eq(fileRelations.entityType, entityType),
+    eq(fileRelations.entityId, entityId),
+  );
+
+  if (role) {
+    query = and(query, eq(fileRelations.role, role));
+  }
+
+  const relations = await db
+    .select({
+      relation: fileRelations,
+      file: files,
+    })
+    .from(fileRelations)
+    .innerJoin(files, eq(fileRelations.fileId, files.id))
+    .where(query)
+    .orderBy(fileRelations.order, fileRelations.createdAt);
+
+  return relations.map(({ relation, file }) => ({
+    ...file,
+    relation,
+  }));
+}
+
+/**
+ * Получает файл по ID
+ */
+export async function getFileById(db: Database, fileId: string) {
+  const [file] = await db
+    .select()
+    .from(files)
+    .where(eq(files.id, fileId))
+    .limit(1);
+
+  return file;
+}
+
+/**
+ * Получает файл по storage key
+ */
+export async function getFileByStorageKey(db: Database, storageKey: string) {
+  const [file] = await db
+    .select()
+    .from(files)
+    .where(eq(files.storageKey, storageKey))
+    .limit(1);
+
+  return file;
+}
+
+/**
+ * Обновляет статус файла
+ */
+export async function updateFileStatus(
+  db: Database,
+  fileId: string,
+  status: FileStatus,
+) {
+  const [file] = await db
+    .update(files)
+    .set({
+      status: status,
+      updatedAt: new Date(),
+    })
+    .where(eq(files.id, fileId))
+    .returning();
+
+  return file;
+}
+
+/**
+ * Помечает файл как удаленный (soft delete)
+ */
+export async function softDeleteFile(db: Database, fileId: string) {
+  const [file] = await db
+    .update(files)
+    .set({
+      status: "deleted",
+      deletedAt: new Date(),
+      updatedAt: new Date(),
+    })
+    .where(eq(files.id, fileId))
+    .returning();
+
+  return file;
+}
+
+/**
+ * Получает статистику по файлам
+ */
+export async function getFileStats(db: Database, householdId?: string) {
+  const whereClause = householdId
+    ? eq(files.householdId, householdId)
+    : sql`1=1`;
+
+  const stats = await db
+    .select({
+      totalFiles: sql<number>`count(*)`,
+      totalSize: sql<bigint>`coalesce(sum(size), 0)`,
+      byType: files.type,
+      byStatus: files.status,
+    })
+    .from(files)
+    .where(and(whereClause, sql`deleted_at IS NULL`))
+    .groupBy(files.type, files.status);
+
+  return stats;
+}

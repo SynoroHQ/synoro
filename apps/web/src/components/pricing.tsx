@@ -31,20 +31,24 @@ export default function Pricing() {
         </div>
 
         <div className="grid items-stretch gap-6 sm:gap-8 md:grid-cols-3">
-          {/* Free Plan */}
+          {/* Beta Plan */}
           <div className="group relative">
             <Card className="bg-card/90 relative flex h-full flex-col border-0 shadow-xl backdrop-blur-sm">
-              <CardHeader className="relative px-4 pb-4 text-center sm:px-6 sm:pb-6">
+              <Badge className="from-primary via-accent to-primary text-primary-foreground border-primary-foreground/20 absolute -top-4 left-1/2 z-10 -translate-x-1/2 transform rounded-full border-2 bg-gradient-to-r px-6 py-2 text-xs shadow-xl backdrop-blur-sm sm:-top-6 sm:px-8 sm:py-3 sm:text-sm">
+                <Sparkles className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+                {t("beta.badge")}
+              </Badge>
+              <CardHeader className="relative px-4 pt-6 pb-4 text-center sm:px-6 sm:pt-8 sm:pb-6">
                 <CardTitle className="mb-2 font-serif text-2xl font-bold sm:text-3xl">
-                  {t("free.title")}
+                  {t("beta.title")}
                 </CardTitle>
                 <CardDescription className="mb-4 text-sm sm:mb-6 sm:text-base">
-                  {t("free.subtitle")}
+                  {t("beta.subtitle")}
                 </CardDescription>
                 <div className="mb-4 text-4xl font-bold sm:text-5xl">
-                  {t("free.price")}
+                  {t("beta.price")}
                   <span className="text-muted-foreground text-base font-normal sm:text-lg">
-                    {t("free.period")}
+                    {t("beta.period")}
                   </span>
                 </div>
               </CardHeader>
@@ -53,19 +57,31 @@ export default function Pricing() {
                   <li className="flex items-center gap-2 sm:gap-3">
                     <CheckCircle className="text-primary h-4 w-4 flex-shrink-0 sm:h-5 sm:w-5" />
                     <span className="text-sm sm:text-base">
-                      {t("free.features.basicLogging")}
+                      {t("beta.features.allFeatures")}
                     </span>
                   </li>
                   <li className="flex items-center gap-2 sm:gap-3">
                     <CheckCircle className="text-primary h-4 w-4 flex-shrink-0 sm:h-5 sm:w-5" />
                     <span className="text-sm sm:text-base">
-                      {t("free.features.telegram")}
+                      {t("beta.features.telegram")}
                     </span>
                   </li>
                   <li className="flex items-center gap-2 sm:gap-3">
                     <CheckCircle className="text-primary h-4 w-4 flex-shrink-0 sm:h-5 sm:w-5" />
                     <span className="text-sm sm:text-base">
-                      {t("free.features.basicReports")}
+                      {t("beta.features.advancedAnalytics")}
+                    </span>
+                  </li>
+                  <li className="flex items-center gap-2 sm:gap-3">
+                    <CheckCircle className="text-primary h-4 w-4 flex-shrink-0 sm:h-5 sm:w-5" />
+                    <span className="text-sm sm:text-base">
+                      {t("beta.features.smartReminders")}
+                    </span>
+                  </li>
+                  <li className="flex items-center gap-2 sm:gap-3">
+                    <CheckCircle className="text-primary h-4 w-4 flex-shrink-0 sm:h-5 sm:w-5" />
+                    <span className="text-sm sm:text-base">
+                      {t("beta.features.receiptAnalysis")}
                     </span>
                   </li>
                 </ul>
@@ -102,7 +118,7 @@ export default function Pricing() {
                   <li className="flex items-center gap-2 sm:gap-3">
                     <CheckCircle className="text-primary h-4 w-4 flex-shrink-0 sm:h-5 sm:w-5" />
                     <span className="text-sm sm:text-base">
-                      {t("premium.features.everythingFree")}
+                      {t("premium.features.everythingBeta")}
                     </span>
                   </li>
                   <li className="flex items-center gap-2 sm:gap-3">

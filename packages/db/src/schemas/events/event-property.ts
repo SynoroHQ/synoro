@@ -1,17 +1,37 @@
-import { jsonb, pgTable, primaryKey, text } from "drizzle-orm/pg-core";
+import {
+  index,
+  jsonb,
+  pgTable,
+  primaryKey,
+  text,
+  timestamp,
+} from "drizzle-orm/pg-core";
 
-import { event } from "./event";
+import { events } from "./event";
 
-export const eventProperty = pgTable(
-  "event_property",
+/**
+ * Таблица дополнительных свойств событий
+ * Хранит произвольные ключ-значение пары для расширения событий
+ * Позволяет добавлять специфичные поля без изменения основной схемы
+ */
+export const eventProperties = pgTable(
+  "event_properties",
   {
     eventId: text("event_id")
       .notNull()
-      .references(() => event.id, { onDelete: "cascade" }),
+      .references(() => events.id, { onDelete: "cascade" }),
     key: text("key").notNull(),
     value: jsonb("value").$type<unknown>(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
   },
-  (table) => ({
-    pk: primaryKey({ columns: [table.eventId, table.key] }),
-  }),
+  (table) => [
+    primaryKey({ columns: [table.eventId, table.key] }),
+    index("event_property_key_idx").on(table.key),
+  ],
 );

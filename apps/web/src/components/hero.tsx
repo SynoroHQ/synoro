@@ -52,7 +52,7 @@ export default function Hero() {
   }, []);
 
   return (
-    <section className="relative overflow-hidden px-4 pt-20 pb-12 sm:pt-32 sm:pb-20">
+    <section className="section section-gradient relative overflow-hidden">
       {/* Background Elements */}
       <div className="absolute inset-0">
         <div className="from-primary/10 to-accent/10 absolute top-0 left-0 h-full w-full bg-gradient-to-br"></div>
@@ -63,7 +63,7 @@ export default function Hero() {
         ></div>
       </div>
 
-      <div className="relative z-10 container mx-auto max-w-5xl pt-8 text-center sm:pt-20">
+      <div className="container-default relative z-10 text-center">
         <div className="mb-6 sm:mb-8">
           <Badge className="bg-primary/10 text-primary border-primary/50 rounded-full px-3 py-1.5 text-xs font-medium sm:px-4 sm:py-2 sm:text-sm">
             <Sparkles className="mr-1.5 h-3 w-3 sm:mr-2 sm:h-4 sm:w-4" />
@@ -85,25 +85,25 @@ export default function Hero() {
         </h1>
 
         <p
-          className="text-muted-foreground animate-fade-in-up mx-auto mb-8 max-w-3xl px-2 text-base leading-relaxed sm:mb-12 sm:px-0 sm:text-lg lg:text-xl"
+          className="heading-subtitle text-muted-foreground animate-fade-in-up mx-auto mb-6 max-w-3xl sm:mb-8"
           style={{ animationDelay: "0.4s" }}
         >
           {t("subtitle")}
         </p>
 
-        <div className="mb-12 flex flex-col justify-center gap-4 px-4 sm:mb-16 sm:flex-row sm:gap-6 sm:px-0">
+        <div className="mt-6 mb-12 flex flex-col justify-center gap-4 px-4 sm:mt-8 sm:mb-16 sm:flex-row sm:gap-6 sm:px-0">
           <Button
             size="lg"
             className="bg-primary hover:bg-primary/90 w-full rounded-xl px-6 py-3 font-semibold text-gray-900 shadow-lg transition-all duration-300 hover:shadow-xl sm:w-auto sm:px-8"
           >
             <Sparkles className="mr-2 h-4 w-4" />
-            {t("startTrial")}
+            {t("startBeta")}
           </Button>
 
           <Button
             size="lg"
             variant="outline"
-            className="border-primary text-primary hover:bg-primary w-full rounded-xl bg-transparent px-6 py-3 font-semibold shadow-lg transition-all duration-300 hover:text-gray-900 hover:shadow-xl sm:w-auto sm:px-8"
+            className="border-primary text-primary hover:bg-primary/10 hover:text-primary w-full rounded-xl bg-transparent px-6 py-3 font-semibold shadow-lg transition-all duration-300 hover:shadow-xl sm:w-auto sm:px-8"
           >
             <Play className="mr-2 h-4 w-4" />
             {t("seeDemo")}

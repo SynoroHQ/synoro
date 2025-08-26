@@ -10,14 +10,14 @@
     "dist/**"
   ],
   "scripts": {
-    "dev": "bun with-env email dev -p 3002",
+    "develop": "bun with-env email dev -p 3002",
     "build": "tsup",
     "export": "email export",
     "with-env": "dotenv -e ../../.env --"
   },
   "dependencies": {
     "@radix-ui/colors": "3.0.0",
-    "@react-email/components": "0.5.0",
+    "@react-email/components": "0.5.1",
     "@synoro/config": "workspace:*",
     "@synoro/tsconfig": "workspace:*",
     "@tailwindcss/typography": "0.5.16",
@@ -33,7 +33,7 @@
   "devDependencies": {
     "@react-email/preview-server": "4.2.8",
     "@types/node": "24.3.0",
-    "@types/nodemailer": "^7.0.0",
+    "@types/nodemailer": "^7.0.1",
     "@types/react": "19.1.10",
     "@types/react-dom": "19.1.7",
     "dotenv-cli": "10.0.0",
