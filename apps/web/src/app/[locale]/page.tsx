@@ -8,6 +8,7 @@ import Header from "@/src/components/header";
 import Hero from "@/src/components/hero";
 import HowItWorks from "@/src/components/how-it-works";
 import Pricing from "@/src/components/pricing";
+import TelegramCTA from "@/src/components/telegram-cta";
 import WhoBenefits from "@/src/components/who-benefits";
 
 export default function HomePage() {
@@ -77,6 +78,8 @@ export default function HomePage() {
       <Header />
 
       <Hero />
+
+      <TelegramCTA />
 
       <Features />
 

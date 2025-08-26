@@ -153,7 +153,7 @@ function getContentTypeFromFilename(filename: string): string {
  */
 export function isObviousSpam(text: string): boolean {
   const t = (text || "").trim();
-  if (t.length < 3) return true;
+  if (t.length < 2) return true;
 
   // Too many URLs
   const urlCount = (t.match(/https?:\/\//gi) || []).length;

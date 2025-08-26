@@ -45,7 +45,7 @@ export async function processClassifiedMessage(
         metadata: {
           ...context.metadata,
           channel: context.channel,
-          userId: context.userId,
+          userId: context.userId || "anonymous",
           ...(context.chatId && { chatId: context.chatId }),
           ...(context.messageId && { messageId: context.messageId }),
         },
@@ -60,7 +60,7 @@ export async function processClassifiedMessage(
         metadata: {
           ...context.metadata,
           channel: context.channel,
-          userId: context.userId,
+          userId: context.userId || "anonymous",
           ...(context.chatId && { chatId: context.chatId }),
           ...(context.messageId && { messageId: context.messageId }),
         },
@@ -71,7 +71,7 @@ export async function processClassifiedMessage(
         metadata: {
           ...context.metadata,
           channel: context.channel,
-          userId: context.userId,
+          userId: context.userId || "anonymous",
           ...(context.chatId && { chatId: context.chatId }),
           ...(context.messageId && { messageId: context.messageId }),
         },
@@ -87,7 +87,7 @@ export async function processClassifiedMessage(
         metadata: {
           ...context.metadata,
           channel: context.channel,
-          userId: context.userId,
+          userId: context.userId || "anonymous",
           ...(context.chatId && { chatId: context.chatId }),
           ...(context.messageId && { messageId: context.messageId }),
         },
@@ -107,7 +107,7 @@ export async function processClassifiedMessage(
         metadata: {
           ...context.metadata,
           channel: context.channel,
-          userId: context.userId,
+          userId: context.userId || "anonymous",
           ...(context.chatId && { chatId: context.chatId }),
           ...(context.messageId && { messageId: context.messageId }),
         },
@@ -118,7 +118,7 @@ export async function processClassifiedMessage(
         metadata: {
           ...context.metadata,
           channel: context.channel,
-          userId: context.userId,
+          userId: context.userId || "anonymous",
           ...(context.chatId && { chatId: context.chatId }),
           ...(context.messageId && { messageId: context.messageId }),
         },

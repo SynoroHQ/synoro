@@ -36,7 +36,7 @@ export interface ProcessClassifiedMessageResult {
 
 export interface MessageContext {
   channel: "telegram" | "web" | "mobile";
-  userId: string;
+  userId: string | null; // null для анонимных пользователей
   chatId?: string;
   messageId?: string;
   metadata?: Record<string, unknown>;

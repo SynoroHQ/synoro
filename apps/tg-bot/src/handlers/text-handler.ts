@@ -36,7 +36,6 @@ export async function handleText(ctx: Context): Promise<void> {
 
   try {
     const messageContext = createMessageContext(ctx);
-
     console.log(
       `📝 Обработка текста от ${getUserIdentifier(ctx.from)} в чате ${messageContext.chatId}: "${text.slice(0, 50)}${text.length > 50 ? "..." : ""}"`,
     );

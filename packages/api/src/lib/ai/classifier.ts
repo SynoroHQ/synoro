@@ -16,6 +16,7 @@ import {
 } from "@synoro/validators";
 
 import type { MessageTypeResult, RelevanceResult, Telemetry } from "./types";
+import { parseContextSafely } from "./advisor";
 
 // Initialize AI providers
 const oai = openai; // use default provider instance; it reads OPENAI_API_KEY from env
@@ -153,11 +154,29 @@ export async function classifyMessage(
   telemetry?: Telemetry,
 ): Promise<MessageClassificationResult> {
   const system = await getSystemPrompt(PROMPT_KEYS.MESSAGE_CLASSIFIER);
+
+  // Извлекаем контекст из метаданных
+  const context = parseContextSafely(telemetry);
+
+  // Формируем контекстный промпт
+  let contextualPrompt = `Message: ${text}`;
+
+  if (context.length > 0) {
+    contextualPrompt = `Контекст беседы:\n`;
+    context.forEach((msg: any, index: number) => {
+      const role = msg.role === "user" ? "Пользователь" : "Ассистент";
+      contextualPrompt += `${index + 1}. ${role}: ${msg.content.text}\n`;
+    });
+    contextualPrompt += `\nТекущее сообщение для классификации: ${text}`;
+  }
+
+  contextualPrompt += `\nJSON:`;
+
   try {
     const { text: out } = await generateText({
       model: getActiveProvider()(getAdviceModel()),
       system,
-      prompt: `Message: ${text}\nJSON:`,
+      prompt: contextualPrompt,
       temperature: 0.1,
       experimental_telemetry: {
         isEnabled: true,
