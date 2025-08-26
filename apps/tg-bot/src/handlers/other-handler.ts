@@ -1,5 +1,9 @@
 import type { Context } from "grammy";
 
+import {
+  removeProcessingMessage,
+  sendProcessingMessage,
+} from "../utils/message-utils";
 import { getMessageType } from "../utils/telegram-utils";
 
 /**
@@ -15,11 +19,17 @@ export async function handleOther(ctx: Context): Promise<void> {
   // Показываем индикатор "печатает..." для других типов сообщений
   await ctx.replyWithChatAction("typing");
 
+  // Отправляем сообщение "Обрабатываем..." и сохраняем его ID для последующего удаления
+  const processingMessageId = await sendProcessingMessage(ctx, "сообщение");
+
   try {
     const messageType = getMessageType(ctx.message);
 
     // If a caption exists (e.g., photo with caption), extract it
     const caption = typeof msg.caption === "string" ? msg.caption.trim() : "";
+
+    // Удаляем сообщение "Обрабатываем..." если оно было отправлено
+    await removeProcessingMessage(ctx, processingMessageId, ctx.chat!.id);
 
     if (caption) {
       await ctx.reply(
@@ -36,6 +46,9 @@ export async function handleOther(ctx: Context): Promise<void> {
         "Отправьте текст или голосовое сообщение для анализа.",
     );
   } catch (error) {
+    // Удаляем сообщение "Обрабатываем..." в случае ошибки
+    await removeProcessingMessage(ctx, processingMessageId, ctx.chat!.id);
+
     console.error("Other message handling error:", error);
     await ctx.reply(
       "Получил ваше сообщение, но не смог его обработать. " +

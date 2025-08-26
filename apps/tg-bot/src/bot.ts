@@ -9,7 +9,7 @@ import { buildRateLimitKey, checkRateLimit } from "./lib/rate-limit";
 import { getMessageType, getUserIdentifier } from "./utils/telegram-utils";
 
 export function createBot(): Bot<Context> {
-  const bot = new Bot<Context>(env.TELEGRAM_BOT_TOKEN);
+  const bot = new Bot(env.TELEGRAM_BOT_TOKEN);
 
   // Parse allowlist of chat IDs (optional)
   const allowedChats = new Set<string>(
@@ -84,6 +84,15 @@ export function createBot(): Bot<Context> {
         "📋 Помогу с делами, вопросами и дам полезные советы\n\n" +
         "Просто начинай разговор!",
     );
+  });
+
+  // Обработчик callback-запросов для кнопки "Обрабатываем..."
+  bot.callbackQuery("processing", async (ctx) => {
+    try {
+      await ctx.answerCallbackQuery("⏳ Обрабатываем ваше сообщение...");
+    } catch (error) {
+      console.warn("Не удалось ответить на callback query:", error);
+    }
   });
 
   // Обработчики сообщений

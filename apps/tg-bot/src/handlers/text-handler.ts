@@ -3,6 +3,10 @@ import type { Context } from "grammy";
 import { env } from "../env";
 import { processTextMessage } from "../services/message-service";
 import {
+  removeProcessingMessage,
+  sendProcessingMessage,
+} from "../utils/message-utils";
+import {
   createMessageContext,
   getUserIdentifier,
   isObviousSpam,
@@ -34,6 +38,12 @@ export async function handleText(ctx: Context): Promise<void> {
   // Показываем индикатор "печатает..."
   await ctx.replyWithChatAction("typing");
 
+  // Отправляем сообщение "Обрабатываем..." и сохраняем его ID для последующего удаления
+  const processingMessageId = await sendProcessingMessage(
+    ctx,
+    "текстовое сообщение",
+  );
+
   try {
     const messageContext = createMessageContext(ctx);
     console.log(
@@ -42,6 +52,9 @@ export async function handleText(ctx: Context): Promise<void> {
 
     // Обрабатываем сообщение через API
     const result = await processTextMessage(text, messageContext);
+
+    // Удаляем сообщение "Обрабатываем..." если оно было отправлено
+    await removeProcessingMessage(ctx, processingMessageId, ctx.chat!.id);
 
     if (!result.success) {
       await ctx.reply(result.response);
@@ -62,6 +75,9 @@ export async function handleText(ctx: Context): Promise<void> {
       `✅ Сообщение обработано: тип=${result.messageType?.type}, релевантность=${result.relevance?.relevant}`,
     );
   } catch (error) {
+    // Удаляем сообщение "Обрабатываем..." в случае ошибки
+    await removeProcessingMessage(ctx, processingMessageId, ctx.chat!.id);
+
     console.error("Text handling error:", error);
     await ctx.reply(
       "Не удалось обработать сообщение. Попробуйте ещё раз позже.",
