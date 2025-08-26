@@ -16,9 +16,19 @@ async function main() {
     // Initialize Express app
     const app = express();
 
+    // Increase timeout for large requests
+    app.use((req, res, next) => {
+      req.setTimeout(300000); // 5 minutes
+      res.setTimeout(300000); // 5 minutes
+      next();
+    });
+
     // Add basic middleware
-    app.use(express.json());
-    app.use(express.urlencoded({ extended: true }));
+    app.use(express.json({ limit: "50mb" }));
+    app.use(express.urlencoded({ extended: true, limit: "50mb" }));
+
+    // Add multipart/form-data support for file uploads
+    app.use(express.raw({ type: "multipart/form-data", limit: "50mb" }));
 
     // Health check endpoint
     app.get("/health", (req, res) => {
@@ -32,6 +42,25 @@ async function main() {
         router: appRouter,
         createContext: createExpressContext,
       }),
+    );
+
+    // Error handling middleware for payload too large (must be after all other middleware)
+    app.use(
+      (
+        error: any,
+        req: express.Request,
+        res: express.Response,
+        next: express.NextFunction,
+      ) => {
+        if (error.type === "entity.too.large") {
+          return res.status(413).json({
+            error: "PayloadTooLargeError",
+            message: "Request entity too large",
+            maxSize: "50MB",
+          });
+        }
+        next(error);
+      },
     );
 
     // Start the server
