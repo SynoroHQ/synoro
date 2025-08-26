@@ -1,24 +1,26 @@
-import { generateObject, generateText, tool, stepCountIs } from "ai";
+import { generateText, stepCountIs } from "ai";
 import { z } from "zod";
 
-import { AbstractAgent } from "./base-agent";
 import type {
-  AgentTask,
-  AgentResult,
-  AgentTelemetry,
   AgentCapability,
+  AgentResult,
+  AgentTask,
+  AgentTelemetry,
 } from "./types";
+import { AbstractAgent } from "./base-agent";
 
 // Схемы для оркестрации задач
 const orchestrationPlanSchema = z.object({
-  steps: z.array(z.object({
-    id: z.string(),
-    description: z.string(),
-    requiredAgent: z.string(),
-    dependsOn: z.array(z.string()).optional(),
-    priority: z.enum(["low", "medium", "high"]),
-    estimatedTime: z.string().optional(),
-  })),
+  steps: z.array(
+    z.object({
+      id: z.string(),
+      description: z.string(),
+      requiredAgent: z.string(),
+      dependsOn: z.array(z.string()).optional(),
+      priority: z.enum(["low", "medium", "high"]),
+      estimatedTime: z.string().optional(),
+    }),
+  ),
   totalSteps: z.number(),
   executionType: z.enum(["sequential", "parallel", "mixed"]),
   complexity: z.enum(["medium", "high"]),
@@ -40,12 +42,14 @@ const stepResultSchema = z.object({
  */
 export class TaskOrchestratorAgent extends AbstractAgent {
   name = "Task Orchestrator";
-  description = "Координирует выполнение сложных многоэтапных задач, управляя работой других агентов";
-  
+  description =
+    "Координирует выполнение сложных многоэтапных задач, управляя работой других агентов";
+
   capabilities: AgentCapability[] = [
     {
       name: "Complex Task Planning",
-      description: "Разбиение сложных задач на этапы и планирование их выполнения",
+      description:
+        "Разбиение сложных задач на этапы и планирование их выполнения",
       category: "complex_task",
       confidence: 0.9,
     },
@@ -69,7 +73,8 @@ export class TaskOrchestratorAgent extends AbstractAgent {
     },
     {
       name: "Adaptive Planning",
-      description: "Адаптация плана выполнения на основе промежуточных результатов",
+      description:
+        "Адаптация плана выполнения на основе промежуточных результатов",
       category: "complex_task",
       confidence: 0.7,
     },
@@ -77,7 +82,7 @@ export class TaskOrchestratorAgent extends AbstractAgent {
 
   private availableAgents = [
     "qa-specialist",
-    "event-processor", 
+    "event-processor",
     "data-analyst",
     "financial-advisor",
     "task-manager",
@@ -91,131 +96,48 @@ export class TaskOrchestratorAgent extends AbstractAgent {
   async canHandle(task: AgentTask): Promise<boolean> {
     // Ключевые слова для сложных задач
     const complexTaskKeywords = [
-      "анализ", "статистика", "отчет", "сравни", "найди паттерн",
-      "оптимизируй", "улучши", "план", "стратегия", "исследование",
-      "несколько", "комплексный", "подробный", "детальный"
+      "анализ",
+      "статистика",
+      "отчет",
+      "сравни",
+      "найди паттерн",
+      "оптимизируй",
+      "улучши",
+      "план",
+      "стратегия",
+      "исследование",
+      "несколько",
+      "комплексный",
+      "подробный",
+      "детальный",
     ];
-    
+
     const text = task.input.toLowerCase();
-    const hasComplexPattern = complexTaskKeywords.some(keyword => text.includes(keyword));
-    
+    const hasComplexPattern = complexTaskKeywords.some((keyword) =>
+      text.includes(keyword),
+    );
+
     // Проверяем длину запроса (длинные запросы часто сложные)
     const isLongRequest = task.input.length > 100;
-    
+
     // Проверяем тип задачи
-    const isComplexType = task.type === "complex_task" || 
-                         task.type === "analysis" ||
-                         task.type === "planning";
-    
+    const isComplexType =
+      task.type === "complex_task" ||
+      task.type === "analysis" ||
+      task.type === "planning";
+
     return (hasComplexPattern || isLongRequest) && isComplexType;
-  }
-
-  /**
-   * Создает инструмент для планирования задач
-   */
-  private getTaskPlannerTool() {
-    return tool({
-      description: "Создание плана выполнения сложной задачи с разбивкой на этапы",
-      inputSchema: z.object({
-        taskDescription: z.string(),
-        complexity: z.enum(["medium", "high"]),
-      }),
-      execute: async ({ taskDescription, complexity }) => {
-        // Логика планирования задач
-        const commonSteps = {
-          analysis: {
-            id: "data-analysis",
-            description: "Анализ доступных данных",
-            requiredAgent: "data-analyst",
-            priority: "high" as const,
-          },
-          financial: {
-            id: "financial-review",
-            description: "Финансовый анализ и рекомендации",
-            requiredAgent: "financial-advisor", 
-            priority: "medium" as const,
-          },
-          planning: {
-            id: "task-planning",
-            description: "Планирование и организация задач",
-            requiredAgent: "task-manager",
-            priority: "medium" as const,
-          },
-          qa: {
-            id: "question-answer",
-            description: "Ответы на вопросы и предоставление информации",
-            requiredAgent: "qa-specialist",
-            priority: "low" as const,
-          },
-        };
-        
-        const taskLower = taskDescription.toLowerCase();
-        const relevantSteps = [];
-        
-        if (taskLower.includes("анализ") || taskLower.includes("статистика")) {
-          relevantSteps.push(commonSteps.analysis);
-        }
-        if (taskLower.includes("финанс") || taskLower.includes("деньги") || taskLower.includes("расход")) {
-          relevantSteps.push(commonSteps.financial);
-        }
-        if (taskLower.includes("план") || taskLower.includes("задач") || taskLower.includes("организ")) {
-          relevantSteps.push(commonSteps.planning);
-        }
-        if (taskLower.includes("вопрос") || taskLower.includes("объясн")) {
-          relevantSteps.push(commonSteps.qa);
-        }
-        
-        // Если шагов мало, добавляем общие
-        if (relevantSteps.length === 0) {
-          relevantSteps.push(commonSteps.qa);
-        }
-        
-        return {
-          steps: relevantSteps,
-          executionType: relevantSteps.length > 2 ? "mixed" : "sequential",
-          totalSteps: relevantSteps.length,
-        };
-      },
-    });
-  }
-
-  /**
-   * Создает инструмент для оценки качества выполнения
-   */
-  private getQualityEvaluatorTool() {
-    return tool({
-      description: "Оценка качества выполнения этапа задачи",
-      inputSchema: z.object({
-        stepResult: z.string(),
-        expectedOutcome: z.string(),
-      }),
-      execute: async ({ stepResult, expectedOutcome }) => {
-        // Простая эвристическая оценка качества
-        const qualityMetrics = {
-          completeness: stepResult.length > 50 ? 0.8 : 0.4,
-          relevance: stepResult.toLowerCase().includes(expectedOutcome.toLowerCase()) ? 0.9 : 0.5,
-          clarity: stepResult.split('.').length > 2 ? 0.7 : 0.5,
-        };
-        
-        const averageScore = Object.values(qualityMetrics).reduce((a, b) => a + b, 0) / 3;
-        
-        return {
-          score: averageScore,
-          metrics: qualityMetrics,
-          needsImprovement: averageScore < 0.6,
-          suggestions: averageScore < 0.6 ? ["Добавить больше деталей", "Уточнить информацию"] : [],
-        };
-      },
-    });
   }
 
   /**
    * Создает план выполнения сложной задачи
    */
-  private async createExecutionPlan(task: AgentTask, telemetry?: AgentTelemetry) {
-    const { object: plan } = await generateObject({
+  private async createExecutionPlan(
+    task: AgentTask,
+    telemetry?: AgentTelemetry,
+  ) {
+    const { text } = await generateText({
       model: this.getModel(),
-      schema: orchestrationPlanSchema,
       system: `Ты - архитектор задач в системе Synoro AI. Твоя задача - разбить сложную задачу на управляемые этапы.
 
 ДОСТУПНЫЕ АГЕНТЫ:
@@ -230,15 +152,36 @@ export class TaskOrchestratorAgent extends AbstractAgent {
 1. Разбивай сложные задачи на простые этапы
 2. Используй параллельное выполнение для независимых задач
 3. Учитывай зависимости между этапами
-4. Назначай подходящих агентов для каждого этапа`,
+4. Назначай подходящих агентов для каждого этапа
+5. Оценивай сложность задачи (medium/high)
+6. Объясняй логику планирования в поле reasoning`,
       prompt: `Создай план выполнения задачи: "${task.input}"
 
 Контекст: пользователь ${task.context.userId || "anonymous"} в канале ${task.context.channel}
 
-Определи этапы, их последовательность и ответственных агентов.`,
+Определи этапы, их последовательность и ответственных агентов.
+
+Верни результат в формате JSON со следующей структурой:
+{
+  "steps": [
+    {
+      "id": "уникальный_идентификатор",
+      "description": "описание этапа",
+      "requiredAgent": "имя_агента",
+      "dependsOn": ["id_зависимого_этапа"],
+      "priority": "low|medium|high",
+      "estimatedTime": "примерное время"
+    }
+  ],
+  "totalSteps": количество_этапов,
+  "executionType": "sequential|parallel|mixed",
+  "complexity": "medium|high",
+  "reasoning": "объяснение логики планирования"
+}`,
       temperature: this.defaultTemperature,
-      tools: {
-        planTask: this.getTaskPlannerTool(),
+      experimental_output: {
+        type: "object",
+        schema: orchestrationPlanSchema,
       },
       experimental_telemetry: {
         isEnabled: true,
@@ -246,7 +189,44 @@ export class TaskOrchestratorAgent extends AbstractAgent {
       },
     });
 
-    return plan;
+    // Парсим результат и валидируем схему
+    try {
+      const parsedPlan = JSON.parse(text);
+      const validatedPlan = orchestrationPlanSchema.parse(parsedPlan);
+      return validatedPlan;
+    } catch (error) {
+      console.error("Failed to parse or validate plan:", error);
+      // Создаем fallback план
+      return this.createFallbackPlan(task);
+    }
+  }
+
+  /**
+   * Создает fallback план в случае ошибки парсинга
+   */
+  private createFallbackPlan(task: AgentTask) {
+    return {
+      steps: [
+        {
+          id: "fallback-analysis",
+          description: "Анализ задачи и определение требований",
+          requiredAgent: "qa-specialist",
+          priority: "high" as const,
+          estimatedTime: "5-10 минут",
+        },
+        {
+          id: "fallback-execution",
+          description: "Выполнение основной задачи",
+          requiredAgent: "chat-assistant",
+          priority: "high" as const,
+          estimatedTime: "10-15 минут",
+        },
+      ],
+      totalSteps: 2,
+      executionType: "sequential" as const,
+      complexity: "medium" as const,
+      reasoning: "Создан базовый план из-за ошибки парсинга исходного плана",
+    };
   }
 
   /**
@@ -255,11 +235,11 @@ export class TaskOrchestratorAgent extends AbstractAgent {
   private async executeStep(
     step: any,
     task: AgentTask,
-    telemetry?: AgentTelemetry
+    telemetry?: AgentTelemetry,
   ): Promise<any> {
     // В реальной реализации здесь был бы вызов соответствующего агента
     // Для демонстрации симулируем выполнение
-    
+
     const mockResults = {
       "qa-specialist": `Ответ от специалиста Q&A: обработан вопрос "${step.description}"`,
       "data-analyst": `Анализ данных: выявлены паттерны и тенденции для "${step.description}"`,
@@ -269,8 +249,9 @@ export class TaskOrchestratorAgent extends AbstractAgent {
       "chat-assistant": `Диалог поддержан: дружеский ответ для "${step.description}"`,
     };
 
-    const result = mockResults[step.requiredAgent as keyof typeof mockResults] || 
-                  `Результат от ${step.requiredAgent}: выполнен этап "${step.description}"`;
+    const result =
+      mockResults[step.requiredAgent as keyof typeof mockResults] ||
+      `Результат от ${step.requiredAgent}: выполнен этап "${step.description}"`;
 
     return {
       stepId: step.id,
@@ -281,49 +262,73 @@ export class TaskOrchestratorAgent extends AbstractAgent {
     };
   }
 
-  async process(task: AgentTask, telemetry?: AgentTelemetry): Promise<AgentResult<{
-    plan: any;
-    results: any[];
-    finalSummary: string;
-    qualityScore: number;
-  }>> {
+  async process(
+    task: AgentTask,
+    telemetry?: AgentTelemetry,
+  ): Promise<
+    AgentResult<{
+      plan: any;
+      results: any[];
+      finalSummary: string;
+      qualityScore: number;
+    }>
+  > {
     try {
       // 1. Создаем план выполнения
       const plan = await this.createExecutionPlan(task, telemetry);
-      
+
       // 2. Выполняем этапы согласно плану
       const results = [];
       let overallQuality = 0;
 
       if (plan.executionType === "parallel") {
         // Параллельное выполнение независимых этапов
-        const promises = plan.steps.map(step => 
-          this.executeStep(step, task, telemetry)
+        const promises = plan.steps.map((step) =>
+          this.executeStep(step, task, telemetry),
         );
         const parallelResults = await Promise.all(promises);
         results.push(...parallelResults);
+
+        // Оценка качества каждого этапа в параллельном режиме
+        for (const stepResult of parallelResults) {
+          const quality = await this.evaluateStepQuality(
+            stepResult,
+            stepResult,
+          );
+          overallQuality += quality.score;
+        }
       } else {
         // Последовательное выполнение
         for (const step of plan.steps) {
           const stepResult = await this.executeStep(step, task, telemetry);
           results.push(stepResult);
-          
+
           // Оценка качества каждого этапа
           const quality = await this.evaluateStepQuality(stepResult, step);
           overallQuality += quality.score;
-          
+
           // Если качество низкое, можем попробовать улучшить
           if (quality.needsImprovement && quality.suggestions.length > 0) {
-            console.log(`Quality improvement needed for step ${step.id}:`, quality.suggestions);
+            console.log(
+              `Quality improvement needed for step ${step.id}:`,
+              quality.suggestions,
+            );
             // Здесь можно добавить логику повторного выполнения
           }
         }
       }
 
       // 3. Создаем итоговый отчет
-      const finalSummary = await this.generateFinalSummary(task, plan, results, telemetry);
-      
-      const averageQuality = overallQuality / plan.steps.length;
+      const finalSummary = await this.generateFinalSummary(
+        task,
+        plan,
+        results,
+        telemetry,
+      );
+
+      // Защита от деления на ноль при вычислении среднего качества
+      const totalSteps = plan.steps.length;
+      const averageQuality = totalSteps === 0 ? 0 : overallQuality / totalSteps;
 
       return this.createSuccessResult(
         {
@@ -333,7 +338,7 @@ export class TaskOrchestratorAgent extends AbstractAgent {
           qualityScore: averageQuality,
         },
         averageQuality,
-        `Orchestrated ${plan.steps.length} steps with ${plan.executionType} execution`
+        `Orchestrated ${plan.steps.length} steps with ${plan.executionType} execution`,
       );
     } catch (error) {
       console.error("Error in task orchestrator:", error);
@@ -349,7 +354,8 @@ export class TaskOrchestratorAgent extends AbstractAgent {
     return {
       score: stepResult.confidence || 0.7,
       needsImprovement: (stepResult.confidence || 0.7) < 0.6,
-      suggestions: (stepResult.confidence || 0.7) < 0.6 ? ["Улучшить детализацию"] : [],
+      suggestions:
+        (stepResult.confidence || 0.7) < 0.6 ? ["Улучшить детализацию"] : [],
     };
   }
 
@@ -360,7 +366,7 @@ export class TaskOrchestratorAgent extends AbstractAgent {
     task: AgentTask,
     plan: any,
     results: any[],
-    telemetry?: AgentTelemetry
+    telemetry?: AgentTelemetry,
   ): Promise<string> {
     const { text } = await generateText({
       model: this.getModel(),
@@ -377,7 +383,7 @@ export class TaskOrchestratorAgent extends AbstractAgent {
 ${JSON.stringify(plan, null, 2)}
 
 Результаты этапов:
-${results.map(r => `- ${r.stepId}: ${r.result}`).join('\n')}
+${results.map((r) => `- ${r.stepId}: ${r.result}`).join("\n")}
 
 Сформируй понятное и полезное резюме для пользователя.`,
       temperature: 0.5,

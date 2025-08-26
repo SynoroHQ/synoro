@@ -6,11 +6,16 @@ import type {
   BaseAgent,
   OrchestrationResult,
 } from "./types";
+import { ChatAssistantAgent } from "./chat-assistant-agent";
+import { DataAnalystAgent } from "./data-analyst-agent";
 import { EventProcessorAgent } from "./event-processor-agent";
+import { FinancialAdvisorAgent } from "./financial-advisor-agent";
+import { GeneralAssistantAgent } from "./general-assistant-agent";
 import { QASpecialistAgent } from "./qa-specialist-agent";
 import { QualityEvaluatorAgent } from "./quality-evaluator-agent";
 // Импорт всех агентов
 import { RouterAgent } from "./router-agent";
+import { TaskManagerAgent } from "./task-manager-agent";
 import { TaskOrchestratorAgent } from "./task-orchestrator-agent";
 
 /**
@@ -18,7 +23,7 @@ import { TaskOrchestratorAgent } from "./task-orchestrator-agent";
  * Реализует паттерны orchestration и routing из AI SDK
  */
 export class AgentManager {
-  private agents: Map<string, BaseAgent> = new Map();
+  private agents = new Map<string, BaseAgent>();
   private router: RouterAgent;
   private qualityEvaluator: QualityEvaluatorAgent;
 
@@ -36,6 +41,11 @@ export class AgentManager {
       new QASpecialistAgent(),
       new EventProcessorAgent(),
       new TaskOrchestratorAgent(),
+      new GeneralAssistantAgent(),
+      new TaskManagerAgent(),
+      new DataAnalystAgent(),
+      new FinancialAdvisorAgent(),
+      new ChatAssistantAgent(),
     ];
 
     agentInstances.forEach((agent) => {
@@ -54,7 +64,7 @@ export class AgentManager {
    * затем заменяет последовательности пробелов на дефисы и приводит к нижнему регистру
    */
   private getAgentKey(agentName: string): string {
-    if (!agentName || !agentName.trim()) {
+    if (!agentName?.trim()) {
       return "";
     }
 
@@ -79,7 +89,7 @@ export class AgentManager {
     input: string,
     type: string,
     context: AgentContext,
-    priority: number = 1,
+    priority = 1,
   ): AgentTask {
     return {
       id: `task-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -301,12 +311,12 @@ export class AgentManager {
   /**
    * Получение информации о доступных агентах
    */
-  getAvailableAgents(): Array<{
+  getAvailableAgents(): {
     key: string;
     name: string;
     description: string;
     capabilities: any[];
-  }> {
+  }[] {
     const result = [];
 
     for (const [key, agent] of this.agents) {

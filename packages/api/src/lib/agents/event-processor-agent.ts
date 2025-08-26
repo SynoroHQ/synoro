@@ -237,9 +237,9 @@ export class EventProcessorAgent extends AbstractAgent {
 
         const dollarPatterns = [
           // Формат: "$1,299.90" или "$1 299,90"
-          /\$\s*([\d\s\u00A0\u2009\u200A\u200B\u200C\u200D\uFEFF]+(?:[.,]\d+)?)/i,
+          /\$\s*([\d\s\u00A0\u2009\u200A\u200B\u200C\u200D\uFEFF,]+(?:[.,]\d+)?)/i,
           // Формат: "1 299,90 доллар" или "1 299.90 USD"
-          /([\d\s\u00A0\u2009\u200A\u200B\u200C\u200D\uFEFF]+(?:[.,]\d+)?)\s*(?:доллар|долларов|usd)/i,
+          /([\d\s\u00A0\u2009\u200A\u200B\u200C\u200D\uFEFF,]+(?:[.,]\d+)?)\s*(?:доллар|долларов|usd)/i,
         ];
 
         const euroPatterns = [
