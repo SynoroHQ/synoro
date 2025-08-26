@@ -127,7 +127,7 @@ export class AgentMessageProcessor {
         response:
           "Извините, произошла ошибка при обработке сообщения. Попробуйте еще раз.",
         parsed: null,
-        model: "gpt-5-mini",
+        model: "gpt-5-nano",
         agentMetadata: {
           agentsUsed: ["error-handler"],
           totalSteps: 1,
@@ -245,12 +245,12 @@ export class AgentMessageProcessor {
   private getModelFromAgents(agentsUsed: string[]): string {
     // Простая эвристика: если использовался orchestrator, то более мощная модель
     if (agentsUsed.includes("Task Orchestrator")) {
-      return "gpt-5";
-    }
-    if (agentsUsed.includes("Q&A Specialist")) {
       return "gpt-5-mini";
     }
-    return "gpt-5-mini"; // По умолчанию
+    if (agentsUsed.includes("Q&A Specialist")) {
+      return "gpt-5-nano";
+    }
+    return "gpt-5-nano"; // По умолчанию
   }
 
   /**

@@ -76,7 +76,7 @@ export class RouterAgent extends AbstractAgent {
   ]);
 
   constructor() {
-    super("gpt-5", 0.1); // Используем более точную модель для роутинга
+    super("gpt-5-mini", 0.1); // Используем более точную модель для роутинга
   }
 
   async canHandle(task: AgentTask): Promise<boolean> {
@@ -202,8 +202,9 @@ export class RouterAgent extends AbstractAgent {
       console.error("Error in routing decision:", error);
 
       // Fallback маршрутизация на основе типа сообщения
-      const fallbackAgents =
-        this.availableAgents.get(classification.messageType) ?? ["qa-specialist"];
+      const fallbackAgents = this.availableAgents.get(
+        classification.messageType,
+      ) ?? ["qa-specialist"];
 
       return {
         targetAgent: fallbackAgents[0] ?? "qa-specialist",

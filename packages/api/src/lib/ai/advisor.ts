@@ -150,7 +150,7 @@ function getAdviceModel() {
     process.env.MOONSHOT_ADVICE_MODEL,
     process.env.OPENAI_ADVICE_MODEL,
     "kimi-k2-0711-preview",
-    "gpt-5-mini",
+    "gpt-5-nano",
   );
 }
 

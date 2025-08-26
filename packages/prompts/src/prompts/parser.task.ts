@@ -164,7 +164,7 @@ const parserTask: PromptDefinition = {
   type: "text",
   prompt: parserTaskTemplate,
   labels: ["production", "staging", "latest"],
-  defaultModel: "gpt-5-mini",
+  defaultModel: "gpt-5-nano",
   defaultTemperature: 0.2,
 };
 

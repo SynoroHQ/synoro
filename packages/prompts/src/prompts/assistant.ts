@@ -80,7 +80,7 @@ const assistant: PromptDefinition = {
   type: "text",
   prompt: assistantTemplate,
   labels: ["production", "staging", "latest"],
-  defaultModel: "gpt-5-mini",
+  defaultModel: "gpt-5-nano",
   defaultTemperature: 0.4,
 };
 

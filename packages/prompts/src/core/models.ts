@@ -5,7 +5,7 @@ export type ModelConfig = {
   temperature?: number;
 };
 
-export const DEFAULT_MODEL: AIModel = "gpt-5-mini";
+export const DEFAULT_MODEL: AIModel = "gpt-5-nano";
 
 export function createModelConfig(
   model: AIModel = DEFAULT_MODEL,

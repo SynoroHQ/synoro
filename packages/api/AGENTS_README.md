@@ -174,7 +174,7 @@ TG_AGENT_AUTO_MODE=true            # Автоматический выбор р�
 # API (наследует от существующих)
 AI_PROVIDER=openai                 # Провайдер AI (openai/moonshot)
 OPENAI_API_KEY=your_key           # OpenAI API ключ
-OPENAI_ADVICE_MODEL=gpt-5-mini   # Модель для советов
+OPENAI_ADVICE_MODEL=gpt-5-nano   # Модель для советов
 ```
 
 ## Мониторинг и отладка

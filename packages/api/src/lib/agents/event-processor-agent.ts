@@ -83,7 +83,7 @@ export class EventProcessorAgent extends AbstractAgent {
   ];
 
   constructor() {
-    super("gpt-5-mini", 0.2); // Низкая температура для точного парсинга
+    super("gpt-5-nano", 0.2); // Низкая температура для точного парсинга
   }
 
   async canHandle(task: AgentTask): Promise<boolean> {
