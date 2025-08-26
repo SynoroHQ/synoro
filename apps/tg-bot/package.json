@@ -3,9 +3,6 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "engines": {
-    "node": ">=22.14.0"
-  },
   "scripts": {
     "with-env": "dotenv -e ../../.env --",
     "dev": "bun run with-env -- bun --watch src/index.ts",
