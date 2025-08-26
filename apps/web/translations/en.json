@@ -55,7 +55,13 @@
     "aiStatus": "Online • Smart Assistant",
     "online": "Online",
     "bottomText": "Don't wait - try Synoro right now in Telegram!",
-    "tryNow": "Try now"
+    "tryNow": "Try now",
+    "telegramCta": {
+      "greeting": "Hello! I'm Synoro, your smart assistant. How can I help?",
+      "userExample": "Changed oil in car, took 2 hours",
+      "confirmation": "✅ Recorded: Oil change (2h). Next service in 5000 km.",
+      "inputPlaceholder": "Type a message..."
+    }
   },
   "Features": {
     "badge": "Features",
