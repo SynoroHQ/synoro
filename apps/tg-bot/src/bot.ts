@@ -3,7 +3,9 @@ import { Bot } from "grammy";
 
 import { env } from "./env";
 import { handleAudio } from "./handlers/audio-handler";
+import { handleAgentsCommand, handleAgentTestCommand } from "./handlers/agent-handler";
 import { handleOther } from "./handlers/other-handler";
+import { handleSmartText } from "./handlers/smart-text-handler";
 import { handleText } from "./handlers/text-handler";
 import { buildRateLimitKey, checkRateLimit } from "./lib/rate-limit";
 import { getMessageType, getUserIdentifier } from "./utils/telegram-utils";
@@ -82,9 +84,16 @@ export function createBot(): Bot<Context> {
         "💬 Отправь текстовое сообщение — я его разберу и проанализирую\n" +
         "🎤 Отправь голосовое — переведу в текст и обработаю\n" +
         "📋 Помогу с делами, вопросами и дам полезные советы\n\n" +
+        "🤖 Команды:\n" +
+        "/agents - информация о мультиагентной системе\n" +
+        "/agent_test - тестирование агентной обработки\n\n" +
         "Просто начинай разговор!",
     );
   });
+
+  // Команды для агентной системы
+  bot.command("agents", handleAgentsCommand);
+  bot.command("agent_test", handleAgentTestCommand);
 
   // Обработчик callback-запросов для кнопки "Обрабатываем..."
   bot.callbackQuery("processing", async (ctx) => {
@@ -96,7 +105,9 @@ export function createBot(): Bot<Context> {
   });
 
   // Обработчики сообщений
-  bot.on("message:text", handleText);
+  // Используем умный обработчик, если включена агентная система
+  const textHandler = env.TG_USE_AGENT_SYSTEM ? handleSmartText : handleText;
+  bot.on("message:text", textHandler);
   bot.on(["message:voice", "message:audio"], handleAudio);
   // Fallback для всех остальных типов сообщений
   bot.on("message", handleOther);

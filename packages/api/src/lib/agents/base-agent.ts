@@ -1,0 +1,138 @@
+import { openai } from "@ai-sdk/openai";
+import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
+import type { LanguageModelV1 } from "ai";
+
+import type {
+  BaseAgent,
+  AgentTask,
+  AgentResult,
+  AgentTelemetry,
+  AgentCapability,
+} from "./types";
+
+// Инициализация AI провайдеров
+const oai = openai;
+const moonshotAI = createOpenAICompatible({
+  name: "moonshot",
+  apiKey: process.env.MOONSHOT_API_KEY,
+  baseURL: "https://api.moonshot.ai/v1",
+});
+
+function getActiveProvider() {
+  return process.env.AI_PROVIDER === "moonshot" ? moonshotAI : oai;
+}
+
+function getModelName(defaultModel: string = "gpt-4o-mini"): string {
+  if (process.env.AI_PROVIDER === "moonshot") {
+    return process.env.MOONSHOT_ADVICE_MODEL || "moonshot-v1-8k";
+  }
+  return process.env.OPENAI_ADVICE_MODEL || defaultModel;
+}
+
+/**
+ * Базовый класс для всех агентов
+ * Предоставляет общую функциональность и интерфейс
+ */
+export abstract class AbstractAgent implements BaseAgent {
+  abstract name: string;
+  abstract description: string;
+  abstract capabilities: AgentCapability[];
+
+  protected defaultModel: string;
+  protected defaultTemperature: number;
+
+  constructor(defaultModel: string = "gpt-4o-mini", defaultTemperature: number = 0.4) {
+    this.defaultModel = defaultModel;
+    this.defaultTemperature = defaultTemperature;
+  }
+
+  /**
+   * Получение модели для агента
+   */
+  getModel(): LanguageModelV1 {
+    return getActiveProvider()(getModelName(this.defaultModel));
+  }
+
+  /**
+   * Проверка возможности обработки задачи агентом
+   */
+  abstract canHandle(task: AgentTask): Promise<boolean>;
+
+  /**
+   * Основная обработка задачи агентом
+   */
+  abstract process(task: AgentTask, telemetry?: AgentTelemetry): Promise<AgentResult>;
+
+  /**
+   * Генерация уникального ID для телеметрии
+   */
+  protected generateFunctionId(operation: string): string {
+    return `agent-${this.name.toLowerCase().replace(/\s+/g, "-")}-${operation}`;
+  }
+
+  /**
+   * Создание телеметрии для операции
+   */
+  protected createTelemetry(operation: string, task: AgentTask, baseTelemetry?: AgentTelemetry): AgentTelemetry {
+    return {
+      functionId: baseTelemetry?.functionId || this.generateFunctionId(operation),
+      metadata: {
+        ...baseTelemetry?.metadata,
+        agentName: this.name,
+        taskType: task.type,
+        taskId: task.id,
+        userId: task.context.userId || "anonymous",
+        channel: task.context.channel,
+        ...(task.context.chatId && { chatId: task.context.chatId }),
+        ...(task.context.messageId && { messageId: task.context.messageId }),
+      },
+    };
+  }
+
+  /**
+   * Создание результата с ошибкой
+   */
+  protected createErrorResult(error: string, confidence: number = 0): AgentResult {
+    return {
+      success: false,
+      error,
+      confidence,
+    };
+  }
+
+  /**
+   * Создание успешного результата
+   */
+  protected createSuccessResult<T>(data: T, confidence: number = 1, reasoning?: string): AgentResult<T> {
+    return {
+      success: true,
+      data,
+      confidence,
+      reasoning,
+    };
+  }
+
+  /**
+   * Проверка соответствия возможности агента типу задачи
+   */
+  protected hasCapabilityForTask(taskType: string): boolean {
+    return this.capabilities.some(cap => 
+      cap.category === taskType || cap.name.toLowerCase().includes(taskType.toLowerCase())
+    );
+  }
+
+  /**
+   * Получение наиболее подходящей возможности для задачи
+   */
+  protected getBestCapabilityForTask(taskType: string): AgentCapability | null {
+    const matching = this.capabilities.filter(cap => 
+      cap.category === taskType || cap.name.toLowerCase().includes(taskType.toLowerCase())
+    );
+    
+    if (matching.length === 0) return null;
+    
+    return matching.reduce((best, current) => 
+      current.confidence > best.confidence ? current : best
+    );
+  }
+}
