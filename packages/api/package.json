@@ -37,7 +37,7 @@
     "@synoro/prompts": "workspace:*",
     "@synoro/validators": "workspace:*",
     "@trpc/server": "^11.5.0",
-    "ai": "^5.0.24",
+    "ai": "5.0.24",
     "date-fns": "4.1.0",
     "express": "^5.1.0",
     "langfuse": "^3.38.4",
