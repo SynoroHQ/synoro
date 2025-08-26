@@ -1,46 +1,49 @@
-import { AbstractAgent, AgentTask, AgentTelemetry } from "./base-agent";
+import { AbstractAgent } from "./base-agent";
+import type { AgentTask, AgentTelemetry, AgentResult } from "./types";
+import { getPromptSafe, PROMPT_KEYS } from "@synoro/prompts";
 
 export class ChatAssistantAgent extends AbstractAgent {
+  name = "Chat Assistant";
+  description = "Дружелюбный чат-ассистент Synoro AI для casual-общения";
+  capabilities = [
+    {
+      name: "Small Talk",
+      description: "Приветствия, прощания, поддержка коротких бесед",
+      category: "chat",
+      confidence: 0.9,
+    },
+    {
+      name: "Empathy",
+      description: "Вежливость, эмпатия и поддержка",
+      category: "chat",
+      confidence: 0.85,
+    },
+  ];
   constructor() {
     super("gpt-4o", 0.8);
   }
 
-  async canHandle(task: AgentTask): Promise<boolean> {
+  canHandle(task: AgentTask): Promise<boolean> {
     const input = task.input.toLowerCase();
-    return (
+    return Promise.resolve(
       input.includes("привет") ||
-      input.includes("здравствуй") ||
-      input.includes("спасибо") ||
-      input.includes("пока") ||
-      input.includes("как дела") ||
-      input.includes("как ты") ||
-      input.includes("hello") ||
-      input.includes("hi") ||
-      input.includes("thanks") ||
-      input.includes("bye") ||
-      input.includes("how are you") ||
-      input.length < 20 // Короткие сообщения обычно для общения
+        input.includes("здравствуй") ||
+        input.includes("спасибо") ||
+        input.includes("как ты") ||
+        input.includes("hello") ||
+        input.includes("hi") ||
+        input.includes("thanks") ||
+        input.includes("bye") ||
+        input.includes("how are you") ||
+        input.length < 20 // Короткие сообщения обычно для общения
     );
   }
 
-  async process(task: AgentTask, telemetry?: AgentTelemetry): Promise<string> {
-    const systemPrompt = `Ты - дружелюбный чат-ассистент в системе Synoro AI.
-
-Твоя задача - вести естественное, дружеское общение с пользователями.
-
-Ты можешь:
-- Отвечать на приветствия и прощания
-- Поддерживать casual разговор
-- Выражать эмоции и эмпатию
-- Быть вежливым и дружелюбным
-- Помогать с простыми вопросами
-
-Ты не должен:
-- Давать сложные технические ответы
-- Обрабатывать специализированные запросы
-- Логировать все сообщения
-
-Будь естественным, дружелюбным и немного игривым, но всегда профессиональным.`;
+  async process(
+    task: AgentTask,
+    telemetry?: AgentTelemetry,
+  ): Promise<AgentResult<string>> {
+    const systemPrompt = getPromptSafe(PROMPT_KEYS.ASSISTANT);
 
     try {
       const response = await this.generateResponse(
@@ -50,15 +53,17 @@ export class ChatAssistantAgent extends AbstractAgent {
         telemetry,
       );
 
-      return response;
+      return this.createSuccessResult(response, 0.8);
     } catch (error) {
       console.error("Error in ChatAssistantAgent:", error);
-      return "Привет! Извините, у меня возникли технические сложности. Как дела?";
+      return this.createErrorResult(
+        "Привет! Извините, у меня возникли технические сложности. Как дела?",
+      );
     }
   }
 
-  async shouldLog(task: AgentTask): Promise<boolean> {
+  shouldLog(task: AgentTask): Promise<boolean> {
     // Логируем только важные или длинные сообщения
-    return task.input.length > 30;
+    return Promise.resolve(task.input.length > 30);
   }
 }
