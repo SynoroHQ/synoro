@@ -30,7 +30,7 @@ export class AgentMessageProcessor {
     text: string,
     messageType: MessageTypeResult,
     context: MessageContext,
-    options: MessageProcessorOptions & {
+    options: Partial<MessageProcessorOptions> & {
       useQualityControl?: boolean;
       maxQualityIterations?: number;
       targetQuality?: number;
@@ -48,11 +48,13 @@ export class AgentMessageProcessor {
     try {
       // Преобразуем контекст для агентной системы
       const agentContext: AgentContext = {
-        userId: context.userId,
+        userId: context.userId || undefined,
         chatId: context.chatId,
         messageId: context.messageId,
         channel: context.channel,
-        metadata: context.metadata,
+        metadata: context.metadata as
+          | Record<string, AttributeValue>
+          | undefined,
       };
 
       // Формируем телеметрию
@@ -146,7 +148,7 @@ export class AgentMessageProcessor {
     text: string,
     messageType: MessageTypeResult,
     context: MessageContext,
-    options: MessageProcessorOptions & {
+    options: Partial<MessageProcessorOptions> & {
       forceAgentMode?: boolean;
       useQualityControl?: boolean;
     } = {},
@@ -183,7 +185,15 @@ export class AgentMessageProcessor {
         text,
         messageType,
         context,
-        options,
+        {
+          questionFunctionId: "legacy-question",
+          chatFunctionId: "legacy-chat",
+          parseFunctionId: "legacy-parse",
+          adviseFunctionId: "legacy-advise",
+          fallbackParseFunctionId: "legacy-fallback-parse",
+          fallbackAdviseFunctionId: "legacy-fallback-advise",
+          ...options,
+        },
       );
 
       return {

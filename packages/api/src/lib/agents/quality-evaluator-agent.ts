@@ -70,10 +70,13 @@ export class QualityEvaluatorAgent extends AbstractAgent {
     },
   ];
 
-  private qualityThresholds = {
+  private qualityThresholds: Record<
+    "excellent" | "good" | "acceptable" | "poor",
+    number
+  > = {
     excellent: 0.9,
     good: 0.7,
-    accepta: 0.5,
+    acceptable: 0.5,
     poor: 0.3,
   };
 
@@ -155,7 +158,6 @@ ${context ? `Дополнительный контекст: ${JSON.stringify(con
         clarity: 0.5,
         helpfulness: 0.5,
         overallScore: 0.5,
-        reasoning: "Fallback evaluation due to error",
         suggestions: ["Проверить ответ агента"],
         needsImprovement: true,
       };
@@ -285,7 +287,7 @@ ${evaluation.suggestions.join("\n- ")}
       finalResponse: currentResponse,
       evaluations,
       iterationsUsed,
-      finalQuality: finalEvaluation.overallScore,
+      finalQuality: finalEvaluation?.overallScore ?? 0.5,
     };
   }
 

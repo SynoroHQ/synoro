@@ -190,6 +190,7 @@ export async function processMessageWithAgents(
         fallbackAdviseFunctionId:
           MESSAGE_PROCESSING_CONFIG.FUNCTION_IDS.FALLBACK_ADVISE,
         useQualityControl: options.useQualityControl ?? true,
+        forceAgentMode: true,
       },
     );
 
