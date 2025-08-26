@@ -4,6 +4,7 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/i18n.ts");
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  reactStrictMode: true,
   eslint: {
     ignoreDuringBuilds: true,
   },
@@ -20,7 +21,7 @@ const nextConfig = {
       "base-uri 'self'",
       "object-src 'none'",
       "frame-ancestors 'none'",
-      `script-src 'self' 'unsafe-inline' ${isProd ? '' : "'unsafe-eval'"} https:`.trim(),
+      `script-src 'self' 'unsafe-inline' ${isProd ? "" : "'unsafe-eval'"} https:`.trim(),
       "style-src 'self' 'unsafe-inline' https:",
       "connect-src 'self' https:",
       "img-src 'self' data: blob: https:",
@@ -54,6 +55,7 @@ const nextConfig = {
       },
     ];
   },
+  output: "standalone",
 };
 
 export default withNextIntl(nextConfig);
