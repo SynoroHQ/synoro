@@ -1,13 +1,13 @@
+import type { LanguageModelV1 } from "ai";
 import { openai } from "@ai-sdk/openai";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
-import type { LanguageModelV1 } from "ai";
 
 import type {
-  BaseAgent,
-  AgentTask,
-  AgentResult,
-  AgentTelemetry,
   AgentCapability,
+  AgentResult,
+  AgentTask,
+  AgentTelemetry,
+  BaseAgent,
 } from "./types";
 
 // Инициализация AI провайдеров
@@ -22,7 +22,7 @@ function getActiveProvider() {
   return process.env.AI_PROVIDER === "moonshot" ? moonshotAI : oai;
 }
 
-function getModelName(defaultModel: string = "gpt-4o-mini"): string {
+function getModelName(defaultModel = "gpt-4o-mini"): string {
   if (process.env.AI_PROVIDER === "moonshot") {
     return process.env.MOONSHOT_ADVICE_MODEL || "moonshot-v1-8k";
   }
@@ -41,7 +41,7 @@ export abstract class AbstractAgent implements BaseAgent {
   protected defaultModel: string;
   protected defaultTemperature: number;
 
-  constructor(defaultModel: string = "gpt-4o-mini", defaultTemperature: number = 0.4) {
+  constructor(defaultModel = "gpt-4o-mini", defaultTemperature = 0.4) {
     this.defaultModel = defaultModel;
     this.defaultTemperature = defaultTemperature;
   }
@@ -61,7 +61,10 @@ export abstract class AbstractAgent implements BaseAgent {
   /**
    * Основная обработка задачи агентом
    */
-  abstract process(task: AgentTask, telemetry?: AgentTelemetry): Promise<AgentResult>;
+  abstract process(
+    task: AgentTask,
+    telemetry?: AgentTelemetry,
+  ): Promise<AgentResult>;
 
   /**
    * Генерация уникального ID для телеметрии
@@ -73,9 +76,14 @@ export abstract class AbstractAgent implements BaseAgent {
   /**
    * Создание телеметрии для операции
    */
-  protected createTelemetry(operation: string, task: AgentTask, baseTelemetry?: AgentTelemetry): AgentTelemetry {
+  protected createTelemetry(
+    operation: string,
+    task: AgentTask,
+    baseTelemetry?: AgentTelemetry,
+  ): AgentTelemetry {
     return {
-      functionId: baseTelemetry?.functionId || this.generateFunctionId(operation),
+      functionId:
+        baseTelemetry?.functionId || this.generateFunctionId(operation),
       metadata: {
         ...baseTelemetry?.metadata,
         agentName: this.name,
@@ -92,7 +100,7 @@ export abstract class AbstractAgent implements BaseAgent {
   /**
    * Создание результата с ошибкой
    */
-  protected createErrorResult(error: string, confidence: number = 0): AgentResult {
+  protected createErrorResult(error: string, confidence = 0): AgentResult {
     return {
       success: false,
       error,
@@ -103,7 +111,11 @@ export abstract class AbstractAgent implements BaseAgent {
   /**
    * Создание успешного результата
    */
-  protected createSuccessResult<T>(data: T, confidence: number = 1, reasoning?: string): AgentResult<T> {
+  protected createSuccessResult<T>(
+    data: T,
+    confidence = 1,
+    reasoning?: string,
+  ): AgentResult<T> {
     return {
       success: true,
       data,
@@ -116,8 +128,10 @@ export abstract class AbstractAgent implements BaseAgent {
    * Проверка соответствия возможности агента типу задачи
    */
   protected hasCapabilityForTask(taskType: string): boolean {
-    return this.capabilities.some(cap => 
-      cap.category === taskType || cap.name.toLowerCase().includes(taskType.toLowerCase())
+    return this.capabilities.some(
+      (cap) =>
+        cap.category === taskType ||
+        cap.name.toLowerCase().includes(taskType.toLowerCase()),
     );
   }
 
@@ -125,14 +139,16 @@ export abstract class AbstractAgent implements BaseAgent {
    * Получение наиболее подходящей возможности для задачи
    */
   protected getBestCapabilityForTask(taskType: string): AgentCapability | null {
-    const matching = this.capabilities.filter(cap => 
-      cap.category === taskType || cap.name.toLowerCase().includes(taskType.toLowerCase())
+    const matching = this.capabilities.filter(
+      (cap) =>
+        cap.category === taskType ||
+        cap.name.toLowerCase().includes(taskType.toLowerCase()),
     );
-    
+
     if (matching.length === 0) return null;
-    
-    return matching.reduce((best, current) => 
-      current.confidence > best.confidence ? current : best
+
+    return matching.reduce((best, current) =>
+      current.confidence > best.confidence ? current : best,
     );
   }
 }

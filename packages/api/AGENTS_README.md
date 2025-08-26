@@ -9,7 +9,7 @@
 ### Основные компоненты
 
 1. **Router Agent** - Классифицирует сообщения и направляет к подходящим агентам
-2. **Q&A Specialist Agent** - Отвечает на вопросы о системе и предоставляет информацию  
+2. **Q&A Specialist Agent** - Отвечает на вопросы о системе и предоставляет информацию
 3. **Event Processor Agent** - Обрабатывает события (покупки, задачи, встречи)
 4. **Task Orchestrator Agent** - Координирует сложные многоэтапные задачи
 5. **Quality Evaluator Agent** - Оценивает и улучшает качество ответов
@@ -19,7 +19,7 @@
 Система реализует следующие паттерны из AI SDK:
 
 - **Sequential Processing** - Последовательная обработка этапов
-- **Parallel Processing** - Параллельная обработка независимых задач  
+- **Parallel Processing** - Параллельная обработка независимых задач
 - **Routing** - Интеллектуальная маршрутизация запросов
 - **Evaluation-Optimization Loops** - Циклы оценки и улучшения качества
 - **Multi-Step Tool Usage** - Использование инструментов в несколько шагов
@@ -43,17 +43,19 @@ await api.messages.processMessageAgents.processMessageWithAgents.mutate({
   channel: "web",
   agentOptions: {
     useQualityControl: true,
-    targetQuality: 0.8
-  }
+    targetQuality: 0.8,
+  },
 });
 
 // Обработка для Telegram
-await api.messages.processMessageAgents.processMessageFromTelegramWithAgents.mutate({
-  text: "Купил хлеб за 45 рублей", 
-  channel: "telegram",
-  chatId: "123",
-  telegramUserId: "456"
-});
+await api.messages.processMessageAgents.processMessageFromTelegramWithAgents.mutate(
+  {
+    text: "Купил хлеб за 45 рублей",
+    channel: "telegram",
+    chatId: "123",
+    telegramUserId: "456",
+  },
+);
 
 // Статистика агентов
 const stats = await api.messages.processMessageAgents.getAgentStats.query();
@@ -79,11 +81,13 @@ const stats = await api.messages.processMessageAgents.getAgentStats.query();
 ### Router Agent
 
 **Возможности:**
+
 - Классификация типа сообщения
 - Выбор подходящего агента
 - Определение сложности задачи
 
 **Поддерживаемые типы:**
+
 - `question` - Вопросы
 - `event` - События для логирования
 - `chat` - Обычное общение
@@ -93,48 +97,56 @@ const stats = await api.messages.processMessageAgents.getAgentStats.query();
 ### Q&A Specialist Agent
 
 **Возможности:**
+
 - Ответы о функциях бота
 - Помощь в использовании системы
 - Общие знания с контекстом Synoro
 
 **Инструменты:**
+
 - Поиск информации о системе
 - Контекстные ответы
 
 ### Event Processor Agent
 
 **Возможности:**
+
 - Парсинг покупок с суммами
 - Извлечение задач и встреч
 - Автоматическая категоризация
 - Контекстные советы
 
 **Инструменты:**
+
 - Категоризация событий
 - Извлечение финансовой информации
 
 ### Task Orchestrator Agent
 
 **Возможности:**
+
 - Планирование сложных задач
 - Координация других агентов
 - Параллельная обработка
 - Адаптивное планирование
 
 **Инструменты:**
+
 - Планировщик задач
 - Оценщик качества
 
 ### Quality Evaluator Agent
 
 **Возможности:**
+
 - Оценка по критериям (точность, релевантность, полнота)
 - Генерация улучшенных версий
 - Итеративное улучшение
 
 **Метрики качества:**
+
 - Accuracy (точность)
-- Relevance (релевантность) 
+- Relevance (релевантность)
 - Completeness (полнота)
 - Clarity (ясность)
 - Helpfulness (полезность)
@@ -145,10 +157,10 @@ const stats = await api.messages.processMessageAgents.getAgentStats.query();
 
 ```typescript
 interface AgentOptions {
-  forceAgentMode?: boolean;           // Принудительный агентный режим
-  useQualityControl?: boolean;        // Контроль качества (по умолчанию true)
-  maxQualityIterations?: number;      // Макс. итераций улучшения (по умолчанию 2)
-  targetQuality?: number;             // Целевое качество 0-1 (по умолчанию 0.8)
+  forceAgentMode?: boolean; // Принудительный агентный режим
+  useQualityControl?: boolean; // Контроль качества (по умолчанию true)
+  maxQualityIterations?: number; // Макс. итераций улучшения (по умолчанию 2)
+  targetQuality?: number; // Целевое качество 0-1 (по умолчанию 0.8)
 }
 ```
 
@@ -183,10 +195,10 @@ OPENAI_ADVICE_MODEL=gpt-4o-mini   # Модель для советов
 
 ```typescript
 interface AgentMetadata {
-  agentsUsed: string[];              // Список использованных агентов
-  totalSteps: number;                // Общее количество шагов
-  qualityScore: number;              // Оценка качества (0-1)
-  processingTime: number;            // Время обработки в мс
+  agentsUsed: string[]; // Список использованных агентов
+  totalSteps: number; // Общее количество шагов
+  qualityScore: number; // Оценка качества (0-1)
+  processingTime: number; // Время обработки в мс
   processingMode: "agents" | "legacy"; // Режим обработки
 }
 ```
@@ -204,11 +216,11 @@ bun run src/scripts/test-agents.ts
 
 ```typescript
 const testMessages = [
-  "Что ты умеешь?",                                           // Q&A Agent
-  "Купил хлеб за 45 рублей",                                 // Event Processor  
-  "Привет! Как дела?",                                       // Chat Assistant
-  "Проанализируй расходы и дай рекомендации",               // Task Orchestrator
-  "Сколько я потратил на продукты?"                         // Data Analysis
+  "Что ты умеешь?", // Q&A Agent
+  "Купил хлеб за 45 рублей", // Event Processor
+  "Привет! Как дела?", // Chat Assistant
+  "Проанализируй расходы и дай рекомендации", // Task Orchestrator
+  "Сколько я потратил на продукты?", // Data Analysis
 ];
 ```
 
@@ -247,15 +259,18 @@ export class CustomAgent extends AbstractAgent {
       name: "Custom Capability",
       description: "Описание возможности",
       category: "custom",
-      confidence: 0.9
-    }
+      confidence: 0.9,
+    },
   ];
 
   async canHandle(task: AgentTask): Promise<boolean> {
     return task.type === "custom";
   }
 
-  async process(task: AgentTask, telemetry?: AgentTelemetry): Promise<AgentResult> {
+  async process(
+    task: AgentTask,
+    telemetry?: AgentTelemetry,
+  ): Promise<AgentResult> {
     // Логика обработки
     return this.createSuccessResult("Результат", 0.9);
   }
@@ -274,6 +289,7 @@ export class CustomAgent extends AbstractAgent {
 ### Гибридный режим
 
 Система поддерживает гибридный режим, автоматически выбирая:
+
 - Legacy систему для простых случаев
 - Агентную систему для сложных задач
 

@@ -2,6 +2,7 @@ import { pathToFileURL } from "url";
 import * as trpcExpress from "@trpc/server/adapters/express";
 import express from "express";
 
+import { uploadRouter } from "./lib/upload";
 import { startTracing, stopTracing } from "./otel";
 import { appRouter } from "./root";
 import { createExpressContext } from "./trpc";
@@ -27,13 +28,13 @@ async function main() {
     app.use(express.json({ limit: "50mb" }));
     app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
-    // Add multipart/form-data support for file uploads
-    app.use(express.raw({ type: "multipart/form-data", limit: "50mb" }));
-
     // Health check endpoint
     app.get("/health", (req, res) => {
       res.json({ status: "ok", timestamp: new Date().toISOString() });
     });
+
+    // Add file upload routes
+    app.use("/api/upload", uploadRouter);
 
     // Add tRPC middleware
     app.use(

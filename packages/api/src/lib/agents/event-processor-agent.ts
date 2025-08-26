@@ -1,19 +1,27 @@
 import { generateObject, generateText, tool } from "ai";
 import { z } from "zod";
 
-import { AbstractAgent } from "./base-agent";
 import type {
-  AgentTask,
-  AgentResult,
-  AgentTelemetry,
   AgentCapability,
+  AgentResult,
+  AgentTask,
+  AgentTelemetry,
 } from "./types";
-import { parseTask } from "../ai/parser";
 import { advise } from "../ai/advisor";
+import { parseTask } from "../ai/parser";
+import { AbstractAgent } from "./base-agent";
 
 // Схемы для структурированного парсинга событий
 const eventSchema = z.object({
-  type: z.enum(["purchase", "task", "meeting", "note", "expense", "income", "other"]),
+  type: z.enum([
+    "purchase",
+    "task",
+    "meeting",
+    "note",
+    "expense",
+    "income",
+    "other",
+  ]),
   description: z.string(),
   amount: z.number().optional(),
   currency: z.string().optional(),
@@ -38,8 +46,9 @@ const adviceRequestSchema = z.object({
  */
 export class EventProcessorAgent extends AbstractAgent {
   name = "Event Processor";
-  description = "Специализированный агент для парсинга событий и извлечения структурированных данных";
-  
+  description =
+    "Специализированный агент для парсинга событий и извлечения структурированных данных";
+
   capabilities: AgentCapability[] = [
     {
       name: "Event Parsing",
@@ -80,24 +89,45 @@ export class EventProcessorAgent extends AbstractAgent {
   async canHandle(task: AgentTask): Promise<boolean> {
     // Ключевые слова для событий
     const eventKeywords = [
-      "купил", "купила", "потратил", "потратила", "заплатил", "заплатила",
-      "задача", "дело", "сделать", "выполнить", "запланировать",
-      "встреча", "собрание", "созвон", "встретиться",
-      "заметка", "записать", "запомнить", "напомнить",
-      "доход", "заработал", "получил", "прибыль"
+      "купил",
+      "купила",
+      "потратил",
+      "потратила",
+      "заплатил",
+      "заплатила",
+      "задача",
+      "дело",
+      "сделать",
+      "выполнить",
+      "запланировать",
+      "встреча",
+      "собрание",
+      "созвон",
+      "встретиться",
+      "заметка",
+      "записать",
+      "запомнить",
+      "напомнить",
+      "доход",
+      "заработал",
+      "получил",
+      "прибыль",
     ];
-    
+
     const text = task.input.toLowerCase();
-    const hasEventPattern = eventKeywords.some(keyword => text.includes(keyword));
-    
+    const hasEventPattern = eventKeywords.some((keyword) =>
+      text.includes(keyword),
+    );
+
     // Проверяем тип задачи
-    const isEventType = task.type === "event" || 
-                       task.type === "logging" ||
-                       task.type === "general";
-    
+    const isEventType =
+      task.type === "event" ||
+      task.type === "logging" ||
+      task.type === "general";
+
     // Проверяем наличие числовых значений (суммы)
     const hasNumbers = /\d+/.test(task.input);
-    
+
     return (hasEventPattern || hasNumbers) && isEventType;
   }
 
@@ -114,31 +144,60 @@ export class EventProcessorAgent extends AbstractAgent {
       execute: async ({ eventType, description }) => {
         const categories = {
           purchase: {
-            "продукты": ["хлеб", "молоко", "мясо", "овощи", "фрукты", "еда", "продукты"],
-            "транспорт": ["такси", "автобус", "метро", "бензин", "топливо", "проезд"],
-            "развлечения": ["кино", "театр", "концерт", "игра", "книга", "развлечение"],
-            "одежда": ["рубашка", "брюки", "обувь", "куртка", "платье", "одежда"],
-            "здоровье": ["лекарство", "врач", "аптека", "анализы", "медицина"],
-            "дом": ["мебель", "ремонт", "коммунальные", "электричество", "интернет"],
-            "образование": ["курс", "книга", "обучение", "семинар", "тренинг"],
+            продукты: [
+              "хлеб",
+              "молоко",
+              "мясо",
+              "овощи",
+              "фрукты",
+              "еда",
+              "продукты",
+            ],
+            транспорт: [
+              "такси",
+              "автобус",
+              "метро",
+              "бензин",
+              "топливо",
+              "проезд",
+            ],
+            развлечения: [
+              "кино",
+              "театр",
+              "концерт",
+              "игра",
+              "книга",
+              "развлечение",
+            ],
+            одежда: ["рубашка", "брюки", "обувь", "куртка", "платье", "одежда"],
+            здоровье: ["лекарство", "врач", "аптека", "анализы", "медицина"],
+            дом: [
+              "мебель",
+              "ремонт",
+              "коммунальные",
+              "электричество",
+              "интернет",
+            ],
+            образование: ["курс", "книга", "обучение", "семинар", "тренинг"],
           },
           task: {
-            "работа": ["проект", "отчет", "встреча", "презентация", "задача"],
-            "дом": ["уборка", "готовка", "покупки", "ремонт", "стирка"],
-            "здоровье": ["тренировка", "врач", "спорт", "диета", "анализы"],
-            "личное": ["хобби", "друзья", "семья", "отдых", "развитие"],
-          }
+            работа: ["проект", "отчет", "встреча", "презентация", "задача"],
+            дом: ["уборка", "готовка", "покупки", "ремонт", "стирка"],
+            здоровье: ["тренировка", "врач", "спорт", "диета", "анализы"],
+            личное: ["хобби", "друзья", "семья", "отдых", "развитие"],
+          },
         };
-        
-        const eventCategories = categories[eventType as keyof typeof categories] || {};
+
+        const eventCategories =
+          categories[eventType as keyof typeof categories] || {};
         const descLower = description.toLowerCase();
-        
+
         for (const [category, keywords] of Object.entries(eventCategories)) {
-          if (keywords.some(keyword => descLower.includes(keyword))) {
+          if (keywords.some((keyword) => descLower.includes(keyword))) {
             return category;
           }
         }
-        
+
         return "общее";
       },
     });
@@ -159,17 +218,17 @@ export class EventProcessorAgent extends AbstractAgent {
           /(\d+(?:\.\d+)?)\s*(?:руб|рублей?|р\.?|₽)/i,
           /(\d+(?:\.\d+)?)\s*р(?:\s|$)/i,
         ];
-        
+
         const dollarPatterns = [
           /\$(\d+(?:\.\d+)?)/i,
           /(\d+(?:\.\d+)?)\s*(?:доллар|долларов|usd)/i,
         ];
-        
+
         const euroPatterns = [
           /€(\d+(?:\.\d+)?)/i,
           /(\d+(?:\.\d+)?)\s*(?:евро|eur)/i,
         ];
-        
+
         // Проверяем рубли
         for (const pattern of rublePatterns) {
           const match = text.match(pattern);
@@ -177,7 +236,7 @@ export class EventProcessorAgent extends AbstractAgent {
             return { amount: parseFloat(match[1]), currency: "RUB" };
           }
         }
-        
+
         // Проверяем доллары
         for (const pattern of dollarPatterns) {
           const match = text.match(pattern);
@@ -185,7 +244,7 @@ export class EventProcessorAgent extends AbstractAgent {
             return { amount: parseFloat(match[1]), currency: "USD" };
           }
         }
-        
+
         // Проверяем евро
         for (const pattern of euroPatterns) {
           const match = text.match(pattern);
@@ -193,27 +252,33 @@ export class EventProcessorAgent extends AbstractAgent {
             return { amount: parseFloat(match[1]), currency: "EUR" };
           }
         }
-        
+
         // Если не нашли валюту, но есть число
-        const numberMatch = text.match(/(\d+(?:\.\d+)?)/);
+        const numberMatch = /(\d+(?:\.\d+)?)/.exec(text);
         if (numberMatch) {
           return { amount: parseFloat(numberMatch[1]), currency: "RUB" }; // По умолчанию рубли
         }
-        
+
         return null;
       },
     });
   }
 
-  async process(task: AgentTask, telemetry?: AgentTelemetry): Promise<AgentResult<{
-    parsedEvent: any;
-    advice?: string;
-    structuredData: any;
-  }>> {
+  async process(
+    task: AgentTask,
+    telemetry?: AgentTelemetry,
+  ): Promise<
+    AgentResult<{
+      parsedEvent: any;
+      advice?: string;
+      structuredData: any;
+    }>
+  > {
     try {
       // Используем существующую функцию парсинга как fallback
-      const legacyParsed = await parseTask(task.input, 
-        this.createTelemetry("legacy-parse", task, telemetry)
+      const legacyParsed = await parseTask(
+        task.input,
+        this.createTelemetry("legacy-parse", task, telemetry),
       );
 
       // Структурированный парсинг с помощью AI
@@ -252,12 +317,13 @@ export class EventProcessorAgent extends AbstractAgent {
       });
 
       let advice = undefined;
-      
+
       // Генерируем совет, если нужно
       if (structuredEvent.needsAdvice) {
         try {
-          advice = await advise(task.input, 
-            this.createTelemetry("generate-advice", task, telemetry)
+          advice = await advise(
+            task.input,
+            this.createTelemetry("generate-advice", task, telemetry),
           );
         } catch (error) {
           console.warn("Failed to generate advice:", error);
@@ -282,7 +348,7 @@ export class EventProcessorAgent extends AbstractAgent {
           structuredData: combinedData,
         },
         structuredEvent.confidence,
-        `Parsed ${structuredEvent.type} event with confidence ${structuredEvent.confidence}`
+        `Parsed ${structuredEvent.type} event with confidence ${structuredEvent.confidence}`,
       );
     } catch (error) {
       console.error("Error in event processor agent:", error);
