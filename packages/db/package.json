@@ -30,9 +30,10 @@
     "dev": "tsc",
     "format": "prettier --check . --ignore-path ../../.gitignore",
     "lint": "eslint",
+    "migrate:generate": "bun run with-env -- drizzle-kit generate",
+    "migrate": "bun run with-env -- drizzle-kit migrate",
     "push": "bun run with-env -- drizzle-kit push",
     "reset-db": "bun run with-env -- bun run src/scripts/reset-db.ts",
-    "migrate-to-files": "bun run with-env -- bun run src/scripts/migrate-to-files.ts",
     "studio": "bun run with-env -- drizzle-kit studio",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false",
     "with-env": "dotenv -e ../../.env --"

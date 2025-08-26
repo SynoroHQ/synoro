@@ -6,7 +6,6 @@ export default defineConfig({
     "index.rsc": "src/index.rsc.ts",
     client: "src/client.ts",
     middleware: "src/middleware.ts",
-    util: "src/util.ts",
   },
   format: ["esm"],
   dts: false,
