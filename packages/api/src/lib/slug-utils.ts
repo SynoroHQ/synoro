@@ -7,13 +7,42 @@ export function generateSlug(text: string): string {
   return text
     .toLowerCase() // переводим в нижний регистр
     .replace(/[^\wа-яё\s-]/g, "") // удаляем специальные символы, кроме пробелов и дефисов
-    .replace(/[а-яё]/g, (match) => { // транслитерация кириллицы
+    .replace(/[а-яё]/g, (match) => {
+      // транслитерация кириллицы
       const cyrillicToLatin: Record<string, string> = {
-        "а": "a", "б": "b", "в": "v", "г": "g", "д": "d", "е": "e", "ё": "yo", 
-        "ж": "zh", "з": "z", "и": "i", "й": "y", "к": "k", "л": "l", "м": "m", 
-        "н": "n", "о": "o", "п": "p", "р": "r", "с": "s", "т": "t", "у": "u", 
-        "ф": "f", "х": "h", "ц": "ts", "ч": "ch", "ш": "sh", "щ": "sch", "ъ": "", 
-        "ы": "y", "ь": "", "э": "e", "ю": "yu", "я": "ya"
+        а: "a",
+        б: "b",
+        в: "v",
+        г: "g",
+        д: "d",
+        е: "e",
+        ё: "yo",
+        ж: "zh",
+        з: "z",
+        и: "i",
+        й: "y",
+        к: "k",
+        л: "l",
+        м: "m",
+        н: "n",
+        о: "o",
+        п: "p",
+        р: "r",
+        с: "s",
+        т: "t",
+        у: "u",
+        ф: "f",
+        х: "h",
+        ц: "ts",
+        ч: "ch",
+        ш: "sh",
+        щ: "sch",
+        ъ: "",
+        ы: "y",
+        ь: "",
+        э: "e",
+        ю: "yu",
+        я: "ya",
       };
       return cyrillicToLatin[match] ?? match;
     })
@@ -39,12 +68,12 @@ export function isValidSlug(slug: string): boolean {
  * @returns Уникальный слаг
  */
 export async function generateUniqueSlug(
-  baseSlug: string, 
-  checkExists: (slug: string) => Promise<boolean>
+  baseSlug: string,
+  checkExists: (slug: string) => Promise<boolean>,
 ): Promise<string> {
   let slug = baseSlug;
   let exists = await checkExists(slug);
-  
+
   // Если слаг уже существует, добавляем к нему случайное число
   if (exists) {
     let counter = 1;
@@ -54,6 +83,6 @@ export async function generateUniqueSlug(
       counter++;
     }
   }
-  
+
   return slug;
 }

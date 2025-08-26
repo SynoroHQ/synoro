@@ -68,19 +68,11 @@ export class RouterAgent extends AbstractAgent {
   ];
 
   private availableAgents = new Map<string, string[]>([
-    ["question", ["qa-specialist", "general-assistant"]],
-    ["event", ["event-processor", "data-analyst", "financial-advisor"]],
-    ["chat", ["chat-assistant", "general-assistant"]],
-    [
-      "complex_task",
-      [
-        "task-orchestrator",
-        "data-analyst",
-        "financial-advisor",
-        "task-manager",
-      ],
-    ],
-    ["irrelevant", ["general-assistant"]],
+    ["question", ["qa-specialist"]],
+    ["event", ["event-processor"]],
+    ["chat", ["qa-specialist"]],
+    ["complex_task", ["task-orchestrator"]],
+    ["irrelevant", ["qa-specialist"]],
   ]);
 
   constructor() {
@@ -118,12 +110,9 @@ export class RouterAgent extends AbstractAgent {
 ДОСТУПНЫЕ АГЕНТЫ:
 - qa-specialist: Отвечает на вопросы, предоставляет информацию
 - event-processor: Обрабатывает и парсит события для логирования  
-- chat-assistant: Ведет обычное общение
-- data-analyst: Анализирует данные и статистику
-- financial-advisor: Финансовые советы и анализ расходов
-- task-manager: Управление задачами и планирование
+- quality-evaluator: Оценивает и улучшает качество ответов
 - task-orchestrator: Координирует сложные многоэтапные задачи
-- general-assistant: Универсальный помощник`;
+- quality-evaluator: Оценивает и улучшает качество ответов`;
 
     const prompt = `Проанализируй это сообщение: "${task.input}"
 
@@ -154,8 +143,7 @@ export class RouterAgent extends AbstractAgent {
         confidence: 0.3,
         needsLogging: false,
         complexity: "simple",
-        reasoning: "Fallback due to classification error",
-        suggestedAgents: ["general-assistant"],
+        suggestedAgents: ["qa-specialist"],
       };
     }
   }
@@ -177,20 +165,17 @@ export class RouterAgent extends AbstractAgent {
 ДОСТУПНЫЕ АГЕНТЫ И ИХ СПЕЦИАЛИЗАЦИЯ:
 - qa-specialist: Отвечает на вопросы о функциях бота, дает информацию
 - event-processor: Парсит и обрабатывает события для записи в базу
-- chat-assistant: Ведет дружеское общение, поддерживает диалог
-- data-analyst: Анализирует накопленные данные, выявляет паттерны
-- financial-advisor: Дает советы по финансам, анализирует расходы
-- task-manager: Помогает с планированием задач и напоминаниями
+- qa-specialist: Ведет дружеское общение, поддерживает диалог
+- quality-evaluator: Оценивает и улучшает качество ответов
 - task-orchestrator: Координирует сложные задачи, требующие несколько агентов
-- general-assistant: Универсальный помощник для простых случаев
+- quality-evaluator: Оценивает и улучшает качество ответов
 
 ПРАВИЛА ВЫБОРА:
-1. Для простых вопросов - qa-specialist или general-assistant
+1. Для простых вопросов - qa-specialist
 2. Для событий/покупок - event-processor
-3. Для общения - chat-assistant
+3. Для общения - qa-specialist
 4. Для сложных задач - task-orchestrator
-5. Для анализа данных - data-analyst
-6. Для финансов - financial-advisor`;
+5. Для улучшения качества - quality-evaluator`;
 
     const prompt = `Выбери агента для обработки сообщения: "${task.input}"
 
@@ -216,10 +201,10 @@ export class RouterAgent extends AbstractAgent {
       // Fallback маршрутизация на основе типа сообщения
       const fallbackAgents = this.availableAgents.get(
         classification.messageType,
-      ) || ["general-assistant"];
+      ) || ["qa-specialist"];
 
       return {
-        targetAgent: fallbackAgents[0],
+        targetAgent: fallbackAgents[0] || "qa-specialist",
         confidence: 0.3,
         reasoning: "Fallback routing due to error",
       };

@@ -5,7 +5,7 @@ export const env = createEnv({
   server: {
     NODE_ENV: z.enum(["development", "production", "test"]).optional(),
     DATABASE_TYPE: z.string().optional(),
-    POSTGRES_URL: z.string().url(),
+    POSTGRES_URL: z.string().url().optional(),
   },
   client: {},
   clientPrefix: "NEXT_PUBLIC_",
@@ -17,5 +17,6 @@ export const env = createEnv({
   skipValidation:
     !!process.env.CI ||
     process.env.npm_lifecycle_event === "lint" ||
+    process.env.npm_lifecycle_event === "build" ||
     process.env.NODE_ENV === "test",
 });

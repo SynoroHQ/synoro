@@ -51,7 +51,7 @@ export class QASpecialistAgent extends AbstractAgent {
     super("gpt-4o-mini", 0.4);
   }
 
-  async canHandle(task: AgentTask): Promise<boolean> {
+  canHandle(task: AgentTask): Promise<boolean> {
     // Проверяем, что это вопрос
     const questionKeywords = [
       "что", "как", "где", "когда", "зачем", "почему", "какой", "кто",
@@ -67,13 +67,13 @@ export class QASpecialistAgent extends AbstractAgent {
                           task.type === "chat" ||
                           task.type === "general";
     
-    return hasQuestionPattern && isQuestionType;
+    return Promise.resolve(hasQuestionPattern && isQuestionType);
   }
 
   /**
    * Определяет подтип вопроса для более точного ответа
    */
-  private async classifyQuestionSubtype(question: string): Promise<string> {
+  private classifyQuestionSubtype(question: string): string {
     const botKeywords = ["бот", "synoro", "умеешь", "можешь", "функции", "возможности"];
     const helpKeywords = ["помоги", "help", "как", "покажи", "научи"];
     const dataKeywords = ["статистика", "данные", "потратил", "сколько", "анализ"];
@@ -102,7 +102,7 @@ export class QASpecialistAgent extends AbstractAgent {
       inputSchema: z.object({
         query: z.string().describe("Запрос информации о системе"),
       }),
-      execute: async ({ query }) => {
+      execute: ({ query }) => {
         // Базовая информация о системе
         const systemInfo = {
           "функции": "Логирование событий, анализ данных, финансовая аналитика, управление задачами, ответы на вопросы",
@@ -118,8 +118,9 @@ export class QASpecialistAgent extends AbstractAgent {
           queryLower.includes(key) || value.toLowerCase().includes(queryLower)
         );
         
-        return results.length > 0 ? results.map(([k, v]) => `${k}: ${v}`).join("; ") : 
-               "Общая информация: Synoro AI - умный помощник для управления жизненными событиями";
+        return results.length > 0
+          ? results.map(([k, v]) => `${k}: ${v}`).join("; ")
+          : "Общая информация: Synoro AI - умный помощник для управления жизненными событиями";
       },
     });
   }
@@ -127,10 +128,10 @@ export class QASpecialistAgent extends AbstractAgent {
   async process(task: AgentTask, telemetry?: AgentTelemetry): Promise<AgentResult<string>> {
     try {
       // Получаем системный промпт
-      const assistantPrompt = await getPromptSafe(PROMPT_KEYS.ASSISTANT);
+      const assistantPrompt = getPromptSafe(PROMPT_KEYS.ASSISTANT);
       
       // Определяем подтип вопроса
-      const subtype = await this.classifyQuestionSubtype(task.input);
+      const subtype = this.classifyQuestionSubtype(task.input);
       
       // Извлекаем контекст из метаданных телеметрии
       const context = parseContextSafely(telemetry);
@@ -170,13 +171,12 @@ export class QASpecialistAgent extends AbstractAgent {
       // Генерируем ответ с возможностью использования инструментов
       const result = await generateText({
         model: this.getModel(),
-        system: assistantPrompt.prompt,
+        system: assistantPrompt,
         prompt: contextPrompt,
         temperature: this.defaultTemperature,
         tools: {
           getSystemInfo: this.getSystemInfoTool(),
         },
-        maxSteps: 3, // Ограничиваем количество шагов
         experimental_telemetry: {
           isEnabled: true,
           ...this.createTelemetry("answer-question", task, telemetry),
@@ -188,7 +188,7 @@ export class QASpecialistAgent extends AbstractAgent {
       return this.createSuccessResult(
         response,
         0.9,
-        `Answered ${subtype} question with ${result.steps?.length || 1} steps`
+        `Answered ${subtype} question`
       );
     } catch (error) {
       console.error("Error in QA specialist agent:", error);

@@ -1,7 +1,5 @@
 "use client";
 
-import { Badge } from "@/src/components/ui/badge";
-import { Button } from "@/src/components/ui/button";
 import {
   ArrowRight,
   Bot,
@@ -10,6 +8,8 @@ import {
   Sparkles,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
+
+import { Badge, Button } from "@synoro/ui";
 
 interface TelegramCTAProps {
   id?: string;
@@ -156,26 +156,6 @@ export default function TelegramCTA({ id = "cta-section" }: TelegramCTAProps) {
               <Sparkles className="h-6 w-6" />
             </div>
           </div>
-        </div>
-
-        {/* Bottom CTA */}
-        <div className="mt-12 border-t border-blue-500/20 pt-8 text-center">
-          <p className="text-muted-foreground mb-4">{t("bottomText")}</p>
-          <Button
-            variant="outline"
-            size="lg"
-            className="rounded-xl border-blue-500 px-6 py-3 font-medium text-blue-600 hover:bg-blue-500/10"
-            onClick={() =>
-              window.open(
-                "https://t.me/synoro_bot",
-                "_blank",
-                "noopener,noreferrer",
-              )
-            }
-          >
-            <MessageCircle className="mr-2 h-4 w-4" />
-            {t("tryNow")}
-          </Button>
         </div>
       </div>
     </section>

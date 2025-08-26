@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import Image from "next/image";
-import { Badge } from "@/src/components/ui/badge";
-import { BarChart3, MessageSquare, Zap } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
+import { BarChart3, MessageSquare, Zap } from "lucide-react";
 import { useTranslations } from "next-intl";
+
+import { Badge } from "@synoro/ui";
 
 type Step = {
   title: string;
@@ -125,7 +126,7 @@ export default function HowItWorks() {
         </div>
 
         <div
-          className="grid items-center gap-8 lg:grid-cols-2 lg:min-h-[480px]"
+          className="grid items-center gap-8 lg:min-h-[480px] lg:grid-cols-2"
           tabIndex={0}
           aria-label={t("title")}
           onKeyDown={(e) => {
@@ -139,37 +140,50 @@ export default function HowItWorks() {
           onBlur={() => setIsPaused(false)}
         >
           {/* Left: vertical steps list */}
-          <ol className="hidden lg:flex flex-col gap-5 list-none" role="list" onMouseEnter={() => setIsPaused(true)} onMouseLeave={() => setIsPaused(false)}>
+          <ol
+            className="hidden list-none flex-col gap-5 lg:flex"
+            role="list"
+            onMouseEnter={() => setIsPaused(true)}
+            onMouseLeave={() => setIsPaused(false)}
+          >
             {steps.map((s, i) => {
               const Icon = s.Icon;
               const isActive = i === activeIndex;
               return (
-                <li key={s.title} className="relative overflow-hidden rounded-lg" aria-current={isActive ? "step" : undefined}>
-
-                  {(
+                <li
+                  key={s.title}
+                  className="relative overflow-hidden rounded-lg"
+                  aria-current={isActive ? "step" : undefined}
+                >
+                  {
                     <button
                       type="button"
                       onClick={() => setActiveIndex(i)}
                       data-state={isActive ? "open" : "closed"}
                       aria-pressed={isActive}
-                      className="group w-full cursor-pointer rounded-lg p-3 sm:p-4 text-left outline-none hover:bg-muted/40"
+                      className="group hover:bg-muted/40 w-full cursor-pointer rounded-lg p-3 text-left outline-none sm:p-4"
                       title={s.title}
                     >
                       <div className="relative flex items-start gap-2">
                         {/* Progress bar spanning full text block height */}
-                        <div className="absolute left-0 top-0 w-1 h-full overflow-hidden rounded-lg bg-neutral-300/50 dark:bg-neutral-500/40 pointer-events-none z-20" aria-hidden>
+                        <div
+                          className="pointer-events-none absolute top-0 left-0 z-20 h-full w-1 overflow-hidden rounded-lg bg-neutral-300/50 dark:bg-neutral-500/40"
+                          aria-hidden
+                        >
                           <div
-                            className={`absolute left-0 top-0 w-full origin-top bg-green-500 dark:bg-green-400 will-change-transform ease-linear ${justReset ? "transition-none" : "transition-transform"}`}
-                            style={{ 
+                            className={`absolute top-0 left-0 w-full origin-top bg-green-500 ease-linear will-change-transform dark:bg-green-400 ${justReset ? "transition-none" : "transition-transform"}`}
+                            style={{
                               height: `${isActive ? progress * 100 : 0}%`,
                               transitionProperty: justReset ? "none" : "height",
-                              transitionDuration: justReset ? "0ms" : `${DURATION_MS}ms` 
+                              transitionDuration: justReset
+                                ? "0ms"
+                                : `${DURATION_MS}ms`,
                             }}
                           />
                         </div>
-                        <div className="sm:ml-6 ml-2 sm:mr-3 mr-1 shrink-0">
-                          <div className="item-box w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                            <Icon className="text-primary w-6 h-6" />
+                        <div className="mr-1 ml-2 shrink-0 sm:mr-3 sm:ml-6">
+                          <div className="item-box bg-primary/10 flex h-12 w-12 items-center justify-center rounded-full">
+                            <Icon className="text-primary h-6 w-6" />
                           </div>
                         </div>
                         <div className="ml-1 sm:ml-2">
@@ -177,11 +191,13 @@ export default function HowItWorks() {
                             <span className="mr-2">{i + 1}.</span>
                             {s.title}
                           </span>
-                          <p className="mt-1 text-base leading-relaxed text-muted-foreground">{s.description}</p>
+                          <p className="text-muted-foreground mt-1 text-base leading-relaxed">
+                            {s.description}
+                          </p>
                         </div>
                       </div>
                     </button>
-                  )}
+                  }
                 </li>
               );
             })}
@@ -190,7 +206,7 @@ export default function HowItWorks() {
           {/* Right: media preview */}
           <div className="col-span-1">
             <div
-              className="relative h-[260px] w-full overflow-hidden rounded-[28px] border border-border/60 bg-background shadow-xl sm:h-[300px] md:h-[340px] lg:h-[420px]"
+              className="border-border/60 bg-background relative h-[260px] w-full overflow-hidden rounded-[28px] border shadow-xl sm:h-[300px] md:h-[340px] lg:h-[420px]"
               onMouseEnter={() => setIsPaused(true)}
               onMouseLeave={() => setIsPaused(false)}
               onTouchStart={() => setIsPaused(true)}
@@ -198,7 +214,7 @@ export default function HowItWorks() {
               onTouchCancel={() => setIsPaused(false)}
             >
               {/* Top device bar */}
-              <div className="absolute left-0 right-0 top-0 z-10 flex h-10 items-center justify-between px-4">
+              <div className="absolute top-0 right-0 left-0 z-10 flex h-10 items-center justify-between px-4">
                 <div className="flex items-center gap-1.5">
                   <span className="h-2.5 w-2.5 rounded-full bg-red-400/70" />
                   <span className="h-2.5 w-2.5 rounded-full bg-yellow-400/70" />
@@ -212,12 +228,18 @@ export default function HowItWorks() {
                   className={`absolute inset-0 transition-opacity duration-300 ${i === activeIndex ? "opacity-100" : "opacity-0"}`}
                   aria-hidden={i !== activeIndex}
                 >
-                  <Image src={s.image} alt={s.title} fill className="object-cover p-3 rounded-[28px]" priority={i === 0} />
+                  <Image
+                    src={s.image}
+                    alt={s.title}
+                    fill
+                    className="rounded-[28px] object-cover p-3"
+                    priority={i === 0}
+                  />
                 </div>
               ))}
               {/* Decorative overlay */}
               <div className="pointer-events-none absolute inset-0 opacity-25">
-                <div className="absolute inset-0 rounded-[28px] bg-gradient-to-br from-primary/20 to-secondary/20" />
+                <div className="from-primary/20 to-secondary/20 absolute inset-0 rounded-[28px] bg-gradient-to-br" />
               </div>
               {/* Progress bar for auto-switch */}
               <div
@@ -225,11 +247,14 @@ export default function HowItWorks() {
                 aria-valuemin={0}
                 aria-valuemax={100}
                 aria-valuenow={Math.round(progress * 100)}
-                className="absolute left-0 right-0 bottom-0 h-1.5 bg-foreground/10"
+                className="bg-foreground/10 absolute right-0 bottom-0 left-0 h-1.5"
               >
                 <div
-                  className={`h-full bg-secondary ease-linear ${justReset ? "transition-none" : "transition-[width]"}`}
-                  style={{ width: `${progress * 100}%`, transitionDuration: justReset ? "0ms" : `${DURATION_MS}ms` }}
+                  className={`bg-secondary h-full ease-linear ${justReset ? "transition-none" : "transition-[width]"}`}
+                  style={{
+                    width: `${progress * 100}%`,
+                    transitionDuration: justReset ? "0ms" : `${DURATION_MS}ms`,
+                  }}
                 />
               </div>
             </div>
@@ -240,7 +265,7 @@ export default function HowItWorks() {
         {/* Mobile: horizontal cards with snap */}
         <div className="lg:hidden">
           <ul
-            className="flex snap-x snap-mandatory flex-nowrap overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [-webkit-mask-image:linear-gradient(90deg,transparent,black_10%,white_90%,transparent)] [mask-image:linear-gradient(90deg,transparent,black_10%,white_90%,transparent)]"
+            className="flex snap-x snap-mandatory flex-nowrap overflow-x-auto [mask-image:linear-gradient(90deg,transparent,black_10%,white_90%,transparent)] [-ms-overflow-style:none] [-webkit-mask-image:linear-gradient(90deg,transparent,black_10%,white_90%,transparent)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             style={{ padding: "40px 10%" }}
             onMouseEnter={() => setIsPaused(true)}
             onMouseLeave={() => setIsPaused(false)}
@@ -251,22 +276,25 @@ export default function HowItWorks() {
             {steps.map((s, i) => {
               const isActive = i === activeIndex;
               return (
-                <li key={s.title} className="relative grid h-full max-w-64 shrink-0 snap-center items-start justify-center p-3 first:rounded-tl-xl last:rounded-tr-xl">
+                <li
+                  key={s.title}
+                  className="relative grid h-full max-w-64 shrink-0 snap-center items-start justify-center p-3 first:rounded-tl-xl last:rounded-tr-xl"
+                >
                   <button
                     type="button"
                     onClick={() => setActiveIndex(i)}
-                    className="grid items-start justify-center p-0 text-left bg-transparent"
+                    className="grid items-start justify-center bg-transparent p-0 text-left"
                   >
                     <div className="flex flex-col gap-2">
                       <h3 className="text-lg font-bold">
                         <span className="mr-2">{i + 1}.</span>
                         {s.title}
                       </h3>
-                      <p className="mx-0 max-w-sm text-balance text-sm font-medium leading-relaxed text-muted-foreground">
+                      <p className="text-muted-foreground mx-0 max-w-sm text-sm leading-relaxed font-medium text-balance">
                         {s.description}
                       </p>
                       {s.points.length > 0 && (
-                        <ul className="mt-2 list-disc space-y-1 pl-5 text-xs text-muted-foreground">
+                        <ul className="text-muted-foreground mt-2 list-disc space-y-1 pl-5 text-xs">
                           {s.points.map((p, idx) => (
                             <li key={idx}>{p}</li>
                           ))}

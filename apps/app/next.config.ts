@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  output: "standalone",
+  reactStrictMode: true,
+  poweredByHeader: false,
   transpilePackages: [
     "@synoro/ui",
     "@synoro/auth",
@@ -21,7 +24,7 @@ const nextConfig: NextConfig = {
       "object-src 'none'",
       "frame-ancestors 'none'",
       // Allow scripts/styles; relax in dev
-      `script-src 'self' 'unsafe-inline' ${isProd ? '' : "'unsafe-eval'"} https:`.trim(),
+      `script-src 'self' 'unsafe-inline' ${isProd ? "" : "'unsafe-eval'"} https:`.trim(),
       "style-src 'self' 'unsafe-inline' https:",
       // Allow connections (e.g., APIs, S3, analytics over https)
       "connect-src 'self' https:",

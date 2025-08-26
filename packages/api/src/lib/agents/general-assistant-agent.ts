@@ -1,6 +1,12 @@
-import { AbstractAgent } from "./base-agent";
-import type { AgentTask, AgentTelemetry, AgentResult, AgentCapability } from "./types";
 import { getPromptSafe, PROMPT_KEYS } from "@synoro/prompts";
+
+import type {
+  AgentCapability,
+  AgentResult,
+  AgentTask,
+  AgentTelemetry,
+} from "./types";
+import { AbstractAgent } from "./base-agent";
 
 export class GeneralAssistantAgent extends AbstractAgent {
   name = "General Assistant";

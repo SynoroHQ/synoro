@@ -10,6 +10,15 @@ export const dbConfigSchema = z.object({
 export type DatabaseConfig = z.infer<typeof dbConfigSchema>;
 
 export function getDatabaseConfig(): DatabaseConfig {
+  // Skip validation during build time
+  if (process.env.CI || process.env.npm_lifecycle_event === "build") {
+    return {
+      DATABASE_TYPE: "postgres" as const,
+      POSTGRES_URL:
+        "postgresql://placeholder:placeholder@localhost:5432/placeholder",
+    };
+  }
+
   if (!env.POSTGRES_URL) {
     throw new Error("POSTGRES_URL is required");
   }

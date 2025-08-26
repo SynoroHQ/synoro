@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Badge } from "@/src/components/ui/badge";
-import { Button } from "@/src/components/ui/button";
 import { CheckCircle, MessageSquare, Mic, Play, Sparkles } from "lucide-react";
 import { useTranslations } from "next-intl";
+
+import { Badge, Button } from "@synoro/ui";
 
 export default function Hero() {
   const t = useTranslations("Hero");

@@ -28,9 +28,15 @@ export function checkRateLimit(
   recent.push(now);
   store.set(key, recent);
 
-  return { allowed: true, remaining: Math.max(0, limit - recent.length), resetMs: windowMs };
+  return {
+    allowed: true,
+    remaining: Math.max(0, limit - recent.length),
+    resetMs: windowMs,
+  };
 }
 
-export function buildRateLimitKey(parts: Array<string | undefined | null>): string {
+export function buildRateLimitKey(
+  parts: Array<string | undefined | null>,
+): string {
   return parts.filter(Boolean).join(":");
 }

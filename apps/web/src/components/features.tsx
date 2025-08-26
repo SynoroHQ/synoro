@@ -1,8 +1,10 @@
-'use client';
-import { Badge } from "@/src/components/ui/badge";
-import { Brain, Sparkles, Target, Zap, MessageSquare } from "lucide-react";
+"use client";
+
 import { useEffect, useRef, useState } from "react";
+import { Brain, MessageSquare, Sparkles, Target, Zap } from "lucide-react";
 import { useTranslations } from "next-intl";
+
+import { Badge } from "@synoro/ui";
 
 export default function Features() {
   const t = useTranslations("Features");
@@ -27,10 +29,10 @@ export default function Features() {
     }
     const node = containerRef.current;
     if (!node) return;
-    
+
     // Сначала устанавливаем false, чтобы элементы были скрыты
     setInView(false);
-    
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -38,7 +40,7 @@ export default function Features() {
           observer.disconnect();
         }
       },
-      { root: null, threshold: 0.1, rootMargin: '0px 0px -50px 0px' },
+      { root: null, threshold: 0.1, rootMargin: "0px 0px -50px 0px" },
     );
     observer.observe(node);
     return () => observer.disconnect();
@@ -74,15 +76,18 @@ export default function Features() {
 
         <div className="grid gap-8 lg:grid-cols-3">
           {/* AI-Powered Intelligence */}
-          <div className="group flex items-start gap-4 text-left will-change-transform transition-transform duration-150 hover:-translate-y-1" style={getItemStyle(0)}>
+          <div
+            className="group flex items-start gap-4 text-left transition-transform duration-150 will-change-transform hover:-translate-y-1"
+            style={getItemStyle(0)}
+          >
             <div className="mt-1">
-              <Brain className="h-6 w-6 text-primary transition-transform duration-150 group-hover:scale-110" />
+              <Brain className="text-primary h-6 w-6 transition-transform duration-150 group-hover:scale-110" />
             </div>
             <div>
               <h3 className="text-xl font-semibold tracking-tight">
                 {t("aiIntelligence.title")}
               </h3>
-              <p className="mt-2 text-sm sm:text-base text-muted-foreground leading-relaxed">
+              <p className="text-muted-foreground mt-2 text-sm leading-relaxed sm:text-base">
                 {t("aiIntelligence.description")}
               </p>
               <ul className="mt-3 list-disc space-y-1 pl-5 text-sm">
@@ -94,15 +99,18 @@ export default function Features() {
           </div>
 
           {/* Smart Planning & Analytics */}
-          <div className="group flex items-start gap-4 text-left will-change-transform transition-transform duration-150 hover:-translate-y-1" style={getItemStyle(1)}>
+          <div
+            className="group flex items-start gap-4 text-left transition-transform duration-150 will-change-transform hover:-translate-y-1"
+            style={getItemStyle(1)}
+          >
             <div className="mt-1">
-              <Target className="h-6 w-6 text-primary transition-transform duration-150 group-hover:scale-110" />
+              <Target className="text-primary h-6 w-6 transition-transform duration-150 group-hover:scale-110" />
             </div>
             <div>
               <h3 className="text-xl font-semibold tracking-tight">
                 {t("smartPlanning.title")}
               </h3>
-              <p className="mt-2 text-sm sm:text-base text-muted-foreground leading-relaxed">
+              <p className="text-muted-foreground mt-2 text-sm leading-relaxed sm:text-base">
                 {t("smartPlanning.description")}
               </p>
               <ul className="mt-3 list-disc space-y-1 pl-5 text-sm">
@@ -114,15 +122,18 @@ export default function Features() {
           </div>
 
           {/* Productivity & Security */}
-          <div className="group flex items-start gap-4 text-left will-change-transform transition-transform duration-150 hover:-translate-y-1" style={getItemStyle(2)}>
+          <div
+            className="group flex items-start gap-4 text-left transition-transform duration-150 will-change-transform hover:-translate-y-1"
+            style={getItemStyle(2)}
+          >
             <div className="mt-1">
-              <Zap className="h-6 w-6 text-primary transition-transform duration-150 group-hover:scale-110" />
+              <Zap className="text-primary h-6 w-6 transition-transform duration-150 group-hover:scale-110" />
             </div>
             <div>
               <h3 className="text-xl font-semibold tracking-tight">
                 {t("productivity.title")}
               </h3>
-              <p className="mt-2 text-sm sm:text-base text-muted-foreground leading-relaxed">
+              <p className="text-muted-foreground mt-2 text-sm leading-relaxed sm:text-base">
                 {t("productivity.description")}
               </p>
               <ul className="mt-3 list-disc space-y-1 pl-5 text-sm">

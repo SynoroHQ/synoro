@@ -6,9 +6,9 @@ import {
   ProcessMessageResponse,
 } from "@synoro/validators";
 
-import { 
-  processMessageWithAgents,
+import {
   getAgentSystemStats,
+  processMessageWithAgents,
 } from "../../lib/services/agent-message-processor";
 import { TelegramUserService } from "../../lib/services/telegram-user-service";
 import { botProcedure, protectedProcedure } from "../../trpc";
@@ -22,19 +22,21 @@ const AgentOptionsSchema = z.object({
 });
 
 // Расширенная схема для агентной обработки
-const ProcessMessageWithAgentsInput = ProcessMessageInput.extend({
+const ProcessMessageWithAgentsInput = ProcessMessageInput.safeExtend({
   agentOptions: AgentOptionsSchema.optional(),
 });
 
 // Расширенная схема ответа с метаданными агентов
-const ProcessMessageWithAgentsResponse = ProcessMessageResponse.extend({
-  agentMetadata: z.object({
-    agentsUsed: z.array(z.string()),
-    totalSteps: z.number(),
-    qualityScore: z.number(),
-    processingTime: z.number(),
-    processingMode: z.enum(["agents", "legacy"]),
-  }).optional(),
+const ProcessMessageWithAgentsResponse = ProcessMessageResponse.safeExtend({
+  agentMetadata: z
+    .object({
+      agentsUsed: z.array(z.string()),
+      totalSteps: z.number(),
+      qualityScore: z.number(),
+      processingTime: z.number(),
+      processingMode: z.enum(["agents", "legacy"]),
+    })
+    .optional(),
 });
 
 export const processMessageAgentsRouter = {
@@ -105,33 +107,41 @@ export const processMessageAgentsRouter = {
 
   // Получение статистики агентной системы
   getAgentStats: protectedProcedure
-    .output(z.object({
-      agents: z.object({
-        totalAgents: z.number(),
-        agentList: z.array(z.string()),
+    .output(
+      z.object({
+        agents: z.object({
+          totalAgents: z.number(),
+          agentList: z.array(z.string()),
+        }),
+        availableAgents: z.array(
+          z.object({
+            key: z.string(),
+            name: z.string(),
+            description: z.string(),
+            capabilities: z.array(
+              z.object({
+                name: z.string(),
+                description: z.string(),
+                category: z.string(),
+                confidence: z.number(),
+              }),
+            ),
+          }),
+        ),
       }),
-      availableAgents: z.array(z.object({
-        key: z.string(),
-        name: z.string(),
-        description: z.string(),
-        capabilities: z.array(z.object({
-          name: z.string(),
-          description: z.string(),
-          category: z.string(),
-          confidence: z.number(),
-        })),
-      })),
-    }))
+    )
     .query(() => {
       return getAgentSystemStats();
     }),
 
   // Публичное получение статистики для бота
   getAgentStatsForBot: botProcedure
-    .output(z.object({
-      totalAgents: z.number(),
-      agentList: z.array(z.string()),
-    }))
+    .output(
+      z.object({
+        totalAgents: z.number(),
+        agentList: z.array(z.string()),
+      }),
+    )
     .query(() => {
       const stats = getAgentSystemStats();
       return stats.agents;

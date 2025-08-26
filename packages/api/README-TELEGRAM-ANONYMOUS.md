@@ -9,6 +9,7 @@
 ### 1. Middleware аутентификации
 
 `telegramAnonymousAuthMiddleware` валидирует Telegram WebApp `initData`:
+
 - Проверяет наличие обязательного поля `telegramInitData`
 - Валидирует HMAC-SHA256 подпись используя `TELEGRAM_BOT_TOKEN`
 - Извлекает `telegramUserId` и `telegramChatId` из валидированных данных
@@ -17,6 +18,7 @@
 ### 2. Процедура для анонимных пользователей
 
 `telegramAnonymousProcedure` предоставляет безопасный доступ:
+
 - Применяет все стандартные middleware (timing, CSRF, rate limiting)
 - Требует валидный `telegramInitData` для каждого запроса
 - Автоматически отклоняет неавторизованные запросы
@@ -24,6 +26,7 @@
 ### 3. Идемпотентность сообщений
 
 Реализована система предотвращения дублирования:
+
 - Таблица `processed_idempotency_keys` хранит обработанные ключи
 - Уникальный индекс по `(telegramChatId, idempotencyKey)`
 - Автоматическая очистка старых записей (24 часа)
@@ -41,7 +44,7 @@ const result = await api.sendAnonymousMessage.mutate({
   attachments: [], // Поддерживается
   metadata: { source: "webapp" }, // Поддерживается
   model: "gpt-4", // Опционально
-  telegramInitData: "query_id=...&user=...&hash=..." // Обязательно
+  telegramInitData: "query_id=...&user=...&hash=...", // Обязательно
 });
 ```
 
@@ -50,7 +53,7 @@ const result = await api.sendAnonymousMessage.mutate({
 ```typescript
 const conversations = await api.listAnonymousConversations.query({
   telegramInitData: "query_id=...&user=...&hash=...",
-  limit: 20
+  limit: 20,
 });
 ```
 
@@ -72,7 +75,7 @@ CREATE TABLE processed_idempotency_keys (
   idempotency_key TEXT NOT NULL,
   message_id TEXT NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-  
+
   UNIQUE(telegram_chat_id, idempotency_key)
 );
 ```

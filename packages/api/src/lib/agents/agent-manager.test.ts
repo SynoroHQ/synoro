@@ -96,4 +96,34 @@ describe("AgentManager", () => {
       });
     });
   });
+
+  describe("Agent Initialization", () => {
+    it("should initialize all expected agents", () => {
+      const agentManager = new AgentManager();
+      const stats = agentManager.getAgentStats();
+
+      // Проверяем, что все ожидаемые агенты инициализированы
+      expect(stats.totalAgents).toBeGreaterThan(0);
+
+      // Отладочная информация
+      console.log("Agent stats:", stats);
+
+      // Проверяем наличие ключевых агентов
+      const agentList = stats.agentList;
+      expect(agentList).toContain("qa-specialist");
+      expect(agentList).toContain("event-processor");
+      expect(agentList).toContain("task-orchestrator");
+    });
+
+    it("should have agents with valid keys", () => {
+      const agentManager = new AgentManager();
+      const stats = agentManager.getAgentStats();
+
+      // Проверяем, что все ключи агентов не пустые
+      stats.agentList.forEach((key) => {
+        expect(key).toBeTruthy();
+        expect(key.length).toBeGreaterThan(0);
+      });
+    });
+  });
 });

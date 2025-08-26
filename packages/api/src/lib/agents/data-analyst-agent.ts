@@ -1,11 +1,12 @@
-import { AbstractAgent } from "./base-agent";
+import { getPromptSafe, PROMPT_KEYS } from "@synoro/prompts";
+
 import type {
+  AgentCapability,
+  AgentResult,
   AgentTask,
   AgentTelemetry,
-  AgentResult,
-  AgentCapability,
 } from "./types";
-import { getPromptSafe, PROMPT_KEYS } from "@synoro/prompts";
+import { AbstractAgent } from "./base-agent";
 
 export class DataAnalystAgent extends AbstractAgent {
   name = "Data Analyst";
@@ -40,7 +41,7 @@ export class DataAnalystAgent extends AbstractAgent {
         input.includes("trend") ||
         input.includes("график") ||
         input.includes("числа") ||
-        input.includes("расчет")
+        input.includes("расчет"),
     );
   }
 

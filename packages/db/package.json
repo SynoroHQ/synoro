@@ -5,19 +5,19 @@
   "type": "module",
   "exports": {
     ".": {
-      "default": "./src/index.ts"
+      "default": "./dist/index.js"
     },
     "./client": {
-      "default": "./src/client.ts"
+      "default": "./dist/client.js"
     },
     "./client-ws": {
-      "default": "./src/client-ws.ts"
+      "default": "./dist/client-ws.js"
     },
     "./schema": {
-      "default": "./src/schema.ts"
+      "default": "./dist/schema.js"
     },
     "./types": {
-      "default": "./src/types.ts"
+      "default": "./dist/types.js"
     }
   },
   "license": "MIT",
@@ -30,9 +30,10 @@
     "dev": "tsc",
     "format": "prettier --check . --ignore-path ../../.gitignore",
     "lint": "eslint",
+    "migrate:generate": "bun run with-env -- drizzle-kit generate",
+    "migrate": "bun run with-env -- drizzle-kit migrate",
     "push": "bun run with-env -- drizzle-kit push",
     "reset-db": "bun run with-env -- bun run src/scripts/reset-db.ts",
-    "migrate-to-files": "bun run with-env -- bun run src/scripts/migrate-to-files.ts",
     "studio": "bun run with-env -- drizzle-kit studio",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false",
     "with-env": "dotenv -e ../../.env --"
@@ -47,13 +48,13 @@
     "drizzle-zod": "^0.8.3",
     "file-type": "^21.0.0",
     "pg": "^8.16.3",
-    "zod": "4.1.1"
+    "zod": "4.1.3"
   },
   "devDependencies": {
     "@synoro/eslint-config": "workspace:*",
     "@synoro/prettier-config": "workspace:*",
     "@synoro/tsconfig": "workspace:*",
-    "@types/bun": "^1.2.20",
+    "@types/bun": "^1.2.21",
     "@types/pg": "^8.15.5",
     "dotenv-cli": "10.0.0",
     "drizzle-kit": "^0.31.4",

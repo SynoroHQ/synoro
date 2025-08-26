@@ -1,13 +1,14 @@
-import { Badge } from "@/src/components/ui/badge";
+import { CheckCircle, Shield, Sparkles, Zap } from "lucide-react";
+import { useTranslations } from "next-intl";
+
 import {
+  Badge,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/src/components/ui/card";
-import { CheckCircle, Shield, Sparkles, Zap } from "lucide-react";
-import { useTranslations } from "next-intl";
+} from "@synoro/ui";
 
 export default function Pricing() {
   const t = useTranslations("Pricing");

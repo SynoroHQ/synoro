@@ -1,0 +1,42 @@
+name: Deploy Tg Bot
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/tg-bot/**"
+      - "packages/**"
+env:
+  IMAGE_NAME: synoro-tg-bot
+  CR_REGISTRY: crpd6l22v7dg53j052dr
+  CI: "true"
+  KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+  IMAGE_TAG: ${{ github.sha }}
+jobs:
+  # Deploy to EKS
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Login to Yandex Cloud Container Registry
+        id: login-cr
+        uses: yc-actions/yc-cr-login@v2
+        with:
+          yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
+      - name: Build image app
+        run: |
+          docker build . --file apps/tg-bot/Dockerfile --tag $IMAGE_NAME
+      - name: Push Image
+        run: |
+          IMAGE_ID=cr.yandex/$CR_REGISTRY/$IMAGE_NAME
+          docker tag $IMAGE_NAME $IMAGE_ID:$IMAGE_TAG
+          docker tag $IMAGE_NAME $IMAGE_ID:latest
+          docker push $IMAGE_ID:latest
+          docker push $IMAGE_ID:$IMAGE_TAG
+      - name: Deploy To Cluster
+        uses: kodermax/kubectl-aws-eks@main
+        with:
+          args: set image deployment/$IMAGE_NAME $IMAGE_NAME=cr.yandex/$CR_REGISTRY/$IMAGE_NAME:$IMAGE_TAG
