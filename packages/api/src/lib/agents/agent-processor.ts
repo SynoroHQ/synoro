@@ -1,4 +1,4 @@
-import type { MessageTypeResult } from "../ai/types";
+import type { MessageTypeResult, ParsedTask } from "../ai/types";
 import type {
   MessageContext,
   MessageProcessorOptions,
@@ -13,6 +13,11 @@ import { AgentManager } from "./agent-manager";
  */
 export class AgentMessageProcessor {
   private agentManager: AgentManager;
+  private isParsedTask(value: unknown): value is ParsedTask {
+    if (typeof value !== "object" || value === null) return false;
+    const v = value as Record<string, unknown>;
+    return typeof v.action === "string" && typeof v.object === "string";
+  }
 
   constructor() {
     this.agentManager = new AgentManager();
@@ -25,7 +30,7 @@ export class AgentMessageProcessor {
     text: string,
     messageType: MessageTypeResult,
     context: MessageContext,
-    options: MessageProcessorOptions & {
+    options: Partial<MessageProcessorOptions> & {
       useQualityControl?: boolean;
       maxQualityIterations?: number;
       targetQuality?: number;
@@ -43,11 +48,13 @@ export class AgentMessageProcessor {
     try {
       // Преобразуем контекст для агентной системы
       const agentContext: AgentContext = {
-        userId: context.userId,
+        userId: context.userId || undefined,
         chatId: context.chatId,
         messageId: context.messageId,
         channel: context.channel,
-        metadata: context.metadata,
+        metadata: context.metadata as
+          | Record<string, AttributeValue>
+          | undefined,
       };
 
       // Формируем телеметрию
@@ -74,18 +81,29 @@ export class AgentMessageProcessor {
       );
 
       // Извлекаем данные для совместимости с существующим API
-      let parsed = null;
+      let parsed: ParsedTask | null = null;
 
       // Если это событие и у нас есть парсированные данные
       if (
         messageType.type === "event" &&
         orchestrationResult.metadata?.agentData
       ) {
-        const agentData = orchestrationResult.metadata.agentData;
-        if (agentData.parsedEvent) {
-          parsed = agentData.parsedEvent;
-        } else if (agentData.structuredData) {
-          parsed = agentData.structuredData;
+        const agentData = orchestrationResult.metadata.agentData as Record<
+          string,
+          unknown
+        >;
+        const parsedEvent =
+          typeof agentData === "object" && agentData
+            ? (agentData as { parsedEvent?: unknown }).parsedEvent
+            : undefined;
+        const structuredData =
+          typeof agentData === "object" && agentData
+            ? (agentData as { structuredData?: unknown }).structuredData
+            : undefined;
+        if (this.isParsedTask(parsedEvent)) {
+          parsed = parsedEvent;
+        } else if (this.isParsedTask(structuredData)) {
+          parsed = structuredData;
         }
       }
 
@@ -111,7 +129,7 @@ export class AgentMessageProcessor {
         response:
           "Извините, произошла ошибка при обработке сообщения. Попробуйте еще раз.",
         parsed: null,
-        model: "gpt-4o-mini",
+        model: "gpt-5-nano",
         agentMetadata: {
           agentsUsed: ["error-handler"],
           totalSteps: 1,
@@ -130,7 +148,7 @@ export class AgentMessageProcessor {
     text: string,
     messageType: MessageTypeResult,
     context: MessageContext,
-    options: MessageProcessorOptions & {
+    options: Partial<MessageProcessorOptions> & {
       forceAgentMode?: boolean;
       useQualityControl?: boolean;
     } = {},
@@ -167,7 +185,15 @@ export class AgentMessageProcessor {
         text,
         messageType,
         context,
-        options,
+        {
+          questionFunctionId: "legacy-question",
+          chatFunctionId: "legacy-chat",
+          parseFunctionId: "legacy-parse",
+          adviseFunctionId: "legacy-advise",
+          fallbackParseFunctionId: "legacy-fallback-parse",
+          fallbackAdviseFunctionId: "legacy-fallback-advise",
+          ...options,
+        },
       );
 
       return {
@@ -229,12 +255,12 @@ export class AgentMessageProcessor {
   private getModelFromAgents(agentsUsed: string[]): string {
     // Простая эвристика: если использовался orchestrator, то более мощная модель
     if (agentsUsed.includes("Task Orchestrator")) {
-      return "gpt-4o";
+      return "gpt-5-mini";
     }
     if (agentsUsed.includes("Q&A Specialist")) {
-      return "gpt-4o-mini";
+      return "gpt-5-nano";
     }
-    return "gpt-4o-mini"; // По умолчанию
+    return "gpt-5-nano"; // По умолчанию
   }
 
   /**

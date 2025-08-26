@@ -49,7 +49,7 @@ export async function startCompletionRun(opts: {
   }
 
   // OpenAI streaming path via Vercel AI SDK
-  const model = opts.model ?? "gpt-4o-mini";
+  const model = opts.model ?? "gpt-5-nano";
   let fullText = "";
   try {
     const result = streamText({

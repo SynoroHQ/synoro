@@ -4,7 +4,7 @@ import {
   containsMarkdownV2Chars,
   escapeTelegramMarkdownV2,
   formatTelegramText,
-} from "./telegram-utils";
+} from "../src/utils/telegram-utils";
 
 describe("telegram-utils", () => {
   describe("escapeTelegramMarkdownV2", () => {

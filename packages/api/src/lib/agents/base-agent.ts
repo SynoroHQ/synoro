@@ -1,7 +1,7 @@
 import type { LanguageModel } from "ai";
-import { generateText } from "ai";
 import { openai } from "@ai-sdk/openai";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
+import { generateText } from "ai";
 
 import type {
   AgentCapability,
@@ -23,7 +23,7 @@ function getActiveProvider() {
   return process.env.AI_PROVIDER === "moonshot" ? moonshotAI : oai;
 }
 
-function getModelName(defaultModel = "gpt-4o-mini"): string {
+function getModelName(defaultModel = "gpt-5-nano"): string {
   if (process.env.AI_PROVIDER === "moonshot") {
     return process.env.MOONSHOT_ADVICE_MODEL ?? "moonshot-v1-8k";
   }
@@ -42,7 +42,7 @@ export abstract class AbstractAgent implements BaseAgent {
   protected defaultModel: string;
   protected defaultTemperature: number;
 
-  constructor(defaultModel = "gpt-4o-mini", defaultTemperature = 0.4) {
+  constructor(defaultModel = "gpt-5-nano", defaultTemperature = 0.4) {
     this.defaultModel = defaultModel;
     this.defaultTemperature = defaultTemperature;
   }
@@ -65,7 +65,7 @@ export abstract class AbstractAgent implements BaseAgent {
   abstract process(
     task: AgentTask,
     telemetry?: AgentTelemetry,
-  ): Promise<AgentResult>;
+  ): Promise<AgentResult<unknown>>;
 
   /**
    * Генерация уникального ID для телеметрии
@@ -101,7 +101,10 @@ export abstract class AbstractAgent implements BaseAgent {
   /**
    * Создание результата с ошибкой
    */
-  protected createErrorResult(error: string, confidence = 0): AgentResult {
+  protected createErrorResult<T = string>(
+    error: string,
+    confidence = 0,
+  ): AgentResult<T> {
     return {
       success: false,
       error,

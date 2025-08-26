@@ -68,15 +68,15 @@ export class RouterAgent extends AbstractAgent {
   ];
 
   private availableAgents = new Map<string, string[]>([
-    ["question", ["qa-specialist"]],
-    ["event", ["event-processor"]],
-    ["chat", ["qa-specialist"]],
-    ["complex_task", ["task-orchestrator"]],
-    ["irrelevant", ["qa-specialist"]],
+    ["question", ["qa-specialist", "general-assistant", "data-analyst"]],
+    ["event", ["event-processor", "task-manager"]],
+    ["chat", ["general-assistant", "qa-specialist"]],
+    ["complex_task", ["task-orchestrator", "data-analyst"]],
+    ["irrelevant", ["general-assistant"]],
   ]);
 
   constructor() {
-    super("gpt-4o", 0.1); // Используем более точную модель для роутинга
+    super("gpt-5-mini", 0.1); // Используем более точную модель для роутинга
   }
 
   async canHandle(task: AgentTask): Promise<boolean> {
@@ -109,8 +109,10 @@ export class RouterAgent extends AbstractAgent {
 
 ДОСТУПНЫЕ АГЕНТЫ:
 - qa-specialist: Отвечает на вопросы, предоставляет информацию
-- event-processor: Обрабатывает и парсит события для логирования  
-- quality-evaluator: Оценивает и улучшает качество ответов
+- general-assistant: Универсальный помощник и дружелюбный собеседник
+- event-processor: Обрабатывает и парсит события для логирования
+- task-manager: Управляет задачами/делами пользователя
+- data-analyst: Анализирует числа, метрики, тренды и отчеты
 - task-orchestrator: Координирует сложные многоэтапные задачи
 - quality-evaluator: Оценивает и улучшает качество ответов`;
 
@@ -164,18 +166,19 @@ export class RouterAgent extends AbstractAgent {
 
 ДОСТУПНЫЕ АГЕНТЫ И ИХ СПЕЦИАЛИЗАЦИЯ:
 - qa-specialist: Отвечает на вопросы о функциях бота, дает информацию
+- general-assistant: Универсальный помощник и собеседник
 - event-processor: Парсит и обрабатывает события для записи в базу
-- qa-specialist: Ведет дружеское общение, поддерживает диалог
-- quality-evaluator: Оценивает и улучшает качество ответов
-- task-orchestrator: Координирует сложные задачи, требующие несколько агентов
+- task-manager: Управляет задачами/делами пользователя
+- data-analyst: Выполняет аналитические запросы и рекомендации по визуализации
+- task-orchestrator: Координирует сложные задачи, требующие нескольких агентов
 - quality-evaluator: Оценивает и улучшает качество ответов
 
 ПРАВИЛА ВЫБОРА:
-1. Для простых вопросов - qa-specialist
-2. Для событий/покупок - event-processor
-3. Для общения - qa-specialist
-4. Для сложных задач - task-orchestrator
-5. Для улучшения качества - quality-evaluator`;
+1. Для простых вопросов и обычного общения — general-assistant (или qa-specialist при вопросах о продукте)
+2. Для событий/покупок — event-processor; для дел/задач — task-manager
+3. Для аналитики данных — data-analyst
+4. Для сложных задач — task-orchestrator
+5. Для улучшения качества — quality-evaluator`;
 
     const prompt = `Выбери агента для обработки сообщения: "${task.input}"
 
@@ -201,10 +204,10 @@ export class RouterAgent extends AbstractAgent {
       // Fallback маршрутизация на основе типа сообщения
       const fallbackAgents = this.availableAgents.get(
         classification.messageType,
-      ) || ["qa-specialist"];
+      ) ?? ["qa-specialist"];
 
       return {
-        targetAgent: fallbackAgents[0] || "qa-specialist",
+        targetAgent: fallbackAgents[0] ?? "qa-specialist",
         confidence: 0.3,
         reasoning: "Fallback routing due to error",
       };

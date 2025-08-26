@@ -1,40 +1,47 @@
-import { AbstractAgent } from "./base-agent";
-import type { AgentTask, AgentTelemetry, AgentResult, AgentCapability } from "./types";
 import { getPromptSafe, PROMPT_KEYS } from "@synoro/prompts";
+
+import type {
+  AgentCapability,
+  AgentResult,
+  AgentTask,
+  AgentTelemetry,
+} from "./types";
+import { AbstractAgent } from "./base-agent";
 
 export class DataAnalystAgent extends AbstractAgent {
   name = "Data Analyst";
-  description = "Специалист по анализу данных и статистики в Synoro AI";
+  description =
+    "Аналитик данных Synoro AI: анализ чисел, метрик, трендов и отчётов";
   capabilities: AgentCapability[] = [
     {
       name: "Data Analysis",
-      description: "Анализ данных, метрик и трендов",
-      category: "analysis",
+      description: "Интерпретация данных, метрик и трендов",
+      category: "analytics",
       confidence: 0.85,
     },
     {
       name: "Visualization Advice",
-      description: "Рекомендации по визуализации и отчетам",
-      category: "analysis",
+      description: "Рекомендации по визуализации и отчётам",
+      category: "analytics",
       confidence: 0.8,
     },
   ];
   constructor() {
-    super("gpt-4o", 0.5);
+    super("gpt-5-mini", 0.5);
   }
 
-  async canHandle(task: AgentTask): Promise<boolean> {
+  canHandle(task: AgentTask): Promise<boolean> {
     const input = task.input.toLowerCase();
-    return (
+    return Promise.resolve(
       input.includes("анализ") ||
-      input.includes("статистика") ||
-      input.includes("данные") ||
-      input.includes("отчет") ||
-      input.includes("метрики") ||
-      input.includes("trend") ||
-      input.includes("график") ||
-      input.includes("числа") ||
-      input.includes("расчет")
+        input.includes("статистика") ||
+        input.includes("данные") ||
+        input.includes("отчет") ||
+        input.includes("метрики") ||
+        input.includes("trend") ||
+        input.includes("график") ||
+        input.includes("числа") ||
+        input.includes("расчет"),
     );
   }
 
@@ -51,18 +58,17 @@ export class DataAnalystAgent extends AbstractAgent {
         task,
         telemetry,
       );
-
       return this.createSuccessResult(response, 0.85);
-    } catch (error) {
-      console.error("Error in DataAnalystAgent:", error);
+    } catch (err) {
+      console.error("Error in DataAnalystAgent:", err);
       return this.createErrorResult(
         "Извините, произошла ошибка при анализе данных. Убедитесь, что данные корректно представлены.",
       );
     }
   }
 
-  async shouldLog(task: AgentTask): Promise<boolean> {
+  shouldLog(_task: AgentTask): Promise<boolean> {
     // Логируем все аналитические запросы
-    return true;
+    return Promise.resolve(true);
   }
 }

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { AgentManager } from "./agent-manager";
+import { AgentManager } from "../../src/lib/agents/agent-manager";
 
 describe("AgentManager", () => {
   describe("getAgentKey", () => {

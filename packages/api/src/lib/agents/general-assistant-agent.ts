@@ -1,11 +1,17 @@
-import { AbstractAgent } from "./base-agent";
-import type { AgentTask, AgentTelemetry, AgentResult } from "./types";
 import { getPromptSafe, PROMPT_KEYS } from "@synoro/prompts";
+
+import type {
+  AgentCapability,
+  AgentResult,
+  AgentTask,
+  AgentTelemetry,
+} from "./types";
+import { AbstractAgent } from "./base-agent";
 
 export class GeneralAssistantAgent extends AbstractAgent {
   name = "General Assistant";
   description = "Универсальный помощник Synoro AI для общих вопросов и задач";
-  capabilities = [
+  capabilities: AgentCapability[] = [
     {
       name: "General Help",
       description: "Ответы на общие вопросы и повседневные задачи",
@@ -26,12 +32,12 @@ export class GeneralAssistantAgent extends AbstractAgent {
     },
   ];
   constructor() {
-    super("gpt-4o", 0.7);
+    super("gpt-5-mini", 0.7);
   }
 
-  async canHandle(task: AgentTask): Promise<boolean> {
+  canHandle(_task: AgentTask): Promise<boolean> {
     // Универсальный агент может обработать любое сообщение
-    return true;
+    return Promise.resolve(true);
   }
 
   async process(
@@ -57,8 +63,10 @@ export class GeneralAssistantAgent extends AbstractAgent {
     }
   }
 
-  async shouldLog(task: AgentTask): Promise<boolean> {
+  shouldLog(task: AgentTask): Promise<boolean> {
     // Логируем только важные взаимодействия
-    return task.input.length > 50 || task.context.channel === "telegram";
+    return Promise.resolve(
+      task.input.length > 50 || task.context.channel === "telegram",
+    );
   }
 }

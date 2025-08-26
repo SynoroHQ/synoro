@@ -1,41 +1,53 @@
-import { AbstractAgent, AgentTask, AgentTelemetry } from "./base-agent";
+import { getPromptSafe, PROMPT_KEYS } from "@synoro/prompts";
+
+import type {
+  AgentCapability,
+  AgentResult,
+  AgentTask,
+  AgentTelemetry,
+} from "./types";
+import { AbstractAgent } from "./base-agent";
 
 export class TaskManagerAgent extends AbstractAgent {
+  name = "Task Manager";
+  description =
+    "Помощник по управлению задачами: постановка, приоритизация и дедлайны";
+  capabilities: AgentCapability[] = [
+    {
+      name: "Task Planning",
+      description: "Разбиение задач, планирование и приоритизация",
+      category: "complex_task",
+      confidence: 0.85,
+    },
+    {
+      name: "Todo Management",
+      description: "Списки дел, статусы и дедлайны",
+      category: "task",
+      confidence: 0.8,
+    },
+  ];
   constructor() {
-    super("gpt-4o", 0.6);
+    super("gpt-5-mini", 0.6);
   }
 
-  async canHandle(task: AgentTask): Promise<boolean> {
+  canHandle(task: AgentTask): Promise<boolean> {
     const input = task.input.toLowerCase();
-    return (
+    return Promise.resolve(
       input.includes("задача") ||
-      input.includes("task") ||
-      input.includes("todo") ||
-      input.includes("список") ||
-      input.includes("планирование") ||
-      input.includes("deadline") ||
-      input.includes("приоритет")
+        input.includes("task") ||
+        input.includes("todo") ||
+        input.includes("список") ||
+        input.includes("планирование") ||
+        input.includes("deadline") ||
+        input.includes("приоритет"),
     );
   }
 
-  async process(task: AgentTask, telemetry?: AgentTelemetry): Promise<string> {
-    const systemPrompt = `Ты - специалист по управлению задачами в системе Synoro AI.
-
-Твоя задача - помогать пользователям с:
-- Созданием и управлением задачами
-- Планированием и приоритизацией
-- Отслеживанием прогресса
-- Установкой дедлайнов
-- Организацией рабочего процесса
-
-Ты можешь:
-- Анализировать описание задач
-- Предлагать структуру и разбивку
-- Давать советы по планированию
-- Помогать с приоритизацией
-- Объяснять методы управления проектами
-
-Всегда будь организованным и методичным в своих рекомендациях.`;
+  async process(
+    task: AgentTask,
+    telemetry?: AgentTelemetry,
+  ): Promise<AgentResult<string>> {
+    const systemPrompt = getPromptSafe(PROMPT_KEYS.ASSISTANT);
 
     try {
       const response = await this.generateResponse(
@@ -45,15 +57,17 @@ export class TaskManagerAgent extends AbstractAgent {
         telemetry,
       );
 
-      return response;
+      return this.createSuccessResult(response, 0.85);
     } catch (error) {
       console.error("Error in TaskManagerAgent:", error);
-      return "Извините, произошла ошибка при обработке задачи. Попробуйте описать задачу более подробно.";
+      return this.createErrorResult(
+        "Извините, произошла ошибка при обработке задачи. Попробуйте описать задачу более подробно.",
+      );
     }
   }
 
-  async shouldLog(task: AgentTask): Promise<boolean> {
+  shouldLog(_task: AgentTask): Promise<boolean> {
     // Логируем все задачи для отслеживания
-    return true;
+    return Promise.resolve(true);
   }
 }

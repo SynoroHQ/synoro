@@ -83,7 +83,7 @@ export class EventProcessorAgent extends AbstractAgent {
   ];
 
   constructor() {
-    super("gpt-4o-mini", 0.2); // Низкая температура для точного парсинга
+    super("gpt-5-nano", 0.2); // Низкая температура для точного парсинга
   }
 
   async canHandle(task: AgentTask): Promise<boolean> {
@@ -215,13 +215,58 @@ export class EventProcessorAgent extends AbstractAgent {
       execute: async ({ text }) => {
         // Функция для нормализации числовой строки
         const normalizeNumberString = (numStr: string): string => {
-          return numStr
-            // Убираем все типы пробелов (обычные, неразрывные, тонкие) как разделители тысяч
-            .replace(/[\s\u00A0\u2009\u200A\u200B\u200C\u200D\uFEFF]/g, "")
-            // Заменяем запятую на точку как десятичный разделитель
-            .replace(/,/g, ".")
-            // Убираем лишние символы валют и пробелы
-            .replace(/[^\d.]/g, "");
+          // Убираем все символы валют и не-цифровые символы, кроме цифр, запятых, точек и минуса
+          let cleaned = numStr.replace(/[^\d.,\-\s\u00A0\u2009\u200A\u200B\u200C\u200D\uFEFF]/g, "");
+          
+          // Убираем все типы пробелов (обычные, неразрывные, тонкие) как разделители тысяч
+          cleaned = cleaned.replace(/[\s\u00A0\u2009\u200A\u200B\u200C\u200D\uFEFF]/g, "");
+          
+          // Находим правый десятичный разделитель (точка или запятая)
+          const lastDotIndex = cleaned.lastIndexOf('.');
+          const lastCommaIndex = cleaned.lastIndexOf(',');
+          
+          let decimalSeparatorIndex = -1;
+          let decimalSeparator = '';
+          
+          if (lastDotIndex > lastCommaIndex) {
+            decimalSeparatorIndex = lastDotIndex;
+            decimalSeparator = '.';
+          } else if (lastCommaIndex > lastDotIndex) {
+            decimalSeparatorIndex = lastCommaIndex;
+            decimalSeparator = ',';
+          }
+          
+          if (decimalSeparatorIndex !== -1) {
+            // Убираем все запятые и точки, кроме правого десятичного разделителя
+            const beforeDecimal = cleaned.substring(0, decimalSeparatorIndex).replace(/[.,]/g, '');
+            const afterDecimal = cleaned.substring(decimalSeparatorIndex + 1).replace(/[.,]/g, '');
+            
+            // Собираем результат, заменяя правый разделитель на точку
+            cleaned = beforeDecimal + '.' + afterDecimal;
+          } else {
+            // Если нет десятичного разделителя, убираем все запятые и точки
+            cleaned = cleaned.replace(/[.,]/g, '');
+          }
+          
+          // Убираем лишние символы, оставляя только цифры, точку и минус
+          cleaned = cleaned.replace(/[^\d.\-]/g, '');
+          
+          // Обрабатываем множественные десятичные точки
+          const dotCount = (cleaned.match(/\./g) || []).length;
+          if (dotCount > 1) {
+            // Оставляем только первую точку
+            const firstDotIndex = cleaned.indexOf('.');
+            const beforeFirstDot = cleaned.substring(0, firstDotIndex + 1);
+            const afterFirstDot = cleaned.substring(firstDotIndex + 1).replace(/\./g, '');
+            cleaned = beforeFirstDot + afterFirstDot;
+          }
+          
+          // Убираем множественные минусы, оставляя только первый
+          if (cleaned.startsWith('--')) {
+            cleaned = '-' + cleaned.replace(/-/g, '');
+          }
+          
+          return cleaned;
         };
 
         // Улучшенные регулярные выражения для поиска сумм
@@ -286,7 +331,8 @@ export class EventProcessorAgent extends AbstractAgent {
         }
 
         // Если не нашли валюту, но есть число с пробелами
-        const numberPattern = /([\d\s\u00A0\u2009\u200A\u200B\u200C\u200D\uFEFF]+(?:[.,]\d+)?)/;
+        const numberPattern =
+          /([\d\s\u00A0\u2009\u200A\u200B\u200C\u200D\uFEFF]+(?:[.,]\d+)?)/;
         const numberMatch = numberPattern.exec(text);
         if (numberMatch) {
           const normalizedAmount = normalizeNumberString(numberMatch[1]);
