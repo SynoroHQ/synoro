@@ -83,7 +83,7 @@ export class EventProcessorAgent extends AbstractAgent {
   ];
 
   constructor() {
-    super("gpt-4o-mini", 0.2); // Низкая температура для точного парсинга
+    super("gpt-5-mini", 0.2); // Низкая температура для точного парсинга
   }
 
   async canHandle(task: AgentTask): Promise<boolean> {
@@ -215,13 +215,15 @@ export class EventProcessorAgent extends AbstractAgent {
       execute: async ({ text }) => {
         // Функция для нормализации числовой строки
         const normalizeNumberString = (numStr: string): string => {
-          return numStr
-            // Убираем все типы пробелов (обычные, неразрывные, тонкие) как разделители тысяч
-            .replace(/[\s\u00A0\u2009\u200A\u200B\u200C\u200D\uFEFF]/g, "")
-            // Заменяем запятую на точку как десятичный разделитель
-            .replace(/,/g, ".")
-            // Убираем лишние символы валют и пробелы
-            .replace(/[^\d.]/g, "");
+          return (
+            numStr
+              // Убираем все типы пробелов (обычные, неразрывные, тонкие) как разделители тысяч
+              .replace(/[\s\u00A0\u2009\u200A\u200B\u200C\u200D\uFEFF]/g, "")
+              // Заменяем запятую на точку как десятичный разделитель
+              .replace(/,/g, ".")
+              // Убираем лишние символы валют и пробелы
+              .replace(/[^\d.]/g, "")
+          );
         };
 
         // Улучшенные регулярные выражения для поиска сумм
@@ -286,7 +288,8 @@ export class EventProcessorAgent extends AbstractAgent {
         }
 
         // Если не нашли валюту, но есть число с пробелами
-        const numberPattern = /([\d\s\u00A0\u2009\u200A\u200B\u200C\u200D\uFEFF]+(?:[.,]\d+)?)/;
+        const numberPattern =
+          /([\d\s\u00A0\u2009\u200A\u200B\u200C\u200D\uFEFF]+(?:[.,]\d+)?)/;
         const numberMatch = numberPattern.exec(text);
         if (numberMatch) {
           const normalizedAmount = normalizeNumberString(numberMatch[1]);

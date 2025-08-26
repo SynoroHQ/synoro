@@ -43,7 +43,7 @@ const result = await api.sendAnonymousMessage.mutate({
   idempotencyKey: "unique-key-123", // Опционально
   attachments: [], // Поддерживается
   metadata: { source: "webapp" }, // Поддерживается
-  model: "gpt-4", // Опционально
+  model: "gpt-5", // Опционально
   telegramInitData: "query_id=...&user=...&hash=...", // Обязательно
 });
 ```

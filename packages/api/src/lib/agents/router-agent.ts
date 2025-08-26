@@ -76,7 +76,7 @@ export class RouterAgent extends AbstractAgent {
   ]);
 
   constructor() {
-    super("gpt-4o", 0.1); // Используем более точную модель для роутинга
+    super("gpt-5", 0.1); // Используем более точную модель для роутинга
   }
 
   async canHandle(task: AgentTask): Promise<boolean> {

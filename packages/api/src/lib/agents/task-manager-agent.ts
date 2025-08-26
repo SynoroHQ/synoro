@@ -1,11 +1,12 @@
-import { AbstractAgent } from "./base-agent";
+import { getPromptSafe, PROMPT_KEYS } from "@synoro/prompts";
+
 import type {
+  AgentCapability,
+  AgentResult,
   AgentTask,
   AgentTelemetry,
-  AgentResult,
-  AgentCapability,
 } from "./types";
-import { getPromptSafe, PROMPT_KEYS } from "@synoro/prompts";
+import { AbstractAgent } from "./base-agent";
 
 export class TaskManagerAgent extends AbstractAgent {
   name = "Task Manager";
@@ -26,7 +27,7 @@ export class TaskManagerAgent extends AbstractAgent {
     },
   ];
   constructor() {
-    super("gpt-4o", 0.6);
+    super("gpt-5", 0.6);
   }
 
   canHandle(task: AgentTask): Promise<boolean> {

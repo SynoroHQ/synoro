@@ -1,6 +1,7 @@
-import { AbstractAgent } from "./base-agent";
-import type { AgentTask, AgentTelemetry, AgentResult } from "./types";
 import { getPromptSafe, PROMPT_KEYS } from "@synoro/prompts";
+
+import type { AgentResult, AgentTask, AgentTelemetry } from "./types";
+import { AbstractAgent } from "./base-agent";
 
 export class ChatAssistantAgent extends AbstractAgent {
   name = "Chat Assistant";
@@ -19,8 +20,8 @@ export class ChatAssistantAgent extends AbstractAgent {
       confidence: 0.85,
     },
   ];
-  constructor() {
-    super("gpt-4o", 0.8);
+  constructgpt-5
+    super("gpt-5o", 0.8);
   }
 
   canHandle(task: AgentTask): Promise<boolean> {
@@ -35,7 +36,7 @@ export class ChatAssistantAgent extends AbstractAgent {
         input.includes("thanks") ||
         input.includes("bye") ||
         input.includes("how are you") ||
-        input.length < 20 // Короткие сообщения обычно для общения
+        input.length < 20, // Короткие сообщения обычно для общения
     );
   }
 

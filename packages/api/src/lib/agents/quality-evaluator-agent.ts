@@ -1,18 +1,22 @@
 import { generateObject, generateText } from "ai";
 import { z } from "zod";
 
-import { AbstractAgent } from "./base-agent";
 import type {
-  AgentTask,
-  AgentResult,
-  AgentTelemetry,
   AgentCapability,
+  AgentResult,
+  AgentTask,
+  AgentTelemetry,
   QualityMetrics,
 } from "./types";
+import { AbstractAgent } from "./base-agent";
 
 // Схема для оценки качества
 const qualityEvaluationSchema = z.object({
-  accuracy: z.number().min(0).max(1).describe("Точность и корректность информации"),
+  accuracy: z
+    .number()
+    .min(0)
+    .max(1)
+    .describe("Точность и корректность информации"),
   relevance: z.number().min(0).max(1).describe("Релевантность ответа запросу"),
   completeness: z.number().min(0).max(1).describe("Полнота ответа"),
   clarity: z.number().min(0).max(1).describe("Ясность и понятность"),
@@ -36,8 +40,9 @@ const improvementRequestSchema = z.object({
  */
 export class QualityEvaluatorAgent extends AbstractAgent {
   name = "Quality Evaluator";
-  description = "Оценивает качество ответов других агентов и предлагает улучшения";
-  
+  description =
+    "Оценивает качество ответов других агентов и предлагает улучшения";
+
   capabilities: AgentCapability[] = [
     {
       name: "Response Evaluation",
@@ -68,12 +73,12 @@ export class QualityEvaluatorAgent extends AbstractAgent {
   private qualityThresholds = {
     excellent: 0.9,
     good: 0.7,
-    acceptable: 0.5,
+    acceptagpt-5.5,
     poor: 0.3,
   };
 
   constructor() {
-    super("gpt-4o", 0.2); // Низкая температура для объективной оценки
+    super("gpt-5o", 0.2); // Низкая температура для объективной оценки
   }
 
   async canHandle(task: AgentTask): Promise<boolean> {
@@ -88,8 +93,10 @@ export class QualityEvaluatorAgent extends AbstractAgent {
     originalInput: string,
     agentResponse: string,
     context?: any,
-    telemetry?: AgentTelemetry
-  ): Promise<QualityMetrics & { needsImprovement: boolean; suggestions: string[] }> {
+    telemetry?: AgentTelemetry,
+  ): Promise<
+    QualityMetrics & { needsImprovement: boolean; suggestions: string[] }
+  > {
     try {
       const { object: evaluation } = await generateObject({
         model: this.getModel(),
@@ -121,7 +128,7 @@ export class QualityEvaluatorAgent extends AbstractAgent {
 
 Ответ агента: "${agentResponse}"
 
-${context ? `Дополнительный контекст: ${JSON.stringify(context, null, 2)}` : ''}
+${context ? `Дополнительный контекст: ${JSON.stringify(context, null, 2)}` : ""}
 
 Проанализируй качество ответа по всем критериям и дай объективную оценку.`,
         temperature: this.defaultTemperature,
@@ -139,7 +146,7 @@ ${context ? `Дополнительный контекст: ${JSON.stringify(con
       return evaluation;
     } catch (error) {
       console.error("Error in quality evaluation:", error);
-      
+
       // Fallback простая оценка
       return {
         accuracy: 0.5,
@@ -162,7 +169,7 @@ ${context ? `Дополнительный контекст: ${JSON.stringify(con
     originalInput: string,
     originalResponse: string,
     evaluation: any,
-    telemetry?: AgentTelemetry
+    telemetry?: AgentTelemetry,
   ): Promise<string> {
     if (!evaluation.needsImprovement) {
       return originalResponse;
@@ -181,7 +188,7 @@ ${context ? `Дополнительный контекст: ${JSON.stringify(con
 5. Связывай ответ с возможностями Synoro где уместно
 
 ПРОБЛЕМЫ ДЛЯ ИСПРАВЛЕНИЯ:
-${evaluation.suggestions.join('\n- ')}
+${evaluation.suggestions.join("\n- ")}
 
 ЦЕЛЕВОЕ КАЧЕСТВО: ${evaluation.targetQuality || 0.8}`,
         prompt: `УЛУЧШЕНИЕ ОТВЕТА
@@ -191,7 +198,7 @@ ${evaluation.suggestions.join('\n- ')}
 Оригинальный ответ: "${originalResponse}"
 
 Проблемы качества:
-${evaluation.suggestions.join('\n- ')}
+${evaluation.suggestions.join("\n- ")}
 
 Текущая оценка: ${evaluation.overallScore}
 Обоснование: ${evaluation.reasoning}
@@ -225,7 +232,7 @@ ${evaluation.suggestions.join('\n- ')}
     maxIterations: number = 2,
     targetQuality: number = 0.8,
     context?: any,
-    telemetry?: AgentTelemetry
+    telemetry?: AgentTelemetry,
   ): Promise<{
     finalResponse: string;
     evaluations: any[];
@@ -242,14 +249,17 @@ ${evaluation.suggestions.join('\n- ')}
         originalInput,
         currentResponse,
         context,
-        telemetry
+        telemetry,
       );
-      
+
       evaluations.push(evaluation);
       iterationsUsed++;
 
       // Если качество достаточное, останавливаемся
-      if (evaluation.overallScore >= targetQuality || !evaluation.needsImprovement) {
+      if (
+        evaluation.overallScore >= targetQuality ||
+        !evaluation.needsImprovement
+      ) {
         break;
       }
 
@@ -258,7 +268,7 @@ ${evaluation.suggestions.join('\n- ')}
         originalInput,
         currentResponse,
         evaluation,
-        telemetry
+        telemetry,
       );
 
       // Если улучшений нет, останавливаемся
@@ -279,9 +289,14 @@ ${evaluation.suggestions.join('\n- ')}
     };
   }
 
-  async process(task: AgentTask, telemetry?: AgentTelemetry): Promise<AgentResult<any>> {
+  async process(
+    task: AgentTask,
+    telemetry?: AgentTelemetry,
+  ): Promise<AgentResult<any>> {
     // Этот агент обычно не используется напрямую через process
     // Он вызывается другими агентами для оценки качества
-    return this.createErrorResult("Quality evaluator should be called via specific methods");
+    return this.createErrorResult(
+      "Quality evaluator should be called via specific methods",
+    );
   }
 }

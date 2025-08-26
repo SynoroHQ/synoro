@@ -3,14 +3,14 @@ import { z } from "zod";
 
 import { getPromptSafe, PROMPT_KEYS } from "@synoro/prompts";
 
-import { AbstractAgent } from "./base-agent";
 import type {
-  AgentTask,
-  AgentResult,
-  AgentTelemetry,
   AgentCapability,
+  AgentResult,
+  AgentTask,
+  AgentTelemetry,
 } from "./types";
 import { parseContextSafely } from "../ai/advisor";
+import { AbstractAgent } from "./base-agent";
 
 /**
  * Специализированный агент для ответов на вопросы
@@ -18,8 +18,9 @@ import { parseContextSafely } from "../ai/advisor";
  */
 export class QASpecialistAgent extends AbstractAgent {
   name = "Q&A Specialist";
-  description = "Специализированный агент для ответов на вопросы о системе Synoro и предоставления информации";
-  
+  description =
+    "Специализированный агент для ответов на вопросы о системе Synoro и предоставления информации";
+
   capabilities: AgentCapability[] = [
     {
       name: "Bot Information",
@@ -48,25 +49,42 @@ export class QASpecialistAgent extends AbstractAgent {
   ];
 
   constructor() {
-    super("gpt-4o-mini", 0.4);
+    super("gpt-5-mini", 0.4);
   }
 
   canHandle(task: AgentTask): Promise<boolean> {
     // Проверяем, что это вопрос
     const questionKeywords = [
-      "что", "как", "где", "когда", "зачем", "почему", "какой", "кто",
-      "можешь", "умеешь", "помоги", "расскажи", "объясни", "покажи",
-      "?", "помощь", "help"
+      "что",
+      "как",
+      "где",
+      "когда",
+      "зачем",
+      "почему",
+      "какой",
+      "кто",
+      "можешь",
+      "умеешь",
+      "помоги",
+      "расскажи",
+      "объясни",
+      "покажи",
+      "?",
+      "помощь",
+      "help",
     ];
-    
+
     const text = task.input.toLowerCase();
-    const hasQuestionPattern = questionKeywords.some(keyword => text.includes(keyword));
-    
+    const hasQuestionPattern = questionKeywords.some((keyword) =>
+      text.includes(keyword),
+    );
+
     // Дополнительная проверка на тип задачи
-    const isQuestionType = task.type === "question" || 
-                          task.type === "chat" ||
-                          task.type === "general";
-    
+    const isQuestionType =
+      task.type === "question" ||
+      task.type === "chat" ||
+      task.type === "general";
+
     return Promise.resolve(hasQuestionPattern && isQuestionType);
   }
 
@@ -74,22 +92,35 @@ export class QASpecialistAgent extends AbstractAgent {
    * Определяет подтип вопроса для более точного ответа
    */
   private classifyQuestionSubtype(question: string): string {
-    const botKeywords = ["бот", "synoro", "умеешь", "можешь", "функции", "возможности"];
+    const botKeywords = [
+      "бот",
+      "synoro",
+      "умеешь",
+      "можешь",
+      "функции",
+      "возможности",
+    ];
     const helpKeywords = ["помоги", "help", "как", "покажи", "научи"];
-    const dataKeywords = ["статистика", "данные", "потратил", "сколько", "анализ"];
-    
+    const dataKeywords = [
+      "статистика",
+      "данные",
+      "потратил",
+      "сколько",
+      "анализ",
+    ];
+
     const text = question.toLowerCase();
-    
-    if (botKeywords.some(keyword => text.includes(keyword))) {
+
+    if (botKeywords.some((keyword) => text.includes(keyword))) {
       return "about_bot";
     }
-    if (dataKeywords.some(keyword => text.includes(keyword))) {
+    if (dataKeywords.some((keyword) => text.includes(keyword))) {
       return "about_data";
     }
-    if (helpKeywords.some(keyword => text.includes(keyword))) {
+    if (helpKeywords.some((keyword) => text.includes(keyword))) {
       return "help_request";
     }
-    
+
     return "general";
   }
 
@@ -105,19 +136,24 @@ export class QASpecialistAgent extends AbstractAgent {
       execute: ({ query }) => {
         // Базовая информация о системе
         const systemInfo = {
-          "функции": "Логирование событий, анализ данных, финансовая аналитика, управление задачами, ответы на вопросы",
-          "возможности": "Записываю покупки, встречи, задачи; анализирую расходы; выявляю паттерны; даю советы",
+          функции:
+            "Логирование событий, анализ данных, финансовая аналитика, управление задачами, ответы на вопросы",
+          возможности:
+            "Записываю покупки, встречи, задачи; анализирую расходы; выявляю паттерны; даю советы",
           "типы событий": "покупки, задачи, встречи, заметки, расходы, доходы",
-          "аналитика": "статистика расходов, анализ паттернов поведения, финансовые советы",
-          "платформы": "Telegram бот, веб-приложение, мобильное приложение",
+          аналитика:
+            "статистика расходов, анализ паттернов поведения, финансовые советы",
+          платформы: "Telegram бот, веб-приложение, мобильное приложение",
         };
-        
+
         // Простой поиск по ключевым словам
         const queryLower = query.toLowerCase();
-        const results = Object.entries(systemInfo).filter(([key, value]) => 
-          queryLower.includes(key) || value.toLowerCase().includes(queryLower)
+        const results = Object.entries(systemInfo).filter(
+          ([key, value]) =>
+            queryLower.includes(key) ||
+            value.toLowerCase().includes(queryLower),
         );
-        
+
         return results.length > 0
           ? results.map(([k, v]) => `${k}: ${v}`).join("; ")
           : "Общая информация: Synoro AI - умный помощник для управления жизненными событиями";
@@ -125,17 +161,20 @@ export class QASpecialistAgent extends AbstractAgent {
     });
   }
 
-  async process(task: AgentTask, telemetry?: AgentTelemetry): Promise<AgentResult<string>> {
+  async process(
+    task: AgentTask,
+    telemetry?: AgentTelemetry,
+  ): Promise<AgentResult<string>> {
     try {
       // Получаем системный промпт
       const assistantPrompt = getPromptSafe(PROMPT_KEYS.ASSISTANT);
-      
+
       // Определяем подтип вопроса
       const subtype = this.classifyQuestionSubtype(task.input);
-      
+
       // Извлекаем контекст из метаданных телеметрии
       const context = parseContextSafely(telemetry);
-      
+
       // Формируем историю беседы
       let conversationHistory = "";
       if (context.length > 0) {
@@ -149,7 +188,7 @@ export class QASpecialistAgent extends AbstractAgent {
 
       // Создаем контекстный промпт в зависимости от подтипа вопроса
       let contextPrompt = task.input;
-      
+
       if (subtype === "about_bot") {
         contextPrompt = `${conversationHistory}Пользователь спрашивает о возможностях бота: "${task.input}"
         
@@ -184,11 +223,11 @@ export class QASpecialistAgent extends AbstractAgent {
       });
 
       const response = result.text.trim();
-      
+
       return this.createSuccessResult(
         response,
         0.9,
-        `Answered ${subtype} question`
+        `Answered ${subtype} question`,
       );
     } catch (error) {
       console.error("Error in QA specialist agent:", error);

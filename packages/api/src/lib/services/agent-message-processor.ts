@@ -190,8 +190,6 @@ export async function processMessageWithAgents(
         fallbackAdviseFunctionId:
           MESSAGE_PROCESSING_CONFIG.FUNCTION_IDS.FALLBACK_ADVISE,
         useQualityControl: options.useQualityControl ?? true,
-        maxQualityIterations: options.maxQualityIterations ?? 2,
-        targetQuality: options.targetQuality ?? 0.8,
       },
     );
 

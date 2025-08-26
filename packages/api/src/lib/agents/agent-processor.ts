@@ -86,8 +86,10 @@ export class AgentMessageProcessor {
         messageType.type === "event" &&
         orchestrationResult.metadata?.agentData
       ) {
-        const agentData = orchestrationResult.metadata
-          .agentData as Record<string, unknown>;
+        const agentData = orchestrationResult.metadata.agentData as Record<
+          string,
+          unknown
+        >;
         const parsedEvent =
           typeof agentData === "object" && agentData
             ? (agentData as { parsedEvent?: unknown }).parsedEvent
@@ -125,7 +127,7 @@ export class AgentMessageProcessor {
         response:
           "Извините, произошла ошибка при обработке сообщения. Попробуйте еще раз.",
         parsed: null,
-        model: "gpt-4o-mini",
+        model: "gpt-5-mini",
         agentMetadata: {
           agentsUsed: ["error-handler"],
           totalSteps: 1,
@@ -243,12 +245,12 @@ export class AgentMessageProcessor {
   private getModelFromAgents(agentsUsed: string[]): string {
     // Простая эвристика: если использовался orchestrator, то более мощная модель
     if (agentsUsed.includes("Task Orchestrator")) {
-      return "gpt-4o";
+      return "gpt-5";
     }
     if (agentsUsed.includes("Q&A Specialist")) {
-      return "gpt-4o-mini";
+      return "gpt-5-mini";
     }
-    return "gpt-4o-mini"; // По умолчанию
+    return "gpt-5-mini"; // По умолчанию
   }
 
   /**

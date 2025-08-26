@@ -227,7 +227,7 @@ const messageClassifier: PromptDefinition = {
   type: "text",
   prompt: messageClassifierTemplate,
   labels: ["production", "staging", "latest"],
-  defaultModel: "gpt-4o-mini",
+  defaultModel: "gpt-5-mini",
   defaultTemperature: 0.1,
 };
 

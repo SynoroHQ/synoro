@@ -41,6 +41,9 @@ export class AgentManager {
       new QASpecialistAgent(),
       new EventProcessorAgent(),
       new TaskOrchestratorAgent(),
+      new GeneralAssistantAgent(),
+      new DataAnalystAgent(),
+      new TaskManagerAgent(),
     ];
 
     agentInstances.forEach((agent) => {

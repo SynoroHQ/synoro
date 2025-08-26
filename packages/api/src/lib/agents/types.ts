@@ -51,7 +51,7 @@ export interface BaseAgent {
   process(
     task: AgentTask,
     telemetry?: AgentTelemetry,
-  ): Promise<AgentResult<string>>;
+  ): Promise<AgentResult<unknown>>;
   getModel(): LanguageModel;
 }
 

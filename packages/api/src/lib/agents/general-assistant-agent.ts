@@ -32,7 +32,7 @@ export class GeneralAssistantAgent extends AbstractAgent {
     },
   ];
   constructor() {
-    super("gpt-4o", 0.7);
+    super("gpt-5", 0.7);
   }
 
   canHandle(_task: AgentTask): Promise<boolean> {

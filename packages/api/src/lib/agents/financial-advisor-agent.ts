@@ -1,10 +1,17 @@
-import { AbstractAgent } from "./base-agent";
-import type { AgentTask, AgentTelemetry, AgentResult, AgentCapability } from "./types";
 import { getPromptSafe, PROMPT_KEYS } from "@synoro/prompts";
+
+import type {
+  AgentCapability,
+  AgentResult,
+  AgentTask,
+  AgentTelemetry,
+} from "./types";
+import { AbstractAgent } from "./base-agent";
 
 export class FinancialAdvisorAgent extends AbstractAgent {
   name = "Financial Advisor";
-  description = "Финансовый помощник Synoro AI: бюджет, расходы, базовые советы";
+  description =
+    "Финансовый помощник Synoro AI: бюджет, расходы, базовые советы";
   capabilities: AgentCapability[] = [
     {
       name: "Budget Planning",
@@ -20,7 +27,7 @@ export class FinancialAdvisorAgent extends AbstractAgent {
     },
   ];
   constructor() {
-    super("gpt-4o", 0.6);
+    super("gpt-5", 0.6);
   }
 
   canHandle(task: AgentTask): Promise<boolean> {
