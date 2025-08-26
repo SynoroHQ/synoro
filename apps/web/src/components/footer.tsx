@@ -28,9 +28,6 @@ export default function Footer() {
                 <div className="gradient-text font-serif text-2xl font-bold transition-transform duration-300 hover:scale-105 sm:text-3xl">
                   Synoro
                 </div>
-                <Badge className="from-primary via-accent to-primary text-primary-foreground border-primary-foreground/20 ml-2 inline-flex items-center rounded-full border-2 bg-gradient-to-r px-2 py-1 text-xs font-medium shadow-sm backdrop-blur-sm">
-                  Beta
-                </Badge>
               </div>
               <p className="mb-4 text-sm leading-relaxed text-gray-400 sm:mb-6 sm:text-base">
                 {t("description")}
