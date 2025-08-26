@@ -1,4 +1,4 @@
-import { generateObject } from "ai";
+import { generateObject, generateText } from "ai";
 import { z } from "zod";
 
 import type {
@@ -139,14 +139,48 @@ export class RouterAgent extends AbstractAgent {
     } catch (error) {
       console.error("Error in message classification:", error);
 
-      // Fallback классификация
-      return {
-        messageType: "chat",
-        confidence: 0.3,
-        needsLogging: false,
-        complexity: "simple",
-        suggestedAgents: ["qa-specialist"],
-      };
+      // Fallback классификация с помощью AI
+      try {
+        const { text: fallbackClassification } = await generateText({
+          model: this.getModel(),
+          system: `Ты - эксперт по классификации сообщений. Классифицируй сообщение по типам: question, event, chat, complex_task, irrelevant.
+
+ПРАВИЛА:
+- question: вопросы, запросы информации
+- event: события для записи (покупки, задачи, встречи)
+- chat: обычное общение, приветствия
+- complex_task: сложные многоэтапные задачи
+- irrelevant: спам, бессмысленные сообщения
+
+Верни только тип сообщения, ничего больше.`,
+          prompt: `Классифицируй: "${task.input}"`,
+          temperature: 0.1,
+          experimental_telemetry: {
+            isEnabled: true,
+            functionId: "fallback-classification",
+            metadata: { fallback: true },
+          },
+        });
+
+        const messageType = fallbackClassification.trim().toLowerCase();
+        
+        return {
+          messageType: messageType as any || "chat",
+          confidence: 0.4,
+          needsLogging: messageType === "event",
+          complexity: messageType === "complex_task" ? "complex" : "simple",
+          suggestedAgents: messageType === "question" ? ["qa-specialist"] : ["general-assistant"],
+        };
+      } catch (fallbackError) {
+        console.error("Fallback classification also failed:", fallbackError);
+        return {
+          messageType: "chat",
+          confidence: 0.3,
+          needsLogging: false,
+          complexity: "simple",
+          suggestedAgents: ["qa-specialist"],
+        };
+      }
     }
   }
 

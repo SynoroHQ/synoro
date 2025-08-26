@@ -1,3 +1,6 @@
+import { generateObject } from "ai";
+import { z } from "zod";
+
 import { getPromptSafe, PROMPT_KEYS } from "@synoro/prompts";
 
 import type {
@@ -30,10 +33,76 @@ export class DataAnalystAgent extends AbstractAgent {
     super("gpt-5-mini", 0.5);
   }
 
-  canHandle(task: AgentTask): Promise<boolean> {
-    const input = task.input.toLowerCase();
-    return Promise.resolve(
-      input.includes("анализ") ||
+  async canHandle(task: AgentTask): Promise<boolean> {
+    try {
+      // Используем AI для определения типа запроса
+      const { object: requestAnalysis } = await generateObject({
+        model: this.getModel(),
+        schema: z.object({
+          isAnalyticsRequest: z
+            .boolean()
+            .describe("Требует ли запрос анализа данных"),
+          analyticsType: z
+            .enum([
+              "data_analysis",
+              "statistics",
+              "trends",
+              "visualization",
+              "metrics",
+              "reporting",
+              "other",
+            ])
+            .describe("Тип аналитического запроса"),
+          confidence: z
+            .number()
+            .min(0)
+            .max(1)
+            .describe("Уверенность в классификации"),
+          reasoning: z.string().describe("Обоснование классификации"),
+        }),
+        system: `Ты - эксперт по определению типов запросов в системе Synoro AI.
+
+ТВОЯ ЗАДАЧА:
+Определи, является ли запрос пользователя аналитическим и требует ли он анализа данных.
+
+ТИПЫ АНАЛИТИЧЕСКИХ ЗАПРОСОВ:
+- data_analysis: анализ данных, интерпретация информации
+- statistics: статистика, числовые данные, метрики
+- trends: тренды, изменения во времени, паттерны
+- visualization: визуализация, графики, диаграммы
+- metrics: ключевые показатели, KPI, измерения
+- reporting: отчеты, сводки, обзоры
+- other: прочие аналитические запросы
+
+ПРИЗНАКИ АНАЛИТИЧЕСКИХ ЗАПРОСОВ:
+- Содержит слова: анализ, статистика, данные, отчет, метрики
+- Требует интерпретации чисел или информации
+- Ищет паттерны, тренды или взаимосвязи
+- Нуждается в визуализации или структурировании
+- Запрашивает расчеты или сравнения
+
+ПРАВИЛА:
+1. Если запрос требует анализа данных - это аналитический запрос
+2. Если это простой вопрос без анализа - не аналитический
+3. Учитывай контекст и намерение пользователя`,
+        prompt: `Проанализируй запрос: "${task.input}"
+
+Определи, является ли он аналитическим и требует ли анализа данных.`,
+        temperature: 0.1,
+        experimental_telemetry: {
+          isEnabled: true,
+          functionId: "analytics-request-detection",
+          metadata: { inputLength: task.input.length },
+        },
+      });
+
+      return requestAnalysis.isAnalyticsRequest;
+    } catch (error) {
+      console.error("Error in AI analytics request detection:", error);
+      // Fallback к простой проверке
+      const input = task.input.toLowerCase();
+      return (
+        input.includes("анализ") ||
         input.includes("статистика") ||
         input.includes("данные") ||
         input.includes("отчет") ||
@@ -41,8 +110,9 @@ export class DataAnalystAgent extends AbstractAgent {
         input.includes("trend") ||
         input.includes("график") ||
         input.includes("числа") ||
-        input.includes("расчет"),
-    );
+        input.includes("расчет")
+      );
+    }
   }
 
   async process(

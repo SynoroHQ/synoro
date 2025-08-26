@@ -1,3 +1,6 @@
+import { generateObject } from "ai";
+import { z } from "zod";
+
 import { getPromptSafe, PROMPT_KEYS } from "@synoro/prompts";
 
 import type {
@@ -30,17 +33,82 @@ export class TaskManagerAgent extends AbstractAgent {
     super("gpt-5-mini", 0.6);
   }
 
-  canHandle(task: AgentTask): Promise<boolean> {
-    const input = task.input.toLowerCase();
-    return Promise.resolve(
-      input.includes("задача") ||
+  async canHandle(task: AgentTask): Promise<boolean> {
+    try {
+      // Используем AI для определения типа запроса по управлению задачами
+      const { object: taskAnalysis } = await generateObject({
+        model: this.getModel(),
+        schema: z.object({
+          isTaskManagementRequest: z
+            .boolean()
+            .describe("Требует ли запрос управления задачами"),
+          taskType: z
+            .enum([
+              "task_planning",
+              "todo_management",
+              "deadline_setting",
+              "priority_management",
+              "task_organization",
+              "other",
+            ])
+            .describe("Тип запроса по управлению задачами"),
+          confidence: z
+            .number()
+            .min(0)
+            .max(1)
+            .describe("Уверенность в классификации"),
+          reasoning: z.string().describe("Обоснование классификации"),
+        }),
+        system: `Ты - эксперт по определению типов запросов по управлению задачами в системе Synoro AI.
+
+ТВОЯ ЗАДАЧА:
+Определи, является ли запрос пользователя связанным с управлением задачами.
+
+ТИПЫ ЗАПРОСОВ ПО УПРАВЛЕНИЮ ЗАДАЧАМИ:
+- task_planning: планирование задач, разбиение на этапы
+- todo_management: управление списками дел, статусы
+- deadline_setting: установка сроков, дедлайнов
+- priority_management: приоритизация, важность задач
+- task_organization: организация, структурирование задач
+- other: прочие запросы по управлению задачами
+
+ПРИЗНАКИ ЗАПРОСОВ ПО УПРАВЛЕНИЮ ЗАДАЧАМИ:
+- Содержит слова: задача, task, todo, список, планирование
+- Затрагивает вопросы дедлайнов, приоритетов
+- Требует организации или структурирования задач
+- Ищет способы управления временем или делами
+- Связан с планированием или выполнением задач
+
+ПРАВИЛА:
+1. Если запрос касается управления задачами - это запрос по задачам
+2. Если это общий вопрос без контекста задач - не по задачам
+3. Учитывай контекст и намерение пользователя`,
+        prompt: `Проанализируй запрос: "${task.input}"
+
+Определи, связан ли он с управлением задачами.`,
+        temperature: 0.1,
+        experimental_telemetry: {
+          isEnabled: true,
+          functionId: "task-management-detection",
+          metadata: { inputLength: task.input.length },
+        },
+      });
+
+      return taskAnalysis.isTaskManagementRequest;
+    } catch (error) {
+      console.error("Error in AI task management detection:", error);
+      // Fallback к простой проверке
+      const input = task.input.toLowerCase();
+      return (
+        input.includes("задача") ||
         input.includes("task") ||
         input.includes("todo") ||
         input.includes("список") ||
         input.includes("планирование") ||
         input.includes("deadline") ||
-        input.includes("приоритет"),
-    );
+        input.includes("приоритет")
+      );
+    }
   }
 
   async process(

@@ -1,3 +1,5 @@
+import type { AttributeValue } from "@opentelemetry/api";
+
 import type { MessageTypeResult, ParsedTask } from "../ai/types";
 import type {
   MessageContext,
