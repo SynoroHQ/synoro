@@ -3,9 +3,9 @@ import { defineConfig } from "tsup";
 const isProduction = process.env.NODE_ENV === "production";
 
 export default defineConfig({
-  entry: ["./emails/**/*.ts", "index.ts"],
+  entry: ["index.ts"],
   format: ["esm"],
-  dts: true,
+  dts: false,
   splitting: false,
   sourcemap: false,
   clean: true,
