@@ -26,7 +26,6 @@
     "format": "prettier --check . --ignore-path ../../.gitignore",
     "lint": "eslint",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false",
-    "prepare": "tsup",
     "with-env": "dotenv -e ../../.env --",
     "update-prompt": "bun run with-env -- bun src/scripts/update-prompt.ts"
   },
