@@ -39,12 +39,21 @@
     "userMessage2": "📅 Schedule brake inspection for next month",
     "aiAnalyzing": "Synoro AI is analyzing...",
     "aiResponse1": "✅ Car maintenance recorded: Oil change + tire rotation (2h). Next service due in 5,000 km. Great job staying on schedule!",
-    "aiSuggestion": "💡 Based on your maintenance pattern, I recommend scheduling brake inspection next month.",
-    "scheduling": "Scheduling...",
     "aiResponse2": "✅ Brake inspection scheduled for March 15th at 10:00 AM. Reminder set for 2 days before.",
     "inputHint": "Try: \"Washed car, spent $15\" or \"Changed air filter\"",
     "weatherExample": "🌤️ Weather consideration: \"Schedule fence painting\" → automatically reschedules during rain",
     "savingsExample": "💰 Smart planning: \"Want to save $1,200 for vacation\" → suggests saving strategy"
+  },
+  "TelegramCTA": {
+    "badge": "Telegram Bot",
+    "title": "Try our Telegram bot right now!",
+    "subtitle": "Start using Synoro through the convenient Telegram interface. Send voice messages, text notes and get smart responses in real time.",
+    "feature1": "Easy to use - send messages like to a regular friend",
+    "feature2": "Voice notes are automatically transcribed and analyzed",
+    "feature3": "Instant responses and smart recommendations from AI",
+    "startBot": "Start with bot",
+    "bottomText": "Don't wait - try Synoro right now in Telegram!",
+    "tryNow": "Try now"
   },
   "Features": {
     "badge": "Features",
