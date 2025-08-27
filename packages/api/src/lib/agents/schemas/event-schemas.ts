@@ -62,11 +62,27 @@ export const categorizationSchema = z.object({
 /**
  * Схема для извлечения финансовой информации
  */
-export const financialSchema = z.object({
-  amount: z.number().nullable(),
-  currency: z.enum(["RUB", "USD", "EUR"]).nullable(),
-  confidence: z.number().min(0).max(1),
-});
+export const financialSchema = z
+  .object({
+    amount: z.coerce.number().nullable(),
+    currency: z
+      .string()
+      .transform((s) => s.trim().toUpperCase())
+      .pipe(z.enum(["RUB", "USD", "EUR"]))
+      .nullable(),
+    confidence: z.number().min(0).max(1),
+  })
+  .strict()
+  .refine(
+    (data) =>
+      (data.amount === null && data.currency === null) ||
+      (data.amount !== null && data.currency !== null),
+    {
+      message:
+        "amount and currency must either both be null or both be provided",
+      path: ["currency"],
+    },
+  );
 
 /**
  * Типы на основе схем
