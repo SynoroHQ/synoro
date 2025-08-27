@@ -10,22 +10,31 @@ import type { ZodSchema } from "zod";
  * @param fallbackValue - Значение по умолчанию, если парсинг не удался
  * @returns Распарсенный объект или fallbackValue
  */
-export function parseAIJsonResponse<T = any>(
+export function parseAIJsonResponse<T = unknown>(
   text: string,
   fallbackValue?: T,
 ): T | null {
   try {
-    // Ищем JSON в тексте (убираем лишний текст до и после)
-    const jsonMatch = /\{[\s\S]*\}/.exec(text);
-    if (jsonMatch) {
-      return JSON.parse(jsonMatch[0]) as T;
+    const debug = process.env.DEBUG_AI_PARSER === "true";
+    // Сначала пытаемся вынуть содержимое из ограждённого блока ```json ... ```
+    // Если не найдено — ищем первый объект или массив (неголодный матч)
+    const candidate = extractJsonString(text);
+    if (candidate) {
+      return JSON.parse(candidate) as T;
     } else {
-      console.warn("No JSON found in AI response:", text);
+      if (debug) {
+        const truncated = text.length > 500 ? text.slice(0, 500) + "…" : text;
+        console.warn("No JSON found in AI response (truncated):", truncated);
+      }
       return fallbackValue ?? null;
     }
   } catch (parseError) {
-    console.error("Failed to parse AI JSON response:", parseError);
-    console.error("Raw response:", text);
+    const debug = process.env.DEBUG_AI_PARSER === "true";
+    if (debug) {
+      console.error("Failed to parse AI JSON response:", parseError);
+      const truncated = text.length > 500 ? text.slice(0, 500) + "…" : text;
+      console.error("Raw response (truncated):", truncated);
+    }
     return fallbackValue ?? null;
   }
 }
@@ -84,8 +93,14 @@ export function parseAIJsonResponseWithSchema<T>(
  * @returns JSON строка или null
  */
 export function extractJsonString(text: string): string | null {
-  const jsonMatch = /\{[\s\S]*\}/.exec(text);
-  return jsonMatch ? jsonMatch[0] : null;
+  // Предпочитаем ограждённые блоки кода: ```json ... ``` или просто ``` ... ```
+  const fenced = /```(?:json)?\s*([\s\S]*?)\s*```/i.exec(text);
+  const fencedContent = fenced?.[1]?.trim();
+  if (fencedContent) return fencedContent;
+
+  // Фолбэк: первый небезграничный матч объекта или массива
+  const match = /(\{[\s\S]*?\}|\[[\s\S]*?\])/.exec(text);
+  return match ? match[0] : null;
 }
 
 /**

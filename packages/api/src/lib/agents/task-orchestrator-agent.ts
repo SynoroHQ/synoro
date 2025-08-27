@@ -13,6 +13,13 @@ import type {
 import { AgentManager } from "./agent-manager";
 import { AbstractAgent } from "./base-agent";
 
+// Утилита для компактного форматирования ошибок Zod
+function formatZodIssues(error: z.ZodError): string {
+  return error.issues
+    .map((i) => `${i.path.join(".") || "(root)"}: ${i.message}`)
+    .join("; ");
+}
+
 // Схемы для оркестрации задач
 const orchestrationPlanSchema = z.object({
   steps: z.array(
@@ -30,6 +37,9 @@ const orchestrationPlanSchema = z.object({
   complexity: z.enum(["medium", "high"]),
   reasoning: z.string(),
 });
+
+// Полная схема плана (алиас для читабельности)
+const PlanSchema = orchestrationPlanSchema;
 
 const stepResultSchema = z.object({
   stepId: z.string(),
@@ -55,6 +65,18 @@ const evaluateStepInputSchema = z.object({
   stepResult: stepResultSchema,
   step: stepSchema,
 });
+
+// Частичная схема плана для парсинга стриминговых чанков
+const PartialStepSchema = stepSchema.partial();
+const PartialPlanSchema = z
+  .object({
+    steps: z.array(PartialStepSchema).optional(),
+    totalSteps: z.number().optional(),
+    executionType: z.enum(["sequential", "parallel", "mixed"]).optional(),
+    complexity: z.enum(["medium", "high"]).optional(),
+    reasoning: z.string().optional(),
+  })
+  .strict();
 
 // Типы на основе схем
 type Step = z.infer<typeof stepSchema>;
@@ -255,12 +277,36 @@ export class TaskOrchestratorAgent extends AbstractAgent {
           schema: z.toJSONSchema(orchestrationPlanSchema) as JSONSchema7,
         },
         parsePartial: async (options) => {
-          const parsedPlan = JSON.parse(options.text);
-          return { partial: parsedPlan };
+          try {
+            const parsed = JSON.parse(options.text);
+            const result = PartialPlanSchema.safeParse(parsed);
+            if (!result.success) {
+              throw new Error(
+                `Partial plan validation failed: ${formatZodIssues(result.error)}`,
+              );
+            }
+            return { partial: result.data };
+          } catch (err) {
+            throw new Error(
+              `Failed to parse partial plan: ${err instanceof Error ? err.message : String(err)}`,
+            );
+          }
         },
         parseOutput: async (options, context) => {
-          const parsedPlan = JSON.parse(options.text);
-          return parsedPlan;
+          try {
+            const parsed = JSON.parse(options.text);
+            const result = PlanSchema.safeParse(parsed);
+            if (!result.success) {
+              throw new Error(
+                `Plan validation failed: ${formatZodIssues(result.error)}`,
+              );
+            }
+            return result.data;
+          } catch (err) {
+            throw new Error(
+              `Failed to parse plan: ${err instanceof Error ? err.message : String(err)}`,
+            );
+          }
         },
       },
       experimental_telemetry: {
