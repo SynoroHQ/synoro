@@ -2,8 +2,11 @@ import type { Context } from "grammy";
 import { Bot } from "grammy";
 
 import { env } from "./env";
+import {
+  handleAgentsCommand,
+  handleAgentTestCommand,
+} from "./handlers/agent-handler";
 import { handleAudio } from "./handlers/audio-handler";
-import { handleAgentsCommand, handleAgentTestCommand } from "./handlers/agent-handler";
 import { handleOther } from "./handlers/other-handler";
 import { handleSmartText } from "./handlers/smart-text-handler";
 import { handleText } from "./handlers/text-handler";
@@ -94,15 +97,6 @@ export function createBot(): Bot<Context> {
   // Команды для агентной системы
   bot.command("agents", handleAgentsCommand);
   bot.command("agent_test", handleAgentTestCommand);
-
-  // Обработчик callback-запросов для кнопки "Обрабатываем..."
-  bot.callbackQuery("processing", async (ctx) => {
-    try {
-      await ctx.answerCallbackQuery("⏳ Обрабатываем ваше сообщение...");
-    } catch (error) {
-      console.warn("Не удалось ответить на callback query:", error);
-    }
-  });
 
   // Обработчики сообщений
   // Используем умный обработчик, если включена агентная система

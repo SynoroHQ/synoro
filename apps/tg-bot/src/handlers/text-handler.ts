@@ -1,7 +1,7 @@
 import type { Context } from "grammy";
 
-import { apiClient } from "../api/client";
 import { env } from "../env";
+import { processTextMessage } from "../services/message-service";
 import {
   removeProcessingMessage,
   sendProcessingMessage,
@@ -50,26 +50,14 @@ export async function handleText(ctx: Context): Promise<void> {
       `📝 Обработка текста от ${getUserIdentifier(ctx.from)} в чате ${messageContext.chatId}: "${text.slice(0, 50)}${text.length > 50 ? "..." : ""}"`,
     );
 
-    // Обрабатываем сообщение через агентную систему
-    const result =
-      await apiClient.messages.processMessageAgents.processMessageFromTelegramWithAgents.mutate(
-        {
-          text,
-          channel: "telegram",
-          chatId: messageContext.chatId,
-          messageId: messageContext.messageId,
-          telegramUserId: messageContext.userId,
-          agentOptions: {
-            useQualityControl: true,
-            maxQualityIterations: 2,
-            targetQuality: 0.8,
-          },
-          metadata: {
-            smartMode: true,
-            timestamp: new Date().toISOString(),
-          },
-        },
-      );
+    // Обрабатываем сообщение через существующий сервис
+    const result = await processTextMessage(text, {
+      ...messageContext,
+      metadata: {
+        ...messageContext.metadata,
+        smartMode: true,
+      },
+    });
 
     // Удаляем сообщение "Обрабатываем..." если оно было отправлено
     await removeProcessingMessage(ctx, processingMessageId, ctx.chat!.id);

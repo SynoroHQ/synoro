@@ -54,16 +54,6 @@ export async function sendProcessingMessage(
       `⏳ Обрабатываем ваше ${messageType}...`,
       {
         parse_mode: "HTML",
-        reply_markup: {
-          inline_keyboard: [
-            [
-              {
-                text: "⏳ Обрабатываем...",
-                callback_data: "processing",
-              },
-            ],
-          ],
-        },
       },
     );
     return processingMsg.message_id;

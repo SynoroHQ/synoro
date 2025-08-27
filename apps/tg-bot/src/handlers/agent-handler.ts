@@ -1,6 +1,7 @@
 import type { Context } from "grammy";
 
 import { apiClient } from "../api/client";
+import { DEFAULT_AGENT_OPTIONS } from "../config/agents";
 import {
   createMessageContext,
   escapeTelegramMarkdownV2,
@@ -89,10 +90,8 @@ export async function handleAgentTestCommand(ctx: Context): Promise<void> {
           messageId: messageContext.messageId,
           telegramUserId: messageContext.userId,
           agentOptions: {
+            ...DEFAULT_AGENT_OPTIONS,
             forceAgentMode: true,
-            useQualityControl: true,
-            maxQualityIterations: 2,
-            targetQuality: 0.8,
           },
           metadata: {
             testMode: true,

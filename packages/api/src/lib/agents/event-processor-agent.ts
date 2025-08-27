@@ -9,7 +9,6 @@ import type {
   AgentTask,
   AgentTelemetry,
 } from "./types";
-
 import { AbstractAgent } from "./base-agent";
 
 // Схемы для структурированного парсинга событий
@@ -93,9 +92,27 @@ export class EventProcessorAgent extends AbstractAgent {
       const { object: eventAnalysis } = await generateObject({
         model: this.getModel(),
         schema: z.object({
-          isEvent: z.boolean().describe("Является ли сообщение событием для логирования"),
-          eventType: z.enum(["purchase", "task", "meeting", "note", "expense", "income", "other", "none"]).describe("Тип события или none если это не событие"),
-          confidence: z.number().min(0).max(1).describe("Уверенность в классификации"),
+          isEvent: z
+            .boolean()
+            .describe("Является ли сообщение событием для логирования"),
+          eventType: z
+            .enum([
+              "purchase",
+              "task",
+              "meeting",
+              "note",
+              "expense",
+              "income",
+              "maintenance",
+              "other",
+              "none",
+            ])
+            .describe("Тип события или none если это не событие"),
+          confidence: z
+            .number()
+            .min(0)
+            .max(1)
+            .describe("Уверенность в классификации"),
           reasoning: z.string().describe("Обоснование классификации"),
         }),
         system: `Ты - эксперт по определению типов сообщений в системе Synoro AI.
@@ -110,6 +127,7 @@ export class EventProcessorAgent extends AbstractAgent {
 - note: заметки, записи, идеи, мысли для сохранения
 - expense: расходы без конкретного товара, общие траты
 - income: доходы, поступления, заработок, прибыль
+- maintenance: обслуживание/ремонт/ТО, регулярные сервисные работы
 - other: прочие события, не подходящие под другие категории
 - none: не является событием (вопрос, обычное общение, спам)
 
@@ -123,9 +141,7 @@ export class EventProcessorAgent extends AbstractAgent {
 1. Если сообщение описывает действие/событие - это событие
 2. Если это вопрос или обычное общение - не событие
 3. Учитывай контекст и намерение пользователя`,
-        prompt: `Проанализируй сообщение: "${task.input}"
-
-Определи, является ли это событием для логирования и какой у него тип.`,
+        prompt: `Проанализируй сообщение: "${task.input}"`,
         temperature: 0.1,
         experimental_telemetry: {
           isEnabled: true,
@@ -146,14 +162,40 @@ export class EventProcessorAgent extends AbstractAgent {
       // Fallback к простой проверке
       const text = task.input.toLowerCase();
       const hasEventKeywords = [
-        "купил", "купила", "потратил", "потратила", "заплатил", "заплатила",
-        "задача", "дело", "сделать", "выполнить", "запланировать",
-        "встреча", "собрание", "созвон", "встретиться",
-        "заметка", "записать", "запомнить", "напомнить",
-        "доход", "заработал", "получил", "прибыль"
-      ].some(keyword => text.includes(keyword));
-      
-      const isEventType = task.type === "event" || task.type === "logging" || task.type === "general";
+        "купил",
+        "купила",
+        "потратил",
+        "потратила",
+        "заплатил",
+        "заплатила",
+        "задача",
+        "дело",
+        "сделать",
+        "выполнить",
+        "запланировать",
+        "встреча",
+        "собрание",
+        "созвон",
+        "встретиться",
+        "заметка",
+        "записать",
+        "запомнить",
+        "напомнить",
+        "доход",
+        "заработал",
+        "получил",
+        "прибыль",
+        "ремонт",
+        "обслуживание",
+        "техобслуживание",
+        "то",
+        "maintenance",
+      ].some((keyword) => text.includes(keyword));
+
+      const isEventType =
+        task.type === "event" ||
+        task.type === "logging" ||
+        task.type === "general";
       return hasEventKeywords && isEventType;
     }
   }
@@ -175,7 +217,11 @@ export class EventProcessorAgent extends AbstractAgent {
             model: this.getModel(),
             schema: z.object({
               category: z.string().describe("Категория события"),
-              confidence: z.number().min(0).max(1).describe("Уверенность в категоризации"),
+              confidence: z
+                .number()
+                .min(0)
+                .max(1)
+                .describe("Уверенность в категоризации"),
               reasoning: z.string().describe("Обоснование выбора категории"),
             }),
             system: `Ты - эксперт по категоризации событий в системе Synoro AI.
@@ -247,7 +293,11 @@ export class EventProcessorAgent extends AbstractAgent {
             schema: z.object({
               amount: z.number().describe("Сумма в числовом формате"),
               currency: z.enum(["RUB", "USD", "EUR"]).describe("Валюта"),
-              confidence: z.number().min(0).max(1).describe("Уверенность в извлечении"),
+              confidence: z
+                .number()
+                .min(0)
+                .max(1)
+                .describe("Уверенность в извлечении"),
             }),
             system: `Ты - специалист по извлечению финансовой информации из текста.
             

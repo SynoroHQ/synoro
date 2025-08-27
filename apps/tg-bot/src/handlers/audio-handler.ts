@@ -1,6 +1,7 @@
 import type { Context } from "grammy";
 
 import { apiClient } from "../api/client";
+import { DEFAULT_AGENT_OPTIONS } from "../config/agents";
 import { env } from "../env";
 import { transcribeAudio } from "../services/message-service";
 import {
@@ -101,11 +102,7 @@ export async function handleAudio(ctx: Context): Promise<void> {
           chatId: messageContext.chatId,
           messageId: messageContext.messageId,
           telegramUserId: messageContext.userId,
-          agentOptions: {
-            useQualityControl: true,
-            maxQualityIterations: 2,
-            targetQuality: 0.8,
-          },
+          agentOptions: DEFAULT_AGENT_OPTIONS,
           metadata: {
             ...messageContext.metadata,
             transcribedFrom: "audio",

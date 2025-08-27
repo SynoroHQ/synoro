@@ -163,13 +163,31 @@ export class RouterAgent extends AbstractAgent {
         });
 
         const messageType = fallbackClassification.trim().toLowerCase();
-        
+        const validTypes = [
+          "question",
+          "event",
+          "chat",
+          "complex_task",
+          "irrelevant",
+        ];
+        const validatedType = validTypes.includes(messageType)
+          ? messageType
+          : "chat";
+
         return {
-          messageType: messageType as any || "chat",
+          messageType: validatedType as
+            | "question"
+            | "event"
+            | "chat"
+            | "complex_task"
+            | "irrelevant",
           confidence: 0.4,
           needsLogging: messageType === "event",
           complexity: messageType === "complex_task" ? "complex" : "simple",
-          suggestedAgents: messageType === "question" ? ["qa-specialist"] : ["general-assistant"],
+          suggestedAgents:
+            messageType === "question"
+              ? ["qa-specialist"]
+              : ["general-assistant"],
         };
       } catch (fallbackError) {
         console.error("Fallback classification also failed:", fallbackError);

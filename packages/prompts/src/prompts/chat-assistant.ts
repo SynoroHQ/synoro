@@ -244,7 +244,7 @@ const chatAssistant: PromptDefinition = {
   type: "text",
   prompt: chatAssistantTemplate,
   labels: ["production", "staging", "latest"],
-  defaultModel: "gpt-5o",
+  defaultModel: "gpt-5-mini",
   defaultTemperature: 0.8,
 };
 

@@ -39,6 +39,28 @@ const stepResultSchema = z.object({
   suggestions: z.array(z.string()).optional(),
 });
 
+// Схемы для типизации методов
+const stepSchema = z.object({
+  id: z.string(),
+  description: z.string(),
+  requiredAgent: z.string(),
+  dependsOn: z.array(z.string()).optional(),
+  priority: z.enum(["low", "medium", "high"]),
+  estimatedTime: z.string().optional(),
+  taskType: z.string().optional(),
+});
+
+const evaluateStepInputSchema = z.object({
+  stepResult: stepResultSchema,
+  step: stepSchema,
+});
+
+// Типы на основе схем
+type Step = z.infer<typeof stepSchema>;
+type StepResult = z.infer<typeof stepResultSchema>;
+type OrchestrationPlan = z.infer<typeof orchestrationPlanSchema>;
+type EvaluateStepInput = z.infer<typeof evaluateStepInputSchema>;
+
 /**
  * Агент-оркестратор для координации сложных многоэтапных задач
  * Использует паттерны из AI SDK: routing, parallel processing, evaluation loops
@@ -194,7 +216,7 @@ export class TaskOrchestratorAgent extends AbstractAgent {
   private async createExecutionPlan(
     task: AgentTask,
     telemetry?: AgentTelemetry,
-  ) {
+  ): Promise<OrchestrationPlan> {
     const { text } = await generateText({
       model: this.getModel(),
       system: getPromptSafe(PROMPT_KEYS.TASK_ORCHESTRATOR),
@@ -247,7 +269,7 @@ export class TaskOrchestratorAgent extends AbstractAgent {
   /**
    * Создает fallback план в случае ошибки парсинга
    */
-  private createFallbackPlan(task: AgentTask) {
+  private createFallbackPlan(task: AgentTask): OrchestrationPlan {
     return {
       steps: [
         {
@@ -276,10 +298,10 @@ export class TaskOrchestratorAgent extends AbstractAgent {
    * Выполняет этап через соответствующего агента
    */
   private async executeStep(
-    step: any,
+    step: Step,
     task: AgentTask,
     telemetry?: AgentTelemetry,
-  ): Promise<any> {
+  ): Promise<StepResult> {
     try {
       // Получаем агента для выполнения этапа
       const agentManager = new AgentManager();
@@ -302,7 +324,8 @@ export class TaskOrchestratorAgent extends AbstractAgent {
         type: step.taskType || "general",
         input: step.description,
         context: task.context,
-        priority: step.priority || "medium",
+        priority:
+          step.priority === "high" ? 1 : step.priority === "medium" ? 2 : 3,
         metadata: {
           ...task.metadata,
           stepId: step.id,
@@ -347,8 +370,8 @@ export class TaskOrchestratorAgent extends AbstractAgent {
     telemetry?: AgentTelemetry,
   ): Promise<
     AgentResult<{
-      plan: any;
-      results: any[];
+      plan: OrchestrationPlan;
+      results: StepResult[];
       finalSummary: string;
       qualityScore: number;
     }>
@@ -429,7 +452,14 @@ export class TaskOrchestratorAgent extends AbstractAgent {
   /**
    * Оценка качества выполнения этапа с помощью AI
    */
-  private async evaluateStepQuality(stepResult: any, step: any) {
+  private async evaluateStepQuality(
+    stepResult: StepResult,
+    step: Step,
+  ): Promise<{
+    score: number;
+    needsImprovement: boolean;
+    suggestions: string[];
+  }> {
     try {
       const { object: quality } = await generateObject({
         model: this.getModel(),
@@ -484,8 +514,8 @@ export class TaskOrchestratorAgent extends AbstractAgent {
    */
   private async generateFinalSummary(
     task: AgentTask,
-    plan: any,
-    results: any[],
+    plan: OrchestrationPlan,
+    results: StepResult[],
     telemetry?: AgentTelemetry,
   ): Promise<string> {
     const { text } = await generateText({
