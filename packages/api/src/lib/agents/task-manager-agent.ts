@@ -33,7 +33,10 @@ export class TaskManagerAgent extends AbstractAgent {
     super("gpt-5-mini", 0.6);
   }
 
-  async canHandle(task: AgentTask): Promise<boolean> {
+  async canHandle(
+    task: AgentTask,
+    telemetry?: AgentTelemetry,
+  ): Promise<boolean> {
     try {
       // Используем AI для определения типа запроса по управлению задачами
       const { object: taskAnalysis } = await generateObject({
@@ -66,7 +69,7 @@ export class TaskManagerAgent extends AbstractAgent {
         temperature: 0.1,
         experimental_telemetry: {
           isEnabled: true,
-          functionId: "task-management-detection",
+          ...this.createTelemetry("task-management-detection", task, telemetry),
           metadata: { inputLength: task.input.length },
         },
       });

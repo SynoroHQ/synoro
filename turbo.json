@@ -7,7 +7,7 @@
       "outputs": [".cache/tsbuildinfo.json", ".next/**", "dist/**", "out/**"]
     },
     "dev": {
-      "dependsOn": ["^build"],
+      "dependsOn": [],
       "cache": false,
       "persistent": true
     },

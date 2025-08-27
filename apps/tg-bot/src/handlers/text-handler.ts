@@ -1,7 +1,7 @@
 import type { Context } from "grammy";
 
-import { apiClient } from "../api/client";
 import { env } from "../env";
+import { processTextMessage } from "../services/message-service";
 import {
   removeProcessingMessage,
   sendProcessingMessage,
@@ -11,6 +11,7 @@ import {
   getUserIdentifier,
   isObviousSpam,
 } from "../utils/telegram-utils";
+import { formatForTelegram } from "../utils/telegram-formatter";
 
 /**
  * Обрабатывает текстовые сообщения
@@ -50,26 +51,14 @@ export async function handleText(ctx: Context): Promise<void> {
       `📝 Обработка текста от ${getUserIdentifier(ctx.from)} в чате ${messageContext.chatId}: "${text.slice(0, 50)}${text.length > 50 ? "..." : ""}"`,
     );
 
-    // Обрабатываем сообщение через агентную систему
-    const result =
-      await apiClient.messages.processMessageAgents.processMessageFromTelegramWithAgents.mutate(
-        {
-          text,
-          channel: "telegram",
-          chatId: messageContext.chatId,
-          messageId: messageContext.messageId,
-          telegramUserId: messageContext.userId,
-          agentOptions: {
-            useQualityControl: true,
-            maxQualityIterations: 2,
-            targetQuality: 0.8,
-          },
-          metadata: {
-            smartMode: true,
-            timestamp: new Date().toISOString(),
-          },
-        },
-      );
+    // Обрабатываем сообщение через существующий сервис
+    const result = await processTextMessage(text, {
+      ...messageContext,
+      metadata: {
+        ...messageContext.metadata,
+        smartMode: true,
+      },
+    });
 
     // Удаляем сообщение "Обрабатываем..." если оно было отправлено
     await removeProcessingMessage(ctx, processingMessageId, ctx.chat!.id);
@@ -80,14 +69,25 @@ export async function handleText(ctx: Context): Promise<void> {
     }
 
     // Отправляем ответ пользователю
-    {
-      const MAX_TG_MESSAGE = 4096;
-      const reply =
-        result.response.length > MAX_TG_MESSAGE
-          ? result.response.slice(0, MAX_TG_MESSAGE - 1) + "…"
-          : result.response;
-      await ctx.reply(reply);
+    const MAX_TG_MESSAGE = 4096;
+    let reply = result.response;
+    
+    if (reply.length > MAX_TG_MESSAGE) {
+      reply = reply.slice(0, MAX_TG_MESSAGE - 1) + "…";
     }
+
+    // Форматируем ответ для Telegram
+    const formattedMessage = formatForTelegram(reply, {
+      useEmojis: true,
+      useMarkdown: true,
+      addSeparators: true,
+      maxLineLength: 80,
+    });
+
+    await ctx.reply(formattedMessage.text, {
+      parse_mode: formattedMessage.parse_mode,
+      disable_web_page_preview: formattedMessage.disable_web_page_preview,
+    });
     // Логируем результат обработки
     console.log(
       `✅ Сообщение обработано: тип=${result.messageType?.type}, релевантность=${result.relevance?.relevant}`,

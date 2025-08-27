@@ -1,4 +1,4 @@
-import { generateObject, generateText, tool } from "ai";
+import { generateText, tool } from "ai";
 import { z } from "zod";
 
 import { getPromptSafe, PROMPT_KEYS } from "@synoro/prompts";
@@ -9,37 +9,14 @@ import type {
   AgentTask,
   AgentTelemetry,
 } from "./types";
-
+import { parseAIJsonResponseWithSchema } from "../utils/ai-response-parser";
 import { AbstractAgent } from "./base-agent";
-
-// Схемы для структурированного парсинга событий
-const eventSchema = z.object({
-  type: z.enum([
-    "purchase",
-    "task",
-    "meeting",
-    "note",
-    "expense",
-    "income",
-    "other",
-  ]),
-  description: z.string(),
-  amount: z.number().optional(),
-  currency: z.string().optional(),
-  date: z.string().optional(),
-  category: z.string().optional(),
-  location: z.string().optional(),
-  tags: z.array(z.string()).optional(),
-  confidence: z.number().min(0).max(1),
-  needsAdvice: z.boolean(),
-  reasoning: z.string(),
-});
-
-const adviceRequestSchema = z.object({
-  eventContext: z.string(),
-  adviceType: z.enum(["financial", "productivity", "health", "general"]),
-  priority: z.enum(["low", "medium", "high"]),
-});
+import {
+  categorizationSchema,
+  eventAnalysisSchema,
+  eventSchema,
+  financialSchema,
+} from "./schemas/event-schemas";
 
 /**
  * Специализированный агент для обработки и парсинга событий
@@ -87,17 +64,14 @@ export class EventProcessorAgent extends AbstractAgent {
     super("gpt-5-nano", 0.2); // Низкая температура для точного парсинга
   }
 
-  async canHandle(task: AgentTask): Promise<boolean> {
+  async canHandle(
+    task: AgentTask,
+    telemetry?: AgentTelemetry,
+  ): Promise<boolean> {
     try {
       // Используем AI для определения типа события
-      const { object: eventAnalysis } = await generateObject({
+      const { text: eventAnalysisText } = await generateText({
         model: this.getModel(),
-        schema: z.object({
-          isEvent: z.boolean().describe("Является ли сообщение событием для логирования"),
-          eventType: z.enum(["purchase", "task", "meeting", "note", "expense", "income", "other", "none"]).describe("Тип события или none если это не событие"),
-          confidence: z.number().min(0).max(1).describe("Уверенность в классификации"),
-          reasoning: z.string().describe("Обоснование классификации"),
-        }),
         system: `Ты - эксперт по определению типов сообщений в системе Synoro AI.
 
 ТВОЯ ЗАДАЧА:
@@ -110,6 +84,7 @@ export class EventProcessorAgent extends AbstractAgent {
 - note: заметки, записи, идеи, мысли для сохранения
 - expense: расходы без конкретного товара, общие траты
 - income: доходы, поступления, заработок, прибыль
+- maintenance: обслуживание/ремонт/ТО, регулярные сервисные работы
 - other: прочие события, не подходящие под другие категории
 - none: не является событием (вопрос, обычное общение, спам)
 
@@ -125,14 +100,38 @@ export class EventProcessorAgent extends AbstractAgent {
 3. Учитывай контекст и намерение пользователя`,
         prompt: `Проанализируй сообщение: "${task.input}"
 
-Определи, является ли это событием для логирования и какой у него тип.`,
+Верни ответ в формате JSON:
+{
+  "isEvent": true_или_false,
+  "eventType": "purchase|task|meeting|note|expense|income|maintenance|other|none",
+  "confidence": число_от_0_до_1,
+  "reasoning": "обоснование_классификации"
+}
+
+ВАЖНО: Верни только валидный JSON без дополнительного текста.`,
         temperature: 0.1,
         experimental_telemetry: {
           isEnabled: true,
-          functionId: "event-type-detection",
+          ...this.createTelemetry("event-type-detection", task, telemetry),
           metadata: { inputLength: task.input.length },
         },
       });
+
+      // Парсим JSON ответ используя импортированную схему
+
+      const parseResult = parseAIJsonResponseWithSchema(
+        eventAnalysisText,
+        eventAnalysisSchema,
+      );
+      if (!parseResult.success) {
+        console.error(
+          "Failed to parse event analysis response:",
+          parseResult.error,
+        );
+        throw new Error("Failed to parse AI response");
+      }
+
+      const eventAnalysis = parseResult.data;
 
       // Проверяем тип задачи
       const isEventType =
@@ -146,14 +145,40 @@ export class EventProcessorAgent extends AbstractAgent {
       // Fallback к простой проверке
       const text = task.input.toLowerCase();
       const hasEventKeywords = [
-        "купил", "купила", "потратил", "потратила", "заплатил", "заплатила",
-        "задача", "дело", "сделать", "выполнить", "запланировать",
-        "встреча", "собрание", "созвон", "встретиться",
-        "заметка", "записать", "запомнить", "напомнить",
-        "доход", "заработал", "получил", "прибыль"
-      ].some(keyword => text.includes(keyword));
-      
-      const isEventType = task.type === "event" || task.type === "logging" || task.type === "general";
+        "купил",
+        "купила",
+        "потратил",
+        "потратила",
+        "заплатил",
+        "заплатила",
+        "задача",
+        "дело",
+        "сделать",
+        "выполнить",
+        "запланировать",
+        "встреча",
+        "собрание",
+        "созвон",
+        "встретиться",
+        "заметка",
+        "записать",
+        "запомнить",
+        "напомнить",
+        "доход",
+        "заработал",
+        "получил",
+        "прибыль",
+        "ремонт",
+        "обслуживание",
+        "техобслуживание",
+        "то",
+        "maintenance",
+      ].some((keyword) => text.includes(keyword));
+
+      const isEventType =
+        task.type === "event" ||
+        task.type === "logging" ||
+        task.type === "general";
       return hasEventKeywords && isEventType;
     }
   }
@@ -161,7 +186,7 @@ export class EventProcessorAgent extends AbstractAgent {
   /**
    * Создает инструмент для категоризации событий
    */
-  private getCategorizationTool() {
+  private getCategorizationTool(task: AgentTask, telemetry?: AgentTelemetry) {
     return tool({
       description: "Автоматическая категоризация события на основе описания",
       inputSchema: z.object({
@@ -171,13 +196,8 @@ export class EventProcessorAgent extends AbstractAgent {
       execute: async ({ eventType, description }) => {
         try {
           // Используем AI для категоризации событий
-          const { object: categorization } = await generateObject({
+          const { text: categorizationText } = await generateText({
             model: this.getModel(),
-            schema: z.object({
-              category: z.string().describe("Категория события"),
-              confidence: z.number().min(0).max(1).describe("Уверенность в категоризации"),
-              reasoning: z.string().describe("Обоснование выбора категории"),
-            }),
             system: `Ты - эксперт по категоризации событий в системе Synoro AI.
 
 ТВОЯ ЗАДАЧА:
@@ -212,16 +232,37 @@ export class EventProcessorAgent extends AbstractAgent {
 Тип события: ${eventType}
 Описание: "${description}"
 
-Определи наиболее подходящую категорию.`,
+Верни ответ в формате JSON:
+{
+  "category": "название_категории",
+  "confidence": число_от_0_до_1,
+  "reasoning": "обоснование_выбора"
+}
+
+ВАЖНО: Верни только валидный JSON без дополнительного текста.`,
             temperature: 0.2,
             experimental_telemetry: {
               isEnabled: true,
-              functionId: "event-categorization",
+              ...this.createTelemetry("event-categorization", task, telemetry),
               metadata: { eventType, descriptionLength: description.length },
             },
           });
 
-          return categorization.category;
+          // Парсим JSON ответ используя импортированную схему
+
+          const parseResult = parseAIJsonResponseWithSchema(
+            categorizationText,
+            categorizationSchema,
+          );
+          if (!parseResult.success) {
+            console.error(
+              "Failed to parse categorization response:",
+              parseResult.error,
+            );
+            return "прочее"; // Fallback
+          }
+
+          return parseResult.data.category;
         } catch (error) {
           console.error("Error in AI event categorization:", error);
           return "прочее"; // Fallback
@@ -233,7 +274,10 @@ export class EventProcessorAgent extends AbstractAgent {
   /**
    * Создает инструмент для извлечения финансовой информации
    */
-  private getFinancialExtractionTool() {
+  private getFinancialExtractionTool(
+    task: AgentTask,
+    telemetry?: AgentTelemetry,
+  ) {
     return tool({
       description: "Извлечение суммы и валюты из текста",
       inputSchema: z.object({
@@ -242,13 +286,8 @@ export class EventProcessorAgent extends AbstractAgent {
       execute: async ({ text }) => {
         try {
           // Используем AI для извлечения финансовой информации
-          const { object: financialData } = await generateObject({
+          const { text: financialText } = await generateText({
             model: this.getModel(),
-            schema: z.object({
-              amount: z.number().describe("Сумма в числовом формате"),
-              currency: z.enum(["RUB", "USD", "EUR"]).describe("Валюта"),
-              confidence: z.number().min(0).max(1).describe("Уверенность в извлечении"),
-            }),
             system: `Ты - специалист по извлечению финансовой информации из текста.
             
 Твоя задача - найти сумму и валюту в тексте пользователя.
@@ -265,16 +304,37 @@ export class EventProcessorAgent extends AbstractAgent {
 4. Если валюта не указана, используй RUB по умолчанию`,
             prompt: `Извлеки финансовую информацию из текста: "${text}"
 
-Верни сумму и валюту в структурированном виде.`,
+Верни ответ в формате JSON:
+{
+  "amount": число_или_null,
+  "currency": "RUB|USD|EUR_или_null",
+  "confidence": число_от_0_до_1
+}
+
+ВАЖНО: Верни только валидный JSON без дополнительного текста.`,
             temperature: 0.1,
             experimental_telemetry: {
               isEnabled: true,
-              functionId: "financial-extraction",
+              ...this.createTelemetry("financial-extraction", task, telemetry),
               metadata: { textLength: text.length },
             },
           });
 
-          return financialData;
+          // Парсим JSON ответ используя импортированную схему
+
+          const parseResult = parseAIJsonResponseWithSchema(
+            financialText,
+            financialSchema,
+          );
+          if (!parseResult.success) {
+            console.error(
+              "Failed to parse financial extraction response:",
+              parseResult.error,
+            );
+            return null; // Fallback
+          }
+
+          return parseResult.data;
         } catch (error) {
           console.error("Error in AI financial extraction:", error);
           return null;
@@ -295,21 +355,33 @@ export class EventProcessorAgent extends AbstractAgent {
   > {
     try {
       // Структурированный парсинг с помощью AI
-
-      // Структурированный парсинг с помощью AI
-      const { object: structuredEvent } = await generateObject({
+      const { text } = await generateText({
         model: this.getModel(),
-        schema: eventSchema,
         system: getPromptSafe(PROMPT_KEYS.EVENT_PROCESSOR),
         prompt: `Проанализируй и распарси это событие: "${task.input}"
         
-Контекст: пользователь ${task.context.userId || "anonymous"} в канале ${task.context.channel}
+Контекст: пользователь ${task.context?.userId || "anonymous"} в канале ${task.context?.channel || "unknown"}
         
-Извлеки всю доступную информацию и структурируй её.`,
+Извлеки всю доступную информацию и структурируй её в формате JSON согласно этой схеме:
+{
+  "type": "purchase|task|meeting|note|expense|income|maintenance|other",
+  "description": "описание события",
+  "amount": число_или_null,
+  "currency": "RUB|USD|EUR_или_null",
+  "date": "дата_или_null",
+  "category": "категория_или_null",
+  "location": "место_или_null",
+  "tags": ["тег1", "тег2"]_или_null,
+  "confidence": число_от_0_до_1,
+  "needsAdvice": true_или_false,
+  "reasoning": "обоснование"
+}
+
+ВАЖНО: Верни только валидный JSON без дополнительного текста.`,
         temperature: this.defaultTemperature,
         tools: {
-          categorizeEvent: this.getCategorizationTool(),
-          extractFinancial: this.getFinancialExtractionTool(),
+          categorizeEvent: this.getCategorizationTool(task, telemetry),
+          extractFinancial: this.getFinancialExtractionTool(task, telemetry),
         },
         experimental_telemetry: {
           isEnabled: true,
@@ -317,10 +389,24 @@ export class EventProcessorAgent extends AbstractAgent {
         },
       });
 
+      // Парсим JSON ответ от AI с валидацией схемы
+      const parseResult = parseAIJsonResponseWithSchema(text, eventSchema);
+      if (!parseResult.success) {
+        console.error("Failed to parse AI response:", parseResult.error);
+        return this.createErrorResult(
+          `Failed to parse AI response: ${parseResult.error}`,
+        );
+      }
+
+      const structuredEvent = { success: true, data: parseResult.data };
+      if (!structuredEvent.success) {
+        return this.createErrorResult("Failed to parse event");
+      }
+
       let advice = undefined;
 
       // Генерируем совет, если нужно
-      if (structuredEvent.needsAdvice) {
+      if (structuredEvent.data.needsAdvice) {
         try {
           const { text: adviceText } = await generateText({
             model: this.getModel(),
@@ -340,22 +426,22 @@ export class EventProcessorAgent extends AbstractAgent {
 
       // Комбинируем структурированные данные
       const combinedData = {
-        structured: structuredEvent,
+        structured: structuredEvent.data,
         metadata: {
           processingTimestamp: new Date().toISOString(),
           agentName: this.name,
-          confidence: structuredEvent.confidence,
+          confidence: structuredEvent.data.confidence,
         },
       };
 
       return this.createSuccessResult(
         {
-          parsedEvent: structuredEvent,
+          parsedEvent: structuredEvent.data,
           advice,
           structuredData: combinedData,
         },
-        structuredEvent.confidence,
-        `Parsed ${structuredEvent.type} event with confidence ${structuredEvent.confidence}`,
+        structuredEvent.data.confidence,
+        `Parsed ${structuredEvent.data.type} event with confidence ${structuredEvent.data.confidence}`,
       );
     } catch (error) {
       console.error("Error in event processor agent:", error);

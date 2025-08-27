@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 
 import { apiClient } from "../api/client";
+import { DEFAULT_AGENT_OPTIONS } from "../config/agents";
 
 /**
  * Контекст для обработки сообщения
@@ -54,11 +55,7 @@ export async function processTextMessage(
           chatId: context.chatId,
           messageId: context.messageId,
           telegramUserId: context.userId, // Передаем ID пользователя Telegram
-          agentOptions: {
-            useQualityControl: true,
-            maxQualityIterations: 2,
-            targetQuality: 0.8,
-          },
+          agentOptions: DEFAULT_AGENT_OPTIONS,
           metadata: {
             ...context.metadata,
             traceId,

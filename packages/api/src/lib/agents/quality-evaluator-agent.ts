@@ -84,7 +84,10 @@ export class QualityEvaluatorAgent extends AbstractAgent {
     super("gpt-5o", 0.2); // Низкая температура для объективной оценки
   }
 
-  async canHandle(task: AgentTask): Promise<boolean> {
+  async canHandle(
+    task: AgentTask,
+    telemetry?: AgentTelemetry,
+  ): Promise<boolean> {
     // Этот агент используется для оценки ответов других агентов
     return task.type === "evaluation" || task.type === "quality_check";
   }
@@ -95,6 +98,7 @@ export class QualityEvaluatorAgent extends AbstractAgent {
   async evaluateResponse(
     originalInput: string,
     agentResponse: string,
+    task: AgentTask,
     context?: any,
     telemetry?: AgentTelemetry,
   ): Promise<
@@ -137,7 +141,7 @@ ${context ? `Дополнительный контекст: ${JSON.stringify(con
         temperature: this.defaultTemperature,
         experimental_telemetry: {
           isEnabled: true,
-          functionId: "quality-evaluation",
+          ...this.createTelemetry("quality-evaluation", task, telemetry),
           metadata: {
             ...telemetry?.metadata,
             originalInput: originalInput.substring(0, 100),
@@ -171,6 +175,7 @@ ${context ? `Дополнительный контекст: ${JSON.stringify(con
     originalInput: string,
     originalResponse: string,
     evaluation: any,
+    task: AgentTask,
     telemetry?: AgentTelemetry,
   ): Promise<string> {
     if (!evaluation.needsImprovement) {
@@ -209,7 +214,7 @@ ${evaluation.suggestions.join("\n- ")}
         temperature: 0.5,
         experimental_telemetry: {
           isEnabled: true,
-          functionId: "response-improvement",
+          ...this.createTelemetry("response-improvement", task, telemetry),
           metadata: {
             ...telemetry?.metadata,
             originalQuality: evaluation.overallScore,
@@ -233,6 +238,7 @@ ${evaluation.suggestions.join("\n- ")}
     agentResponse: string,
     maxIterations = 2,
     targetQuality = 0.8,
+    task: AgentTask,
     context?: any,
     telemetry?: AgentTelemetry,
   ): Promise<{
@@ -270,6 +276,7 @@ ${evaluation.suggestions.join("\n- ")}
         originalInput,
         currentResponse,
         evaluation,
+        task,
         telemetry,
       );
 

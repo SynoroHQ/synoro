@@ -9,7 +9,6 @@ import type {
   AgentTask,
   AgentTelemetry,
 } from "./types";
-
 import { AbstractAgent } from "./base-agent";
 
 /**
@@ -52,7 +51,10 @@ export class QASpecialistAgent extends AbstractAgent {
     super("gpt-5-nano", 0.4);
   }
 
-  async canHandle(task: AgentTask): Promise<boolean> {
+  async canHandle(
+    task: AgentTask,
+    telemetry?: AgentTelemetry,
+  ): Promise<boolean> {
     try {
       // Используем AI для определения типа сообщения
       const { object: messageAnalysis } = await generateObject({
@@ -105,7 +107,7 @@ export class QASpecialistAgent extends AbstractAgent {
         temperature: 0.1,
         experimental_telemetry: {
           isEnabled: true,
-          functionId: "question-detection",
+          ...this.createTelemetry("question-detection", task, telemetry),
           metadata: { inputLength: task.input.length },
         },
       });
@@ -156,7 +158,11 @@ export class QASpecialistAgent extends AbstractAgent {
   /**
    * Определяет подтип вопроса с помощью AI
    */
-  private async classifyQuestionSubtype(question: string): Promise<string> {
+  private async classifyQuestionSubtype(
+    question: string,
+    task: AgentTask,
+    telemetry?: AgentTelemetry,
+  ): Promise<string> {
     try {
       const { object: classification } = await generateObject({
         model: this.getModel(),
@@ -189,7 +195,7 @@ export class QASpecialistAgent extends AbstractAgent {
         temperature: 0.1,
         experimental_telemetry: {
           isEnabled: true,
-          functionId: "question-classification",
+          ...this.createTelemetry("question-classification", task, telemetry),
           metadata: { questionLength: question.length },
         },
       });
@@ -204,7 +210,7 @@ export class QASpecialistAgent extends AbstractAgent {
   /**
    * Создает инструмент для поиска информации о системе
    */
-  private getSystemInfoTool() {
+  private getSystemInfoTool(task: AgentTask, telemetry?: AgentTelemetry) {
     return tool({
       description: "Получение информации о возможностях системы Synoro",
       inputSchema: z.object({
@@ -222,7 +228,7 @@ export class QASpecialistAgent extends AbstractAgent {
             temperature: 0.3,
             experimental_telemetry: {
               isEnabled: true,
-              functionId: "system-info-search",
+              ...this.createTelemetry("system-info-search", task, telemetry),
               metadata: { queryLength: query.length },
             },
           });
@@ -245,10 +251,14 @@ export class QASpecialistAgent extends AbstractAgent {
       const assistantPrompt = getPromptSafe(PROMPT_KEYS.ASSISTANT);
 
       // Определяем подтип вопроса
-      const subtype = await this.classifyQuestionSubtype(task.input);
+      const subtype = await this.classifyQuestionSubtype(
+        task.input,
+        task,
+        telemetry,
+      );
 
       // Формируем историю беседы (пока без контекста)
-      let conversationHistory = "";
+      const conversationHistory = "";
 
       // Создаем контекстный промпт в зависимости от подтипа вопроса
       let contextPrompt = task.input;
@@ -278,7 +288,7 @@ export class QASpecialistAgent extends AbstractAgent {
         prompt: contextPrompt,
         temperature: this.defaultTemperature,
         tools: {
-          getSystemInfo: this.getSystemInfoTool(),
+          getSystemInfo: this.getSystemInfoTool(task, telemetry),
         },
         experimental_telemetry: {
           isEnabled: true,

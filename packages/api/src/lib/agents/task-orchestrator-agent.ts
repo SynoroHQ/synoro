@@ -1,5 +1,6 @@
+import type { JSONSchema7 } from "json-schema";
 import { generateObject, generateText } from "ai";
-import { z } from "zod";
+import * as z from "zod";
 
 import { getPromptSafe, PROMPT_KEYS } from "@synoro/prompts";
 
@@ -11,6 +12,13 @@ import type {
 } from "./types";
 import { AgentManager } from "./agent-manager";
 import { AbstractAgent } from "./base-agent";
+
+// Утилита для компактного форматирования ошибок Zod
+function formatZodIssues(error: z.ZodError): string {
+  return error.issues
+    .map((i) => `${i.path.join(".") || "(root)"}: ${i.message}`)
+    .join("; ");
+}
 
 // Схемы для оркестрации задач
 const orchestrationPlanSchema = z.object({
@@ -30,6 +38,9 @@ const orchestrationPlanSchema = z.object({
   reasoning: z.string(),
 });
 
+// Полная схема плана (алиас для читабельности)
+const PlanSchema = orchestrationPlanSchema;
+
 const stepResultSchema = z.object({
   stepId: z.string(),
   success: z.boolean(),
@@ -38,6 +49,40 @@ const stepResultSchema = z.object({
   needsFollowUp: z.boolean(),
   suggestions: z.array(z.string()).optional(),
 });
+
+// Схемы для типизации методов
+const stepSchema = z.object({
+  id: z.string(),
+  description: z.string(),
+  requiredAgent: z.string(),
+  dependsOn: z.array(z.string()).optional(),
+  priority: z.enum(["low", "medium", "high"]),
+  estimatedTime: z.string().optional(),
+  taskType: z.string().optional(),
+});
+
+const evaluateStepInputSchema = z.object({
+  stepResult: stepResultSchema,
+  step: stepSchema,
+});
+
+// Частичная схема плана для парсинга стриминговых чанков
+const PartialStepSchema = stepSchema.partial();
+const PartialPlanSchema = z
+  .object({
+    steps: z.array(PartialStepSchema).optional(),
+    totalSteps: z.number().optional(),
+    executionType: z.enum(["sequential", "parallel", "mixed"]).optional(),
+    complexity: z.enum(["medium", "high"]).optional(),
+    reasoning: z.string().optional(),
+  })
+  .strict();
+
+// Типы на основе схем
+type Step = z.infer<typeof stepSchema>;
+type StepResult = z.infer<typeof stepResultSchema>;
+type OrchestrationPlan = z.infer<typeof orchestrationPlanSchema>;
+type EvaluateStepInput = z.infer<typeof evaluateStepInputSchema>;
 
 /**
  * Агент-оркестратор для координации сложных многоэтапных задач
@@ -96,7 +141,10 @@ export class TaskOrchestratorAgent extends AbstractAgent {
     super("gpt-5-mini", 0.3); // Более мощная модель для планирования
   }
 
-  async canHandle(task: AgentTask): Promise<boolean> {
+  async canHandle(
+    task: AgentTask,
+    telemetry?: AgentTelemetry,
+  ): Promise<boolean> {
     try {
       // Используем AI для определения сложности задачи
       const { object: taskAnalysis } = await generateObject({
@@ -142,7 +190,7 @@ export class TaskOrchestratorAgent extends AbstractAgent {
         temperature: 0.2,
         experimental_telemetry: {
           isEnabled: true,
-          functionId: "task-complexity-analysis",
+          ...this.createTelemetry("task-complexity-analysis", task, telemetry),
           metadata: { inputLength: task.input.length },
         },
       });
@@ -194,13 +242,13 @@ export class TaskOrchestratorAgent extends AbstractAgent {
   private async createExecutionPlan(
     task: AgentTask,
     telemetry?: AgentTelemetry,
-  ) {
+  ): Promise<OrchestrationPlan> {
     const { text } = await generateText({
       model: this.getModel(),
       system: getPromptSafe(PROMPT_KEYS.TASK_ORCHESTRATOR),
       prompt: `Создай план выполнения задачи: "${task.input}"
 
-Контекст: пользователь ${task.context.userId || "anonymous"} в канале ${task.context.channel}
+Контекст: пользователь ${task.context?.userId || "anonymous"} в канале ${task.context?.channel || "unknown"}
 
 Определи этапы, их последовательность и ответственных агентов.
 
@@ -224,7 +272,42 @@ export class TaskOrchestratorAgent extends AbstractAgent {
       temperature: this.defaultTemperature,
       experimental_output: {
         type: "object",
-        schema: orchestrationPlanSchema,
+        responseFormat: {
+          type: "json",
+          schema: z.toJSONSchema(orchestrationPlanSchema) as JSONSchema7,
+        },
+        parsePartial: async (options) => {
+          try {
+            const parsed = JSON.parse(options.text);
+            const result = PartialPlanSchema.safeParse(parsed);
+            if (!result.success) {
+              throw new Error(
+                `Partial plan validation failed: ${formatZodIssues(result.error)}`,
+              );
+            }
+            return { partial: result.data };
+          } catch (err) {
+            throw new Error(
+              `Failed to parse partial plan: ${err instanceof Error ? err.message : String(err)}`,
+            );
+          }
+        },
+        parseOutput: async (options, context) => {
+          try {
+            const parsed = JSON.parse(options.text);
+            const result = PlanSchema.safeParse(parsed);
+            if (!result.success) {
+              throw new Error(
+                `Plan validation failed: ${formatZodIssues(result.error)}`,
+              );
+            }
+            return result.data;
+          } catch (err) {
+            throw new Error(
+              `Failed to parse plan: ${err instanceof Error ? err.message : String(err)}`,
+            );
+          }
+        },
       },
       experimental_telemetry: {
         isEnabled: true,
@@ -247,7 +330,7 @@ export class TaskOrchestratorAgent extends AbstractAgent {
   /**
    * Создает fallback план в случае ошибки парсинга
    */
-  private createFallbackPlan(task: AgentTask) {
+  private createFallbackPlan(task: AgentTask): OrchestrationPlan {
     return {
       steps: [
         {
@@ -276,10 +359,10 @@ export class TaskOrchestratorAgent extends AbstractAgent {
    * Выполняет этап через соответствующего агента
    */
   private async executeStep(
-    step: any,
+    step: Step,
     task: AgentTask,
     telemetry?: AgentTelemetry,
-  ): Promise<any> {
+  ): Promise<StepResult> {
     try {
       // Получаем агента для выполнения этапа
       const agentManager = new AgentManager();
@@ -301,13 +384,13 @@ export class TaskOrchestratorAgent extends AbstractAgent {
         id: `${step.id}-${Date.now()}`,
         type: step.taskType || "general",
         input: step.description,
-        context: task.context,
-        priority: step.priority || "medium",
-        metadata: {
-          ...task.metadata,
-          stepId: step.id,
-          orchestration: true,
+        context: task.context || {
+          userId: "anonymous",
+          channel: "unknown",
         },
+        priority:
+          step.priority === "high" ? 1 : step.priority === "medium" ? 2 : 3,
+        createdAt: new Date(),
       };
 
       // Выполняем задачу через агента
@@ -326,7 +409,7 @@ export class TaskOrchestratorAgent extends AbstractAgent {
       return {
         stepId: step.id,
         success: true,
-        result: agentResult.data,
+        result: agentResult.data as string,
         confidence: agentResult.confidence || 0.8,
         needsFollowUp: false,
       };
@@ -335,7 +418,7 @@ export class TaskOrchestratorAgent extends AbstractAgent {
       return {
         stepId: step.id,
         success: false,
-        result: `Ошибка выполнения: ${error.message}`,
+        result: `Ошибка выполнения: ${error instanceof Error ? error.message : "Неизвестная ошибка"}`,
         confidence: 0.2,
         needsFollowUp: true,
       };
@@ -347,8 +430,8 @@ export class TaskOrchestratorAgent extends AbstractAgent {
     telemetry?: AgentTelemetry,
   ): Promise<
     AgentResult<{
-      plan: any;
-      results: any[];
+      plan: OrchestrationPlan;
+      results: StepResult[];
       finalSummary: string;
       qualityScore: number;
     }>
@@ -373,7 +456,9 @@ export class TaskOrchestratorAgent extends AbstractAgent {
         for (const stepResult of parallelResults) {
           const quality = await this.evaluateStepQuality(
             stepResult,
-            stepResult,
+            plan.steps[0] as Step,
+            task,
+            telemetry,
           );
           overallQuality += quality.score;
         }
@@ -384,7 +469,12 @@ export class TaskOrchestratorAgent extends AbstractAgent {
           results.push(stepResult);
 
           // Оценка качества каждого этапа
-          const quality = await this.evaluateStepQuality(stepResult, step);
+          const quality = await this.evaluateStepQuality(
+            stepResult,
+            step,
+            task,
+            telemetry,
+          );
           overallQuality += quality.score;
 
           // Если качество низкое, можем попробовать улучшить
@@ -429,7 +519,16 @@ export class TaskOrchestratorAgent extends AbstractAgent {
   /**
    * Оценка качества выполнения этапа с помощью AI
    */
-  private async evaluateStepQuality(stepResult: any, step: any) {
+  private async evaluateStepQuality(
+    stepResult: StepResult,
+    step: Step,
+    task: AgentTask,
+    telemetry?: AgentTelemetry,
+  ): Promise<{
+    score: number;
+    needsImprovement: boolean;
+    suggestions: string[];
+  }> {
     try {
       const { object: quality } = await generateObject({
         model: this.getModel(),
@@ -461,7 +560,7 @@ export class TaskOrchestratorAgent extends AbstractAgent {
         temperature: 0.2,
         experimental_telemetry: {
           isEnabled: true,
-          functionId: "step-quality-evaluation",
+          ...this.createTelemetry("step-quality-evaluation", task, telemetry),
           metadata: { stepId: step.id },
         },
       });
@@ -484,8 +583,8 @@ export class TaskOrchestratorAgent extends AbstractAgent {
    */
   private async generateFinalSummary(
     task: AgentTask,
-    plan: any,
-    results: any[],
+    plan: OrchestrationPlan,
+    results: StepResult[],
     telemetry?: AgentTelemetry,
   ): Promise<string> {
     const { text } = await generateText({

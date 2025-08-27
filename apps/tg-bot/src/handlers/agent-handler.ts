@@ -1,11 +1,12 @@
 import type { Context } from "grammy";
 
 import { apiClient } from "../api/client";
+import { DEFAULT_AGENT_OPTIONS } from "../config/agents";
 import {
   createMessageContext,
-  escapeTelegramMarkdownV2,
   getUserIdentifier,
 } from "../utils/telegram-utils";
+import { formatForTelegram } from "../utils/telegram-formatter";
 
 /**
  * Обработчик команды /agents - переключение в агентный режим
@@ -46,8 +47,15 @@ export async function handleAgentsCommand(ctx: Context): Promise<void> {
 📝 *Попробуйте прямо сейчас:*
 Отправьте любое сообщение, и система автоматически выберет лучший способ его обработки!`;
 
-    await ctx.reply(escapeTelegramMarkdownV2(response), {
-      parse_mode: "MarkdownV2",
+    const formattedMessage = formatForTelegram(response, {
+      useEmojis: true,
+      useMarkdown: true,
+      addSeparators: true,
+    });
+
+    await ctx.reply(formattedMessage.text, {
+      parse_mode: formattedMessage.parse_mode,
+      disable_web_page_preview: formattedMessage.disable_web_page_preview,
     });
   } catch (error) {
     console.error("Error in agents command:", error);
@@ -71,14 +79,21 @@ export async function handleAgentTestCommand(ctx: Context): Promise<void> {
     const testMessage =
       "Проанализируй мои возможности экономии и дай советы по управлению финансами";
 
-    await ctx.reply(
-      escapeTelegramMarkdownV2(
-        '🧪 *Тестирование агентной системы...*\n\nОтправляю тестовый запрос: "' +
-          testMessage +
-          '"',
-      ),
-      { parse_mode: "MarkdownV2" },
+    const testMessageFormatted = formatForTelegram(
+      '🧪 Тестирование агентной системы...\n\nОтправляю тестовый запрос: "' +
+        testMessage +
+        '"',
+      {
+        useEmojis: true,
+        useMarkdown: true,
+        addSeparators: true,
+      }
     );
+
+    await ctx.reply(testMessageFormatted.text, {
+      parse_mode: testMessageFormatted.parse_mode,
+      disable_web_page_preview: testMessageFormatted.disable_web_page_preview,
+    });
 
     const result =
       await apiClient.messages.processMessageAgents.processMessageFromTelegramWithAgents.mutate(
@@ -89,10 +104,8 @@ export async function handleAgentTestCommand(ctx: Context): Promise<void> {
           messageId: messageContext.messageId,
           telegramUserId: messageContext.userId,
           agentOptions: {
+            ...DEFAULT_AGENT_OPTIONS,
             forceAgentMode: true,
-            useQualityControl: true,
-            maxQualityIterations: 2,
-            targetQuality: 0.8,
           },
           metadata: {
             testMode: true,
@@ -136,13 +149,25 @@ export async function handleAgentTestCommand(ctx: Context): Promise<void> {
       if (currentPart) parts.push(currentPart);
 
       for (const part of parts) {
-        await ctx.reply(escapeTelegramMarkdownV2(part), {
-          parse_mode: "MarkdownV2",
+        const formattedPart = formatForTelegram(part, {
+          useEmojis: true,
+          useMarkdown: true,
+          addSeparators: true,
+        });
+        await ctx.reply(formattedPart.text, {
+          parse_mode: formattedPart.parse_mode,
+          disable_web_page_preview: formattedPart.disable_web_page_preview,
         });
       }
     } else {
-      await ctx.reply(escapeTelegramMarkdownV2(response), {
-        parse_mode: "MarkdownV2",
+      const formattedResponse = formatForTelegram(response, {
+        useEmojis: true,
+        useMarkdown: true,
+        addSeparators: true,
+      });
+      await ctx.reply(formattedResponse.text, {
+        parse_mode: formattedResponse.parse_mode,
+        disable_web_page_preview: formattedResponse.disable_web_page_preview,
       });
     }
   } catch (error) {

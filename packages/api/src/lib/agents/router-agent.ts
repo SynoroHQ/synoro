@@ -118,7 +118,7 @@ export class RouterAgent extends AbstractAgent {
 
     const prompt = `Проанализируй это сообщение: "${task.input}"
 
-Контекст: канал ${task.context.channel}, пользователь ${task.context.userId || "anonymous"}
+Контекст: канал ${task.context?.channel || "unknown"}, пользователь ${task.context?.userId || "anonymous"}
 
 Верни JSON с классификацией.`;
 
@@ -141,6 +141,12 @@ export class RouterAgent extends AbstractAgent {
 
       // Fallback классификация с помощью AI
       try {
+        const telemetryData = this.createTelemetry(
+          "fallback-classification",
+          task,
+          telemetry,
+        );
+
         const { text: fallbackClassification } = await generateText({
           model: this.getModel(),
           system: `Ты - эксперт по классификации сообщений. Классифицируй сообщение по типам: question, event, chat, complex_task, irrelevant.
@@ -157,19 +163,37 @@ export class RouterAgent extends AbstractAgent {
           temperature: 0.1,
           experimental_telemetry: {
             isEnabled: true,
-            functionId: "fallback-classification",
-            metadata: { fallback: true },
+            ...telemetryData,
+            metadata: { ...(telemetryData.metadata ?? {}), fallback: true },
           },
         });
 
         const messageType = fallbackClassification.trim().toLowerCase();
-        
+        const validTypes = [
+          "question",
+          "event",
+          "chat",
+          "complex_task",
+          "irrelevant",
+        ];
+        const validatedType = validTypes.includes(messageType)
+          ? messageType
+          : "chat";
+
         return {
-          messageType: messageType as any || "chat",
+          messageType: validatedType as
+            | "question"
+            | "event"
+            | "chat"
+            | "complex_task"
+            | "irrelevant",
           confidence: 0.4,
           needsLogging: messageType === "event",
           complexity: messageType === "complex_task" ? "complex" : "simple",
-          suggestedAgents: messageType === "question" ? ["qa-specialist"] : ["general-assistant"],
+          suggestedAgents:
+            messageType === "question"
+              ? ["qa-specialist"]
+              : ["general-assistant"],
         };
       } catch (fallbackError) {
         console.error("Fallback classification also failed:", fallbackError);

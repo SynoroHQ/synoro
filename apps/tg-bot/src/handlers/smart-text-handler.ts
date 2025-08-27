@@ -1,6 +1,7 @@
 import type { Context } from "grammy";
 
 import { apiClient } from "../api/client";
+import { DEFAULT_AGENT_OPTIONS } from "../config/agents";
 import { env } from "../env";
 import {
   removeProcessingMessage,
@@ -8,10 +9,10 @@ import {
 } from "../utils/message-utils";
 import {
   createMessageContext,
-  escapeTelegramMarkdownV2,
   getUserIdentifier,
   isObviousSpam,
 } from "../utils/telegram-utils";
+import { formatForTelegram } from "../utils/telegram-formatter";
 
 /**
  * Умный обработчик текстовых сообщений с автоматическим выбором агентной системы
@@ -57,11 +58,7 @@ export async function handleSmartText(ctx: Context): Promise<void> {
           chatId: messageContext.chatId,
           messageId: messageContext.messageId,
           telegramUserId: messageContext.userId,
-          agentOptions: {
-            useQualityControl: true,
-            maxQualityIterations: 2,
-            targetQuality: 0.8,
-          },
+          agentOptions: DEFAULT_AGENT_OPTIONS,
           metadata: {
             smartMode: true,
             timestamp: new Date().toISOString(),
@@ -92,11 +89,20 @@ export async function handleSmartText(ctx: Context): Promise<void> {
       result.agentMetadata
     ) {
       const agentInfo = result.agentMetadata;
-      reply += `\n\n🔬 _Debug: ${agentInfo.processingMode} | ${agentInfo.agentsUsed.join("→")} | Q:${(agentInfo.qualityScore * 100).toFixed(0)}%_`;
+      reply += `\n\n🔬 Debug: ${agentInfo.processingMode} | ${agentInfo.agentsUsed.join("→")} | Q:${(agentInfo.qualityScore * 100).toFixed(0)}%`;
     }
 
-    await ctx.reply(escapeTelegramMarkdownV2(reply), {
-      parse_mode: "MarkdownV2",
+    // Форматируем ответ для Telegram
+    const formattedMessage = formatForTelegram(reply, {
+      useEmojis: true,
+      useMarkdown: true,
+      addSeparators: true,
+      maxLineLength: 80,
+    });
+
+    await ctx.reply(formattedMessage.text, {
+      parse_mode: formattedMessage.parse_mode,
+      disable_web_page_preview: formattedMessage.disable_web_page_preview,
     });
 
     // Логируем результат обработки
