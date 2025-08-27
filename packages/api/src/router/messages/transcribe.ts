@@ -1,6 +1,6 @@
 import { TranscribeInput, TranscribeResponse } from "@synoro/validators";
 
-import { transcribe } from "../../lib/ai";
+import { transcribe } from "../../lib/ai/transcriber";
 import { TelegramUserService } from "../../lib/services/telegram-user-service";
 import { botProcedure, protectedProcedure, publicProcedure } from "../../trpc";
 

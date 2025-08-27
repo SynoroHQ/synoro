@@ -1,3 +1,6 @@
+import { generateObject } from "ai";
+import { z } from "zod";
+
 import { getPromptSafe, PROMPT_KEYS } from "@synoro/prompts";
 
 import type {
@@ -30,10 +33,51 @@ export class FinancialAdvisorAgent extends AbstractAgent {
     super("gpt-5-mini", 0.6);
   }
 
-  canHandle(task: AgentTask): Promise<boolean> {
-    const input = task.input.toLowerCase();
-    return Promise.resolve(
-      input.includes("финанс") ||
+  async canHandle(task: AgentTask): Promise<boolean> {
+    try {
+      // Используем AI для определения типа финансового запроса
+      const { object: financialAnalysis } = await generateObject({
+        model: this.getModel(),
+        schema: z.object({
+          isFinancialRequest: z
+            .boolean()
+            .describe("Требует ли запрос финансового совета"),
+          financialType: z
+            .enum([
+              "budget_planning",
+              "expense_analysis",
+              "savings_advice",
+              "investment_advice",
+              "financial_planning",
+              "other",
+            ])
+            .describe("Тип финансового запроса"),
+          confidence: z
+            .number()
+            .min(0)
+            .max(1)
+            .describe("Уверенность в классификации"),
+          reasoning: z.string().describe("Обоснование классификации"),
+        }),
+        system: getPromptSafe(PROMPT_KEYS.FINANCIAL_ADVISOR),
+        prompt: `Проанализируй запрос: "${task.input}"
+
+Определи, является ли он финансовым и требует ли финансового совета.`,
+        temperature: 0.1,
+        experimental_telemetry: {
+          isEnabled: true,
+          functionId: "financial-request-detection",
+          metadata: { inputLength: task.input.length },
+        },
+      });
+
+      return financialAnalysis.isFinancialRequest;
+    } catch (error) {
+      console.error("Error in AI financial request detection:", error);
+      // Fallback к простой проверке
+      const input = task.input.toLowerCase();
+      return (
+        input.includes("финанс") ||
         input.includes("деньги") ||
         input.includes("бюджет") ||
         input.includes("расход") ||
@@ -44,8 +88,9 @@ export class FinancialAdvisorAgent extends AbstractAgent {
         input.includes("планирование") ||
         input.includes("cost") ||
         input.includes("budget") ||
-        input.includes("expense"),
-    );
+        input.includes("expense")
+      );
+    }
   }
 
   async process(

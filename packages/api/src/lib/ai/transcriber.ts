@@ -1,33 +1,27 @@
-import { openai } from "@ai-sdk/openai";
-import { experimental_transcribe as aiTranscribe } from "ai";
-
 import type { Telemetry } from "./types";
 
 /**
- * Транскрибирует аудио файл в текст используя OpenAI Whisper
+ * Транскрибирует аудио файл
  */
 export async function transcribe(
-  buffer: Buffer,
+  audioBuffer: Buffer,
   filename: string,
   telemetry?: Telemetry,
 ): Promise<string> {
   try {
-    const { text } = await aiTranscribe({
-      model: openai.transcription("whisper-1"),
-      audio: buffer,
+    // Здесь должна быть интеграция с OpenAI Whisper API
+    // Пока возвращаем заглушку
+    console.log("Transcribing audio:", {
+      filename,
+      bufferSize: audioBuffer.length,
+      functionId: telemetry?.functionId,
+      metadata: telemetry?.metadata,
     });
 
-    return text ?? "";
+    // TODO: Реализовать реальную транскрипцию через OpenAI Whisper
+    throw new Error("Audio transcription not implemented yet");
   } catch (error) {
-    // Log the error with contextual information
-    const context = `aiTranscribe failed for filename: ${filename}`;
-    if (telemetry?.functionId) {
-      console.error(`${context}, functionId: ${telemetry.functionId}`, error);
-    } else {
-      console.error(context, error);
-    }
-
-    // Rethrow with a clear message while preserving the original error
-    throw new Error(`Audio transcription failed: ${context}`, { cause: error });
+    console.error("Error in audio transcription:", error);
+    throw error;
   }
 }

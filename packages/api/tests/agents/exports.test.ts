@@ -76,9 +76,18 @@ describe("Agent Exports", () => {
     expect(typeof AgentManager).toBe("function");
   });
 
-  it("should export createAgentSystem function", () => {
-    const { createAgentSystem } = require("./index");
-    expect(createAgentSystem).toBeDefined();
-    expect(typeof createAgentSystem).toBe("function");
+  it("should export all required agents", () => {
+    expect(AbstractAgent).toBeDefined();
+    expect(RouterAgent).toBeDefined();
+    expect(QASpecialistAgent).toBeDefined();
+    expect(EventProcessorAgent).toBeDefined();
+    expect(TaskOrchestratorAgent).toBeDefined();
+    expect(QualityEvaluatorAgent).toBeDefined();
+    expect(GeneralAssistantAgent).toBeDefined();
+    expect(TaskManagerAgent).toBeDefined();
+    expect(DataAnalystAgent).toBeDefined();
+    expect(FinancialAdvisorAgent).toBeDefined();
+    expect(ChatAssistantAgent).toBeDefined();
+    expect(AgentManager).toBeDefined();
   });
 });

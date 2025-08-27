@@ -1,3 +1,5 @@
+import { AgentManager } from "./agent-manager";
+
 // Экспорт всех типов
 export type * from "./types";
 

@@ -1,5 +1,7 @@
-import { generateText, stepCountIs } from "ai";
+import { generateObject, generateText } from "ai";
 import { z } from "zod";
+
+import { getPromptSafe, PROMPT_KEYS } from "@synoro/prompts";
 
 import type {
   AgentCapability,
@@ -7,6 +9,7 @@ import type {
   AgentTask,
   AgentTelemetry,
 } from "./types";
+import { AgentManager } from "./agent-manager";
 import { AbstractAgent } from "./base-agent";
 
 // Схемы для оркестрации задач
@@ -94,39 +97,95 @@ export class TaskOrchestratorAgent extends AbstractAgent {
   }
 
   async canHandle(task: AgentTask): Promise<boolean> {
-    // Ключевые слова для сложных задач
-    const complexTaskKeywords = [
-      "анализ",
-      "статистика",
-      "отчет",
-      "сравни",
-      "найди паттерн",
-      "оптимизируй",
-      "улучши",
-      "план",
-      "стратегия",
-      "исследование",
-      "несколько",
-      "комплексный",
-      "подробный",
-      "детальный",
-    ];
+    try {
+      // Используем AI для определения сложности задачи
+      const { object: taskAnalysis } = await generateObject({
+        model: this.getModel(),
+        schema: z.object({
+          isComplexTask: z
+            .boolean()
+            .describe("Требует ли задача сложной многоэтапной обработки"),
+          complexity: z
+            .enum(["simple", "medium", "complex"])
+            .describe("Уровень сложности задачи"),
+          requiresOrchestration: z
+            .boolean()
+            .describe("Нужна ли координация нескольких агентов"),
+          reasoning: z.string().describe("Обоснование оценки сложности"),
+        }),
+        system: `Ты - эксперт по оценке сложности задач в системе Synoro AI.
 
-    const text = task.input.toLowerCase();
-    const hasComplexPattern = complexTaskKeywords.some((keyword) =>
-      text.includes(keyword),
-    );
+ТВОЯ ЗАДАЧА:
+Определи, является ли задача сложной и требует ли она координации нескольких агентов.
 
-    // Проверяем длину запроса (длинные запросы часто сложные)
-    const isLongRequest = task.input.length > 100;
+ПРИЗНАКИ СЛОЖНЫХ ЗАДАЧ:
+- Требует анализа данных и выявления паттернов
+- Включает несколько независимых подзадач
+- Нуждается в планировании и стратегии
+- Требует сравнения, оптимизации, улучшения
+- Содержит исследовательские элементы
+- Длинные и детальные запросы
 
-    // Проверяем тип задачи
-    const isComplexType =
-      task.type === "complex_task" ||
-      task.type === "analysis" ||
-      task.type === "planning";
+ПРИЗНАКИ ПРОСТЫХ ЗАДАЧ:
+- Одиночные действия или запросы
+- Простые вопросы или команды
+- Не требуют планирования или координации
+- Могут быть выполнены одним агентом
 
-    return (hasComplexPattern || isLongRequest) && isComplexType;
+ПРАВИЛА:
+1. Если задача требует нескольких этапов - она сложная
+2. Если нужна координация агентов - требуется оркестрация
+3. Учитывай контекст и детализацию запроса`,
+        prompt: `Проанализируй задачу: "${task.input}"
+
+Определи, является ли она сложной и требует ли координации нескольких агентов.`,
+        temperature: 0.2,
+        experimental_telemetry: {
+          isEnabled: true,
+          functionId: "task-complexity-analysis",
+          metadata: { inputLength: task.input.length },
+        },
+      });
+
+      // Проверяем тип задачи
+      const isComplexType =
+        task.type === "complex_task" ||
+        task.type === "analysis" ||
+        task.type === "planning";
+
+      return taskAnalysis.isComplexTask && isComplexType;
+    } catch (error) {
+      console.error("Error in AI task complexity analysis:", error);
+      // Fallback к простой проверке
+      const complexTaskKeywords = [
+        "анализ",
+        "статистика",
+        "отчет",
+        "сравни",
+        "найди паттерн",
+        "оптимизируй",
+        "улучши",
+        "план",
+        "стратегия",
+        "исследование",
+        "несколько",
+        "комплексный",
+        "подробный",
+        "детальный",
+      ];
+
+      const text = task.input.toLowerCase();
+      const hasComplexPattern = complexTaskKeywords.some((keyword) =>
+        text.includes(keyword),
+      );
+      const isLongRequest = task.input.length > 100;
+
+      const isComplexType =
+        task.type === "complex_task" ||
+        task.type === "analysis" ||
+        task.type === "planning";
+      return (hasComplexPattern || isLongRequest) && isComplexType;
+    }
   }
 
   /**
@@ -138,23 +197,7 @@ export class TaskOrchestratorAgent extends AbstractAgent {
   ) {
     const { text } = await generateText({
       model: this.getModel(),
-      system: `Ты - архитектор задач в системе Synoro AI. Твоя задача - разбить сложную задачу на управляемые этапы.
-
-ДОСТУПНЫЕ АГЕНТЫ:
-- qa-specialist: Ответы на вопросы, информация о системе
-- event-processor: Обработка и парсинг событий
-- data-analyst: Анализ данных и выявление паттернов  
-- financial-advisor: Финансовые советы и анализ расходов
-- task-manager: Управление задачами и планирование
-- chat-assistant: Общение и поддержка пользователя
-
-ПРИНЦИПЫ ПЛАНИРОВАНИЯ:
-1. Разбивай сложные задачи на простые этапы
-2. Используй параллельное выполнение для независимых задач
-3. Учитывай зависимости между этапами
-4. Назначай подходящих агентов для каждого этапа
-5. Оценивай сложность задачи (medium/high)
-6. Объясняй логику планирования в поле reasoning`,
+      system: getPromptSafe(PROMPT_KEYS.TASK_ORCHESTRATOR),
       prompt: `Создай план выполнения задачи: "${task.input}"
 
 Контекст: пользователь ${task.context.userId || "anonymous"} в канале ${task.context.channel}
@@ -230,36 +273,73 @@ export class TaskOrchestratorAgent extends AbstractAgent {
   }
 
   /**
-   * Симулирует выполнение этапа другим агентом
+   * Выполняет этап через соответствующего агента
    */
   private async executeStep(
     step: any,
     task: AgentTask,
     telemetry?: AgentTelemetry,
   ): Promise<any> {
-    // В реальной реализации здесь был бы вызов соответствующего агента
-    // Для демонстрации симулируем выполнение
+    try {
+      // Получаем агента для выполнения этапа
+      const agentManager = new AgentManager();
+      const targetAgent = agentManager.getAgent(step.requiredAgent);
 
-    const mockResults = {
-      "qa-specialist": `Ответ от специалиста Q&A: обработан вопрос "${step.description}"`,
-      "data-analyst": `Анализ данных: выявлены паттерны и тенденции для "${step.description}"`,
-      "financial-advisor": `Финансовый совет: рекомендации по "${step.description}"`,
-      "event-processor": `Событие обработано: структурированы данные для "${step.description}"`,
-      "task-manager": `Задача организована: создан план для "${step.description}"`,
-      "chat-assistant": `Диалог поддержан: дружеский ответ для "${step.description}"`,
-    };
+      if (!targetAgent) {
+        console.warn(`Agent ${step.requiredAgent} not found, using fallback`);
+        return {
+          stepId: step.id,
+          success: false,
+          result: `Агент ${step.requiredAgent} недоступен`,
+          confidence: 0.3,
+          needsFollowUp: true,
+        };
+      }
 
-    const result =
-      mockResults[step.requiredAgent as keyof typeof mockResults] ||
-      `Результат от ${step.requiredAgent}: выполнен этап "${step.description}"`;
+      // Создаем задачу для агента
+      const agentTask: AgentTask = {
+        id: `${step.id}-${Date.now()}`,
+        type: step.taskType || "general",
+        input: step.description,
+        context: task.context,
+        priority: step.priority || "medium",
+        metadata: {
+          ...task.metadata,
+          stepId: step.id,
+          orchestration: true,
+        },
+      };
 
-    return {
-      stepId: step.id,
-      success: true,
-      result,
-      confidence: 0.8,
-      needsFollowUp: false,
-    };
+      // Выполняем задачу через агента
+      const agentResult = await targetAgent.process(agentTask, telemetry);
+
+      if (!agentResult.success) {
+        return {
+          stepId: step.id,
+          success: false,
+          result: agentResult.error || "Ошибка выполнения",
+          confidence: agentResult.confidence || 0.3,
+          needsFollowUp: true,
+        };
+      }
+
+      return {
+        stepId: step.id,
+        success: true,
+        result: agentResult.data,
+        confidence: agentResult.confidence || 0.8,
+        needsFollowUp: false,
+      };
+    } catch (error) {
+      console.error(`Error executing step ${step.id}:`, error);
+      return {
+        stepId: step.id,
+        success: false,
+        result: `Ошибка выполнения: ${error.message}`,
+        confidence: 0.2,
+        needsFollowUp: true,
+      };
+    }
   }
 
   async process(
@@ -347,16 +427,56 @@ export class TaskOrchestratorAgent extends AbstractAgent {
   }
 
   /**
-   * Оценка качества выполнения этапа
+   * Оценка качества выполнения этапа с помощью AI
    */
   private async evaluateStepQuality(stepResult: any, step: any) {
-    // Простая оценка качества на основе результата
-    return {
-      score: stepResult.confidence || 0.7,
-      needsImprovement: (stepResult.confidence || 0.7) < 0.6,
-      suggestions:
-        (stepResult.confidence || 0.7) < 0.6 ? ["Улучшить детализацию"] : [],
-    };
+    try {
+      const { object: quality } = await generateObject({
+        model: this.getModel(),
+        schema: z.object({
+          score: z.number().min(0).max(1).describe("Оценка качества (0-1)"),
+          needsImprovement: z.boolean().describe("Требуется ли улучшение"),
+          suggestions: z.array(z.string()).describe("Предложения по улучшению"),
+        }),
+        system: `Ты - эксперт по оценке качества выполнения задач в системе Synoro AI.
+
+Оценивай качество выполнения этапов по следующим критериям:
+1. Успешность выполнения (успех/ошибка)
+2. Уровень уверенности агента
+3. Полезность результата
+4. Соответствие описанию этапа
+
+ПРАВИЛА ОЦЕНКИ:
+- Высокое качество (0.8+): этап выполнен успешно, результат полезен
+- Среднее качество (0.6-0.8): этап выполнен, но может быть улучшен
+- Низкое качество (<0.6): этап не выполнен или результат неудовлетворителен`,
+        prompt: `Оцени качество выполнения этапа:
+
+Описание этапа: "${step.description}"
+Результат: ${JSON.stringify(stepResult.result)}
+Успех: ${stepResult.success}
+Уверенность: ${stepResult.confidence}
+
+Дай объективную оценку качества.`,
+        temperature: 0.2,
+        experimental_telemetry: {
+          isEnabled: true,
+          functionId: "step-quality-evaluation",
+          metadata: { stepId: step.id },
+        },
+      });
+
+      return quality;
+    } catch (error) {
+      console.error("Error in AI quality evaluation:", error);
+      // Fallback оценка
+      return {
+        score: stepResult.confidence || 0.7,
+        needsImprovement: (stepResult.confidence || 0.7) < 0.6,
+        suggestions:
+          (stepResult.confidence || 0.7) < 0.6 ? ["Улучшить детализацию"] : [],
+      };
+    }
   }
 
   /**

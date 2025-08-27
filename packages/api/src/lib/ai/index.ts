@@ -1,5 +1,2 @@
-export * from "./classifier";
-export * from "./transcriber";
-export * from "./advisor";
-export * from "./parser";
-export * from "./types";
+export { transcribe } from "./transcriber";
+export type { Telemetry } from "./types";

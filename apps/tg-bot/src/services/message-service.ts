@@ -47,13 +47,18 @@ export async function processTextMessage(
     const traceId = randomUUID();
 
     const result =
-      await apiClient.messages.processMessage.processMessageFromTelegram.mutate(
+      await apiClient.messages.processMessageAgents.processMessageFromTelegramWithAgents.mutate(
         {
           text,
           channel: "telegram",
           chatId: context.chatId,
           messageId: context.messageId,
           telegramUserId: context.userId, // Передаем ID пользователя Telegram
+          agentOptions: {
+            useQualityControl: true,
+            maxQualityIterations: 2,
+            targetQuality: 0.8,
+          },
           metadata: {
             ...context.metadata,
             traceId,

@@ -1,14 +1,15 @@
 import { generateObject, generateText, tool } from "ai";
 import { z } from "zod";
 
+import { getPromptSafe, PROMPT_KEYS } from "@synoro/prompts";
+
 import type {
   AgentCapability,
   AgentResult,
   AgentTask,
   AgentTelemetry,
 } from "./types";
-import { advise } from "../ai/advisor";
-import { parseTask } from "../ai/parser";
+
 import { AbstractAgent } from "./base-agent";
 
 // Схемы для структурированного парсинга событий
@@ -87,48 +88,74 @@ export class EventProcessorAgent extends AbstractAgent {
   }
 
   async canHandle(task: AgentTask): Promise<boolean> {
-    // Ключевые слова для событий
-    const eventKeywords = [
-      "купил",
-      "купила",
-      "потратил",
-      "потратила",
-      "заплатил",
-      "заплатила",
-      "задача",
-      "дело",
-      "сделать",
-      "выполнить",
-      "запланировать",
-      "встреча",
-      "собрание",
-      "созвон",
-      "встретиться",
-      "заметка",
-      "записать",
-      "запомнить",
-      "напомнить",
-      "доход",
-      "заработал",
-      "получил",
-      "прибыль",
-    ];
+    try {
+      // Используем AI для определения типа события
+      const { object: eventAnalysis } = await generateObject({
+        model: this.getModel(),
+        schema: z.object({
+          isEvent: z.boolean().describe("Является ли сообщение событием для логирования"),
+          eventType: z.enum(["purchase", "task", "meeting", "note", "expense", "income", "other", "none"]).describe("Тип события или none если это не событие"),
+          confidence: z.number().min(0).max(1).describe("Уверенность в классификации"),
+          reasoning: z.string().describe("Обоснование классификации"),
+        }),
+        system: `Ты - эксперт по определению типов сообщений в системе Synoro AI.
 
-    const text = task.input.toLowerCase();
-    const hasEventPattern = eventKeywords.some((keyword) =>
-      text.includes(keyword),
-    );
+ТВОЯ ЗАДАЧА:
+Определи, является ли сообщение пользователя событием для логирования в системе.
 
-    // Проверяем тип задачи
-    const isEventType =
-      task.type === "event" ||
-      task.type === "logging" ||
-      task.type === "general";
+ТИПЫ СОБЫТИЙ:
+- purchase: покупки, трата денег, расходы на товары/услуги
+- task: задачи, дела, планы, todo-элементы
+- meeting: встречи, собрания, созвоны, назначенные события
+- note: заметки, записи, идеи, мысли для сохранения
+- expense: расходы без конкретного товара, общие траты
+- income: доходы, поступления, заработок, прибыль
+- other: прочие события, не подходящие под другие категории
+- none: не является событием (вопрос, обычное общение, спам)
 
-    // Проверяем наличие числовых значений (суммы)
-    const hasNumbers = /\d+/.test(task.input);
+ПРИЗНАКИ СОБЫТИЙ:
+- Содержит информацию о действиях пользователя
+- Включает детали, которые стоит запомнить
+- Может содержать суммы, даты, места
+- Описывает что произошло или планируется
 
-    return (hasEventPattern || hasNumbers) && isEventType;
+ПРАВИЛА:
+1. Если сообщение описывает действие/событие - это событие
+2. Если это вопрос или обычное общение - не событие
+3. Учитывай контекст и намерение пользователя`,
+        prompt: `Проанализируй сообщение: "${task.input}"
+
+Определи, является ли это событием для логирования и какой у него тип.`,
+        temperature: 0.1,
+        experimental_telemetry: {
+          isEnabled: true,
+          functionId: "event-type-detection",
+          metadata: { inputLength: task.input.length },
+        },
+      });
+
+      // Проверяем тип задачи
+      const isEventType =
+        task.type === "event" ||
+        task.type === "logging" ||
+        task.type === "general";
+
+      return eventAnalysis.isEvent && isEventType;
+    } catch (error) {
+      console.error("Error in AI event detection:", error);
+      // Fallback к простой проверке
+      const text = task.input.toLowerCase();
+      const hasEventKeywords = [
+        "купил", "купила", "потратил", "потратила", "заплатил", "заплатила",
+        "задача", "дело", "сделать", "выполнить", "запланировать",
+        "встреча", "собрание", "созвон", "встретиться",
+        "заметка", "записать", "запомнить", "напомнить",
+        "доход", "заработал", "получил", "прибыль"
+      ].some(keyword => text.includes(keyword));
+      
+      const isEventType = task.type === "event" || task.type === "logging" || task.type === "general";
+      return hasEventKeywords && isEventType;
+    }
   }
 
   /**
@@ -142,63 +169,63 @@ export class EventProcessorAgent extends AbstractAgent {
         description: z.string(),
       }),
       execute: async ({ eventType, description }) => {
-        const categories = {
-          purchase: {
-            продукты: [
-              "хлеб",
-              "молоко",
-              "мясо",
-              "овощи",
-              "фрукты",
-              "еда",
-              "продукты",
-            ],
-            транспорт: [
-              "такси",
-              "автобус",
-              "метро",
-              "бензин",
-              "топливо",
-              "проезд",
-            ],
-            развлечения: [
-              "кино",
-              "театр",
-              "концерт",
-              "игра",
-              "книга",
-              "развлечение",
-            ],
-            одежда: ["рубашка", "брюки", "обувь", "куртка", "платье", "одежда"],
-            здоровье: ["лекарство", "врач", "аптека", "анализы", "медицина"],
-            дом: [
-              "мебель",
-              "ремонт",
-              "коммунальные",
-              "электричество",
-              "интернет",
-            ],
-            образование: ["курс", "книга", "обучение", "семинар", "тренинг"],
-          },
-          task: {
-            работа: ["проект", "отчет", "встреча", "презентация", "задача"],
-            дом: ["уборка", "готовка", "покупки", "ремонт", "стирка"],
-            здоровье: ["тренировка", "врач", "спорт", "диета", "анализы"],
-            личное: ["хобби", "друзья", "семья", "отдых", "развитие"],
-          },
-        };
+        try {
+          // Используем AI для категоризации событий
+          const { object: categorization } = await generateObject({
+            model: this.getModel(),
+            schema: z.object({
+              category: z.string().describe("Категория события"),
+              confidence: z.number().min(0).max(1).describe("Уверенность в категоризации"),
+              reasoning: z.string().describe("Обоснование выбора категории"),
+            }),
+            system: `Ты - эксперт по категоризации событий в системе Synoro AI.
 
-        const eventCategories =
-          categories[eventType as keyof typeof categories] || {};
-        const descLower = description.toLowerCase();
+ТВОЯ ЗАДАЧА:
+Определи наиболее подходящую категорию для события на основе его описания.
 
-        for (const [category, keywords] of Object.entries(eventCategories)) {
-          if (keywords.some((keyword) => descLower.includes(keyword))) {
-            return category;
-          }
+ДОСТУПНЫЕ КАТЕГОРИИ ДЛЯ ПОКУПОК (purchase):
+- продукты: еда, напитки, продукты питания
+- транспорт: проезд, топливо, такси, общественный транспорт
+- развлечения: кино, театр, игры, книги, хобби
+- одежда: одежда, обувь, аксессуары
+- здоровье: лекарства, медицинские услуги, спорт
+- дом: мебель, ремонт, коммунальные услуги, техника
+- образование: курсы, обучение, семинары, книги
+- услуги: различные платные услуги
+- подарки: подарки для других людей
+- прочее: не подходящее под другие категории
+
+ДОСТУПНЫЕ КАТЕГОРИИ ДЛЯ ЗАДАЧ (task):
+- работа: рабочие задачи, проекты, встречи
+- дом: домашние дела, уборка, готовка
+- здоровье: тренировки, диета, медицинские задачи
+- личное: хобби, личные планы, саморазвитие
+- семья: семейные дела, забота о близких
+- финансы: финансовое планирование, учет расходов
+
+ПРАВИЛА:
+1. Выбирай наиболее специфичную категорию
+2. Учитывай контекст и детали описания
+3. Если событие подходит под несколько категорий, выбирай основную`,
+            prompt: `Категоризируй событие:
+
+Тип события: ${eventType}
+Описание: "${description}"
+
+Определи наиболее подходящую категорию.`,
+            temperature: 0.2,
+            experimental_telemetry: {
+              isEnabled: true,
+              functionId: "event-categorization",
+              metadata: { eventType, descriptionLength: description.length },
+            },
+          });
+
+          return categorization.category;
+        } catch (error) {
+          console.error("Error in AI event categorization:", error);
+          return "прочее"; // Fallback
         }
-
-        return "общее";
       },
     });
   }
@@ -213,136 +240,45 @@ export class EventProcessorAgent extends AbstractAgent {
         text: z.string(),
       }),
       execute: async ({ text }) => {
-        // Функция для нормализации числовой строки
-        const normalizeNumberString = (numStr: string): string => {
-          // Убираем все символы валют и не-цифровые символы, кроме цифр, запятых, точек и минуса
-          let cleaned = numStr.replace(/[^\d.,\-\s\u00A0\u2009\u200A\u200B\u200C\u200D\uFEFF]/g, "");
-          
-          // Убираем все типы пробелов (обычные, неразрывные, тонкие) как разделители тысяч
-          cleaned = cleaned.replace(/[\s\u00A0\u2009\u200A\u200B\u200C\u200D\uFEFF]/g, "");
-          
-          // Находим правый десятичный разделитель (точка или запятая)
-          const lastDotIndex = cleaned.lastIndexOf('.');
-          const lastCommaIndex = cleaned.lastIndexOf(',');
-          
-          let decimalSeparatorIndex = -1;
-          let decimalSeparator = '';
-          
-          if (lastDotIndex > lastCommaIndex) {
-            decimalSeparatorIndex = lastDotIndex;
-            decimalSeparator = '.';
-          } else if (lastCommaIndex > lastDotIndex) {
-            decimalSeparatorIndex = lastCommaIndex;
-            decimalSeparator = ',';
-          }
-          
-          if (decimalSeparatorIndex !== -1) {
-            // Убираем все запятые и точки, кроме правого десятичного разделителя
-            const beforeDecimal = cleaned.substring(0, decimalSeparatorIndex).replace(/[.,]/g, '');
-            const afterDecimal = cleaned.substring(decimalSeparatorIndex + 1).replace(/[.,]/g, '');
+        try {
+          // Используем AI для извлечения финансовой информации
+          const { object: financialData } = await generateObject({
+            model: this.getModel(),
+            schema: z.object({
+              amount: z.number().describe("Сумма в числовом формате"),
+              currency: z.enum(["RUB", "USD", "EUR"]).describe("Валюта"),
+              confidence: z.number().min(0).max(1).describe("Уверенность в извлечении"),
+            }),
+            system: `Ты - специалист по извлечению финансовой информации из текста.
             
-            // Собираем результат, заменяя правый разделитель на точку
-            cleaned = beforeDecimal + '.' + afterDecimal;
-          } else {
-            // Если нет десятичного разделителя, убираем все запятые и точки
-            cleaned = cleaned.replace(/[.,]/g, '');
-          }
-          
-          // Убираем лишние символы, оставляя только цифры, точку и минус
-          cleaned = cleaned.replace(/[^\d.\-]/g, '');
-          
-          // Обрабатываем множественные десятичные точки
-          const dotCount = (cleaned.match(/\./g) || []).length;
-          if (dotCount > 1) {
-            // Оставляем только первую точку
-            const firstDotIndex = cleaned.indexOf('.');
-            const beforeFirstDot = cleaned.substring(0, firstDotIndex + 1);
-            const afterFirstDot = cleaned.substring(firstDotIndex + 1).replace(/\./g, '');
-            cleaned = beforeFirstDot + afterFirstDot;
-          }
-          
-          // Убираем множественные минусы, оставляя только первый
-          if (cleaned.startsWith('--')) {
-            cleaned = '-' + cleaned.replace(/-/g, '');
-          }
-          
-          return cleaned;
-        };
+Твоя задача - найти сумму и валюту в тексте пользователя.
 
-        // Улучшенные регулярные выражения для поиска сумм
-        // Поддерживают пробелы как разделители тысяч и запятые как десятичные разделители
-        const rublePatterns = [
-          // Формат: "1 299,90 ₽" или "1 299.90 ₽"
-          /([\d\s\u00A0\u2009\u200A\u200B\u200C\u200D\uFEFF]+(?:[.,]\d+)?)\s*(?:руб|рублей?|р\.?|₽)/i,
-          // Формат: "1 299,90 р" или "1 299.90 р"
-          /([\d\s\u00A0\u2009\u200A\u200B\u200C\u200D\uFEFF]+(?:[.,]\d+)?)\s*р(?:\s|$)/i,
-          // Формат: "₽1 299,90"
-          /₽\s*([\d\s\u00A0\u2009\u200A\u200B\u200C\u200D\uFEFF]+(?:[.,]\d+)?)/i,
-        ];
+ПОДДЕРЖИВАЕМЫЕ ФОРМАТЫ:
+- Российские рубли: "1 299,90 ₽", "₽1 299,90", "1 299,90 р", "1 299,90 руб"
+- Доллары США: "$1,299.90", "1 299,90 USD", "1 299,90 доллар"
+- Евро: "€1.299,90", "1 299,90 EUR", "1 299,90 евро"
 
-        const dollarPatterns = [
-          // Формат: "$1,299.90" или "$1 299,90"
-          /\$\s*([\d\s\u00A0\u2009\u200A\u200B\u200C\u200D\uFEFF,]+(?:[.,]\d+)?)/i,
-          // Формат: "1 299,90 доллар" или "1 299.90 USD"
-          /([\d\s\u00A0\u2009\u200A\u200B\u200C\u200D\uFEFF,]+(?:[.,]\d+)?)\s*(?:доллар|долларов|usd)/i,
-        ];
+ПРАВИЛА:
+1. Извлекай только явно указанные суммы
+2. Определяй валюту по символам или словам
+3. Обрабатывай различные разделители (пробелы, запятые, точки)
+4. Если валюта не указана, используй RUB по умолчанию`,
+            prompt: `Извлеки финансовую информацию из текста: "${text}"
 
-        const euroPatterns = [
-          // Формат: "€1.299,90" или "€1 299,90"
-          /€\s*([\d\s\u00A0\u2009\u200A\u200B\u200C\u200D\uFEFF]+(?:[.,]\d+)?)/i,
-          // Формат: "1 299,90 евро" или "1 299,90 EUR"
-          /([\d\s\u00A0\u2009\u200A\u200B\u200C\u200D\uFEFF]+(?:[.,]\d+)?)\s*(?:евро|eur)/i,
-        ];
+Верни сумму и валюту в структурированном виде.`,
+            temperature: 0.1,
+            experimental_telemetry: {
+              isEnabled: true,
+              functionId: "financial-extraction",
+              metadata: { textLength: text.length },
+            },
+          });
 
-        // Проверяем рубли
-        for (const pattern of rublePatterns) {
-          const match = text.match(pattern);
-          if (match) {
-            const normalizedAmount = normalizeNumberString(match[1]);
-            const amount = parseFloat(normalizedAmount);
-            if (!isNaN(amount)) {
-              return { amount, currency: "RUB" };
-            }
-          }
+          return financialData;
+        } catch (error) {
+          console.error("Error in AI financial extraction:", error);
+          return null;
         }
-
-        // Проверяем доллары
-        for (const pattern of dollarPatterns) {
-          const match = text.match(pattern);
-          if (match) {
-            const normalizedAmount = normalizeNumberString(match[1]);
-            const amount = parseFloat(normalizedAmount);
-            if (!isNaN(amount)) {
-              return { amount, currency: "USD" };
-            }
-          }
-        }
-
-        // Проверяем евро
-        for (const pattern of euroPatterns) {
-          const match = text.match(pattern);
-          if (match) {
-            const normalizedAmount = normalizeNumberString(match[1]);
-            const amount = parseFloat(normalizedAmount);
-            if (!isNaN(amount)) {
-              return { amount, currency: "EUR" };
-            }
-          }
-        }
-
-        // Если не нашли валюту, но есть число с пробелами
-        const numberPattern =
-          /([\d\s\u00A0\u2009\u200A\u200B\u200C\u200D\uFEFF]+(?:[.,]\d+)?)/;
-        const numberMatch = numberPattern.exec(text);
-        if (numberMatch) {
-          const normalizedAmount = normalizeNumberString(numberMatch[1]);
-          const amount = parseFloat(normalizedAmount);
-          if (!isNaN(amount)) {
-            return { amount, currency: "RUB" }; // По умолчанию рубли
-          }
-        }
-
-        return null;
       },
     });
   }
@@ -358,31 +294,13 @@ export class EventProcessorAgent extends AbstractAgent {
     }>
   > {
     try {
-      // Используем существующую функцию парсинга как fallback
-      const legacyParsed = await parseTask(
-        task.input,
-        this.createTelemetry("legacy-parse", task, telemetry),
-      );
+      // Структурированный парсинг с помощью AI
 
       // Структурированный парсинг с помощью AI
       const { object: structuredEvent } = await generateObject({
         model: this.getModel(),
         schema: eventSchema,
-        system: `Ты - специалист по парсингу событий в системе Synoro AI.
-
-Твоя задача - извлечь структурированную информацию из описания события.
-
-ТИПЫ СОБЫТИЙ:
-- purchase: покупки, трата денег
-- task: задачи, дела, планы
-- meeting: встречи, собрания, созвоны
-- note: заметки, записи, идеи
-- expense: расходы без конкретного товара
-- income: доходы, поступления
-- other: прочие события
-
-Всегда указывай уровень уверенности в правильности парсинга.
-Определи, нужен ли совет пользователю по этому событию.`,
+        system: getPromptSafe(PROMPT_KEYS.EVENT_PROCESSOR),
         prompt: `Проанализируй и распарси это событие: "${task.input}"
         
 Контекст: пользователь ${task.context.userId || "anonymous"} в канале ${task.context.channel}
@@ -404,10 +322,17 @@ export class EventProcessorAgent extends AbstractAgent {
       // Генерируем совет, если нужно
       if (structuredEvent.needsAdvice) {
         try {
-          advice = await advise(
-            task.input,
-            this.createTelemetry("generate-advice", task, telemetry),
-          );
+          const { text: adviceText } = await generateText({
+            model: this.getModel(),
+            system: getPromptSafe(PROMPT_KEYS.EVENT_PROCESSOR),
+            prompt: `Дай краткий полезный совет для события: "${task.input}"`,
+            temperature: 0.4,
+            experimental_telemetry: {
+              isEnabled: true,
+              ...this.createTelemetry("generate-advice", task, telemetry),
+            },
+          });
+          advice = adviceText;
         } catch (error) {
           console.warn("Failed to generate advice:", error);
         }
@@ -415,7 +340,6 @@ export class EventProcessorAgent extends AbstractAgent {
 
       // Комбинируем структурированные данные
       const combinedData = {
-        ...legacyParsed,
         structured: structuredEvent,
         metadata: {
           processingTimestamp: new Date().toISOString(),
@@ -426,7 +350,7 @@ export class EventProcessorAgent extends AbstractAgent {
 
       return this.createSuccessResult(
         {
-          parsedEvent: legacyParsed,
+          parsedEvent: structuredEvent,
           advice,
           structuredData: combinedData,
         },

@@ -1,77 +1,55 @@
-import type { MessageTypeResult, ParsedTask } from "../ai/types";
-import type {
-  MessageContext,
-  MessageProcessorOptions,
-  ProcessClassifiedMessageResult,
-} from "../message-processor/types";
+import type { AttributeValue } from "@opentelemetry/api";
+
 import type { AgentContext } from "./types";
 import { AgentManager } from "./agent-manager";
 
 /**
- * Новый процессор сообщений с использованием мультиагентной системы
- * Интегрируется с существующей архитектурой, но использует агентов
+ * Процессор сообщений с использованием мультиагентной системы
+ * Полностью заменяет старую систему обработки сообщений
  */
 export class AgentMessageProcessor {
   private agentManager: AgentManager;
-  private isParsedTask(value: unknown): value is ParsedTask {
-    if (typeof value !== "object" || value === null) return false;
-    const v = value as Record<string, unknown>;
-    return typeof v.action === "string" && typeof v.object === "string";
-  }
 
   constructor() {
     this.agentManager = new AgentManager();
   }
 
   /**
-   * Процессор для работы с классифицированными сообщениями через агентов
+   * Процессор для работы с сообщениями через агентов
    */
-  async processWithAgents(
+  async processMessage(
     text: string,
-    messageType: MessageTypeResult,
-    context: MessageContext,
-    options: Partial<MessageProcessorOptions> & {
+    context: AgentContext,
+    options: {
       useQualityControl?: boolean;
       maxQualityIterations?: number;
       targetQuality?: number;
     } = {},
-  ): Promise<
-    ProcessClassifiedMessageResult & {
-      agentMetadata?: {
-        agentsUsed: string[];
-        totalSteps: number;
-        qualityScore: number;
-        processingTime: number;
-      };
-    }
-  > {
+  ): Promise<{
+    response: string;
+    parsed: any;
+    model: string;
+    agentMetadata: {
+      agentsUsed: string[];
+      totalSteps: number;
+      qualityScore: number;
+      processingTime: number;
+    };
+  }> {
     try {
-      // Преобразуем контекст для агентной системы
-      const agentContext: AgentContext = {
-        userId: context.userId || undefined,
-        chatId: context.chatId,
-        messageId: context.messageId,
-        channel: context.channel,
-        metadata: context.metadata as
-          | Record<string, AttributeValue>
-          | undefined,
-      };
-
       // Формируем телеметрию
       const telemetry = {
-        functionId: options.questionFunctionId || "agent-processing",
+        functionId: "agent-processing",
         metadata: {
           ...context.metadata,
-          messageType: messageType.type,
-          confidence: messageType.confidence,
-          needLogging: messageType.need_logging,
+          textLength: text.length,
         },
       };
 
       // Обрабатываем сообщение через агентную систему
       const orchestrationResult = await this.agentManager.processMessage(
         text,
-        agentContext,
+        context,
         {
           useQualityControl: options.useQualityControl ?? true,
           maxQualityIterations: options.maxQualityIterations ?? 2,
@@ -81,30 +59,15 @@ export class AgentMessageProcessor {
       );
 
       // Извлекаем данные для совместимости с существующим API
-      let parsed: ParsedTask | null = null;
+      let parsed: any = null;
 
-      // Если это событие и у нас есть парсированные данные
-      if (
-        messageType.type === "event" &&
-        orchestrationResult.metadata?.agentData
-      ) {
+      // Если у нас есть парсированные данные от агентов
+      if (orchestrationResult.metadata?.agentData) {
         const agentData = orchestrationResult.metadata.agentData as Record<
           string,
           unknown
         >;
-        const parsedEvent =
-          typeof agentData === "object" && agentData
-            ? (agentData as { parsedEvent?: unknown }).parsedEvent
-            : undefined;
-        const structuredData =
-          typeof agentData === "object" && agentData
-            ? (agentData as { structuredData?: unknown }).structuredData
-            : undefined;
-        if (this.isParsedTask(parsedEvent)) {
-          parsed = parsedEvent;
-        } else if (this.isParsedTask(structuredData)) {
-          parsed = structuredData;
-        }
+        parsed = agentData;
       }
 
       // Определяем модель, которая была использована
@@ -138,115 +101,6 @@ export class AgentMessageProcessor {
         },
       };
     }
-  }
-
-  /**
-   * Гибридный процессор: использует агентов для сложных задач,
-   * старую систему для простых
-   */
-  async processHybrid(
-    text: string,
-    messageType: MessageTypeResult,
-    context: MessageContext,
-    options: Partial<MessageProcessorOptions> & {
-      forceAgentMode?: boolean;
-      useQualityControl?: boolean;
-    } = {},
-  ): Promise<
-    ProcessClassifiedMessageResult & {
-      processingMode: "agents" | "legacy";
-      agentMetadata?: any;
-    }
-  > {
-    // Определяем, нужно ли использовать агентов
-    const shouldUseAgents = this.shouldUseAgentProcessing(
-      text,
-      messageType,
-      options.forceAgentMode,
-    );
-
-    if (shouldUseAgents) {
-      const result = await this.processWithAgents(
-        text,
-        messageType,
-        context,
-        options,
-      );
-      return {
-        ...result,
-        processingMode: "agents",
-      };
-    } else {
-      // Используем существующую систему для простых случаев
-      const { processClassifiedMessage } = await import(
-        "../message-processor/processor"
-      );
-      const result = await processClassifiedMessage(
-        text,
-        messageType,
-        context,
-        {
-          questionFunctionId: "legacy-question",
-          chatFunctionId: "legacy-chat",
-          parseFunctionId: "legacy-parse",
-          adviseFunctionId: "legacy-advise",
-          fallbackParseFunctionId: "legacy-fallback-parse",
-          fallbackAdviseFunctionId: "legacy-fallback-advise",
-          ...options,
-        },
-      );
-
-      return {
-        ...result,
-        processingMode: "legacy",
-      };
-    }
-  }
-
-  /**
-   * Определяет, нужно ли использовать агентную систему
-   */
-  private shouldUseAgentProcessing(
-    text: string,
-    messageType: MessageTypeResult,
-    forceAgentMode?: boolean,
-  ): boolean {
-    if (forceAgentMode) return true;
-
-    // Критерии для использования агентов:
-
-    // 1. Сложные вопросы
-    const complexQuestionKeywords = [
-      "анализ",
-      "статистика",
-      "сравни",
-      "найди паттерн",
-      "оптимизируй",
-      "улучши",
-      "план",
-      "стратегия",
-    ];
-
-    // 2. Длинные сообщения (обычно более сложные)
-    const isLongMessage = text.length > 100;
-
-    // 3. Низкая уверенность классификации
-    const lowConfidence = messageType.confidence < 0.7;
-
-    // 4. Определенные типы сообщений
-    const complexTypes = ["complex_task", "analysis"];
-
-    const textLower = text.toLowerCase();
-    const hasComplexKeywords = complexQuestionKeywords.some((keyword) =>
-      textLower.includes(keyword),
-    );
-
-    return (
-      hasComplexKeywords ||
-      isLongMessage ||
-      lowConfidence ||
-      complexTypes.includes(messageType.type)
-    );
   }
 
   /**

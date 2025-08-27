@@ -1,4 +1,4 @@
-import { generateText, tool } from "ai";
+import { generateObject, generateText, tool } from "ai";
 import { z } from "zod";
 
 import { getPromptSafe, PROMPT_KEYS } from "@synoro/prompts";
@@ -9,7 +9,7 @@ import type {
   AgentTask,
   AgentTelemetry,
 } from "./types";
-import { parseContextSafely } from "../ai/advisor";
+
 import { AbstractAgent } from "./base-agent";
 
 /**
@@ -52,76 +52,153 @@ export class QASpecialistAgent extends AbstractAgent {
     super("gpt-5-nano", 0.4);
   }
 
-  canHandle(task: AgentTask): Promise<boolean> {
-    // Проверяем, что это вопрос
-    const questionKeywords = [
-      "что",
-      "как",
-      "где",
-      "когда",
-      "зачем",
-      "почему",
-      "какой",
-      "кто",
-      "можешь",
-      "умеешь",
-      "помоги",
-      "расскажи",
-      "объясни",
-      "покажи",
-      "?",
-      "помощь",
-      "help",
-    ];
+  async canHandle(task: AgentTask): Promise<boolean> {
+    try {
+      // Используем AI для определения типа сообщения
+      const { object: messageAnalysis } = await generateObject({
+        model: this.getModel(),
+        schema: z.object({
+          isQuestion: z
+            .boolean()
+            .describe("Является ли сообщение вопросом или просьбой о помощи"),
+          questionType: z
+            .enum([
+              "question",
+              "help_request",
+              "information_request",
+              "general_chat",
+              "other",
+            ])
+            .describe("Тип сообщения"),
+          confidence: z
+            .number()
+            .min(0)
+            .max(1)
+            .describe("Уверенность в классификации"),
+          reasoning: z.string().describe("Обоснование классификации"),
+        }),
+        system: `Ты - эксперт по определению типов сообщений пользователей в системе Synoro AI.
 
-    const text = task.input.toLowerCase();
-    const hasQuestionPattern = questionKeywords.some((keyword) =>
-      text.includes(keyword),
-    );
+ТВОЯ ЗАДАЧА:
+Определи, является ли сообщение пользователя вопросом или просьбой о помощи, которую может обработать QA-специалист.
 
-    // Дополнительная проверка на тип задачи
-    const isQuestionType =
-      task.type === "question" ||
-      task.type === "chat" ||
-      task.type === "general";
+ТИПЫ СООБЩЕНИЙ:
+- question: прямые вопросы (что, как, где, когда, зачем, почему, какой, кто)
+- help_request: просьбы о помощи, поддержке, инструкциях
+- information_request: запросы информации, объяснений, деталей
+- general_chat: обычное общение, не требующее специальной помощи
+- other: прочие типы сообщений
 
-    return Promise.resolve(hasQuestionPattern && isQuestionType);
+ПРИЗНАКИ ВОПРОСОВ И ПРОСЬБ:
+- Содержит вопросительные слова или знаки вопроса
+- Выражает потребность в информации или помощи
+- Просит что-то объяснить, показать, рассказать
+- Ищет решение проблемы или задачи
+
+ПРАВИЛА:
+1. Если сообщение содержит вопрос или просьбу - это вопрос
+2. Если это обычное общение без запроса - не вопрос
+3. Учитывай контекст и намерение пользователя`,
+        prompt: `Проанализируй сообщение: "${task.input}"
+
+Определи, является ли это вопросом или просьбой о помощи.`,
+        temperature: 0.1,
+        experimental_telemetry: {
+          isEnabled: true,
+          functionId: "question-detection",
+          metadata: { inputLength: task.input.length },
+        },
+      });
+
+      // Проверяем тип задачи
+      const isQuestionType =
+        task.type === "question" ||
+        task.type === "chat" ||
+        task.type === "general";
+
+      return messageAnalysis.isQuestion && isQuestionType;
+    } catch (error) {
+      console.error("Error in AI question detection:", error);
+      // Fallback к простой проверке
+      const questionKeywords = [
+        "что",
+        "как",
+        "где",
+        "когда",
+        "зачем",
+        "почему",
+        "какой",
+        "кто",
+        "можешь",
+        "умеешь",
+        "помоги",
+        "расскажи",
+        "объясни",
+        "покажи",
+        "?",
+        "помощь",
+        "help",
+      ];
+
+      const text = task.input.toLowerCase();
+      const hasQuestionPattern = questionKeywords.some((keyword) =>
+        text.includes(keyword),
+      );
+
+      const isQuestionType =
+        task.type === "question" ||
+        task.type === "chat" ||
+        task.type === "general";
+      return hasQuestionPattern && isQuestionType;
+    }
   }
 
   /**
-   * Определяет подтип вопроса для более точного ответа
+   * Определяет подтип вопроса с помощью AI
    */
-  private classifyQuestionSubtype(question: string): string {
-    const botKeywords = [
-      "бот",
-      "synoro",
-      "умеешь",
-      "можешь",
-      "функции",
-      "возможности",
-    ];
-    const helpKeywords = ["помоги", "help", "как", "покажи", "научи"];
-    const dataKeywords = [
-      "статистика",
-      "данные",
-      "потратил",
-      "сколько",
-      "анализ",
-    ];
+  private async classifyQuestionSubtype(question: string): Promise<string> {
+    try {
+      const { object: classification } = await generateObject({
+        model: this.getModel(),
+        schema: z.object({
+          subtype: z
+            .enum(["about_bot", "about_data", "help_request", "general"])
+            .describe("Подтип вопроса"),
+          confidence: z
+            .number()
+            .min(0)
+            .max(1)
+            .describe("Уверенность в классификации"),
+        }),
+        system: `Ты - специалист по классификации вопросов пользователей в системе Synoro AI.
 
-    const text = question.toLowerCase();
+КЛАССИФИКАЦИЯ ВОПРОСОВ:
+- about_bot: вопросы о возможностях бота, функциях системы, что умеет Synoro
+- about_data: вопросы о данных, статистике, анализе, сколько потратил, тренды
+- help_request: просьбы о помощи, как что-то сделать, обучение, инструкции
+- general: общие вопросы, не подходящие под другие категории
 
-    if (botKeywords.some((keyword) => text.includes(keyword))) {
-      return "about_bot";
-    }
-    if (dataKeywords.some((keyword) => text.includes(keyword))) {
-      return "about_data";
-    }
-    if (helpKeywords.some((keyword) => text.includes(keyword))) {
-      return "help_request";
-    }
+ПРИМЕРЫ:
+- "Что умеет бот?" → about_bot
+- "Сколько я потратил в этом месяце?" → about_data  
+- "Помоги настроить задачу" → help_request
+- "Привет, как дела?" → general`,
+        prompt: `Классифицируй этот вопрос: "${question}"
 
-    return "general";
+Выбери наиболее подходящий подтип.`,
+        temperature: 0.1,
+        experimental_telemetry: {
+          isEnabled: true,
+          functionId: "question-classification",
+          metadata: { questionLength: question.length },
+        },
+      });
+
+      return classification.subtype;
+    } catch (error) {
+      console.error("Error in AI question classification:", error);
+      return "general"; // Fallback
+    }
   }
 
   /**
@@ -133,30 +210,28 @@ export class QASpecialistAgent extends AbstractAgent {
       inputSchema: z.object({
         query: z.string().describe("Запрос информации о системе"),
       }),
-      execute: ({ query }) => {
-        // Базовая информация о системе
-        const systemInfo = {
-          функции:
-            "Логирование событий, анализ данных, финансовая аналитика, управление задачами, ответы на вопросы",
-          возможности:
-            "Записываю покупки, встречи, задачи; анализирую расходы; выявляю паттерны; даю советы",
-          "типы событий": "покупки, задачи, встречи, заметки, расходы, доходы",
-          аналитика:
-            "статистика расходов, анализ паттернов поведения, финансовые советы",
-          платформы: "Telegram бот, веб-приложение, мобильное приложение",
-        };
+      execute: async ({ query }) => {
+        try {
+          // Используем AI для поиска системной информации
+          const { text: systemInfo } = await generateText({
+            model: this.getModel(),
+            system: getPromptSafe(PROMPT_KEYS.QA_SPECIALIST),
+            prompt: `Пользователь спрашивает: "${query}"
 
-        // Простой поиск по ключевым словам
-        const queryLower = query.toLowerCase();
-        const results = Object.entries(systemInfo).filter(
-          ([key, value]) =>
-            queryLower.includes(key) ||
-            value.toLowerCase().includes(queryLower),
-        );
+Дай подробный и полезный ответ о возможностях Synoro AI.`,
+            temperature: 0.3,
+            experimental_telemetry: {
+              isEnabled: true,
+              functionId: "system-info-search",
+              metadata: { queryLength: query.length },
+            },
+          });
 
-        return results.length > 0
-          ? results.map(([k, v]) => `${k}: ${v}`).join("; ")
-          : "Общая информация: Synoro AI - умный помощник для управления жизненными событиями";
+          return systemInfo;
+        } catch (error) {
+          console.error("Error in AI system info search:", error);
+          return "Общая информация: Synoro AI - умный помощник для управления жизненными событиями";
+        }
       },
     });
   }
@@ -170,21 +245,10 @@ export class QASpecialistAgent extends AbstractAgent {
       const assistantPrompt = getPromptSafe(PROMPT_KEYS.ASSISTANT);
 
       // Определяем подтип вопроса
-      const subtype = this.classifyQuestionSubtype(task.input);
+      const subtype = await this.classifyQuestionSubtype(task.input);
 
-      // Извлекаем контекст из метаданных телеметрии
-      const context = parseContextSafely(telemetry);
-
-      // Формируем историю беседы
+      // Формируем историю беседы (пока без контекста)
       let conversationHistory = "";
-      if (context.length > 0) {
-        conversationHistory = "\n\nИстория беседы:\n";
-        context.forEach((msg, index) => {
-          const role = msg.role === "user" ? "Пользователь" : "Ассистент";
-          conversationHistory += `${index + 1}. ${role}: ${msg.content.text}\n`;
-        });
-        conversationHistory += "\n";
-      }
 
       // Создаем контекстный промпт в зависимости от подтипа вопроса
       let contextPrompt = task.input;

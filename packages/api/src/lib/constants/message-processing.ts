@@ -13,15 +13,9 @@ export const MESSAGE_PROCESSING_CONFIG = {
     SHORT_MESSAGE_THRESHOLD: 50, // Порог для определения коротких сообщений
   },
 
-  // ID функций для классификации и обработки
+  // ID функций для агентной системы
   FUNCTION_IDS: {
-    CLASSIFIER: "api-message-classifier",
-    QUESTION: "api-answer-question",
-    CHAT: "api-chat-response",
-    PARSE: "api-parse-text",
-    ADVISE: "api-advise",
-    FALLBACK_PARSE: "api-parse-text-fallback",
-    FALLBACK_ADVISE: "api-advise-fallback",
+    AGENT_PROCESSOR: "agent-processor",
   },
 
   // Лимиты для логирования
