@@ -361,7 +361,9 @@ export class EventProcessorAgent extends AbstractAgent {
         prompt: `Проанализируй и распарси это событие: "${task.input}"
         
 Контекст: пользователь ${task.context?.userId || "anonymous"} в канале ${task.context?.channel || "unknown"}
-        
+
+ВАЖНО: Это событие ОБЯЗАТЕЛЬНО нужно записать в систему. НЕ спрашивай пользователя о необходимости записи.
+
 Извлеки всю доступную информацию и структурируй её в формате JSON согласно этой схеме:
 {
   "type": "purchase|task|meeting|note|expense|income|maintenance|other",

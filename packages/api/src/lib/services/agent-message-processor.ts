@@ -168,9 +168,7 @@ export async function processMessageWithAgents(
     );
 
     const agentProcessingTime = formatExecutionTime(agentProcessingStartTime);
-    console.log(
-      `🚀 [AGENTS] Обработка агентами: ${agentProcessingTime}`,
-    );
+    console.log(`🚀 [AGENTS] Обработка агентами: ${agentProcessingTime}`);
 
     // Логируем информацию об агентах
     if (result.agentMetadata) {
@@ -212,6 +210,7 @@ export async function processMessageWithAgents(
         ? {
             ...result.agentMetadata,
             processingMode: "agents",
+            shouldLogEvent: result.agentMetadata.shouldLogEvent,
           }
         : {
             agentsUsed: ["agent-processor"],
@@ -219,6 +218,7 @@ export async function processMessageWithAgents(
             qualityScore: 0.7,
             processingTime: totalProcessingTime,
             processingMode: "agents",
+            shouldLogEvent: false,
           },
     };
   } catch (error) {

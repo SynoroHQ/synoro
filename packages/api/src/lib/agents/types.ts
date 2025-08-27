@@ -102,6 +102,7 @@ export interface OrchestrationResult {
       structuredData?: unknown;
       [key: string]: unknown;
     };
+    shouldLogEvent?: boolean; // Флаг для автоматического логирования событий
     [key: string]: unknown;
   };
 }

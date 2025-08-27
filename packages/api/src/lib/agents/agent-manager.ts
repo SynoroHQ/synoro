@@ -6,6 +6,7 @@ import type {
   BaseAgent,
   OrchestrationResult,
 } from "./types";
+import { globalAgentRegistry } from "./agent-registry";
 import { DataAnalystAgent } from "./data-analyst-agent";
 import { EventProcessorAgent } from "./event-processor-agent";
 import { GeneralAssistantAgent } from "./general-assistant-agent";
@@ -16,7 +17,6 @@ import { RouterAgent } from "./router-agent";
 import { TaskManagerAgent } from "./task-manager-agent";
 import { TaskOrchestratorAgent } from "./task-orchestrator-agent";
 import { TelegramFormatterAgent } from "./telegram-formatter-agent";
-import { globalAgentRegistry } from "./agent-registry";
 
 /**
  * Менеджер агентов - центральная точка управления мультиагентной системой
@@ -70,7 +70,6 @@ export class AgentManager {
   getAgent(agentKey: string): BaseAgent | undefined {
     return globalAgentRegistry.get(agentKey);
   }
-
 
   /**
    * Узкий type guard для объектов
@@ -265,6 +264,8 @@ export class AgentManager {
             ? processingResult.data
             : undefined,
           qualityControlUsed: options.useQualityControl ?? false,
+          // Автоматически добавляем флаг для логирования событий
+          shouldLogEvent: classification.needsLogging,
         },
       };
 

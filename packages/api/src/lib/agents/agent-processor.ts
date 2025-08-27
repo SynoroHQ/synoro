@@ -34,6 +34,7 @@ export class AgentMessageProcessor {
       totalSteps: number;
       qualityScore: number;
       processingTime: number;
+      shouldLogEvent: boolean;
     };
   }> {
     try {
@@ -82,6 +83,8 @@ export class AgentMessageProcessor {
           totalSteps: orchestrationResult.totalSteps,
           qualityScore: orchestrationResult.qualityScore,
           processingTime: orchestrationResult.metadata.processingTime,
+          // Передаем флаг для автоматического логирования событий
+          shouldLogEvent: orchestrationResult.metadata.shouldLogEvent,
         },
       };
     } catch (error) {
@@ -98,6 +101,7 @@ export class AgentMessageProcessor {
           totalSteps: 1,
           qualityScore: 0.3,
           processingTime: 0,
+          shouldLogEvent: false,
         },
       };
     }

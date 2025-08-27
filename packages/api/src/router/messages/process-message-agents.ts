@@ -35,6 +35,7 @@ const ProcessMessageWithAgentsResponse = ProcessMessageResponse.safeExtend({
       qualityScore: z.number(),
       processingTime: z.number(),
       processingMode: z.enum(["agents"]),
+      shouldLogEvent: z.boolean().optional(), // Флаг для автоматического логирования событий
     })
     .optional(),
 });
