@@ -7,15 +7,12 @@ export interface AgentContext {
   chatId?: string;
   messageId?: string;
   channel: string;
-  metadata?: Record<string, AttributeValue>;
+  metadata?: Record<string, unknown>; // Упрощенная метаданная
 }
 
 export interface AgentTelemetry {
   functionId?: string;
-  metadata?: Record<string, AttributeValue> & {
-    langfuseTraceId?: string;
-    langfuseUpdateParent?: boolean;
-  };
+  metadata?: Record<string, unknown>; // Упрощенная метаданная без langfuse
 }
 
 export interface AgentResult<T = unknown> {

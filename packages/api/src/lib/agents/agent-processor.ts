@@ -84,7 +84,7 @@ export class AgentMessageProcessor {
           qualityScore: orchestrationResult.qualityScore,
           processingTime: orchestrationResult.metadata.processingTime,
           // Передаем флаг для автоматического логирования событий
-          shouldLogEvent: orchestrationResult.metadata.shouldLogEvent,
+          shouldLogEvent: orchestrationResult.metadata.shouldLogEvent ?? false,
         },
       };
     } catch (error) {

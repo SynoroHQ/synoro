@@ -52,6 +52,7 @@ export interface ProcessAgentMessageResult {
     qualityScore: number;
     processingTime: number;
     processingMode: "agents";
+    shouldLogEvent: boolean;
   };
 }
 
@@ -154,7 +155,7 @@ export async function processMessageWithAgents(
     const result = await processor.processMessage(
       text,
       {
-        userId: userId || undefined,
+        userId: userId ?? undefined,
         chatId,
         messageId,
         channel,
@@ -210,7 +211,6 @@ export async function processMessageWithAgents(
         ? {
             ...result.agentMetadata,
             processingMode: "agents",
-            shouldLogEvent: result.agentMetadata.shouldLogEvent,
           }
         : {
             agentsUsed: ["agent-processor"],

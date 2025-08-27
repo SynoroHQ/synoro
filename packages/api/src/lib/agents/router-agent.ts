@@ -267,6 +267,9 @@ export class RouterAgent extends AbstractAgent {
         experimental_telemetry: {
           isEnabled: true,
           ...this.createTelemetry("route", task, telemetry),
+          metadata: { 
+            operation: "route"
+          },
         },
       });
 

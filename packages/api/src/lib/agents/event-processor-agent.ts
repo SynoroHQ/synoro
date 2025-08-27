@@ -418,6 +418,9 @@ export class EventProcessorAgent extends AbstractAgent {
             experimental_telemetry: {
               isEnabled: true,
               ...this.createTelemetry("generate-advice", task, telemetry),
+              metadata: { 
+                operation: "generate-advice"
+              },
             },
           });
           advice = adviceText;
