@@ -245,13 +245,7 @@ export class RouterAgent extends AbstractAgent {
 - data-analyst: Выполняет аналитические запросы и рекомендации по визуализации
 - task-orchestrator: Координирует сложные задачи, требующие нескольких агентов
 - quality-evaluator: Оценивает и улучшает качество ответов
-
-ПРАВИЛА ВЫБОРА:
-1. Для простых вопросов и обычного общения — general-assistant (или qa-specialist при вопросах о продукте)
-2. Для событий/покупок — event-processor; для дел/задач — task-manager
-3. Для аналитики данных — data-analyst
-4. Для сложных задач — task-orchestrator
-5. Для улучшения качества — quality-evaluator`;
+- telegram-formatter: Форматирует ответы для Telegram с использованием Markdown и эмодзи`;
 
     const prompt = `Выбери агента для обработки сообщения: "${task.input}"
 
@@ -267,8 +261,8 @@ export class RouterAgent extends AbstractAgent {
         experimental_telemetry: {
           isEnabled: true,
           ...this.createTelemetry("route", task, telemetry),
-          metadata: { 
-            operation: "route"
+          metadata: {
+            operation: "route",
           },
         },
       });

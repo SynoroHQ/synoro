@@ -269,8 +269,41 @@ export class AgentManager {
         },
       };
 
+      // 8. Форматируем ответ для Telegram, если это Telegram канал
+      if (context.channel === "telegram" && finalResponse) {
+        console.log("📱 Formatting response for Telegram...");
+
+        const telegramFormatter = this.getAgent("telegram-formatter");
+        if (telegramFormatter) {
+          const formattingTask = this.createAgentTask(
+            finalResponse,
+            "telegram-formatting",
+            context,
+            1,
+          );
+
+          try {
+            const formattingResult = await telegramFormatter.process(
+              formattingTask,
+              telemetry,
+            );
+            if (formattingResult.success && formattingResult.data) {
+              result.finalResponse = formattingResult.data as string;
+              agentsUsed.push(telegramFormatter.name);
+              totalSteps++;
+              console.log("✅ Response formatted for Telegram");
+            }
+          } catch (error) {
+            console.warn(
+              "⚠️ Telegram formatting failed, using original response:",
+              error,
+            );
+          }
+        }
+      }
+
       console.log(
-        `✅ Processing completed in ${result.metadata.processingTime}ms`,
+        `✅ Processing completed in ${Date.now() - startTime}ms with ${totalSteps} steps`,
       );
       console.log(`📊 Agents used: ${agentsUsed.join(" → ")}`);
       console.log(`⭐ Quality score: ${qualityScore.toFixed(2)}`);

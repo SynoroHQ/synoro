@@ -10,11 +10,13 @@ import { AbstractAgent } from "./base-agent";
 
 export class TelegramFormatterAgent extends AbstractAgent {
   name = "Telegram Formatter";
-  description = "Агент для форматирования ответов для Telegram с использованием AI и Markdown";
+  description =
+    "Агент для форматирования ответов для Telegram с использованием AI и Markdown";
   capabilities: AgentCapability[] = [
     {
       name: "Text Formatting",
-      description: "Форматирование текста для Telegram с использованием Markdown",
+      description:
+        "Форматирование текста для Telegram с использованием Markdown",
       category: "formatting",
       confidence: 0.95,
     },
@@ -36,9 +38,17 @@ export class TelegramFormatterAgent extends AbstractAgent {
     super("gpt-5-nano", 0.3);
   }
 
-  canHandle(_task: AgentTask): Promise<boolean> {
-    // Агент может обрабатывать задачи форматирования
-    return Promise.resolve(true);
+  canHandle(task: AgentTask): Promise<boolean> {
+    // Агент может обрабатывать задачи форматирования и задачи для Telegram
+    const isFormattingTask =
+      task.type === "telegram-formatting" ||
+      task.type === "formatting" ||
+      task.type === "telegram-response";
+
+    const isTelegramChannel = task.context?.channel === "telegram";
+
+    // Всегда участвуем для Telegram канала или задач форматирования
+    return Promise.resolve(isFormattingTask || isTelegramChannel);
   }
 
   async process(

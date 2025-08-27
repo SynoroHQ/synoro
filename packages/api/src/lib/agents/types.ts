@@ -12,7 +12,7 @@ export interface AgentContext {
 
 export interface AgentTelemetry {
   functionId?: string;
-  metadata?: Record<string, unknown>; // Упрощенная метаданная без langfuse
+  metadata?: Record<string, AttributeValue>; // Упрощенная метаданная без langfuse
 }
 
 export interface AgentResult<T = unknown> {
