@@ -354,33 +354,22 @@ export class TelegramFormatter {
    * Экранирует специальные символы для MarkdownV2
    */
   private escapeMarkdownV2(text: string): string {
-    const specialChars = [
-      "_",
-      "*",
-      "[",
-      "]",
-      "(",
-      ")",
-      "~",
-      "`",
-      ">",
-      "#",
-      "+",
-      "-",
-      "=",
-      "|",
-      "{",
-      "}",
-      ".",
-      "!",
-    ];
+    // 1) защитим инлайн‑код: `...`
+    const parts = text.split(/(`[^`]*`)/g);
+    const esc = (s: string) =>
+      s
+        // сохраняем наши маркеры **...** и цитаты в начале строки
+        .replace(/\*\*([^*]+)\*\*/g, "§§$1§§")
+        .replace(/^\s*> /gm, "§Q ")
+        // экранируем спецсимволы, НО не трогаем `*`, '`' и '>' (наши маркеры)
+        .replace(/[_\[\]()~#+\-=|{}.!]/g, "\\$&")
+        // возвращаем маркеры
+        .replace(/§§([^§]+)§§/g, "**$1**")
+        .replace(/^§Q /gm, "> ");
 
-    let escaped = text;
-    for (const char of specialChars) {
-      escaped = escaped.replace(new RegExp(`\\${char}`, "g"), `\\${char}`);
-    }
-
-    return escaped;
+    return parts
+      .map((seg) => (seg.startsWith("`") && seg.endsWith("`") ? seg : esc(seg)))
+      .join("");
   }
 
   /**
