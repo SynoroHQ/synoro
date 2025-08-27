@@ -141,6 +141,12 @@ export class RouterAgent extends AbstractAgent {
 
       // Fallback классификация с помощью AI
       try {
+        const telemetryData = this.createTelemetry(
+          "fallback-classification",
+          task,
+          telemetry,
+        );
+
         const { text: fallbackClassification } = await generateText({
           model: this.getModel(),
           system: `Ты - эксперт по классификации сообщений. Классифицируй сообщение по типам: question, event, chat, complex_task, irrelevant.
@@ -157,8 +163,8 @@ export class RouterAgent extends AbstractAgent {
           temperature: 0.1,
           experimental_telemetry: {
             isEnabled: true,
-            ...this.createTelemetry("fallback-classification", task, telemetry),
-            metadata: { fallback: true },
+            ...telemetryData,
+            metadata: { ...(telemetryData.metadata ?? {}), fallback: true },
           },
         });
 
