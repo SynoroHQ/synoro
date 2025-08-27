@@ -67,7 +67,7 @@ export class DataAnalystAgent extends AbstractAgent {
         temperature: 0.1,
         experimental_telemetry: {
           isEnabled: true,
-          functionId: "analytics-request-detection",
+          ...this.createTelemetry("analytics-request-detection", task, telemetry),
           metadata: { inputLength: task.input.length },
         },
       });

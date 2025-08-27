@@ -60,7 +60,7 @@ export class ChatAssistantAgent extends AbstractAgent {
         temperature: 0.1,
         experimental_telemetry: {
           isEnabled: true,
-          functionId: "chat-message-detection",
+          ...this.createTelemetry("chat-message-detection", task, telemetry),
           metadata: { inputLength: task.input.length },
         },
       });

@@ -145,7 +145,7 @@ export class EventProcessorAgent extends AbstractAgent {
         temperature: 0.1,
         experimental_telemetry: {
           isEnabled: true,
-          functionId: "event-type-detection",
+          ...this.createTelemetry("event-type-detection", task, telemetry),
           metadata: { inputLength: task.input.length },
         },
       });
@@ -262,7 +262,7 @@ export class EventProcessorAgent extends AbstractAgent {
             temperature: 0.2,
             experimental_telemetry: {
               isEnabled: true,
-              functionId: "event-categorization",
+              ...this.createTelemetry("event-categorization", task, telemetry),
               metadata: { eventType, descriptionLength: description.length },
             },
           });
@@ -319,7 +319,7 @@ export class EventProcessorAgent extends AbstractAgent {
             temperature: 0.1,
             experimental_telemetry: {
               isEnabled: true,
-              functionId: "financial-extraction",
+              ...this.createTelemetry("financial-extraction", task, telemetry),
               metadata: { textLength: text.length },
             },
           });

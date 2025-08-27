@@ -66,7 +66,7 @@ export class FinancialAdvisorAgent extends AbstractAgent {
         temperature: 0.1,
         experimental_telemetry: {
           isEnabled: true,
-          functionId: "financial-request-detection",
+          ...this.createTelemetry("financial-request-detection", task, telemetry),
           metadata: { inputLength: task.input.length },
         },
       });

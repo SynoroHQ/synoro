@@ -157,7 +157,7 @@ export class RouterAgent extends AbstractAgent {
           temperature: 0.1,
           experimental_telemetry: {
             isEnabled: true,
-            functionId: "fallback-classification",
+            ...this.createTelemetry("fallback-classification", task, telemetry),
             metadata: { fallback: true },
           },
         });

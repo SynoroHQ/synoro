@@ -37,9 +37,9 @@ export class AgentMessageProcessor {
     };
   }> {
     try {
-      // Формируем телеметрию
+      // Формируем телеметрию для основного процессора
       const telemetry = {
-        functionId: "agent-processing",
+        functionId: "agent-processor-main",
         metadata: {
           ...context.metadata,
           textLength: text.length,

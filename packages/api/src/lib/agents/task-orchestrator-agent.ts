@@ -164,7 +164,7 @@ export class TaskOrchestratorAgent extends AbstractAgent {
         temperature: 0.2,
         experimental_telemetry: {
           isEnabled: true,
-          functionId: "task-complexity-analysis",
+          ...this.createTelemetry("task-complexity-analysis", task, telemetry),
           metadata: { inputLength: task.input.length },
         },
       });
@@ -491,7 +491,7 @@ export class TaskOrchestratorAgent extends AbstractAgent {
         temperature: 0.2,
         experimental_telemetry: {
           isEnabled: true,
-          functionId: "step-quality-evaluation",
+          ...this.createTelemetry("step-quality-evaluation", task, telemetry),
           metadata: { stepId: step.id },
         },
       });

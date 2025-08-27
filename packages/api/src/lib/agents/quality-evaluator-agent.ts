@@ -137,7 +137,7 @@ ${context ? `Дополнительный контекст: ${JSON.stringify(con
         temperature: this.defaultTemperature,
         experimental_telemetry: {
           isEnabled: true,
-          functionId: "quality-evaluation",
+          ...this.createTelemetry("quality-evaluation", task, telemetry),
           metadata: {
             ...telemetry?.metadata,
             originalInput: originalInput.substring(0, 100),
@@ -209,7 +209,7 @@ ${evaluation.suggestions.join("\n- ")}
         temperature: 0.5,
         experimental_telemetry: {
           isEnabled: true,
-          functionId: "response-improvement",
+          ...this.createTelemetry("response-improvement", task, telemetry),
           metadata: {
             ...telemetry?.metadata,
             originalQuality: evaluation.overallScore,

@@ -66,7 +66,7 @@ export class TaskManagerAgent extends AbstractAgent {
         temperature: 0.1,
         experimental_telemetry: {
           isEnabled: true,
-          functionId: "task-management-detection",
+          ...this.createTelemetry("task-management-detection", task, telemetry),
           metadata: { inputLength: task.input.length },
         },
       });
