@@ -3,6 +3,9 @@ import { AgentManager } from "./agent-manager";
 // Экспорт всех типов
 export type * from "./types";
 
+// Экспорт схем
+export * from "./schemas";
+
 // Экспорт базового класса агента
 export { AbstractAgent } from "./base-agent";
 

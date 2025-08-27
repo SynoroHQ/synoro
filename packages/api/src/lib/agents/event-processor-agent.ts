@@ -1,4 +1,4 @@
-import { generateObject, generateText, tool } from "ai";
+import { generateText, tool } from "ai";
 import { z } from "zod";
 
 import { getPromptSafe, PROMPT_KEYS } from "@synoro/prompts";
@@ -11,39 +11,12 @@ import type {
 } from "./types";
 import { parseAIJsonResponseWithSchema } from "../utils/ai-response-parser";
 import { AbstractAgent } from "./base-agent";
-
-// Схемы для структурированного парсинга событий
-const eventSchema = z.object({
-  type: z.enum([
-    "purchase",
-    "task",
-    "meeting",
-    "note",
-    "expense",
-    "income",
-    "other",
-  ]),
-  description: z.string(),
-  amount: z.number().optional(),
-  currency: z.string().optional(),
-  date: z.string().optional(),
-  category: z.string().optional(),
-  location: z.string().optional(),
-  tags: z.array(z.string()).optional(),
-  confidence: z
-    .number()
-    .min(0)
-    .max(1)
-    .describe("Уверенность в парсинге события"),
-  needsAdvice: z.boolean(),
-  reasoning: z.string(),
-});
-
-const adviceRequestSchema = z.object({
-  eventContext: z.string(),
-  adviceType: z.enum(["financial", "productivity", "health", "general"]),
-  priority: z.enum(["low", "medium", "high"]),
-});
+import {
+  categorizationSchema,
+  eventAnalysisSchema,
+  eventSchema,
+  financialSchema,
+} from "./schemas/event-schemas";
 
 /**
  * Специализированный агент для обработки и парсинга событий
@@ -144,23 +117,7 @@ export class EventProcessorAgent extends AbstractAgent {
         },
       });
 
-      // Парсим JSON ответ
-      const eventAnalysisSchema = z.object({
-        isEvent: z.boolean(),
-        eventType: z.enum([
-          "purchase",
-          "task",
-          "meeting",
-          "note",
-          "expense",
-          "income",
-          "maintenance",
-          "other",
-          "none",
-        ]),
-        confidence: z.number().min(0).max(1),
-        reasoning: z.string(),
-      });
+      // Парсим JSON ответ используя импортированную схему
 
       const parseResult = parseAIJsonResponseWithSchema(
         eventAnalysisText,
@@ -291,12 +248,7 @@ export class EventProcessorAgent extends AbstractAgent {
             },
           });
 
-          // Парсим JSON ответ
-          const categorizationSchema = z.object({
-            category: z.string(),
-            confidence: z.number().min(0).max(1),
-            reasoning: z.string(),
-          });
+          // Парсим JSON ответ используя импортированную схему
 
           const parseResult = parseAIJsonResponseWithSchema(
             categorizationText,
@@ -368,12 +320,7 @@ export class EventProcessorAgent extends AbstractAgent {
             },
           });
 
-          // Парсим JSON ответ
-          const financialSchema = z.object({
-            amount: z.number().nullable(),
-            currency: z.enum(["RUB", "USD", "EUR"]).nullable(),
-            confidence: z.number().min(0).max(1),
-          });
+          // Парсим JSON ответ используя импортированную схему
 
           const parseResult = parseAIJsonResponseWithSchema(
             financialText,
@@ -417,7 +364,7 @@ export class EventProcessorAgent extends AbstractAgent {
         
 Извлеки всю доступную информацию и структурируй её в формате JSON согласно этой схеме:
 {
-  "type": "purchase|task|meeting|note|expense|income|other",
+  "type": "purchase|task|meeting|note|expense|income|maintenance|other",
   "description": "описание события",
   "amount": число_или_null,
   "currency": "RUB|USD|EUR_или_null",

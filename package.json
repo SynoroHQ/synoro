@@ -10,7 +10,7 @@
     "clean:workspaces": "turbo run clean",
     "db:push": "turbo -F @synoro/db push",
     "db:studio": "turbo -F @synoro/db studio",
-    "dev": "turbo watch dev --continue --filter=@synoro/tg-bot --filter=@synoro/api",
+    "dev": "turbo watch dev --continue --filter=@synoro/api --filter=@synoro/tg-bot",
     "dev:api": "turbo watch dev --continue --filter=@synoro/api",
     "dev:bot": "turbo watch dev --continue --filter=@synoro/tg-bot",
     "format": "turbo run format --continue -- --cache --cache-location .cache/.prettiercache",
