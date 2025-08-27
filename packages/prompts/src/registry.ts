@@ -10,6 +10,7 @@ import parser_task from "./prompts/parser.task";
 import qa_specialist from "./prompts/qa-specialist";
 import task_manager from "./prompts/task-manager";
 import task_orchestrator from "./prompts/task-orchestrator";
+import telegram_formatter from "./prompts/telegram-formatter";
 
 export const registry: Record<string, PromptDefinition> = {
   [assistant.key]: assistant,
@@ -23,4 +24,5 @@ export const registry: Record<string, PromptDefinition> = {
   [qa_specialist.key]: qa_specialist,
   [task_manager.key]: task_manager,
   [task_orchestrator.key]: task_orchestrator,
+  [telegram_formatter.key]: telegram_formatter,
 };

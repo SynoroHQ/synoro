@@ -20,6 +20,7 @@ export { TaskManagerAgent } from "./task-manager-agent";
 export { DataAnalystAgent } from "./data-analyst-agent";
 export { FinancialAdvisorAgent } from "./financial-advisor-agent";
 export { ChatAssistantAgent } from "./chat-assistant-agent";
+export { TelegramFormatterAgent } from "./telegram-formatter-agent";
 
 // Экспорт менеджера агентов
 export { AgentManager } from "./agent-manager";

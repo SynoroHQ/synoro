@@ -10,8 +10,8 @@ import type {
   AgentTask,
   AgentTelemetry,
 } from "./types";
-import { AgentManager } from "./agent-manager";
 import { AbstractAgent } from "./base-agent";
+import { globalAgentRegistry } from "./agent-registry";
 
 // Утилита для компактного форматирования ошибок Zod
 function formatZodIssues(error: z.ZodError): string {
@@ -364,9 +364,8 @@ export class TaskOrchestratorAgent extends AbstractAgent {
     telemetry?: AgentTelemetry,
   ): Promise<StepResult> {
     try {
-      // Получаем агента для выполнения этапа
-      const agentManager = new AgentManager();
-      const targetAgent = agentManager.getAgent(step.requiredAgent);
+      // Получаем агента для выполнения этапа из глобального реестра
+      const targetAgent = globalAgentRegistry.get(step.requiredAgent);
 
       if (!targetAgent) {
         console.warn(`Agent ${step.requiredAgent} not found, using fallback`);
