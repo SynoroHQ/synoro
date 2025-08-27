@@ -226,7 +226,7 @@ export class TaskOrchestratorAgent extends AbstractAgent {
       system: getPromptSafe(PROMPT_KEYS.TASK_ORCHESTRATOR),
       prompt: `Создай план выполнения задачи: "${task.input}"
 
-Контекст: пользователь ${task.context.userId || "anonymous"} в канале ${task.context.channel}
+Контекст: пользователь ${task.context?.userId || "anonymous"} в канале ${task.context?.channel || "unknown"}
 
 Определи этапы, их последовательность и ответственных агентов.
 
@@ -338,7 +338,10 @@ export class TaskOrchestratorAgent extends AbstractAgent {
         id: `${step.id}-${Date.now()}`,
         type: step.taskType || "general",
         input: step.description,
-        context: task.context,
+        context: task.context || {
+          userId: "anonymous",
+          channel: "unknown",
+        },
         priority:
           step.priority === "high" ? 1 : step.priority === "medium" ? 2 : 3,
         createdAt: new Date(),

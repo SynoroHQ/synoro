@@ -118,7 +118,7 @@ export class RouterAgent extends AbstractAgent {
 
     const prompt = `Проанализируй это сообщение: "${task.input}"
 
-Контекст: канал ${task.context.channel}, пользователь ${task.context.userId || "anonymous"}
+Контекст: канал ${task.context?.channel || "unknown"}, пользователь ${task.context?.userId || "anonymous"}
 
 Верни JSON с классификацией.`;
 

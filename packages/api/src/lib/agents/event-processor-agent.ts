@@ -360,7 +360,7 @@ export class EventProcessorAgent extends AbstractAgent {
         system: getPromptSafe(PROMPT_KEYS.EVENT_PROCESSOR),
         prompt: `Проанализируй и распарси это событие: "${task.input}"
         
-Контекст: пользователь ${task.context.userId || "anonymous"} в канале ${task.context.channel}
+Контекст: пользователь ${task.context?.userId || "anonymous"} в канале ${task.context?.channel || "unknown"}
         
 Извлеки всю доступную информацию и структурируй её в формате JSON согласно этой схеме:
 {

@@ -90,10 +90,10 @@ export abstract class AbstractAgent implements BaseAgent {
         agentName: this.name,
         taskType: task.type,
         taskId: task.id,
-        userId: task.context.userId ?? "anonymous",
-        channel: task.context.channel,
-        ...(task.context.chatId && { chatId: task.context.chatId }),
-        ...(task.context.messageId && { messageId: task.context.messageId }),
+        userId: task.context?.userId ?? "anonymous",
+        channel: task.context?.channel ?? "unknown",
+        ...(task.context?.chatId && { chatId: task.context.chatId }),
+        ...(task.context?.messageId && { messageId: task.context.messageId }),
       },
     };
   }
