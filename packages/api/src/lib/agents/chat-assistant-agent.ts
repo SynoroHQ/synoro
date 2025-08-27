@@ -27,7 +27,10 @@ export class ChatAssistantAgent extends AbstractAgent {
     super("gpt-5o", 0.8);
   }
 
-  async canHandle(task: AgentTask): Promise<boolean> {
+  async canHandle(
+    task: AgentTask,
+    telemetry?: AgentTelemetry,
+  ): Promise<boolean> {
     try {
       // Используем AI для определения типа сообщения для чата
       const { object: chatAnalysis } = await generateObject({

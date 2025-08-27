@@ -74,7 +74,7 @@ export class AgentManager {
   /**
    * Получение агента по ключу
    */
-  private getAgent(agentKey: string): BaseAgent | undefined {
+  getAgent(agentKey: string): BaseAgent | undefined {
     return this.agents.get(agentKey);
   }
 
@@ -242,13 +242,8 @@ export class AgentManager {
           finalResponse,
           options.maxQualityIterations ?? 2,
           options.targetQuality ?? 0.8,
-          {
-            classification,
-            routing,
-            agentData: this.isRecord(processingResult.data)
-              ? processingResult.data
-              : undefined,
-          },
+          processingTask,
+          context,
           telemetry,
         );
 

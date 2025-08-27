@@ -1,5 +1,6 @@
+import type { JSONSchema7 } from "json-schema";
 import { generateObject, generateText } from "ai";
-import { z } from "zod";
+import * as z from "zod";
 
 import { getPromptSafe, PROMPT_KEYS } from "@synoro/prompts";
 
@@ -118,7 +119,10 @@ export class TaskOrchestratorAgent extends AbstractAgent {
     super("gpt-5-mini", 0.3); // Более мощная модель для планирования
   }
 
-  async canHandle(task: AgentTask): Promise<boolean> {
+  async canHandle(
+    task: AgentTask,
+    telemetry?: AgentTelemetry,
+  ): Promise<boolean> {
     try {
       // Используем AI для определения сложности задачи
       const { object: taskAnalysis } = await generateObject({
@@ -246,7 +250,18 @@ export class TaskOrchestratorAgent extends AbstractAgent {
       temperature: this.defaultTemperature,
       experimental_output: {
         type: "object",
-        schema: orchestrationPlanSchema,
+        responseFormat: {
+          type: "json",
+          schema: z.toJSONSchema(orchestrationPlanSchema) as JSONSchema7,
+        },
+        parsePartial: async (options) => {
+          const parsedPlan = JSON.parse(options.text);
+          return { partial: parsedPlan };
+        },
+        parseOutput: async (options, context) => {
+          const parsedPlan = JSON.parse(options.text);
+          return parsedPlan;
+        },
       },
       experimental_telemetry: {
         isEnabled: true,
@@ -326,11 +341,7 @@ export class TaskOrchestratorAgent extends AbstractAgent {
         context: task.context,
         priority:
           step.priority === "high" ? 1 : step.priority === "medium" ? 2 : 3,
-        metadata: {
-          ...task.metadata,
-          stepId: step.id,
-          orchestration: true,
-        },
+        createdAt: new Date(),
       };
 
       // Выполняем задачу через агента
@@ -349,7 +360,7 @@ export class TaskOrchestratorAgent extends AbstractAgent {
       return {
         stepId: step.id,
         success: true,
-        result: agentResult.data,
+        result: agentResult.data as string,
         confidence: agentResult.confidence || 0.8,
         needsFollowUp: false,
       };
@@ -358,7 +369,7 @@ export class TaskOrchestratorAgent extends AbstractAgent {
       return {
         stepId: step.id,
         success: false,
-        result: `Ошибка выполнения: ${error.message}`,
+        result: `Ошибка выполнения: ${error instanceof Error ? error.message : "Неизвестная ошибка"}`,
         confidence: 0.2,
         needsFollowUp: true,
       };
@@ -396,7 +407,9 @@ export class TaskOrchestratorAgent extends AbstractAgent {
         for (const stepResult of parallelResults) {
           const quality = await this.evaluateStepQuality(
             stepResult,
-            stepResult,
+            plan.steps[0] as Step,
+            task,
+            telemetry,
           );
           overallQuality += quality.score;
         }
@@ -407,7 +420,12 @@ export class TaskOrchestratorAgent extends AbstractAgent {
           results.push(stepResult);
 
           // Оценка качества каждого этапа
-          const quality = await this.evaluateStepQuality(stepResult, step);
+          const quality = await this.evaluateStepQuality(
+            stepResult,
+            step,
+            task,
+            telemetry,
+          );
           overallQuality += quality.score;
 
           // Если качество низкое, можем попробовать улучшить
@@ -455,6 +473,8 @@ export class TaskOrchestratorAgent extends AbstractAgent {
   private async evaluateStepQuality(
     stepResult: StepResult,
     step: Step,
+    task: AgentTask,
+    telemetry?: AgentTelemetry,
   ): Promise<{
     score: number;
     needsImprovement: boolean;

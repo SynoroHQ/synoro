@@ -13,6 +13,7 @@ import {
   downloadTelegramFile,
   getUserIdentifier,
 } from "../utils/telegram-utils";
+import { formatForTelegram } from "../utils/telegram-formatter";
 
 /**
  * Обрабатывает аудио и голосовые сообщения
@@ -125,7 +126,17 @@ export async function handleAudio(ctx: Context): Promise<void> {
         result.response.length > room
           ? result.response.slice(0, room - 1) + "…"
           : result.response;
-      await ctx.reply(prefix + body);
+      
+      const formattedMessage = formatForTelegram(prefix + body, {
+        useEmojis: true,
+        useMarkdown: true,
+        addSeparators: true,
+      });
+      
+      await ctx.reply(formattedMessage.text, {
+        parse_mode: formattedMessage.parse_mode,
+        disable_web_page_preview: formattedMessage.disable_web_page_preview,
+      });
       return;
     }
 
@@ -137,7 +148,17 @@ export async function handleAudio(ctx: Context): Promise<void> {
       result.response.length > room
         ? result.response.slice(0, room - 1) + "…"
         : result.response;
-    await ctx.reply(prefix + body);
+    
+    const formattedMessage = formatForTelegram(prefix + body, {
+      useEmojis: true,
+      useMarkdown: true,
+      addSeparators: true,
+    });
+    
+    await ctx.reply(formattedMessage.text, {
+      parse_mode: formattedMessage.parse_mode,
+      disable_web_page_preview: formattedMessage.disable_web_page_preview,
+    });
     // Логируем результат обработки
     console.log(
       `✅ Аудио обработано: тип=${result.messageType?.type}, релевантность=${result.relevance?.relevant}`,

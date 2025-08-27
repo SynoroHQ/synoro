@@ -11,6 +11,7 @@ import {
   getUserIdentifier,
   isObviousSpam,
 } from "../utils/telegram-utils";
+import { formatForTelegram } from "../utils/telegram-formatter";
 
 /**
  * Обрабатывает текстовые сообщения
@@ -68,14 +69,25 @@ export async function handleText(ctx: Context): Promise<void> {
     }
 
     // Отправляем ответ пользователю
-    {
-      const MAX_TG_MESSAGE = 4096;
-      const reply =
-        result.response.length > MAX_TG_MESSAGE
-          ? result.response.slice(0, MAX_TG_MESSAGE - 1) + "…"
-          : result.response;
-      await ctx.reply(reply);
+    const MAX_TG_MESSAGE = 4096;
+    let reply = result.response;
+    
+    if (reply.length > MAX_TG_MESSAGE) {
+      reply = reply.slice(0, MAX_TG_MESSAGE - 1) + "…";
     }
+
+    // Форматируем ответ для Telegram
+    const formattedMessage = formatForTelegram(reply, {
+      useEmojis: true,
+      useMarkdown: true,
+      addSeparators: true,
+      maxLineLength: 80,
+    });
+
+    await ctx.reply(formattedMessage.text, {
+      parse_mode: formattedMessage.parse_mode,
+      disable_web_page_preview: formattedMessage.disable_web_page_preview,
+    });
     // Логируем результат обработки
     console.log(
       `✅ Сообщение обработано: тип=${result.messageType?.type}, релевантность=${result.relevance?.relevant}`,

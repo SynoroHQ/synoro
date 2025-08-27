@@ -86,7 +86,10 @@ export class EventProcessorAgent extends AbstractAgent {
     super("gpt-5-nano", 0.2); // Низкая температура для точного парсинга
   }
 
-  async canHandle(task: AgentTask): Promise<boolean> {
+  async canHandle(
+    task: AgentTask,
+    telemetry?: AgentTelemetry,
+  ): Promise<boolean> {
     try {
       // Используем AI для определения типа события
       const { object: eventAnalysis } = await generateObject({
@@ -203,7 +206,7 @@ export class EventProcessorAgent extends AbstractAgent {
   /**
    * Создает инструмент для категоризации событий
    */
-  private getCategorizationTool() {
+  private getCategorizationTool(task: AgentTask, telemetry?: AgentTelemetry) {
     return tool({
       description: "Автоматическая категоризация события на основе описания",
       inputSchema: z.object({
@@ -279,7 +282,10 @@ export class EventProcessorAgent extends AbstractAgent {
   /**
    * Создает инструмент для извлечения финансовой информации
    */
-  private getFinancialExtractionTool() {
+  private getFinancialExtractionTool(
+    task: AgentTask,
+    telemetry?: AgentTelemetry,
+  ) {
     return tool({
       description: "Извлечение суммы и валюты из текста",
       inputSchema: z.object({
@@ -347,9 +353,9 @@ export class EventProcessorAgent extends AbstractAgent {
       // Структурированный парсинг с помощью AI
 
       // Структурированный парсинг с помощью AI
-      const { object: structuredEvent } = await generateObject({
+      const { text } = await generateText({
         model: this.getModel(),
-        schema: eventSchema,
+
         system: getPromptSafe(PROMPT_KEYS.EVENT_PROCESSOR),
         prompt: `Проанализируй и распарси это событие: "${task.input}"
         
@@ -358,8 +364,8 @@ export class EventProcessorAgent extends AbstractAgent {
 Извлеки всю доступную информацию и структурируй её.`,
         temperature: this.defaultTemperature,
         tools: {
-          categorizeEvent: this.getCategorizationTool(),
-          extractFinancial: this.getFinancialExtractionTool(),
+          categorizeEvent: this.getCategorizationTool(task, telemetry),
+          extractFinancial: this.getFinancialExtractionTool(task, telemetry),
         },
         experimental_telemetry: {
           isEnabled: true,
@@ -367,10 +373,15 @@ export class EventProcessorAgent extends AbstractAgent {
         },
       });
 
+      const structuredEvent = eventSchema.safeParse(JSON.parse(text));
+      if (!structuredEvent.success) {
+        return this.createErrorResult("Failed to parse event");
+      }
+
       let advice = undefined;
 
       // Генерируем совет, если нужно
-      if (structuredEvent.needsAdvice) {
+      if (structuredEvent.data.needsAdvice) {
         try {
           const { text: adviceText } = await generateText({
             model: this.getModel(),
@@ -390,22 +401,22 @@ export class EventProcessorAgent extends AbstractAgent {
 
       // Комбинируем структурированные данные
       const combinedData = {
-        structured: structuredEvent,
+        structured: structuredEvent.data,
         metadata: {
           processingTimestamp: new Date().toISOString(),
           agentName: this.name,
-          confidence: structuredEvent.confidence,
+          confidence: structuredEvent.data.confidence,
         },
       };
 
       return this.createSuccessResult(
         {
-          parsedEvent: structuredEvent,
+          parsedEvent: structuredEvent.data,
           advice,
           structuredData: combinedData,
         },
-        structuredEvent.confidence,
-        `Parsed ${structuredEvent.type} event with confidence ${structuredEvent.confidence}`,
+        structuredEvent.data.confidence,
+        `Parsed ${structuredEvent.data.type} event with confidence ${structuredEvent.data.confidence}`,
       );
     } catch (error) {
       console.error("Error in event processor agent:", error);

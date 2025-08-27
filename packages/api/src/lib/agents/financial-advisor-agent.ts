@@ -33,7 +33,10 @@ export class FinancialAdvisorAgent extends AbstractAgent {
     super("gpt-5-mini", 0.6);
   }
 
-  async canHandle(task: AgentTask): Promise<boolean> {
+  async canHandle(
+    task: AgentTask,
+    telemetry?: AgentTelemetry,
+  ): Promise<boolean> {
     try {
       // Используем AI для определения типа финансового запроса
       const { object: financialAnalysis } = await generateObject({
@@ -66,7 +69,11 @@ export class FinancialAdvisorAgent extends AbstractAgent {
         temperature: 0.1,
         experimental_telemetry: {
           isEnabled: true,
-          ...this.createTelemetry("financial-request-detection", task, telemetry),
+          ...this.createTelemetry(
+            "financial-request-detection",
+            task,
+            telemetry,
+          ),
           metadata: { inputLength: task.input.length },
         },
       });
