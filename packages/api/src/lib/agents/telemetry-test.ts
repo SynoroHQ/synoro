@@ -1,7 +1,7 @@
-import { QASpecialistAgent } from "./qa-specialist-agent";
-import { EventProcessorAgent } from "./event-processor-agent";
+import type { AgentContext, AgentTask } from "./types";
 import { DataAnalystAgent } from "./data-analyst-agent";
-import type { AgentTask, AgentContext } from "./types";
+import { EventProcessorAgent } from "./event-processor-agent";
+import { QASpecialistAgent } from "./qa-specialist-agent";
 
 /**
  * Тест для демонстрации работы новой системы телеметрии
@@ -36,7 +36,7 @@ export function demonstrateTelemetrySystem() {
   const dataAgent = new DataAnalystAgent();
 
   console.log("🧪 Тестирование системы телеметрии агентов");
-  console.log("=" .repeat(50));
+  console.log("=".repeat(50));
 
   // Демонстрируем, как работает createTelemetry для каждого агента
   console.log("\n📊 QA Specialist Agent:");
@@ -46,20 +46,30 @@ export function demonstrateTelemetrySystem() {
   console.log(`  taskType: ${qaTelemetry.metadata?.taskType}`);
 
   console.log("\n📊 Event Processor Agent:");
-  const eventTelemetry = eventAgent["createTelemetry"]("test-operation", testTask);
+  const eventTelemetry = eventAgent["createTelemetry"](
+    "test-operation",
+    testTask,
+  );
   console.log(`  functionId: ${eventTelemetry.functionId}`);
   console.log(`  agentName: ${eventTelemetry.metadata?.agentName}`);
   console.log(`  taskType: ${eventTelemetry.metadata?.taskType}`);
 
   console.log("\n📊 Data Analyst Agent:");
-  const dataTelemetry = dataAgent["createTelemetry"]("test-operation", testTask);
+  const dataTelemetry = dataAgent["createTelemetry"](
+    "test-operation",
+    testTask,
+  );
   console.log(`  functionId: ${dataTelemetry.functionId}`);
   console.log(`  agentName: ${dataTelemetry.metadata?.agentName}`);
   console.log(`  taskType: ${dataTelemetry.metadata?.taskType}`);
 
   console.log("\n🔍 Примеры различных операций для QA агента:");
-  const operations = ["question-detection", "answer-generation", "system-search"];
-  operations.forEach(operation => {
+  const operations = [
+    "question-detection",
+    "answer-generation",
+    "system-search",
+  ];
+  operations.forEach((operation) => {
     const telemetry = qaAgent["createTelemetry"](operation, testTask);
     console.log(`  ${operation}: ${telemetry.functionId}`);
   });
