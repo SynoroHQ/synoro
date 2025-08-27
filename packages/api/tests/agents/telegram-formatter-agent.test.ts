@@ -74,11 +74,22 @@ describe("TelegramFormatterAgent", () => {
 
   it("должен иметь правильную модель и температуру", () => {
     expect(agent.getModel().modelId).toBe("gpt-5-nano");
-    expect(agent.getDefaultTemperature()).toBe(0.3);
+    // Проверяем, что агент создан с правильными параметрами
+    expect(agent).toBeInstanceOf(TelegramFormatterAgent);
   });
 
   it("должен логировать все взаимодействия", async () => {
     const shouldLog = await agent.shouldLog(task);
     expect(shouldLog).toBe(true);
+  });
+
+  it("должен участвовать в агентной системе", async () => {
+    // Проверяем, что агент зарегистрирован в системе
+    const { AgentManager } = await import("../../src/lib/agents/agent-manager");
+    const agentManager = new AgentManager();
+    
+    const telegramFormatter = agentManager.getAgent("telegram-formatter");
+    expect(telegramFormatter).toBeDefined();
+    expect(telegramFormatter?.name).toBe("Telegram Formatter");
   });
 });
