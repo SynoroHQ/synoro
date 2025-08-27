@@ -2,11 +2,11 @@ import type { Context } from "grammy";
 
 import { apiClient } from "../api/client";
 import { DEFAULT_AGENT_OPTIONS } from "../config/agents";
+import { formatForTelegram } from "../utils/telegram-formatter";
 import {
   createMessageContext,
   getUserIdentifier,
 } from "../utils/telegram-utils";
-import { formatForTelegram } from "../utils/telegram-formatter";
 
 /**
  * Обработчик команды /agents - переключение в агентный режим
@@ -55,7 +55,6 @@ export async function handleAgentsCommand(ctx: Context): Promise<void> {
 
     await ctx.reply(formattedMessage.text, {
       parse_mode: formattedMessage.parse_mode,
-      disable_web_page_preview: formattedMessage.disable_web_page_preview,
     });
   } catch (error) {
     console.error("Error in agents command:", error);
@@ -87,12 +86,11 @@ export async function handleAgentTestCommand(ctx: Context): Promise<void> {
         useEmojis: true,
         useMarkdown: true,
         addSeparators: true,
-      }
+      },
     );
 
     await ctx.reply(testMessageFormatted.text, {
       parse_mode: testMessageFormatted.parse_mode,
-      disable_web_page_preview: testMessageFormatted.disable_web_page_preview,
     });
 
     const result =
@@ -156,7 +154,6 @@ export async function handleAgentTestCommand(ctx: Context): Promise<void> {
         });
         await ctx.reply(formattedPart.text, {
           parse_mode: formattedPart.parse_mode,
-          disable_web_page_preview: formattedPart.disable_web_page_preview,
         });
       }
     } else {
@@ -167,7 +164,6 @@ export async function handleAgentTestCommand(ctx: Context): Promise<void> {
       });
       await ctx.reply(formattedResponse.text, {
         parse_mode: formattedResponse.parse_mode,
-        disable_web_page_preview: formattedResponse.disable_web_page_preview,
       });
     }
   } catch (error) {

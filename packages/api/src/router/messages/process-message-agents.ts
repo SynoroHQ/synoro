@@ -63,7 +63,6 @@ export const processMessageAgentsRouter = {
   // Обработка сообщений с агентами для Telegram бота
   processMessageFromTelegramWithAgents: botProcedure
     .input(ProcessMessageWithAgentsInput)
-    .output(ProcessMessageWithAgentsResponse)
     .mutation(async ({ ctx, input }) => {
       const telegramUserId = input.telegramUserId;
       if (!telegramUserId) {
