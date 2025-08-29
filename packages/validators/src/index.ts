@@ -21,3 +21,6 @@ export * from "./ai";
 
 // Environment validators
 export * from "./env";
+
+// Reminder validators
+export * from "./reminders";

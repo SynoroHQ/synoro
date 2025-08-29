@@ -1,8 +1,8 @@
 // Export schema
 export * from "./schema";
 
-// Export types
-export * from "./types";
+// Export types from validators
+export * from "./validators";
 
 // Export utilities
 export * from "./utils";
@@ -10,5 +10,5 @@ export * from "./utils";
 // Export constants
 export * from "./constants";
 
-// Export validators
+// Export validators (includes types)
 export * from "./validators";

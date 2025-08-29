@@ -44,11 +44,7 @@ export const reminderRecurrenceSchema = z.enum([
   "custom",
 ]);
 
-export const executionStatusSchema = z.enum([
-  "sent",
-  "failed",
-  "skipped",
-]);
+export const executionStatusSchema = z.enum(["sent", "failed", "skipped"]);
 
 export const notificationChannelSchema = z.enum([
   "email",
@@ -248,29 +244,38 @@ export const validateBulkOperation = (data: unknown) => {
 };
 
 // Бизнес-логика валидации
-export const validateReminderTime = (reminderTime: Date, recurrenceEndDate?: Date) => {
+export const validateReminderTime = (
+  reminderTime: Date,
+  recurrenceEndDate?: Date,
+) => {
   const now = new Date();
-  
+
   if (reminderTime < now) {
     throw new Error("Время напоминания не может быть в прошлом");
   }
-  
+
   if (recurrenceEndDate && recurrenceEndDate < reminderTime) {
-    throw new Error("Дата окончания повторения не может быть раньше времени напоминания");
+    throw new Error(
+      "Дата окончания повторения не может быть раньше времени напоминания",
+    );
   }
-  
+
   return true;
 };
 
 export const validateRecurrencePattern = (pattern: any, recurrence: string) => {
   if (recurrence === "custom" && !pattern) {
-    throw new Error("Паттерн повторения обязателен для пользовательского повторения");
+    throw new Error(
+      "Паттерн повторения обязателен для пользовательского повторения",
+    );
   }
-  
+
   if (pattern && recurrence !== "custom") {
-    throw new Error("Паттерн повторения может быть указан только для пользовательского повторения");
+    throw new Error(
+      "Паттерн повторения может быть указан только для пользовательского повторения",
+    );
   }
-  
+
   return true;
 };
 
@@ -278,12 +283,12 @@ export const validateTags = (tags: string[]) => {
   if (tags.length > 10) {
     throw new Error("Максимальное количество тегов: 10");
   }
-  
-  const invalidTags = tags.filter(tag => tag.length > 50);
+
+  const invalidTags = tags.filter((tag) => tag.length > 50);
   if (invalidTags.length > 0) {
     throw new Error("Теги не могут быть длиннее 50 символов");
   }
-  
+
   return true;
 };
 
@@ -304,9 +309,13 @@ export type ReminderMetadata = z.infer<typeof metadataSchema>;
 export type Reminder = z.infer<typeof reminderSchema>;
 export type ReminderUpdate = z.infer<typeof reminderUpdateSchema>;
 export type ReminderExecution = z.infer<typeof reminderExecutionSchema>;
-export type ReminderExecutionUpdate = z.infer<typeof reminderExecutionUpdateSchema>;
+export type ReminderExecutionUpdate = z.infer<
+  typeof reminderExecutionUpdateSchema
+>;
 export type ReminderTemplate = z.infer<typeof reminderTemplateSchema>;
-export type ReminderTemplateUpdate = z.infer<typeof reminderTemplateUpdateSchema>;
+export type ReminderTemplateUpdate = z.infer<
+  typeof reminderTemplateUpdateSchema
+>;
 
 export type ReminderFilters = z.infer<typeof reminderFiltersSchema>;
 export type ReminderSortOptions = z.infer<typeof reminderSortOptionsSchema>;

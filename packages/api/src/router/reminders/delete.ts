@@ -1,5 +1,6 @@
 import { TRPCError } from "@trpc/server";
-import { z } from "zod";
+
+import { reminderIdSchema } from "@synoro/db";
 
 import { ReminderService } from "../../lib/services/reminder-service";
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
@@ -12,11 +13,7 @@ export const deleteRemindersRouter = createTRPCRouter({
    * Удалить напоминание
    */
   reminder: protectedProcedure
-    .input(
-      z.object({
-        id: z.string().uuid("Некорректный ID напоминания"),
-      }),
-    )
+    .input(reminderIdSchema)
     .mutation(async ({ ctx, input }) => {
       try {
         const success = await reminderService.deleteReminder(

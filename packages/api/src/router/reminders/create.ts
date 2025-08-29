@@ -1,7 +1,11 @@
 import { TRPCError } from "@trpc/server";
-import { z } from "zod";
 
 import type { NewReminder } from "@synoro/db";
+import {
+  reminderSchema,
+  createFromTextSchema,
+  type CreateFromTextRequest,
+} from "@synoro/db";
 
 import { SmartReminderAgent } from "../../lib/agents/smart-reminder-agent";
 import { ReminderService } from "../../lib/services/reminder-service";
@@ -11,39 +15,12 @@ import { createTRPCRouter, protectedProcedure } from "../../trpc";
 const reminderService = new ReminderService();
 const smartReminderAgent = new SmartReminderAgent();
 
-// Схемы валидации
-const createReminderSchema = z.object({
-  title: z
-    .string()
-    .min(1, "Название обязательно")
-    .max(200, "Название слишком длинное"),
-  description: z.string().optional(),
-  type: z.enum([
-    "task",
-    "event",
-    "deadline",
-    "meeting",
-    "call",
-    "follow_up",
-    "custom",
-  ]),
-  priority: z.enum(["low", "medium", "high", "urgent"]),
-  reminderTime: z.date(),
-  recurrence: z
-    .enum(["none", "daily", "weekly", "monthly", "yearly", "custom"])
-    .default("none"),
-  recurrencePattern: z.string().optional(),
-  recurrenceEndDate: z.date().optional(),
-  tags: z.array(z.string()).optional(),
-  chatId: z.string().optional(),
-});
-
 export const createRemindersRouter = createTRPCRouter({
   /**
    * Создать напоминание вручную
    */
   manual: protectedProcedure
-    .input(createReminderSchema)
+    .input(reminderSchema.omit({ userId: true }))
     .mutation(async ({ ctx, input }) => {
       try {
         const reminderData: NewReminder = {
@@ -67,14 +44,7 @@ export const createRemindersRouter = createTRPCRouter({
    * Создать напоминание из текста с помощью ИИ
    */
   fromText: protectedProcedure
-    .input(
-      z.object({
-        text: z.string().min(1, "Текст не может быть пустым"),
-        chatId: z.string().optional(),
-        timezone: z.string().default("Europe/Moscow"),
-        context: z.record(z.any()).optional(),
-      }),
-    )
+    .input(createFromTextSchema)
     .mutation(async ({ ctx, input }) => {
       try {
         const result = await smartReminderAgent.createReminderFromText({

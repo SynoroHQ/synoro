@@ -1,7 +1,11 @@
 import { TRPCError } from "@trpc/server";
-import { z } from "zod";
 
 import type { ReminderUpdate } from "@synoro/db";
+import {
+  reminderUpdateSchema,
+  completeReminderSchema,
+  snoozeReminderSchema,
+} from "@synoro/db";
 
 import { ReminderService } from "../../lib/services/reminder-service";
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
@@ -9,43 +13,14 @@ import { createTRPCRouter, protectedProcedure } from "../../trpc";
 // Инициализируем сервис
 const reminderService = new ReminderService();
 
-// Схема валидации обновления
-const updateReminderSchema = z.object({
-  title: z.string().min(1).max(200).optional(),
-  description: z.string().optional(),
-  type: z
-    .enum([
-      "task",
-      "event",
-      "deadline",
-      "meeting",
-      "call",
-      "follow_up",
-      "custom",
-    ])
-    .optional(),
-  priority: z.enum(["low", "medium", "high", "urgent"]).optional(),
-  reminderTime: z.date().optional(),
-  status: z
-    .enum(["pending", "active", "completed", "cancelled", "snoozed"])
-    .optional(),
-  recurrence: z
-    .enum(["none", "daily", "weekly", "monthly", "yearly", "custom"])
-    .optional(),
-  recurrencePattern: z.string().optional(),
-  recurrenceEndDate: z.date().optional(),
-  tags: z.array(z.string()).optional(),
-});
-
 export const updateRemindersRouter = createTRPCRouter({
   /**
    * Обновить напоминание
    */
   reminder: protectedProcedure
     .input(
-      z.object({
-        id: z.string().uuid("Некорректный ID напоминания"),
-        data: updateReminderSchema,
+      completeReminderSchema.extend({
+        data: reminderUpdateSchema,
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -81,11 +56,7 @@ export const updateRemindersRouter = createTRPCRouter({
    * Отметить напоминание как выполненное
    */
   complete: protectedProcedure
-    .input(
-      z.object({
-        id: z.string().uuid("Некорректный ID напоминания"),
-      }),
-    )
+    .input(completeReminderSchema)
     .mutation(async ({ ctx, input }) => {
       try {
         const reminder = await reminderService.completeReminder(
@@ -113,12 +84,7 @@ export const updateRemindersRouter = createTRPCRouter({
    * Отложить напоминание
    */
   snooze: protectedProcedure
-    .input(
-      z.object({
-        id: z.string().uuid("Некорректный ID напоминания"),
-        snoozeUntil: z.date(),
-      }),
-    )
+    .input(snoozeReminderSchema)
     .mutation(async ({ ctx, input }) => {
       try {
         const reminder = await reminderService.snoozeReminder(
