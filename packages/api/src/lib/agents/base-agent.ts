@@ -3,6 +3,7 @@ import { openai } from "@ai-sdk/openai";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { generateText } from "ai";
 
+import type { AgentContext as NewAgentContext } from "./agent-context";
 import type {
   AgentCapability,
   AgentResult,
@@ -10,7 +11,6 @@ import type {
   AgentTelemetry,
   BaseAgent,
 } from "./types";
-import type { AgentContext as NewAgentContext } from "./agent-context";
 
 // Инициализация AI провайдеров
 const oai = openai;
@@ -84,7 +84,7 @@ export abstract class AbstractAgent implements BaseAgent {
     baseTelemetry?: AgentTelemetry,
   ): AgentTelemetry {
     const context = task.context as NewAgentContext;
-    
+
     return {
       functionId:
         baseTelemetry?.functionId ?? this.generateFunctionId(operation),
@@ -97,20 +97,6 @@ export abstract class AbstractAgent implements BaseAgent {
         // Убираем лишние поля, оставляем только необходимые
         ...(context?.chatId && { chatId: context.chatId }),
         ...(context?.messageId && { messageId: context.messageId }),
-        
-        // Добавляем контекст разговора в телеметрию
-        ...(context?.metadata?.conversationContext && { 
-          conversationContext: context.metadata.conversationContext 
-        }),
-        ...(context?.metadata?.conversationHistory && { 
-          conversationHistory: context.metadata.conversationHistory 
-        }),
-        ...(context?.metadata?.conversationId && { 
-          conversationId: context.metadata.conversationId 
-        }),
-        ...(context?.metadata?.contextMessageCount && { 
-          contextMessageCount: context.metadata.contextMessageCount 
-        }),
       },
     };
   }

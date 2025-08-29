@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 
 import type { TRPCContext } from "../../trpc";
+import { AgentContext } from "../agents/agent-context";
 import { AgentMessageProcessor } from "../agents/agent-processor";
 import { MESSAGE_PROCESSING_CONFIG } from "../constants/message-processing";
 import {
@@ -14,7 +15,6 @@ import {
   formatExecutionTime,
   safeTruncateForLogging,
 } from "../utils/message-utils";
-import { AgentContext } from "../agents/agent-context";
 
 export interface ProcessAgentMessageParams {
   text: string;
@@ -149,7 +149,7 @@ export async function processMessageWithAgents(
       },
     });
 
-    // Создаем контекст для агентов с включением истории беседы
+    // Создаем контекст для агентов
     const agentContext: AgentContext = {
       userId: userId ?? undefined,
       chatId,
@@ -157,20 +157,6 @@ export async function processMessageWithAgents(
       channel,
       metadata: {
         ...commonMetadata,
-        // Добавляем контекст разговора для трейсинга
-        conversationContext: {
-          conversationId: conversationContext.conversationId,
-          totalMessages: conversationContext.totalMessages,
-          contextMessages: trimmedContext.length,
-          hasMoreMessages: conversationContext.hasMoreMessages,
-        },
-        // Добавляем историю сообщений для трейсинга
-        conversationHistory: trimmedContext.map(msg => ({
-          id: msg.id,
-          role: msg.role,
-          content: msg.content.text,
-          createdAt: msg.createdAt,
-        })),
       },
     };
 
@@ -178,15 +164,11 @@ export async function processMessageWithAgents(
     const agentProcessingStartTime = Date.now();
     const processor = getAgentProcessor();
 
-    const result = await processor.processMessage(
-      text,
-      agentContext,
-      {
-        useQualityControl: options.useQualityControl ?? true,
-        maxQualityIterations: options.maxQualityIterations ?? 2,
-        targetQuality: options.targetQuality ?? 0.8,
-      },
-    );
+    const result = await processor.processMessage(text, agentContext, {
+      useQualityControl: options.useQualityControl ?? true,
+      maxQualityIterations: options.maxQualityIterations ?? 2,
+      targetQuality: options.targetQuality ?? 0.8,
+    });
 
     const agentProcessingTime = formatExecutionTime(agentProcessingStartTime);
     console.log(`🚀 [AGENTS] Обработка агентами: ${agentProcessingTime}`);

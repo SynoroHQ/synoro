@@ -1,6 +1,6 @@
+import type { AgentContext } from "./agent-context";
 import type {
   AgentCapability,
-  AgentContext,
   AgentTask,
   AgentTelemetry,
   BaseAgent,

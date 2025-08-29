@@ -1,8 +1,5 @@
-import type { LanguageModel } from "ai";
-
-import { getActiveProvider, getModelName } from "../ai";
-import { AgentManager } from "./agent-manager";
 import type { AgentContext } from "./agent-context";
+import { AgentManager } from "./agent-manager";
 
 /**
  * Процессор сообщений с использованием мультиагентной системы

@@ -1,18 +1,12 @@
 import type { AttributeValue } from "@opentelemetry/api";
 import type { LanguageModel } from "ai";
 
-// Базовые типы для агентов
-export interface AgentContext {
-  userId?: string;
-  chatId?: string;
-  messageId?: string;
-  channel: string;
-  metadata?: Record<string, unknown>; // Упрощенная метаданная
-}
+// Импортируем AgentContext из отдельного файла
+import type { AgentContext } from "./agent-context";
 
 export interface AgentTelemetry {
   functionId?: string;
-  metadata?: Record<string, AttributeValue | undefined>;
+  metadata?: Record<string, AttributeValue>;
 }
 
 export interface AgentResult<T = unknown> {

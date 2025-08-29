@@ -1,20 +1,6 @@
 /**
- * Типы для контекста агентов с включением контекста разговора
+ * Типы для контекста агентов
  */
-
-export interface ConversationMessage {
-  id: string;
-  role: "user" | "assistant" | "system";
-  content: string;
-  createdAt: Date;
-}
-
-export interface ConversationContextInfo {
-  conversationId: string;
-  totalMessages: number;
-  contextMessages: number;
-  hasMoreMessages: boolean;
-}
 
 export interface AgentContext {
   userId?: string;
@@ -30,10 +16,6 @@ export interface AgentContext {
     messageId?: string;
     contextMessageCount?: number;
     agentMode?: boolean;
-    
-    // Контекст разговора для трейсинга
-    conversationContext?: ConversationContextInfo;
-    conversationHistory?: ConversationMessage[];
     
     // Дополнительные метаданные
     [key: string]: unknown;
