@@ -79,7 +79,6 @@ export async function handleText(ctx: Context): Promise<void> {
     const formattedMessage = formatForTelegram(reply, {
       useEmojis: true,
       useMarkdown: true,
-      addSeparators: true,
       maxLineLength: 80,
     });
 

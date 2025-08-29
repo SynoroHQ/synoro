@@ -1,14 +1,12 @@
 /**
- * Сервис форматирования ответов для Telegram
- * Делает сообщения красивыми и удобными для чтения пользователям
+ * Простой и эффективный сервис форматирования ответов для Telegram
+ * Делает сообщения читабельными без лишних украшений
  */
 
 export interface TelegramFormattingOptions {
   useEmojis?: boolean;
   useMarkdown?: boolean;
-  addSeparators?: boolean;
   maxLineLength?: number;
-  addContextInfo?: boolean;
 }
 
 export interface FormattedMessage {
@@ -18,15 +16,13 @@ export interface FormattedMessage {
 }
 
 /**
- * Основной класс для форматирования ответов Telegram
+ * Простой класс для форматирования ответов Telegram
  */
 export class TelegramFormatter {
   private defaultOptions: Required<TelegramFormattingOptions> = {
     useEmojis: true,
     useMarkdown: true,
-    addSeparators: true,
     maxLineLength: 80,
-    addContextInfo: false,
   };
 
   constructor(options?: Partial<TelegramFormattingOptions>) {
@@ -48,28 +44,18 @@ export class TelegramFormatter {
 
     let formattedText = response.trim();
 
-    // 1. Добавляем эмодзи для разных типов контента
+    // 1. Добавляем простые эмодзи для основных типов контента
     if (opts.useEmojis) {
-      formattedText = this.addContentEmojis(formattedText);
+      formattedText = this.addSimpleEmojis(formattedText);
     }
 
     // 2. Форматируем структуру текста
     formattedText = this.formatTextStructure(formattedText, opts);
 
-    // 3. Добавляем разделители
-    if (opts.addSeparators) {
-      formattedText = this.addSeparators(formattedText);
-    }
-
-    // 4. Добавляем контекстную информацию
-    if (opts.addContextInfo) {
-      formattedText = this.addContextInfo(formattedText);
-    }
-
-    // 5. Проверяем длину строк
+    // 3. Проверяем длину строк
     formattedText = this.wrapLongLines(formattedText, opts.maxLineLength);
 
-    // 6. Определяем режим парсинга
+    // 4. Определяем режим парсинга
     const parseMode = this.determineParseMode(formattedText, opts.useMarkdown);
 
     return {
@@ -83,82 +69,42 @@ export class TelegramFormatter {
   }
 
   /**
-   * Добавляет эмодзи для разных типов контента
+   * Добавляет простые эмодзи для основных типов контента
    */
-  private addContentEmojis(text: string): string {
-    // Определяем тип контента по ключевым словам
+  private addSimpleEmojis(text: string): string {
     const lowerText = text.toLowerCase();
 
-    if (
-      lowerText.includes("ошибка") ||
-      lowerText.includes("error") ||
-      lowerText.includes("не удалось")
-    ) {
+    // Только самые важные эмодзи - проверяем в порядке приоритета
+    if (lowerText.includes("ошибка") || lowerText.includes("error")) {
       return `❌ ${text}`;
     }
 
-    if (
-      lowerText.includes("успешно") ||
-      lowerText.includes("готово") ||
-      lowerText.includes("завершено")
-    ) {
+    if (lowerText.includes("успешно") || lowerText.includes("готово")) {
       return `✅ ${text}`;
     }
 
-    if (
-      lowerText.includes("внимание") ||
-      lowerText.includes("warning") ||
-      lowerText.includes("важно")
-    ) {
+    if (lowerText.includes("внимание") || lowerText.includes("важно")) {
       return `⚠️ ${text}`;
     }
 
-    if (
-      lowerText.includes("информация") ||
-      lowerText.includes("info") ||
-      lowerText.includes("справка")
-    ) {
-      return `ℹ️ ${text}`;
+    if (lowerText.includes("анализ") || lowerText.includes("статистика")) {
+      return `📊 ${text}`;
+    }
+
+    if (lowerText.includes("финанс") || lowerText.includes("деньги")) {
+      return `💰 ${text}`;
+    }
+
+    if (lowerText.includes("ответ") || lowerText.includes("решение")) {
+      return `💡 ${text}`;
     }
 
     if (lowerText.includes("вопрос") || lowerText.includes("question")) {
       return `❓ ${text}`;
     }
 
-    if (
-      lowerText.includes("ответ") ||
-      lowerText.includes("answer") ||
-      lowerText.includes("решение")
-    ) {
-      return `💡 ${text}`;
-    }
-
-    if (
-      lowerText.includes("анализ") ||
-      lowerText.includes("analysis") ||
-      lowerText.includes("статистика")
-    ) {
-      return `📊 ${text}`;
-    }
-
-    if (lowerText.includes("событие") || lowerText.includes("event")) {
-      return `📅 ${text}`;
-    }
-
-    if (
-      lowerText.includes("финанс") ||
-      lowerText.includes("деньги") ||
-      lowerText.includes("бюджет")
-    ) {
-      return `💰 ${text}`;
-    }
-
-    if (lowerText.includes("задача") || lowerText.includes("task")) {
-      return `📋 ${text}`;
-    }
-
-    // Если это обычный ответ без специальных ключевых слов
-    return `💬 ${text}`;
+    // Для обычных ответов не добавляем эмодзи
+    return text;
   }
 
   /**
@@ -170,32 +116,31 @@ export class TelegramFormatter {
   ): string {
     let formatted = text;
 
-    // 1. Форматируем заголовки
-    formatted = this.formatHeaders(formatted);
+    // 1. Форматируем заголовки (только очевидные)
+    formatted = this.formatSimpleHeaders(formatted);
 
     // 2. Форматируем списки
-    formatted = this.formatLists(formatted);
+    formatted = this.formatSimpleLists(formatted);
 
-    // 3. Форматируем блоки кода
-    formatted = this.formatCodeBlocks(formatted);
-
-    // 4. Форматируем цитаты
-    formatted = this.formatQuotes(formatted);
-
-    // 5. Добавляем переносы строк для лучшей читаемости
-    formatted = this.addLineBreaks(formatted);
+    // 3. Добавляем переносы строк для лучшей читаемости
+    formatted = this.addSimpleLineBreaks(formatted);
 
     return formatted;
   }
 
   /**
-   * Форматирует заголовки
+   * Форматирует только очевидные заголовки
    */
-  private formatHeaders(text: string): string {
-    // Ищем строки, которые выглядят как заголовки
-    return text.replace(/^(.{3,50})$/gm, (match) => {
-      // Если строка короткая и заканчивается двоеточием или не содержит знаков препинания
-      if (match.length < 50 && (match.endsWith(":") || !/[.!?]/.test(match))) {
+  private formatSimpleHeaders(text: string): string {
+    // Только строки, которые явно выглядят как заголовки
+    return text.replace(/^(.{3,40})$/gm, (match) => {
+      // Если строка короткая, заканчивается двоеточием и не содержит знаков препинания
+      if (
+        match.length < 40 &&
+        match.endsWith(":") &&
+        !/[.!?]/.test(match) &&
+        !match.includes("\n")
+      ) {
         return `**${match}**`;
       }
       return match;
@@ -205,7 +150,7 @@ export class TelegramFormatter {
   /**
    * Форматирует списки
    */
-  private formatLists(text: string): string {
+  private formatSimpleLists(text: string): string {
     // Форматируем маркированные списки
     text = text.replace(/^[-*•]\s+/gm, "• ");
 
@@ -216,92 +161,16 @@ export class TelegramFormatter {
   }
 
   /**
-   * Форматирует блоки кода
+   * Добавляет простые переносы строк
    */
-  private formatCodeBlocks(text: string): string {
-    // Ищем строки, которые выглядят как код (содержат технические термины)
-    const codePatterns = [
-      /\b[A-Z_]{3,}\b/g, // Константы
-      /\b[a-z]+\([^)]*\)/g, // Функции
-      /\b\d+\.\d+\.\d+\b/g, // Версии
-      /\b[A-Z][a-z]+[A-Z][a-z]+\b/g, // CamelCase
-    ];
-
-    codePatterns.forEach((pattern) => {
-      text = text.replace(pattern, (match) => `\`${match}\``);
-    });
-
-    return text;
-  }
-
-  /**
-   * Форматирует цитаты
-   */
-  private formatQuotes(text: string): string {
-    // Ищем строки в кавычках
-    return text.replace(/"([^"]+)"/g, '> "$1"');
-  }
-
-  /**
-   * Добавляет переносы строк для лучшей читаемости
-   */
-  private addLineBreaks(text: string): string {
+  private addSimpleLineBreaks(text: string): string {
     // Добавляем переносы после заголовков
     text = text.replace(/(\*\*[^*]+\*\*)/g, "$1\n");
 
-    // Добавляем переносы между абзацами
-    text = text.replace(/\n\n+/g, "\n\n");
-
-    // Добавляем переносы после списков
-    text = text.replace(/(• [^\n]+)\n/g, "$1\n\n");
+    // Убираем лишние пустые строки
+    text = text.replace(/\n\n\n+/g, "\n\n");
 
     return text;
-  }
-
-  /**
-   * Добавляет разделители
-   */
-  private addSeparators(text: string): string {
-    const lines = text.split("\n");
-    const formattedLines: string[] = [];
-
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
-      if (line) {
-        formattedLines.push(line);
-      }
-
-      // Добавляем разделитель после заголовков
-      if (line && line.includes("**") && line.length < 50) {
-        formattedLines.push("─".repeat(Math.min(line.length, 30)));
-      }
-
-      // Добавляем разделитель между основными секциями
-      if (
-        i < lines.length - 1 &&
-        line &&
-        (line.includes("💡") ||
-          line.includes("📊") ||
-          line.includes("📅") ||
-          line.includes("💰"))
-      ) {
-        formattedLines.push("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-      }
-    }
-
-    return formattedLines.join("\n");
-  }
-
-  /**
-   * Добавляет контекстную информацию
-   */
-  private addContextInfo(text: string): string {
-    const timestamp = new Date().toLocaleString("ru-RU", {
-      timeZone: "Europe/Moscow",
-      hour12: false,
-    });
-
-    return `${text}\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n📅 ${timestamp}`;
   }
 
   /**
@@ -401,40 +270,35 @@ export class TelegramFormatter {
       case "qa-specialist":
         return {
           useEmojis: true,
-          addSeparators: true,
-          addContextInfo: false,
+          useMarkdown: true,
         };
 
       case "financial":
       case "financial-advisor":
         return {
           useEmojis: true,
-          addSeparators: true,
-          addContextInfo: true,
+          useMarkdown: true,
         };
 
       case "analytics":
       case "data-analyst":
         return {
           useEmojis: true,
-          addSeparators: true,
-          addContextInfo: true,
+          useMarkdown: true,
         };
 
       case "event":
       case "event-processor":
         return {
           useEmojis: true,
-          addSeparators: true,
-          addContextInfo: true,
+          useMarkdown: true,
         };
 
       case "task":
       case "task-manager":
         return {
           useEmojis: true,
-          addSeparators: true,
-          addContextInfo: false,
+          useMarkdown: true,
         };
 
       default:
