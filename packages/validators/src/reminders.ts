@@ -1,7 +1,10 @@
 import { z } from "zod";
 
 // Базовые схемы
-export const cuid2Schema = z.string().min(1, "ID обязательно").max(25, "ID слишком длинный");
+export const cuid2Schema = z
+  .string()
+  .min(1, "ID обязательно")
+  .max(25, "ID слишком длинный");
 export const titleSchema = z
   .string()
   .min(1, "Название обязательно")

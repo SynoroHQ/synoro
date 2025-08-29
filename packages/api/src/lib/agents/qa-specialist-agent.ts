@@ -3,12 +3,7 @@ import { z } from "zod";
 
 import { getPromptSafe, PROMPT_KEYS } from "@synoro/prompts";
 
-import type {
-  AgentCapability,
-  AgentResult,
-  AgentTask,
-  AgentTelemetry,
-} from "./types";
+import type { AgentCapability, AgentResult, AgentTask } from "./types";
 import { AbstractAgent } from "./base-agent";
 
 /**
@@ -51,10 +46,7 @@ export class QASpecialistAgent extends AbstractAgent {
     super("gpt-5-nano", 0.4);
   }
 
-  async canHandle(
-    task: AgentTask,
-    telemetry?: AgentTelemetry,
-  ): Promise<boolean> {
+  async canHandle(task: AgentTask): Promise<boolean> {
     try {
       // Используем AI для определения типа сообщения
       const { object: messageAnalysis } = await generateObject({
@@ -161,7 +153,6 @@ export class QASpecialistAgent extends AbstractAgent {
   private async classifyQuestionSubtype(
     question: string,
     task: AgentTask,
-    telemetry?: AgentTelemetry,
   ): Promise<string> {
     try {
       const { object: classification } = await generateObject({
@@ -203,14 +194,14 @@ export class QASpecialistAgent extends AbstractAgent {
       return classification.subtype;
     } catch (error) {
       console.error("Error in AI question classification:", error);
-      return "general"; // Fallback
+      throw new Error("Ошибка классификации вопроса");
     }
   }
 
   /**
    * Создает инструмент для поиска информации о системе
    */
-  private getSystemInfoTool(task: AgentTask, telemetry?: AgentTelemetry) {
+  private getSystemInfoTool(task: AgentTask) {
     return tool({
       description: "Получение информации о возможностях системы Synoro",
       inputSchema: z.object({
@@ -242,20 +233,13 @@ export class QASpecialistAgent extends AbstractAgent {
     });
   }
 
-  async process(
-    task: AgentTask,
-    telemetry?: AgentTelemetry,
-  ): Promise<AgentResult<string>> {
+  async process(task: AgentTask): Promise<AgentResult<string>> {
     try {
       // Получаем системный промпт
       const assistantPrompt = getPromptSafe(PROMPT_KEYS.ASSISTANT);
 
       // Определяем подтип вопроса
-      const subtype = await this.classifyQuestionSubtype(
-        task.input,
-        task,
-        telemetry,
-      );
+      const subtype = await this.classifyQuestionSubtype(task.input, task);
 
       // Формируем историю беседы (пока без контекста)
       const conversationHistory = "";
@@ -288,7 +272,7 @@ export class QASpecialistAgent extends AbstractAgent {
         prompt: contextPrompt,
         temperature: this.defaultTemperature,
         tools: {
-          getSystemInfo: this.getSystemInfoTool(task, telemetry),
+          getSystemInfo: this.getSystemInfoTool(task),
         },
         experimental_telemetry: {
           isEnabled: true,

@@ -1,4 +1,5 @@
 import { createId } from "@paralleldrive/cuid2";
+import { relations } from "drizzle-orm";
 import {
   boolean,
   index,
@@ -7,6 +8,7 @@ import {
   pgTable,
   text,
   timestamp,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 
 export const userRole = pgEnum("user_role", ["user", "admin", "moderator"]);
@@ -27,12 +29,23 @@ export const user = pgTable(
   (t) => ({
     id: text("id").primaryKey().$defaultFn(createId),
     name: t.text().notNull(),
-    email: t.text().notNull().unique(),
-    emailVerified: boolean("email_verified").notNull().default(false),
+    email: t.text(), // Убираем .notNull() и .unique() для анонимных пользователей
+    emailVerified: boolean("email_verified").default(false), // Убираем .notNull() для анонимных пользователей
     image: t.text(),
     role: userRole("role").notNull().default("user"),
     status: userStatus("status").notNull().default("active"),
     lastLoginAt: timestamp("last_login_at", { withTimezone: true }),
+
+    // Поля для анонимных пользователей
+    isAnonymous: boolean("is_anonymous").notNull().default(false),
+    telegramChatId: text("telegram_chat_id"),
+    telegramUsername: text("telegram_username"),
+    telegramFirstName: text("telegram_first_name"),
+    telegramLastName: text("telegram_last_name"),
+    anonymousExpiresAt: timestamp("anonymous_expires_at", {
+      withTimezone: true,
+    }),
+
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -46,6 +59,17 @@ export const user = pgTable(
     index("user_role_idx").on(table.role),
     index("user_status_idx").on(table.status),
     index("user_created_at_idx").on(table.createdAt),
+
+    // Новые индексы для анонимных пользователей
+    index("user_anonymous_idx").on(table.isAnonymous),
+    index("user_telegram_chat_idx").on(table.telegramChatId),
+    index("user_anonymous_expires_idx").on(table.anonymousExpiresAt),
+
+    // Уникальный индекс для telegramChatId (только для анонимных пользователей)
+    uniqueIndex("user_telegram_chat_anonymous_uidx").on(
+      table.telegramChatId,
+      table.isAnonymous,
+    ),
   ],
 );
 

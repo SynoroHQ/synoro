@@ -74,7 +74,7 @@ const smartSuggestionsSchema = z.object({
       ]),
       suggestion: z.string(),
       confidence: z.number().min(0).max(1),
-      metadata: z.record(z.unknown()).optional(),
+      metadata: z.record(z.string(), z.unknown()).optional(),
     }),
   ),
 });
@@ -208,9 +208,27 @@ export class SmartReminderAgent extends AbstractAgent {
       }
 
       // Создаем напоминание
-      const userId = task.context?.userId!;
+      let userId = task.context?.userId;
+
+      // Если userId не указан, но есть telegramChatId, создаем анонимного пользователя
+      if (!userId && task.context?.telegramChatId) {
+        const { AnonymousUserService } = await import(
+          "../services/anonymous-user-service"
+        );
+        const anonymousUserService = new AnonymousUserService();
+
+        const anonymousUser =
+          await anonymousUserService.getOrCreateAnonymousUser({
+            telegramChatId: task.context.telegramChatId,
+          });
+
+        userId = anonymousUser.id;
+      }
+
       if (!userId) {
-        return this.createErrorResult("Не указан пользователь");
+        return this.createErrorResult(
+          "Не указан пользователь или telegramChatId",
+        );
       }
 
       const reminderData: Reminder = {
@@ -455,7 +473,6 @@ export class SmartReminderAgent extends AbstractAgent {
       priority: 1,
       createdAt: new Date(),
       context: {
-        userId: request.userId,
         chatId: request.chatId,
         timezone: request.timezone,
         ...request.context,

@@ -1,15 +1,19 @@
-import { and, desc, eq, gte, lte, or, sql } from "drizzle-orm";
+import { and, desc, eq, gte, lt, lte, or, sql } from "drizzle-orm";
+
+import type {
+  NewReminder,
+  Reminder,
+  ReminderFilters,
+  ReminderSortOptions,
+  ReminderUpdate,
+  ReminderWithExecutions,
+} from "@synoro/db/schemas/reminders";
 import { db } from "@synoro/db";
+import { user } from "@synoro/db/schemas/auth";
 import {
-  reminders,
   reminderExecutions,
+  reminders,
   reminderTemplates,
-  type Reminder,
-  type NewReminder,
-  type ReminderUpdate,
-  type ReminderFilters,
-  type ReminderSortOptions,
-  type ReminderWithExecutions,
 } from "@synoro/db/schemas/reminders";
 
 export class ReminderService {
@@ -51,7 +55,7 @@ export class ReminderService {
    */
   async getReminderWithExecutions(
     id: string,
-    userId: string
+    userId: string,
   ): Promise<ReminderWithExecutions | null> {
     const reminder = await this.getReminderById(id, userId);
     if (!reminder) return null;
@@ -74,7 +78,7 @@ export class ReminderService {
   async updateReminder(
     id: string,
     userId: string,
-    data: ReminderUpdate
+    data: ReminderUpdate,
   ): Promise<Reminder | null> {
     const [updated] = await db
       .update(reminders)
@@ -107,7 +111,7 @@ export class ReminderService {
     filters: ReminderFilters = {},
     sort: ReminderSortOptions = { field: "reminderTime", direction: "asc" },
     limit = 50,
-    offset = 0
+    offset = 0,
   ): Promise<Reminder[]> {
     let query = db.select().from(reminders).where(eq(reminders.userId, userId));
 
@@ -142,15 +146,15 @@ export class ReminderService {
       conditions.push(
         or(
           sql`${reminders.title} ILIKE ${`%${filters.search}%`}`,
-          sql`${reminders.description} ILIKE ${`%${filters.search}%`}`
-        )
+          sql`${reminders.description} ILIKE ${`%${filters.search}%`}`,
+        ),
       );
     }
 
     if (filters.tags?.length) {
       // Поиск по тегам в JSON поле
       conditions.push(
-        sql`${reminders.tags}::jsonb ?| array[${filters.tags.join(",")}]`
+        sql`${reminders.tags}::jsonb ?| array[${filters.tags.join(",")}]`,
       );
     }
 
@@ -159,7 +163,7 @@ export class ReminderService {
     // Применяем сортировку
     const sortField = reminders[sort.field];
     query = query.orderBy(
-      sort.direction === "desc" ? desc(sortField) : sortField
+      sort.direction === "desc" ? desc(sortField) : sortField,
     );
 
     // Применяем пагинацию
@@ -172,7 +176,7 @@ export class ReminderService {
    * Получить активные напоминания для отправки
    */
   async getActiveRemindersForExecution(
-    beforeTime: Date = new Date()
+    beforeTime: Date = new Date(),
   ): Promise<Reminder[]> {
     return await db
       .select()
@@ -184,9 +188,9 @@ export class ReminderService {
           eq(reminders.notificationSent, false),
           or(
             eq(reminders.snoozeUntil, null),
-            lte(reminders.snoozeUntil, beforeTime)
-          )
-        )
+            lte(reminders.snoozeUntil, beforeTime),
+          ),
+        ),
       )
       .orderBy(reminders.reminderTime);
   }
@@ -207,7 +211,7 @@ export class ReminderService {
   async snoozeReminder(
     id: string,
     userId: string,
-    snoozeUntil: Date
+    snoozeUntil: Date,
   ): Promise<Reminder | null> {
     const reminder = await this.getReminderById(id, userId);
     if (!reminder) return null;
@@ -227,7 +231,7 @@ export class ReminderService {
     status: "sent" | "failed" | "skipped",
     channel?: string,
     errorMessage?: string,
-    metadata?: Record<string, any>
+    metadata?: Record<string, any>,
   ): Promise<void> {
     await db.insert(reminderExecutions).values({
       reminderId,
@@ -255,7 +259,7 @@ export class ReminderService {
    */
   async createRecurringReminder(
     originalReminder: Reminder,
-    nextReminderTime: Date
+    nextReminderTime: Date,
   ): Promise<Reminder | null> {
     if (
       originalReminder.recurrence === "none" ||
@@ -337,7 +341,7 @@ export class ReminderService {
     userId: string,
     title: string,
     description?: string,
-    limit = 5
+    limit = 5,
   ): Promise<Reminder[]> {
     const searchText = `${title} ${description || ""}`.trim();
 
@@ -349,11 +353,127 @@ export class ReminderService {
           eq(reminders.userId, userId),
           or(
             sql`${reminders.title} ILIKE ${`%${searchText}%`}`,
-            sql`${reminders.description} ILIKE ${`%${searchText}%`}`
-          )
-        )
+            sql`${reminders.description} ILIKE ${`%${searchText}%`}`,
+          ),
+        ),
       )
       .orderBy(desc(reminders.createdAt))
       .limit(limit);
+  }
+
+  /**
+   * Получить напоминания для анонимного пользователя по Telegram Chat ID
+   */
+  async getRemindersByTelegramChatId(
+    telegramChatId: string,
+  ): Promise<Reminder[]> {
+    // Сначала находим пользователя по telegramChatId
+    const foundUser = await db
+      .select({ id: user.id })
+      .from(user)
+      .where(
+        and(
+          eq(user.telegramChatId, telegramChatId),
+          eq(user.isAnonymous, true),
+        ),
+      )
+      .limit(1);
+
+    if (!foundUser.length) {
+      return [];
+    }
+
+    return await db
+      .select()
+      .from(reminders)
+      .where(eq(reminders.userId, foundUser[0].id))
+      .orderBy(desc(reminders.reminderTime));
+  }
+
+  /**
+   * Создать напоминание для анонимного пользователя
+   */
+  async createReminderForAnonymousUser(
+    telegramChatId: string,
+    reminderData: Omit<NewReminder, "userId">,
+  ): Promise<Reminder> {
+    // Находим или создаем анонимного пользователя
+    const { AnonymousUserService } = await import("./anonymous-user-service");
+    const anonymousUserService = new AnonymousUserService();
+
+    const anonymousUser = await anonymousUserService.getOrCreateAnonymousUser({
+      telegramChatId,
+    });
+
+    // Создаем напоминание с userId анонимного пользователя
+    return await this.createReminder({
+      ...reminderData,
+      userId: anonymousUser.id,
+    });
+  }
+
+  /**
+   * Получить статистику напоминаний для анонимного пользователя
+   */
+  async getAnonymousUserReminderStats(telegramChatId: string): Promise<{
+    total: number;
+    pending: number;
+    completed: number;
+    overdue: number;
+  }> {
+    const foundUser = await db
+      .select({ id: user.id })
+      .from(user)
+      .where(
+        and(
+          eq(user.telegramChatId, telegramChatId),
+          eq(user.isAnonymous, true),
+        ),
+      )
+      .limit(1);
+
+    if (!foundUser.length) {
+      return { total: 0, pending: 0, completed: 0, overdue: 0 };
+    }
+
+    const userId = foundUser[0].id;
+    const now = new Date();
+
+    const [totalResult] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(reminders)
+      .where(eq(reminders.userId, userId));
+
+    const [pendingResult] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(reminders)
+      .where(
+        and(eq(reminders.userId, userId), eq(reminders.status, "pending")),
+      );
+
+    const [completedResult] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(reminders)
+      .where(
+        and(eq(reminders.userId, userId), eq(reminders.status, "completed")),
+      );
+
+    const [overdueResult] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(reminders)
+      .where(
+        and(
+          eq(reminders.userId, userId),
+          eq(reminders.status, "pending"),
+          lt(reminders.reminderTime, now),
+        ),
+      );
+
+    return {
+      total: totalResult?.count || 0,
+      pending: pendingResult?.count || 0,
+      completed: completedResult?.count || 0,
+      overdue: overdueResult?.count || 0,
+    };
   }
 }

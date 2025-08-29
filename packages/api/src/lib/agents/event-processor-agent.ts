@@ -64,10 +64,7 @@ export class EventProcessorAgent extends AbstractAgent {
     super("gpt-5-nano", 0.2); // Низкая температура для точного парсинга
   }
 
-  async canHandle(
-    task: AgentTask,
-    telemetry?: AgentTelemetry,
-  ): Promise<boolean> {
+  async canHandle(task: AgentTask): Promise<boolean> {
     try {
       // Используем AI для определения типа события
       const { text: eventAnalysisText } = await generateText({
@@ -186,7 +183,7 @@ export class EventProcessorAgent extends AbstractAgent {
   /**
    * Создает инструмент для категоризации событий
    */
-  private getCategorizationTool(task: AgentTask, telemetry?: AgentTelemetry) {
+  private getCategorizationTool(task: AgentTask) {
     return tool({
       description: "Автоматическая категоризация события на основе описания",
       inputSchema: z.object({
@@ -259,13 +256,13 @@ export class EventProcessorAgent extends AbstractAgent {
               "Failed to parse categorization response:",
               parseResult.error,
             );
-            return "прочее"; // Fallback
+            throw new Error("Ошибка категоризации события");
           }
 
           return parseResult.data.category;
         } catch (error) {
           console.error("Error in AI event categorization:", error);
-          return "прочее"; // Fallback
+          throw new Error("Ошибка категоризации события");
         }
       },
     });
@@ -274,10 +271,7 @@ export class EventProcessorAgent extends AbstractAgent {
   /**
    * Создает инструмент для извлечения финансовой информации
    */
-  private getFinancialExtractionTool(
-    task: AgentTask,
-    telemetry?: AgentTelemetry,
-  ) {
+  private getFinancialExtractionTool(task: AgentTask) {
     return tool({
       description: "Извлечение суммы и валюты из текста",
       inputSchema: z.object({
@@ -343,10 +337,7 @@ export class EventProcessorAgent extends AbstractAgent {
     });
   }
 
-  async process(
-    task: AgentTask,
-    telemetry?: AgentTelemetry,
-  ): Promise<
+  async process(task: AgentTask): Promise<
     AgentResult<{
       parsedEvent: any;
       advice?: string;
@@ -380,8 +371,8 @@ export class EventProcessorAgent extends AbstractAgent {
 ВАЖНО: Верни только валидный JSON без дополнительного текста.`,
         temperature: this.defaultTemperature,
         tools: {
-          categorizeEvent: this.getCategorizationTool(task, telemetry),
-          extractFinancial: this.getFinancialExtractionTool(task, telemetry),
+          categorizeEvent: this.getCategorizationTool(task),
+          extractFinancial: this.getFinancialExtractionTool(task),
         },
         experimental_telemetry: {
           isEnabled: true,
@@ -403,7 +394,7 @@ export class EventProcessorAgent extends AbstractAgent {
         return this.createErrorResult("Failed to parse event");
       }
 
-      let advice ;
+      let advice;
 
       // Генерируем совет, если нужно
       if (structuredEvent.data.needsAdvice) {

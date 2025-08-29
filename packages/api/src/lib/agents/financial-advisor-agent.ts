@@ -3,12 +3,7 @@ import { z } from "zod";
 
 import { getPromptSafe, PROMPT_KEYS } from "@synoro/prompts";
 
-import type {
-  AgentCapability,
-  AgentResult,
-  AgentTask,
-  AgentTelemetry,
-} from "./types";
+import type { AgentCapability, AgentResult, AgentTask } from "./types";
 import { AbstractAgent } from "./base-agent";
 
 export class FinancialAdvisorAgent extends AbstractAgent {
@@ -33,10 +28,7 @@ export class FinancialAdvisorAgent extends AbstractAgent {
     super("gpt-5-mini", 0.6);
   }
 
-  async canHandle(
-    task: AgentTask,
-    telemetry?: AgentTelemetry,
-  ): Promise<boolean> {
+  async canHandle(task: AgentTask): Promise<boolean> {
     try {
       // Используем AI для определения типа финансового запроса
       const { object: financialAnalysis } = await generateObject({
@@ -77,29 +69,11 @@ export class FinancialAdvisorAgent extends AbstractAgent {
       return financialAnalysis.isFinancialRequest;
     } catch (error) {
       console.error("Error in AI financial request detection:", error);
-      // Fallback к простой проверке
-      const input = task.input.toLowerCase();
-      return (
-        input.includes("финанс") ||
-        input.includes("деньги") ||
-        input.includes("бюджет") ||
-        input.includes("расход") ||
-        input.includes("доход") ||
-        input.includes("инвестиц") ||
-        input.includes("сбережен") ||
-        input.includes("экономия") ||
-        input.includes("планирование") ||
-        input.includes("cost") ||
-        input.includes("budget") ||
-        input.includes("expense")
-      );
+      throw new Error("Ошибка определения типа финансового запроса");
     }
   }
 
-  async process(
-    task: AgentTask,
-    telemetry?: AgentTelemetry,
-  ): Promise<AgentResult<string>> {
+  async process(task: AgentTask): Promise<AgentResult<string>> {
     const systemPrompt = getPromptSafe(PROMPT_KEYS.ASSISTANT);
 
     try {

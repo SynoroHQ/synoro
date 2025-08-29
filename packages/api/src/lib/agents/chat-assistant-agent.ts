@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { getPromptSafe, PROMPT_KEYS } from "@synoro/prompts";
 
-import type { AgentResult, AgentTask, AgentTelemetry } from "./types";
+import type { AgentResult, AgentTask } from "./types";
 import { AbstractAgent } from "./base-agent";
 
 export class ChatAssistantAgent extends AbstractAgent {
@@ -68,20 +68,7 @@ export class ChatAssistantAgent extends AbstractAgent {
       return chatAnalysis.isChatMessage;
     } catch (error) {
       console.error("Error in AI chat message detection:", error);
-      // Fallback к простой проверке
-      const input = task.input.toLowerCase();
-      return (
-        input.includes("привет") ||
-        input.includes("здравствуй") ||
-        input.includes("спасибо") ||
-        input.includes("как ты") ||
-        input.includes("hello") ||
-        input.includes("hi") ||
-        input.includes("thanks") ||
-        input.includes("bye") ||
-        input.includes("how are you") ||
-        input.length < 20
-      );
+      throw new Error("Ошибка определения типа сообщения для чата");
     }
   }
 

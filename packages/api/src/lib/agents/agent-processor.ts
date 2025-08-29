@@ -88,20 +88,8 @@ export class AgentMessageProcessor {
     } catch (error) {
       console.error("Error in agent message processing:", error);
 
-      // Fallback к простому ответу
-      return {
-        response:
-          "Извините, произошла ошибка при обработке сообщения. Попробуйте еще раз.",
-        parsed: null,
-        model: "gpt-5-nano",
-        agentMetadata: {
-          agentsUsed: ["error-handler"],
-          totalSteps: 1,
-          qualityScore: 0.3,
-          processingTime: 0,
-          shouldLogEvent: false,
-        },
-      };
+      // Пробрасываем ошибку дальше
+      throw error;
     }
   }
 

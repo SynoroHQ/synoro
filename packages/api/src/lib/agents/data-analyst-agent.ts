@@ -3,12 +3,7 @@ import { z } from "zod";
 
 import { getPromptSafe, PROMPT_KEYS } from "@synoro/prompts";
 
-import type {
-  AgentCapability,
-  AgentResult,
-  AgentTask,
-  AgentTelemetry,
-} from "./types";
+import type { AgentCapability, AgentResult, AgentTask } from "./types";
 import { AbstractAgent } from "./base-agent";
 
 export class DataAnalystAgent extends AbstractAgent {
@@ -75,19 +70,7 @@ export class DataAnalystAgent extends AbstractAgent {
       return requestAnalysis.isAnalyticsRequest;
     } catch (error) {
       console.error("Error in AI analytics request detection:", error);
-      // Fallback к простой проверке
-      const input = task.input.toLowerCase();
-      return (
-        input.includes("анализ") ||
-        input.includes("статистика") ||
-        input.includes("данные") ||
-        input.includes("отчет") ||
-        input.includes("метрики") ||
-        input.includes("trend") ||
-        input.includes("график") ||
-        input.includes("числа") ||
-        input.includes("расчет")
-      );
+      throw new Error("Ошибка определения типа аналитического запроса");
     }
   }
 

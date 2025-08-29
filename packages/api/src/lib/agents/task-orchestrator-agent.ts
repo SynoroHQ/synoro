@@ -128,23 +128,11 @@ export class TaskOrchestratorAgent extends AbstractAgent {
     },
   ];
 
-  private availableAgents = [
-    "qa-specialist",
-    "event-processor",
-    "data-analyst",
-    "financial-advisor",
-    "task-manager",
-    "chat-assistant",
-  ];
-
   constructor() {
     super("gpt-5-mini", 0.3); // Более мощная модель для планирования
   }
 
-  async canHandle(
-    task: AgentTask,
-    telemetry?: AgentTelemetry,
-  ): Promise<boolean> {
+  async canHandle(task: AgentTask): Promise<boolean> {
     try {
       // Используем AI для определения сложности задачи
       const { object: taskAnalysis } = await generateObject({
@@ -204,35 +192,7 @@ export class TaskOrchestratorAgent extends AbstractAgent {
       return taskAnalysis.isComplexTask && isComplexType;
     } catch (error) {
       console.error("Error in AI task complexity analysis:", error);
-      // Fallback к простой проверке
-      const complexTaskKeywords = [
-        "анализ",
-        "статистика",
-        "отчет",
-        "сравни",
-        "найди паттерн",
-        "оптимизируй",
-        "улучши",
-        "план",
-        "стратегия",
-        "исследование",
-        "несколько",
-        "комплексный",
-        "подробный",
-        "детальный",
-      ];
-
-      const text = task.input.toLowerCase();
-      const hasComplexPattern = complexTaskKeywords.some((keyword) =>
-        text.includes(keyword),
-      );
-      const isLongRequest = task.input.length > 100;
-
-      const isComplexType =
-        task.type === "complex_task" ||
-        task.type === "analysis" ||
-        task.type === "planning";
-      return (hasComplexPattern || isLongRequest) && isComplexType;
+      throw new Error("Ошибка анализа сложности задачи");
     }
   }
 
@@ -241,7 +201,6 @@ export class TaskOrchestratorAgent extends AbstractAgent {
    */
   private async createExecutionPlan(
     task: AgentTask,
-    telemetry?: AgentTelemetry,
   ): Promise<OrchestrationPlan> {
     const { text } = await generateText({
       model: this.getModel(),
@@ -322,37 +281,8 @@ export class TaskOrchestratorAgent extends AbstractAgent {
       return validatedPlan;
     } catch (error) {
       console.error("Failed to parse or validate plan:", error);
-      // Создаем fallback план
-      return this.createFallbackPlan(task);
+      throw new Error("Не удалось создать план выполнения задачи");
     }
-  }
-
-  /**
-   * Создает fallback план в случае ошибки парсинга
-   */
-  private createFallbackPlan(task: AgentTask): OrchestrationPlan {
-    return {
-      steps: [
-        {
-          id: "fallback-analysis",
-          description: "Анализ задачи и определение требований",
-          requiredAgent: "qa-specialist",
-          priority: "high" as const,
-          estimatedTime: "5-10 минут",
-        },
-        {
-          id: "fallback-execution",
-          description: "Выполнение основной задачи",
-          requiredAgent: "chat-assistant",
-          priority: "high" as const,
-          estimatedTime: "10-15 минут",
-        },
-      ],
-      totalSteps: 2,
-      executionType: "sequential" as const,
-      complexity: "medium" as const,
-      reasoning: "Создан базовый план из-за ошибки парсинга исходного плана",
-    };
   }
 
   /**
@@ -368,14 +298,7 @@ export class TaskOrchestratorAgent extends AbstractAgent {
       const targetAgent = globalAgentRegistry.get(step.requiredAgent);
 
       if (!targetAgent) {
-        console.warn(`Agent ${step.requiredAgent} not found, using fallback`);
-        return {
-          stepId: step.id,
-          success: false,
-          result: `Агент ${step.requiredAgent} недоступен`,
-          confidence: 0.3,
-          needsFollowUp: true,
-        };
+        throw new Error(`Агент ${step.requiredAgent} недоступен`);
       }
 
       // Создаем задачу для агента
@@ -437,7 +360,7 @@ export class TaskOrchestratorAgent extends AbstractAgent {
   > {
     try {
       // 1. Создаем план выполнения
-      const plan = await this.createExecutionPlan(task, telemetry);
+      const plan = await this.createExecutionPlan(task);
 
       // 2. Выполняем этапы согласно плану
       const results = [];
@@ -457,7 +380,6 @@ export class TaskOrchestratorAgent extends AbstractAgent {
             stepResult,
             plan.steps[0] as Step,
             task,
-            telemetry,
           );
           overallQuality += quality.score;
         }
@@ -472,7 +394,6 @@ export class TaskOrchestratorAgent extends AbstractAgent {
             stepResult,
             step,
             task,
-            telemetry,
           );
           overallQuality += quality.score;
 
@@ -488,12 +409,7 @@ export class TaskOrchestratorAgent extends AbstractAgent {
       }
 
       // 3. Создаем итоговый отчет
-      const finalSummary = await this.generateFinalSummary(
-        task,
-        plan,
-        results,
-        telemetry,
-      );
+      const finalSummary = await this.generateFinalSummary(task, plan, results);
 
       // Защита от деления на ноль при вычислении среднего качества
       const totalSteps = plan.steps.length;
@@ -522,7 +438,6 @@ export class TaskOrchestratorAgent extends AbstractAgent {
     stepResult: StepResult,
     step: Step,
     task: AgentTask,
-    telemetry?: AgentTelemetry,
   ): Promise<{
     score: number;
     needsImprovement: boolean;
@@ -584,7 +499,6 @@ export class TaskOrchestratorAgent extends AbstractAgent {
     task: AgentTask,
     plan: OrchestrationPlan,
     results: StepResult[],
-    telemetry?: AgentTelemetry,
   ): Promise<string> {
     const { text } = await generateText({
       model: this.getModel(),

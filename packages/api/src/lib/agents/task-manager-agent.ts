@@ -3,12 +3,7 @@ import { z } from "zod";
 
 import { getPromptSafe, PROMPT_KEYS } from "@synoro/prompts";
 
-import type {
-  AgentCapability,
-  AgentResult,
-  AgentTask,
-  AgentTelemetry,
-} from "./types";
+import type { AgentCapability, AgentResult, AgentTask } from "./types";
 import { AbstractAgent } from "./base-agent";
 
 export class TaskManagerAgent extends AbstractAgent {
@@ -33,10 +28,7 @@ export class TaskManagerAgent extends AbstractAgent {
     super("gpt-5-mini", 0.6);
   }
 
-  async canHandle(
-    task: AgentTask,
-    telemetry?: AgentTelemetry,
-  ): Promise<boolean> {
+  async canHandle(task: AgentTask): Promise<boolean> {
     try {
       // Используем AI для определения типа запроса по управлению задачами
       const { object: taskAnalysis } = await generateObject({
@@ -77,24 +69,11 @@ export class TaskManagerAgent extends AbstractAgent {
       return taskAnalysis.isTaskManagementRequest;
     } catch (error) {
       console.error("Error in AI task management detection:", error);
-      // Fallback к простой проверке
-      const input = task.input.toLowerCase();
-      return (
-        input.includes("задача") ||
-        input.includes("task") ||
-        input.includes("todo") ||
-        input.includes("список") ||
-        input.includes("планирование") ||
-        input.includes("deadline") ||
-        input.includes("приоритет")
-      );
+      throw new Error("Ошибка определения типа запроса по управлению задачами");
     }
   }
 
-  async process(
-    task: AgentTask,
-    telemetry?: AgentTelemetry,
-  ): Promise<AgentResult<string>> {
+  async process(task: AgentTask): Promise<AgentResult<string>> {
     const systemPrompt = getPromptSafe(PROMPT_KEYS.ASSISTANT);
 
     try {

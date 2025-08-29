@@ -5,7 +5,6 @@ import type {
   AgentCapability,
   AgentResult,
   AgentTask,
-  AgentTelemetry,
   QualityMetrics,
 } from "./types";
 import { AbstractAgent } from "./base-agent";
@@ -25,13 +24,6 @@ const qualityEvaluationSchema = z.object({
   reasoning: z.string().describe("Обоснование оценки"),
   suggestions: z.array(z.string()).describe("Предложения по улучшению"),
   needsImprovement: z.boolean().describe("Требуется ли улучшение"),
-});
-
-const improvementRequestSchema = z.object({
-  originalResponse: z.string(),
-  issues: z.array(z.string()),
-  improvementGuidelines: z.array(z.string()),
-  targetQuality: z.number().min(0).max(1),
 });
 
 /**
@@ -84,10 +76,7 @@ export class QualityEvaluatorAgent extends AbstractAgent {
     super("gpt-5o", 0.2); // Низкая температура для объективной оценки
   }
 
-  async canHandle(
-    task: AgentTask,
-    telemetry?: AgentTelemetry,
-  ): Promise<boolean> {
+  async canHandle(task: AgentTask): Promise<boolean> {
     // Этот агент используется для оценки ответов других агентов
     return task.type === "evaluation" || task.type === "quality_check";
   }
@@ -100,7 +89,6 @@ export class QualityEvaluatorAgent extends AbstractAgent {
     agentResponse: string,
     task: AgentTask,
     context?: any,
-    telemetry?: AgentTelemetry,
   ): Promise<
     QualityMetrics & { needsImprovement: boolean; suggestions: string[] }
   > {
@@ -143,7 +131,6 @@ ${context ? `Дополнительный контекст: ${JSON.stringify(con
           isEnabled: true,
           ...this.createTelemetry("quality-evaluation", task),
           metadata: {
-            ...telemetry?.metadata,
             originalInput: originalInput.substring(0, 100),
             responseLength: agentResponse.length,
           },
@@ -153,18 +140,7 @@ ${context ? `Дополнительный контекст: ${JSON.stringify(con
       return evaluation;
     } catch (error) {
       console.error("Error in quality evaluation:", error);
-
-      // Fallback простая оценка
-      return {
-        accuracy: 0.5,
-        relevance: 0.5,
-        completeness: 0.5,
-        clarity: 0.5,
-        helpfulness: 0.5,
-        overallScore: 0.5,
-        suggestions: ["Проверить ответ агента"],
-        needsImprovement: true,
-      };
+      throw new Error("Ошибка оценки качества ответа");
     }
   }
 
@@ -176,7 +152,6 @@ ${context ? `Дополнительный контекст: ${JSON.stringify(con
     originalResponse: string,
     evaluation: any,
     task: AgentTask,
-    telemetry?: AgentTelemetry,
   ): Promise<string> {
     if (!evaluation.needsImprovement) {
       return originalResponse;
@@ -216,7 +191,6 @@ ${evaluation.suggestions.join("\n- ")}
           isEnabled: true,
           ...this.createTelemetry("response-improvement", task),
           metadata: {
-            ...telemetry?.metadata,
             originalQuality: evaluation.overallScore,
             improvementNeeded: evaluation.needsImprovement,
           },
@@ -240,7 +214,6 @@ ${evaluation.suggestions.join("\n- ")}
     targetQuality = 0.8,
     task: AgentTask,
     context?: any,
-    telemetry?: AgentTelemetry,
   ): Promise<{
     finalResponse: string;
     evaluations: any[];
@@ -257,7 +230,6 @@ ${evaluation.suggestions.join("\n- ")}
         originalInput,
         currentResponse,
         context,
-        telemetry,
       );
 
       evaluations.push(evaluation);
@@ -277,7 +249,6 @@ ${evaluation.suggestions.join("\n- ")}
         currentResponse,
         evaluation,
         task,
-        telemetry,
       );
 
       // Если улучшений нет, останавливаемся
@@ -298,10 +269,7 @@ ${evaluation.suggestions.join("\n- ")}
     };
   }
 
-  async process(
-    task: AgentTask,
-    telemetry?: AgentTelemetry,
-  ): Promise<AgentResult<any>> {
+  async process(task: AgentTask): Promise<AgentResult<any>> {
     // Этот агент обычно не используется напрямую через process
     // Он вызывается другими агентами для оценки качества
     return this.createErrorResult(

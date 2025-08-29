@@ -1,11 +1,6 @@
 import { getPromptSafe, PROMPT_KEYS } from "@synoro/prompts";
 
-import type {
-  AgentCapability,
-  AgentResult,
-  AgentTask,
-  AgentTelemetry,
-} from "./types";
+import type { AgentCapability, AgentResult, AgentTask } from "./types";
 import { AbstractAgent } from "./base-agent";
 
 export class GeneralAssistantAgent extends AbstractAgent {
@@ -40,10 +35,7 @@ export class GeneralAssistantAgent extends AbstractAgent {
     return Promise.resolve(true);
   }
 
-  async process(
-    task: AgentTask,
-    telemetry?: AgentTelemetry,
-  ): Promise<AgentResult<string>> {
+  async process(task: AgentTask): Promise<AgentResult<string>> {
     const systemPrompt = getPromptSafe(PROMPT_KEYS.ASSISTANT);
 
     try {
@@ -51,7 +43,6 @@ export class GeneralAssistantAgent extends AbstractAgent {
         task.input,
         systemPrompt,
         task,
-        telemetry,
       );
 
       return this.createSuccessResult(response, 0.8);

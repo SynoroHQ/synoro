@@ -162,7 +162,6 @@ export class RouterAgent extends AbstractAgent {
     this.classificationCache.set(hash, { result, timestamp: Date.now() });
   }
 
-
   /**
    * Классифицирует сообщение с оптимизацией производительности
    */
@@ -407,17 +406,7 @@ export class RouterAgent extends AbstractAgent {
       return object;
     } catch (error) {
       console.error("Error in routing decision:", error);
-
-      // Fallback маршрутизация на основе типа сообщения
-      const fallbackAgents = this.availableAgents.get(
-        classification.messageType,
-      ) ?? ["qa-specialist"];
-
-      return {
-        targetAgent: fallbackAgents[0] ?? "qa-specialist",
-        confidence: 0.3,
-        reasoning: "Fallback routing due to error",
-      };
+      throw new Error("Ошибка принятия решения о маршрутизации");
     }
   }
 
