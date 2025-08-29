@@ -1,4 +1,3 @@
-
 // Экспорт всех типов
 export type * from "./types";
 
@@ -24,12 +23,6 @@ export { TelegramFormatterAgent } from "./telegram-formatter-agent";
 // Экспорт менеджера агентов с улучшениями
 export { AgentManager } from "./agent-manager";
 
-// Экспорт улучшенных функций создания агентной системы
-export { 
-  createAgentSystem, 
-  createHighPerformanceAgentSystem 
-} from "./agent-manager";
-
 // Простая функция создания агентной системы для обратной совместимости
 export function createSimpleAgentSystem() {
   const { createAgentSystem } = require("./agent-manager");
@@ -48,7 +41,7 @@ export const AgentUtils = {
     cacheTimeout: 30 * 60 * 1000, // 30 минут
     maxConcurrentTasks: 10,
   }),
-  
+
   /**
    * Создание конфигурации для экономии ресурсов
    */
@@ -59,7 +52,7 @@ export const AgentUtils = {
     cacheTimeout: 5 * 60 * 1000, // 5 минут
     maxConcurrentTasks: 1,
   }),
-  
+
   /**
    * Создание сбалансированной конфигурации (по умолчанию)
    */

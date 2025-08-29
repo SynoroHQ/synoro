@@ -365,6 +365,20 @@ export abstract class AbstractAgent implements BaseAgent {
   }
 
   /**
+   * Создание хеша для входных данных (для кэширования)
+   */
+  protected createInputHash(input: string): string {
+    // Простая хеш-функция для создания уникального ключа
+    let hash = 0;
+    for (let i = 0; i < input.length; i++) {
+      const char = input.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Преобразование в 32-битное число
+    }
+    return Math.abs(hash).toString(36);
+  }
+
+  /**
    * Получение статистики кэша
    */
   protected getCacheStats(): { size: number; hitRate: number } {

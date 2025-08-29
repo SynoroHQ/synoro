@@ -2,6 +2,7 @@ import type { Context } from "grammy";
 
 import { apiClient } from "../api/client";
 import { DEFAULT_AGENT_OPTIONS } from "../config/agents";
+import { telegramFastResponseService } from "../services/fast-response-service";
 import { formatForTelegram } from "../utils/telegram-formatter";
 import {
   createMessageContext,
@@ -24,21 +25,29 @@ export async function handleAgentsCommand(ctx: Context): Promise<void> {
     const agentStats =
       await apiClient.messages.processMessageAgents.getAgentStatsForBot.query();
 
+    // Получаем статистику быстрых ответов
+    const fastResponseStats = telegramFastResponseService.getStats();
+
     const response = `🤖 *Агентная система Synoro AI активна*
 
 📊 *Статистика системы:*
 • Всего агентов: ${agentStats.totalAgents}
 • Доступные агенты: ${agentStats.agentList.join(", ")}
+• *Агент быстрых ответов* — мгновенные интеллектуальные ответы через ИИ
 • *Маршрутизатор сообщений* — классифицирует и выбирает подходящего агента
 • *Специалист по вопросам (Q&A)* — отвечает на вопросы о системе и функциях
 • *Обработчик событий* — фиксирует покупки, задачи, встречи и др.
 • *Оркестратор задач* — координирует сложные многоэтапные задачи
 • *Оценщик качества* — проверяет и улучшает качество ответов
-• *Event Processor* - обрабатывает события (покупки, задачи, встречи)
-• *Task Orchestrator* - координирует сложные многоэтапные задачи
-• *Quality Evaluator* - проверяет и улучшает качество ответов
+
+⚡ *Система быстрых ответов:*
+• Кэш ответов: ${fastResponseStats.agentStats.cacheSize}
+• ИИ-шаблоны: ${fastResponseStats.agentStats.templatesCount}
+• Общее использование: ${fastResponseStats.agentStats.totalUsage}
+• Среднее время ответа: ${fastResponseStats.agentStats.averageResponseTime}мс
 
 ✨ *Преимущества:*
+• Мгновенные ответы на простые запросы через ИИ
 • Более точная обработка сложных запросов
 • Автоматическое улучшение качества ответов
 • Специализированные агенты для разных типов задач
@@ -170,6 +179,101 @@ export async function handleAgentTestCommand(ctx: Context): Promise<void> {
     console.error("Error in agent test command:", error);
     await ctx.reply(
       "Произошла ошибка при тестировании агентной системы: " +
+        (error instanceof Error ? error.message : "Unknown error"),
+    );
+  }
+}
+
+/**
+ * Обработчик команды /fast_test - тестирование быстрых ответов
+ */
+export async function handleFastTestCommand(ctx: Context): Promise<void> {
+  try {
+    await ctx.replyWithChatAction("typing");
+
+    const messageContext = createMessageContext(ctx);
+    console.log(
+      `⚡ Команда /fast_test от ${getUserIdentifier(ctx.from)} в чате ${messageContext.chatId}`,
+    );
+
+    const testMessages = [
+      "Привет!",
+      "Спасибо за помощь",
+      "Что ты умеешь?",
+      "Который час?",
+      "Какая сегодня дата?",
+      "Пока!",
+    ];
+
+    let response = "⚡ *Тестирование системы быстрых ответов:*\n\n";
+
+    for (const testMessage of testMessages) {
+      const startTime = Date.now();
+      const fastResponse = await telegramFastResponseService.analyzeMessage(
+        testMessage,
+        messageContext.userId,
+        messageContext.chatId,
+        messageContext.messageId
+      );
+      const responseTime = Date.now() - startTime;
+
+      response += `📝 *Запрос:* "${testMessage}"\n`;
+      response += `🤖 *Ответ:* ${fastResponse.fastResponse || "Нет быстрого ответа"}\n`;
+      response += `⚡ *Быстрый ответ:* ${fastResponse.shouldSendFast ? "Да" : "Нет"}\n`;
+      response += `🎯 *Уверенность:* ${(fastResponse.confidence * 100).toFixed(1)}%\n`;
+      response += `⏱️ *Время:* ${responseTime}мс\n`;
+      response += `🔄 *Нужна полная обработка:* ${fastResponse.needsFullProcessing ? "Да" : "Нет"}\n\n`;
+    }
+
+    // Добавляем статистику
+    const stats = telegramFastResponseService.getStats();
+    response += `📊 *Статистика агента:*\n`;
+    response += `• Кэш ответов: ${stats.agentStats.cacheSize}\n`;
+    response += `• ИИ-шаблоны: ${stats.agentStats.templatesCount}\n`;
+    response += `• Общее использование: ${stats.agentStats.totalUsage}\n`;
+    response += `• Среднее время ответа: ${stats.agentStats.averageResponseTime}мс\n`;
+
+    // Разбиваем длинный ответ если нужно
+    const MAX_TG_MESSAGE = 4096;
+    if (response.length > MAX_TG_MESSAGE) {
+      const parts = [];
+      let currentPart = "";
+      const lines = response.split("\n");
+
+      for (const line of lines) {
+        if (currentPart.length + line.length + 1 > MAX_TG_MESSAGE) {
+          parts.push(currentPart);
+          currentPart = line;
+        } else {
+          currentPart += (currentPart ? "\n" : "") + line;
+        }
+      }
+      if (currentPart) parts.push(currentPart);
+
+      for (const part of parts) {
+        const formattedPart = formatForTelegram(part, {
+          useEmojis: true,
+          useHTML: true,
+          addSeparators: true,
+        });
+        await ctx.reply(formattedPart.text, {
+          parse_mode: formattedPart.parse_mode,
+        });
+      }
+    } else {
+      const formattedResponse = formatForTelegram(response, {
+        useEmojis: true,
+        useHTML: true,
+        addSeparators: true,
+      });
+      await ctx.reply(formattedResponse.text, {
+        parse_mode: formattedResponse.parse_mode,
+      });
+    }
+  } catch (error) {
+    console.error("Error in fast test command:", error);
+    await ctx.reply(
+      "Произошла ошибка при тестировании быстрых ответов: " +
         (error instanceof Error ? error.message : "Unknown error"),
     );
   }

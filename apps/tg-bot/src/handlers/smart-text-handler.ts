@@ -1,7 +1,7 @@
 import { Context } from "grammy";
 
 import { apiClient } from "../api/client";
-import { fastResponseSystem } from "../utils/fast-response-system";
+import { telegramFastResponseService } from "../services/fast-response-service";
 import {
   createErrorMessage,
   createSuccessMessage,
@@ -10,7 +10,7 @@ import { formatForTelegram } from "../utils/telegram-formatter";
 import { createMessageContext } from "../utils/telegram-utils";
 
 /**
- * Обработчик умных текстовых сообщений с использованием Fast Response System
+ * Обработчик умных текстовых сообщений с использованием FastResponseAgent
  */
 export async function handleSmartText(ctx: Context) {
   try {
@@ -21,11 +21,16 @@ export async function handleSmartText(ctx: Context) {
       `🤖 Smart text handler: "${text}" from user ${messageContext.userId}`,
     );
 
-    // 1. Анализируем сообщение через Fast Response System
-    const fastResponse = fastResponseSystem.analyzeMessage(text);
+    // 1. Анализируем сообщение через FastResponseAgent
+    const fastResponse = await telegramFastResponseService.analyzeMessage(
+      text,
+      messageContext.userId,
+      messageContext.chatId,
+      messageContext.messageId
+    );
 
     if (fastResponse.shouldSendFast) {
-      console.log(`⚡ Fast response triggered: ${fastResponse.processingType}`);
+      console.log(`⚡ Fast response triggered: ${fastResponse.processingType} (confidence: ${fastResponse.confidence})`);
 
       // Отправляем быстрый ответ
       await ctx.reply(fastResponse.fastResponse);

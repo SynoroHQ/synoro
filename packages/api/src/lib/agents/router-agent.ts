@@ -162,17 +162,6 @@ export class RouterAgent extends AbstractAgent {
     this.classificationCache.set(hash, { result, timestamp: Date.now() });
   }
 
-  /**
-   * Создание хэша для входного сообщения
-   */
-  private createInputHash(input: string): string {
-    // Простой хэш на основе нормализованного текста
-    const normalized = input
-      .toLowerCase()
-      .replace(/[^а-яё\w\s]/g, "")
-      .trim();
-    return normalized.slice(0, 50); // Первые 50 символов как ключ
-  }
 
   /**
    * Классифицирует сообщение с оптимизацией производительности

@@ -5,6 +5,7 @@ import { env } from "./env";
 import {
   handleAgentsCommand,
   handleAgentTestCommand,
+  handleFastTestCommand,
 } from "./handlers/agent-handler";
 import { handleAudio } from "./handlers/audio-handler";
 import { handleOther } from "./handlers/other-handler";
@@ -89,7 +90,8 @@ export function createBot(): Bot<Context> {
         "📋 Помогу с делами, вопросами и дам полезные советы\n\n" +
         "🤖 Команды:\n" +
         "/agents - информация о мультиагентной системе\n" +
-        "/agent_test - тестирование агентной обработки\n\n" +
+        "/agent_test - тестирование агентной обработки\n" +
+        "/fast_test - тестирование быстрых ответов\n\n" +
         "Просто начинай разговор!",
     );
   });
@@ -97,6 +99,7 @@ export function createBot(): Bot<Context> {
   // Команды для агентной системы
   bot.command("agents", handleAgentsCommand);
   bot.command("agent_test", handleAgentTestCommand);
+  bot.command("fast_test", handleFastTestCommand);
 
   // Обработчики сообщений
   // Используем умный обработчик, если включена агентная система
