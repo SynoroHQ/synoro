@@ -258,24 +258,53 @@ export function containsMarkdownV2Chars(text: string): boolean {
 
 /**
  * Безопасно форматирует текст для отправки в Telegram
- * Автоматически выбирает между MarkdownV2 и обычным текстом
+ * Использует HTML форматирование для максимальной совместимости
  */
 export function formatTelegramText(
   text: string,
-  preferMarkdown: boolean = true,
+  preferHTML = true,
 ): {
   text: string;
-  parse_mode?: "MarkdownV2" | "HTML";
+  parse_mode?: "HTML";
 } {
   if (!text) return { text };
 
-  if (preferMarkdown && containsMarkdownV2Chars(text)) {
+  if (preferHTML) {
+    // Применяем базовое HTML форматирование
+    let formattedText = text;
+
+    // Заменяем Markdown заголовки на HTML (жирный текст)
+    formattedText = formattedText.replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>");
+
+    // Форматируем курсив (одиночные звездочки)
+    formattedText = formattedText.replace(
+      /(?<!\*)\*([^*]+)\*(?!\*)/g,
+      "<i>$1</i>",
+    );
+
+    // Форматируем код
+    formattedText = formattedText.replace(/`([^`]+)`/g, "<code>$1</code>");
+
+    // Экранируем HTML символы (но не теги)
+    const parts = formattedText.split(/(<[^>]+>)/g);
+    formattedText = parts
+      .map((part, index) => {
+        // Если это HTML тег (четные индексы), не экранируем
+        if (index % 2 === 1) {
+          return part;
+        }
+
+        // Если это обычный текст, экранируем только амперсанд
+        return part.replace(/&/g, "&amp;");
+      })
+      .join("");
+
     return {
-      text: escapeTelegramMarkdownV2(text),
-      parse_mode: "MarkdownV2",
+      text: formattedText,
+      parse_mode: "HTML",
     };
   }
 
-  // Если нет специальных символов или не предпочитаем Markdown, возвращаем как есть
+  // Если HTML отключен, возвращаем как есть
   return { text };
 }

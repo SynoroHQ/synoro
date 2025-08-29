@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@synoro/ui";
-import { type LucideIcon } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { Fragment } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";

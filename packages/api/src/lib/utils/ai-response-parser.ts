@@ -21,13 +21,12 @@ export function parseAIJsonResponse<T = unknown>(
     const candidate = extractJsonString(text);
     if (candidate) {
       return JSON.parse(candidate) as T;
-    } else {
+    }
       if (debug) {
         const truncated = text.length > 500 ? text.slice(0, 500) + "…" : text;
         console.warn("No JSON found in AI response (truncated):", truncated);
       }
       return fallbackValue ?? null;
-    }
   } catch (parseError) {
     const debug = process.env.DEBUG_AI_PARSER === "true";
     if (debug) {
@@ -69,14 +68,13 @@ export function parseAIJsonResponseWithSchema<T>(
         success: true,
         data: validationResult.data,
       };
-    } else {
+    }
       console.error("Schema validation failed:", validationResult.error);
       return {
         success: false,
         error: `Schema validation failed: ${validationResult.error.message}`,
         data: fallbackValue ?? null,
       };
-    }
   } catch (error) {
     console.error("Error in AI response parsing with schema:", error);
     return {

@@ -55,12 +55,12 @@ export default function Hero() {
     <section className="section section-gradient relative overflow-hidden">
       {/* Background Elements */}
       <div className="absolute inset-0">
-        <div className="from-primary/10 to-accent/10 absolute top-0 left-0 h-full w-full bg-gradient-to-br"></div>
-        <div className="border-primary/10 animate-rotate-slow absolute top-1/4 left-1/6 h-16 w-16 rotate-45 border"></div>
+        <div className="from-primary/10 to-accent/10 absolute top-0 left-0 h-full w-full bg-gradient-to-br" />
+        <div className="border-primary/10 animate-rotate-slow absolute top-1/4 left-1/6 h-16 w-16 rotate-45 border" />
         <div
           className="border-accent/10 animate-rotate-slow absolute right-1/5 bottom-1/3 h-12 w-12 rotate-12 border"
           style={{ animationDirection: "reverse" }}
-        ></div>
+        />
       </div>
 
       <div className="container-default relative z-10 text-center">
@@ -121,7 +121,7 @@ export default function Hero() {
                 <div className="from-primary to-accent flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br sm:h-12 sm:w-12">
                   <MessageSquare className="text-primary-foreground h-5 w-5 sm:h-6 sm:w-6" />
                 </div>
-                <div className="absolute -right-1 -bottom-1 h-4 w-4 animate-pulse rounded-full border-2 border-white bg-green-500"></div>
+                <div className="absolute -right-1 -bottom-1 h-4 w-4 animate-pulse rounded-full border-2 border-white bg-green-500" />
               </div>
               <div className="flex-1">
                 <h3 className="text-foreground text-sm font-semibold sm:text-base">
@@ -133,7 +133,7 @@ export default function Hero() {
               </div>
               {(isRecording || animationComplete) && (
                 <div className="animate-fade-in flex items-center gap-2">
-                  <div className="h-2 w-2 animate-pulse rounded-full bg-red-500"></div>
+                  <div className="h-2 w-2 animate-pulse rounded-full bg-red-500" />
                   <Mic className="h-4 w-4 animate-pulse text-red-500" />
                 </div>
               )}
@@ -144,7 +144,7 @@ export default function Hero() {
               {(currentStep === 1 || animationComplete) && (
                 <div className="animate-scale-in flex justify-center">
                   <div className="flex items-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-3 py-2 sm:px-4 sm:py-3">
-                    <div className="h-3 w-3 animate-pulse rounded-full bg-red-500"></div>
+                    <div className="h-3 w-3 animate-pulse rounded-full bg-red-500" />
                     <span className="text-xs text-red-600 sm:text-sm">
                       {t("recording")}
                     </span>
@@ -180,15 +180,15 @@ export default function Hero() {
                         <div
                           className="bg-primary animate-typing-dot h-1.5 w-1.5 rounded-full"
                           style={{ animationDelay: "0ms" }}
-                        ></div>
+                        />
                         <div
                           className="bg-primary animate-typing-dot h-1.5 w-1.5 rounded-full"
                           style={{ animationDelay: "200ms" }}
-                        ></div>
+                        />
                         <div
                           className="bg-primary animate-typing-dot h-1.5 w-1.5 rounded-full"
                           style={{ animationDelay: "400ms" }}
-                        ></div>
+                        />
                       </div>
                     </div>
                   </div>
@@ -251,15 +251,15 @@ export default function Hero() {
                         <div
                           className="bg-primary animate-typing-dot h-1.5 w-1.5 rounded-full"
                           style={{ animationDelay: "0ms" }}
-                        ></div>
+                        />
                         <div
                           className="bg-primary animate-typing-dot h-1.5 w-1.5 rounded-full"
                           style={{ animationDelay: "200ms" }}
-                        ></div>
+                        />
                         <div
                           className="bg-primary animate-typing-dot h-1.5 w-1.5 rounded-full"
                           style={{ animationDelay: "400ms" }}
-                        ></div>
+                        />
                       </div>
                     </div>
                   </div>

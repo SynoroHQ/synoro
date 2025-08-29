@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { AgentRegistryImpl } from "../../src/lib/agents/agent-registry";
 import { AbstractAgent } from "../../src/lib/agents/base-agent";
-import { AgentCapability } from "../../src/lib/agents/types";
+import type { AgentCapability } from "../../src/lib/agents/types";
 
 class TestAgent extends AbstractAgent {
   name = "Test Agent";

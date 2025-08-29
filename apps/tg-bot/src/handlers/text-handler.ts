@@ -7,12 +7,12 @@ import {
   removeProcessingMessage,
   sendProcessingMessage,
 } from "../utils/message-utils";
+import { formatForTelegram } from "../utils/telegram-formatter";
 import {
   createMessageContext,
   getUserIdentifier,
   isObviousSpam,
 } from "../utils/telegram-utils";
-import { formatForTelegram } from "../utils/telegram-formatter";
 
 /**
  * Обрабатывает текстовые сообщения
@@ -41,7 +41,10 @@ export async function handleText(ctx: Context): Promise<void> {
   await ctx.replyWithChatAction("typing");
 
   // Запускаем анимированный индикатор обработки
-  const processingAnimation = new ProcessingAnimation(ctx, "текстовое сообщение");
+  const processingAnimation = new ProcessingAnimation(
+    ctx,
+    "текстовое сообщение",
+  );
   await processingAnimation.start();
 
   try {
@@ -70,7 +73,7 @@ export async function handleText(ctx: Context): Promise<void> {
     // Отправляем ответ пользователю
     const MAX_TG_MESSAGE = 4096;
     let reply = result.response;
-    
+
     if (reply.length > MAX_TG_MESSAGE) {
       reply = reply.slice(0, MAX_TG_MESSAGE - 1) + "…";
     }
@@ -78,7 +81,7 @@ export async function handleText(ctx: Context): Promise<void> {
     // Форматируем ответ для Telegram
     const formattedMessage = formatForTelegram(reply, {
       useEmojis: true,
-      useMarkdown: true,
+      useHTML: true,
       maxLineLength: 80,
     });
 

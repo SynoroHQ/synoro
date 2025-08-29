@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { TaskOrchestratorAgent } from "../../src/lib/agents/task-orchestrator-agent";
 import { globalAgentRegistry } from "../../src/lib/agents/agent-registry";
 import { QASpecialistAgent } from "../../src/lib/agents/qa-specialist-agent";
-import { AgentTask } from "../../src/lib/agents/types";
+import type { AgentTask } from "../../src/lib/agents/types";
 
 describe("TaskOrchestratorAgent", () => {
   it("should use global agent registry instead of creating new AgentManager instances", async () => {

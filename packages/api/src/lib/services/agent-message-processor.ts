@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server";
 
 import type { TRPCContext } from "../../trpc";
-import { AgentContext } from "../agents/agent-context";
+import type { AgentContext } from "../agents/agent-context";
 import { AgentMessageProcessor } from "../agents/agent-processor";
 import { MESSAGE_PROCESSING_CONFIG } from "../constants/message-processing";
 import {

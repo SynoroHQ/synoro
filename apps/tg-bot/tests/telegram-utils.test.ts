@@ -49,19 +49,19 @@ describe("telegram-utils", () => {
   });
 
   describe("formatTelegramText", () => {
-    it("should format text with MarkdownV2 when special chars present", () => {
+    it("should format text with HTML when special chars present", () => {
       const result = formatTelegramText("Hello *world*");
-      expect(result.parse_mode).toBe("MarkdownV2");
-      expect(result.text).toBe("Hello \\*world\\*");
+      expect(result.parse_mode).toBe("HTML");
+      expect(result.text).toBe("Hello <b>world</b>");
     });
 
-    it("should return plain text when no special chars", () => {
+    it("should return HTML formatted text when no special chars", () => {
       const result = formatTelegramText("Hello world");
-      expect(result.parse_mode).toBeUndefined();
+      expect(result.parse_mode).toBe("HTML");
       expect(result.text).toBe("Hello world");
     });
 
-    it("should respect preferMarkdown flag", () => {
+    it("should respect preferHTML flag", () => {
       const result = formatTelegramText("Hello *world*", false);
       expect(result.parse_mode).toBeUndefined();
       expect(result.text).toBe("Hello *world*");

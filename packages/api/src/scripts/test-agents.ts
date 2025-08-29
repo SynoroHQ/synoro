@@ -137,7 +137,7 @@ async function testAgentSystem() {
       },
     );
 
-    console.log(`✅ Гибридный результат:`);
+    console.log("✅ Гибридный результат:");
     console.log(`📤 Ответ: "${hybridResult.response}"`);
     console.log(`🔧 Режим: ${hybridResult.processingMode}`);
 

@@ -1,17 +1,17 @@
 /**
  * Простой и эффективный сервис форматирования ответов для Telegram
- * Делает сообщения читабельными без лишних украшений
+ * Использует HTML форматирование для максимальной совместимости
  */
 
 export interface TelegramFormattingOptions {
   useEmojis?: boolean;
-  useMarkdown?: boolean;
+  useHTML?: boolean;
   maxLineLength?: number;
 }
 
 export interface FormattedMessage {
   text: string;
-  parse_mode?: "MarkdownV2" | "HTML";
+  parse_mode?: "HTML";
   disable_web_page_preview?: boolean;
 }
 
@@ -21,7 +21,7 @@ export interface FormattedMessage {
 export class TelegramFormatter {
   private defaultOptions: Required<TelegramFormattingOptions> = {
     useEmojis: true,
-    useMarkdown: true,
+    useHTML: true,
     maxLineLength: 80,
   };
 
@@ -55,15 +55,14 @@ export class TelegramFormatter {
     // 3. Проверяем длину строк
     formattedText = this.wrapLongLines(formattedText, opts.maxLineLength);
 
-    // 4. Определяем режим парсинга
-    const parseMode = this.determineParseMode(formattedText, opts.useMarkdown);
+    // 4. Применяем HTML форматирование
+    if (opts.useHTML) {
+      formattedText = this.applyHTMLFormatting(formattedText);
+    }
 
     return {
-      text:
-        parseMode === "MarkdownV2"
-          ? this.escapeMarkdownV2(formattedText)
-          : formattedText,
-      parse_mode: parseMode,
+      text: formattedText,
+      parse_mode: opts.useHTML ? "HTML" : undefined,
       disable_web_page_preview: true,
     };
   }
@@ -141,7 +140,7 @@ export class TelegramFormatter {
         !/[.!?]/.test(match) &&
         !match.includes("\n")
       ) {
-        return `**${match}**`;
+        return `<b>${match}</b>`;
       }
       return match;
     });
@@ -155,7 +154,7 @@ export class TelegramFormatter {
     text = text.replace(/^[-*•]\s+/gm, "• ");
 
     // Форматируем нумерованные списки
-    text = text.replace(/^(\d+)\.\s+/gm, "$1\\. ");
+    text = text.replace(/^(\d+)\.\s+/gm, "$1. ");
 
     return text;
   }
@@ -165,7 +164,7 @@ export class TelegramFormatter {
    */
   private addSimpleLineBreaks(text: string): string {
     // Добавляем переносы после заголовков
-    text = text.replace(/(\*\*[^*]+\*\*)/g, "$1\n");
+    text = text.replace(/(<b>[^<]+<\/b>)/g, "$1\n");
 
     // Убираем лишние пустые строки
     text = text.replace(/\n\n\n+/g, "\n\n");
@@ -205,39 +204,69 @@ export class TelegramFormatter {
   }
 
   /**
-   * Определяет режим парсинга
+   * Применяет HTML форматирование для Telegram
    */
-  private determineParseMode(
-    text: string,
-    preferMarkdown: boolean,
-  ): "MarkdownV2" | undefined {
-    if (!preferMarkdown) return undefined;
+  private applyHTMLFormatting(text: string): string {
+    let formatted = text;
 
-    // Проверяем, содержит ли текст Markdown элементы
-    const hasMarkdown = /\*\*|\*\*|`|>/.test(text);
+    // 1. Заменяем Markdown заголовки на HTML (если они есть)
+    formatted = formatted.replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>");
 
-    return hasMarkdown ? "MarkdownV2" : undefined;
+    // 2. Форматируем код
+    formatted = this.formatHTMLCode(formatted);
+
+    // 3. Форматируем ссылки (если они есть)
+    formatted = this.formatHTMLLinks(formatted);
+
+    // 4. Экранируем HTML символы
+    formatted = this.escapeHTML(formatted);
+
+    return formatted;
   }
 
   /**
-   * Экранирует специальные символы для MarkdownV2
+   * Форматирует код в HTML
    */
-  private escapeMarkdownV2(text: string): string {
-    // 1) защитим инлайн‑код: `...`
-    const parts = text.split(/(`[^`]*`)/g);
-    const esc = (s: string) =>
-      s
-        // сохраняем наши маркеры **...** и цитаты в начале строки
-        .replace(/\*\*([^*]+)\*\*/g, "§§$1§§")
-        .replace(/^\s*> /gm, "§Q ")
-        // экранируем спецсимволы, НО не трогаем `*`, '`' и '>' (наши маркеры)
-        .replace(/[_\[\]()~#+\-=|{}.!]/g, "\\$&")
-        // возвращаем маркеры
-        .replace(/§§([^§]+)§§/g, "**$1**")
-        .replace(/^§Q /gm, "> ");
+  private formatHTMLCode(text: string): string {
+    // Инлайн код
+    text = text.replace(/`([^`]+)`/g, "<code>$1</code>");
+
+    // Блоки кода (если есть)
+    text = text.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
+      return `<pre><code>${code.trim()}</code></pre>`;
+    });
+
+    return text;
+  }
+
+  /**
+   * Форматирует ссылки в HTML
+   */
+  private formatHTMLLinks(text: string): string {
+    // Простые URL ссылки
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    text = text.replace(urlRegex, '<a href="$1">$1</a>');
+
+    return text;
+  }
+
+  /**
+   * Экранирует HTML символы
+   */
+  private escapeHTML(text: string): string {
+    // Защищаем HTML теги от экранирования
+    const parts = text.split(/(<[^>]+>)/g);
 
     return parts
-      .map((seg) => (seg.startsWith("`") && seg.endsWith("`") ? seg : esc(seg)))
+      .map((part, index) => {
+        // Если это HTML тег (четные индексы), не экранируем
+        if (index % 2 === 1) {
+          return part;
+        }
+
+        // Если это обычный текст, экранируем только амперсанд
+        return part.replace(/&/g, "&amp;");
+      })
       .join("");
   }
 
@@ -270,35 +299,35 @@ export class TelegramFormatter {
       case "qa-specialist":
         return {
           useEmojis: true,
-          useMarkdown: true,
+          useHTML: true,
         };
 
       case "financial":
       case "financial-advisor":
         return {
           useEmojis: true,
-          useMarkdown: true,
+          useHTML: true,
         };
 
       case "analytics":
       case "data-analyst":
         return {
           useEmojis: true,
-          useMarkdown: true,
+          useHTML: true,
         };
 
       case "event":
       case "event-processor":
         return {
           useEmojis: true,
-          useMarkdown: true,
+          useHTML: true,
         };
 
       case "task":
       case "task-manager":
         return {
           useEmojis: true,
-          useMarkdown: true,
+          useHTML: true,
         };
 
       default:

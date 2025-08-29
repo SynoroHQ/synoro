@@ -61,7 +61,7 @@ async function main() {
     );
 
     // Start the server
-    const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 4000;
+    const port = process.env.PORT ? Number.parseInt(process.env.PORT, 10) : 4000;
     const server = app.listen(port, () => {
       console.log(`🚀 Server running on http://localhost:${port}`);
       console.log(`📡 tRPC API available at http://localhost:${port}/api/trpc`);

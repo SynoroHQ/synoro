@@ -44,7 +44,7 @@ export default function TelegramPage() {
         <CardContent>
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
-              <div className="h-3 w-3 rounded-full bg-green-500"></div>
+              <div className="h-3 w-3 rounded-full bg-green-500" />
               <span className="text-sm font-medium">Бот активен</span>
             </div>
             <span className="text-muted-foreground text-sm">

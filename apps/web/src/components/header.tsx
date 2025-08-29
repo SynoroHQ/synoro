@@ -17,7 +17,7 @@ export default function Header() {
         <div className="flex items-center">
           <div className="gradient-text group relative cursor-pointer font-serif text-xl font-bold transition-transform duration-300 sm:text-2xl">
             Synoro
-            <div className="from-primary/20 to-accent/20 absolute -inset-2 -z-10 rounded-xl bg-gradient-to-r opacity-0 blur transition-opacity duration-300 group-hover:opacity-100"></div>
+            <div className="from-primary/20 to-accent/20 absolute -inset-2 -z-10 rounded-xl bg-gradient-to-r opacity-0 blur transition-opacity duration-300 group-hover:opacity-100" />
           </div>
         </div>
 
@@ -27,21 +27,21 @@ export default function Header() {
             className="hover:text-primary group relative text-gray-700 transition-colors duration-300"
           >
             {t("features")}
-            <span className="from-primary to-accent absolute -bottom-1 left-0 h-0.5 w-0 bg-gradient-to-r transition-all duration-300 group-hover:w-full"></span>
+            <span className="from-primary to-accent absolute -bottom-1 left-0 h-0.5 w-0 bg-gradient-to-r transition-all duration-300 group-hover:w-full" />
           </a>
           <a
             href="#pricing"
             className="hover:text-primary group relative text-gray-700 transition-colors duration-300"
           >
             {t("pricing")}
-            <span className="from-primary to-accent absolute -bottom-1 left-0 h-0.5 w-0 bg-gradient-to-r transition-all duration-300 group-hover:w-full"></span>
+            <span className="from-primary to-accent absolute -bottom-1 left-0 h-0.5 w-0 bg-gradient-to-r transition-all duration-300 group-hover:w-full" />
           </a>
           <a
             href="#for-whom"
             className="hover:text-primary group relative text-gray-700 transition-colors duration-300"
           >
             {t("about")}
-            <span className="from-primary to-accent absolute -bottom-1 left-0 h-0.5 w-0 bg-gradient-to-r transition-all duration-300 group-hover:w-full"></span>
+            <span className="from-primary to-accent absolute -bottom-1 left-0 h-0.5 w-0 bg-gradient-to-r transition-all duration-300 group-hover:w-full" />
           </a>
         </nav>
 
@@ -50,8 +50,8 @@ export default function Header() {
             <span className="relative z-10 flex items-center text-gray-900 drop-shadow-sm">
               {t("joinBeta")}
             </span>
-            <div className="from-accent to-primary absolute inset-0 bg-gradient-to-r opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
-            <div className="absolute inset-0 rounded-xl bg-gray-800/10 opacity-0 blur-sm transition-opacity duration-300 group-hover:opacity-50"></div>
+            <div className="from-accent to-primary absolute inset-0 bg-gradient-to-r opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+            <div className="absolute inset-0 rounded-xl bg-gray-800/10 opacity-0 blur-sm transition-opacity duration-300 group-hover:opacity-50" />
           </Button>
 
           {/* Mobile menu button */}
@@ -99,8 +99,8 @@ export default function Header() {
                 <span className="relative z-10 text-gray-900 drop-shadow-sm">
                   {t("joinBeta")}
                 </span>
-                <div className="from-accent to-primary absolute inset-0 bg-gradient-to-r opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
-                <div className="absolute inset-0 rounded-xl bg-gray-800/10 opacity-0 blur-sm transition-opacity duration-300 group-hover:opacity-50"></div>
+                <div className="from-accent to-primary absolute inset-0 bg-gradient-to-r opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                <div className="absolute inset-0 rounded-xl bg-gray-800/10 opacity-0 blur-sm transition-opacity duration-300 group-hover:opacity-50" />
               </Button>
             </div>
           </div>

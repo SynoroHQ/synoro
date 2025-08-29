@@ -27,10 +27,7 @@ export class ChatAssistantAgent extends AbstractAgent {
     super("gpt-5o", 0.8);
   }
 
-  async canHandle(
-    task: AgentTask,
-    telemetry?: AgentTelemetry,
-  ): Promise<boolean> {
+  async canHandle(task: AgentTask): Promise<boolean> {
     try {
       // Используем AI для определения типа сообщения для чата
       const { object: chatAnalysis } = await generateObject({
@@ -63,7 +60,7 @@ export class ChatAssistantAgent extends AbstractAgent {
         temperature: 0.1,
         experimental_telemetry: {
           isEnabled: true,
-          ...this.createTelemetry("chat-message-detection", task, telemetry),
+          ...this.createTelemetry("chat-message-detection", task),
           metadata: { inputLength: task.input.length },
         },
       });
@@ -99,7 +96,6 @@ export class ChatAssistantAgent extends AbstractAgent {
         task.input,
         systemPrompt,
         task,
-        telemetry,
       );
 
       return this.createSuccessResult(response, 0.8);

@@ -7,15 +7,15 @@ export default function Footer() {
   return (
     <footer className="relative overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
       {/* Background Pattern */}
-      <div className="absolute inset-0 bg-[url('/modern-geometric-pattern.png')] opacity-15"></div>
+      <div className="absolute inset-0 bg-[url('/modern-geometric-pattern.png')] opacity-15" />
 
       {/* Floating Elements */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="animate-float absolute top-10 left-10 h-32 w-32 rounded-full bg-white/5 blur-2xl"></div>
+        <div className="animate-float absolute top-10 left-10 h-32 w-32 rounded-full bg-white/5 blur-2xl" />
         <div
           className="animate-float absolute right-10 bottom-10 h-48 w-48 rounded-full bg-white/5 blur-2xl"
           style={{ animationDelay: "2s" }}
-        ></div>
+        />
       </div>
 
       {/* Main Footer Content */}
@@ -203,7 +203,7 @@ export default function Footer() {
                 {t("apiDocs")}
               </a>
               <div className="flex items-center gap-1 text-gray-400 sm:gap-2">
-                <div className="h-2 w-2 animate-pulse rounded-full bg-green-500"></div>
+                <div className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
                 <span className="text-[10px] sm:text-xs">
                   {t("allSystemsOperational")}
                 </span>

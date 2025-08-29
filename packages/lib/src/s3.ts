@@ -46,7 +46,7 @@ export async function createPresignedUrl(key: string): Promise<string> {
 
 export function generateS3Key(
   originalKey: string,
-  temporary: boolean = false,
+  temporary = false,
 ): string {
   const timestamp = Date.now();
   const randomId = Math.random().toString(36).substring(2, 15);

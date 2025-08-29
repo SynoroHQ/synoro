@@ -22,12 +22,12 @@ export default function TelegramCTA({ id = "cta-section" }: TelegramCTAProps) {
     <section id={id} className="section relative overflow-hidden">
       {/* Background Elements */}
       <div className="absolute inset-0">
-        <div className="absolute top-0 left-0 h-full w-full bg-gradient-to-br from-blue-500/5 to-purple-500/5"></div>
-        <div className="animate-rotate-slow absolute top-1/4 right-1/6 h-20 w-20 rotate-45 rounded-full border border-blue-500/20"></div>
+        <div className="absolute top-0 left-0 h-full w-full bg-gradient-to-br from-blue-500/5 to-purple-500/5" />
+        <div className="animate-rotate-slow absolute top-1/4 right-1/6 h-20 w-20 rotate-45 rounded-full border border-blue-500/20" />
         <div
           className="animate-rotate-slow absolute bottom-1/4 left-1/5 h-16 w-16 rotate-12 rounded-full border border-purple-500/20"
           style={{ animationDirection: "reverse" }}
-        ></div>
+        />
       </div>
 
       <div className="container-default relative z-10">
@@ -102,7 +102,7 @@ export default function TelegramCTA({ id = "cta-section" }: TelegramCTAProps) {
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="h-3 w-3 animate-pulse rounded-full bg-green-500"></div>
+                  <div className="h-3 w-3 animate-pulse rounded-full bg-green-500" />
                   <span className="text-xs text-green-600">{t("online")}</span>
                 </div>
               </div>

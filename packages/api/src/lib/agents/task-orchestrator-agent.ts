@@ -10,8 +10,8 @@ import type {
   AgentTask,
   AgentTelemetry,
 } from "./types";
-import { AbstractAgent } from "./base-agent";
 import { globalAgentRegistry } from "./agent-registry";
+import { AbstractAgent } from "./base-agent";
 
 // Утилита для компактного форматирования ошибок Zod
 function formatZodIssues(error: z.ZodError): string {
@@ -190,7 +190,7 @@ export class TaskOrchestratorAgent extends AbstractAgent {
         temperature: 0.2,
         experimental_telemetry: {
           isEnabled: true,
-          ...this.createTelemetry("task-complexity-analysis", task, telemetry),
+          ...this.createTelemetry("task-complexity-analysis", task),
           metadata: { inputLength: task.input.length },
         },
       });
@@ -311,7 +311,7 @@ export class TaskOrchestratorAgent extends AbstractAgent {
       },
       experimental_telemetry: {
         isEnabled: true,
-        ...this.createTelemetry("create-plan", task, telemetry),
+        ...this.createTelemetry("create-plan", task),
       },
     });
 
@@ -559,7 +559,7 @@ export class TaskOrchestratorAgent extends AbstractAgent {
         temperature: 0.2,
         experimental_telemetry: {
           isEnabled: true,
-          ...this.createTelemetry("step-quality-evaluation", task, telemetry),
+          ...this.createTelemetry("step-quality-evaluation", task),
           metadata: { stepId: step.id },
         },
       });
@@ -607,7 +607,7 @@ ${results.map((r) => `- ${r.stepId}: ${r.result}`).join("\n")}
       temperature: 0.5,
       experimental_telemetry: {
         isEnabled: true,
-        ...this.createTelemetry("generate-summary", task, telemetry),
+        ...this.createTelemetry("generate-summary", task),
       },
     });
 

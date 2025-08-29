@@ -320,7 +320,7 @@ export default function DashboardPage() {
                 className="flex items-center gap-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800"
               >
                 <div
-                  className={`rounded-full bg-slate-100 p-2 dark:bg-slate-700`}
+                  className={"rounded-full bg-slate-100 p-2 dark:bg-slate-700"}
                 >
                   <item.icon className={`h-5 w-5 ${item.color}`} />
                 </div>

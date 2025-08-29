@@ -273,7 +273,7 @@ const telegramAnonymousAuthMiddleware = t.middleware(
       // Check auth_date freshness (within 5 minutes)
       const authDate = urlParams.get("auth_date");
       if (authDate) {
-        const authTimestamp = parseInt(authDate, 10);
+        const authTimestamp = Number.parseInt(authDate, 10);
         const currentTimestamp = Math.floor(Date.now() / 1000);
         const timeDiff = Math.abs(currentTimestamp - authTimestamp);
 

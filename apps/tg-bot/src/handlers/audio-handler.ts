@@ -9,12 +9,12 @@ import {
   removeProcessingMessage,
   sendProcessingMessage,
 } from "../utils/message-utils";
+import { formatForTelegram } from "../utils/telegram-formatter";
 import {
   createMessageContext,
   downloadTelegramFile,
   getUserIdentifier,
 } from "../utils/telegram-utils";
-import { formatForTelegram } from "../utils/telegram-formatter";
 
 /**
  * Обрабатывает аудио и голосовые сообщения
@@ -125,13 +125,13 @@ export async function handleAudio(ctx: Context): Promise<void> {
         result.response.length > room
           ? result.response.slice(0, room - 1) + "…"
           : result.response;
-      
+
       const formattedMessage = formatForTelegram(prefix + body, {
         useEmojis: true,
-        useMarkdown: true,
+        useHTML: true,
         addSeparators: true,
       });
-      
+
       await ctx.reply(formattedMessage.text, {
         parse_mode: formattedMessage.parse_mode,
         disable_web_page_preview: formattedMessage.disable_web_page_preview,
@@ -147,13 +147,13 @@ export async function handleAudio(ctx: Context): Promise<void> {
       result.response.length > room
         ? result.response.slice(0, room - 1) + "…"
         : result.response;
-    
+
     const formattedMessage = formatForTelegram(prefix + body, {
       useEmojis: true,
-      useMarkdown: true,
+      useHTML: true,
       addSeparators: true,
     });
-    
+
     await ctx.reply(formattedMessage.text, {
       parse_mode: formattedMessage.parse_mode,
       disable_web_page_preview: formattedMessage.disable_web_page_preview,

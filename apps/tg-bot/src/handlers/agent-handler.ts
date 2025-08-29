@@ -49,7 +49,7 @@ export async function handleAgentsCommand(ctx: Context): Promise<void> {
 
     const formattedMessage = formatForTelegram(response, {
       useEmojis: true,
-      useMarkdown: true,
+      useHTML: true,
       addSeparators: true,
     });
 
@@ -84,7 +84,7 @@ export async function handleAgentTestCommand(ctx: Context): Promise<void> {
         '"',
       {
         useEmojis: true,
-        useMarkdown: true,
+        useHTML: true,
         addSeparators: true,
       },
     );
@@ -112,11 +112,11 @@ export async function handleAgentTestCommand(ctx: Context): Promise<void> {
         },
       );
 
-    let response = `🎯 *Результат тестирования агентной системы:*\n\n`;
+    let response = "🎯 *Результат тестирования агентной системы:*\n\n";
     response += `📝 *Ответ:*\n${result.response}\n\n`;
 
     if (result.agentMetadata) {
-      response += `🤖 *Информация о процессе:*\n`;
+      response += "🤖 *Информация о процессе:*\n";
       response += `• Режим обработки: ${result.agentMetadata.processingMode}\n`;
       response += `• Использованы агенты: ${result.agentMetadata.agentsUsed.join(" → ")}\n`;
       response += `• Количество шагов: ${result.agentMetadata.totalSteps}\n`;
@@ -124,7 +124,7 @@ export async function handleAgentTestCommand(ctx: Context): Promise<void> {
       response += `• Время обработки: ${result.agentMetadata.processingTime}мс\n\n`;
     }
 
-    response += `📊 *Классификация:*\n`;
+    response += "📊 *Классификация:*\n";
     response += `• Тип: ${result.messageType.type}\n`;
     response += `• Уверенность: ${(result.messageType.confidence * 100).toFixed(1)}%\n`;
     response += `• Релевантность: ${result.relevance.relevant ? "Да" : "Нет"}\n`;
@@ -149,7 +149,7 @@ export async function handleAgentTestCommand(ctx: Context): Promise<void> {
       for (const part of parts) {
         const formattedPart = formatForTelegram(part, {
           useEmojis: true,
-          useMarkdown: true,
+          useHTML: true,
           addSeparators: true,
         });
         await ctx.reply(formattedPart.text, {
@@ -159,7 +159,7 @@ export async function handleAgentTestCommand(ctx: Context): Promise<void> {
     } else {
       const formattedResponse = formatForTelegram(response, {
         useEmojis: true,
-        useMarkdown: true,
+        useHTML: true,
         addSeparators: true,
       });
       await ctx.reply(formattedResponse.text, {

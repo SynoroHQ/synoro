@@ -22,7 +22,7 @@ export class ProcessingAnimation {
   private currentStage = 0;
   private messageType: string;
 
-  constructor(ctx: Context, messageType: string = "сообщение") {
+  constructor(ctx: Context, messageType = "сообщение") {
     this.ctx = ctx;
     this.chatId = ctx.chat!.id;
     this.messageType = messageType;
@@ -147,7 +147,7 @@ export async function smoothDeleteMessage(
  */
 export async function sendProcessingMessage(
   ctx: Context,
-  messageType: string = "сообщение",
+  messageType = "сообщение",
 ): Promise<number | undefined> {
   try {
     const processingMsg = await ctx.reply(

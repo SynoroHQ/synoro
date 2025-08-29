@@ -66,7 +66,7 @@ export class TelegramUserService {
     }
 
     // 2. Получаем или создаем conversation
-    const conversation = await this.getOrCreateConversation(
+    const conversation = await TelegramUserService.getOrCreateConversation(
       userId,
       chatId,
       isAnonymous,
@@ -74,7 +74,7 @@ export class TelegramUserService {
 
     // 3. Если это анонимный пользователь и есть messageId, проверяем идемпотентность
     if (isAnonymous && messageId) {
-      await this.checkIdempotency(chatId, messageId);
+      await TelegramUserService.checkIdempotency(chatId, messageId);
     }
 
     if (!conversation) {
@@ -130,7 +130,7 @@ export class TelegramUserService {
         .returning();
 
       return newConversation;
-    } else {
+    }
       // Для зарегистрированных пользователей ищем по userId
       const existingConversation = await db
         .select()
@@ -159,7 +159,6 @@ export class TelegramUserService {
         .returning();
 
       return newConversation;
-    }
   }
 
   /**

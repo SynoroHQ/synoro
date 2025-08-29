@@ -112,7 +112,7 @@ export class EventProcessorAgent extends AbstractAgent {
         temperature: 0.1,
         experimental_telemetry: {
           isEnabled: true,
-          ...this.createTelemetry("event-type-detection", task, telemetry),
+          ...this.createTelemetry("event-type-detection", task),
           metadata: { inputLength: task.input.length },
         },
       });
@@ -243,7 +243,7 @@ export class EventProcessorAgent extends AbstractAgent {
             temperature: 0.2,
             experimental_telemetry: {
               isEnabled: true,
-              ...this.createTelemetry("event-categorization", task, telemetry),
+              ...this.createTelemetry("event-categorization", task),
               metadata: { eventType, descriptionLength: description.length },
             },
           });
@@ -315,7 +315,7 @@ export class EventProcessorAgent extends AbstractAgent {
             temperature: 0.1,
             experimental_telemetry: {
               isEnabled: true,
-              ...this.createTelemetry("financial-extraction", task, telemetry),
+              ...this.createTelemetry("financial-extraction", task),
               metadata: { textLength: text.length },
             },
           });
@@ -385,7 +385,7 @@ export class EventProcessorAgent extends AbstractAgent {
         },
         experimental_telemetry: {
           isEnabled: true,
-          ...this.createTelemetry("parse-event", task, telemetry),
+          ...this.createTelemetry("parse-event", task),
         },
       });
 
@@ -403,7 +403,7 @@ export class EventProcessorAgent extends AbstractAgent {
         return this.createErrorResult("Failed to parse event");
       }
 
-      let advice = undefined;
+      let advice ;
 
       // Генерируем совет, если нужно
       if (structuredEvent.data.needsAdvice) {
@@ -415,7 +415,7 @@ export class EventProcessorAgent extends AbstractAgent {
             temperature: 0.4,
             experimental_telemetry: {
               isEnabled: true,
-              ...this.createTelemetry("generate-advice", task, telemetry),
+              ...this.createTelemetry("generate-advice", task),
               metadata: {
                 operation: "generate-advice",
               },

@@ -110,7 +110,7 @@ async function telegramFormattingExample() {
 
   // Получаем статистику агентов
   const agentStats = agentManager.getAgentStats();
-  console.log(`\n📊 Статистика агентов:`);
+  console.log("\n📊 Статистика агентов:");
   console.log(`  Всего агентов: ${agentStats.totalAgents}`);
   console.log(`  Список агентов: ${agentStats.agentList.join(", ")}`);
 

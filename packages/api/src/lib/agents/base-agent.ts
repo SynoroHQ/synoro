@@ -3,7 +3,6 @@ import { openai } from "@ai-sdk/openai";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { generateText } from "ai";
 
-import type { AgentContext as NewAgentContext } from "./agent-context";
 import type {
   AgentCapability,
   AgentResult,
@@ -81,13 +80,11 @@ export abstract class AbstractAgent implements BaseAgent {
   protected createTelemetry(
     operation: string,
     task: AgentTask,
-    baseTelemetry?: AgentTelemetry,
   ): AgentTelemetry {
-    const context = task.context as NewAgentContext;
+    const context = task.context;
 
     return {
-      functionId:
-        baseTelemetry?.functionId ?? this.generateFunctionId(operation),
+      functionId: this.generateFunctionId(operation),
       metadata: {
         agentName: this.name,
         taskType: task.type,
@@ -166,7 +163,6 @@ export abstract class AbstractAgent implements BaseAgent {
     input: string,
     system: string,
     task: AgentTask,
-    telemetry?: AgentTelemetry,
   ): Promise<string> {
     const { text } = await generateText({
       model: this.getModel(),
@@ -175,7 +171,7 @@ export abstract class AbstractAgent implements BaseAgent {
       temperature: this.defaultTemperature,
       experimental_telemetry: {
         isEnabled: true,
-        ...this.createTelemetry("respond", task, telemetry),
+        ...this.createTelemetry("respond", task),
       },
     });
     return text.trim();

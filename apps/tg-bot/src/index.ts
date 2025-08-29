@@ -3,7 +3,7 @@ import { env } from "./env";
 
 async function main() {
   console.log("🚀 Запуск Telegram Bot с API интеграцией...");
-  console.log(`📋 Конфигурация:`);
+  console.log("📋 Конфигурация:");
   console.log(
     `   - Telegram Bot Token: ${env.TELEGRAM_BOT_TOKEN ? "✅ установлен" : "❌ не установлен"}`,
   );

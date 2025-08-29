@@ -97,7 +97,7 @@ export async function handleSmartText(ctx: Context): Promise<void> {
     // Форматируем ответ для Telegram
     const formattedMessage = formatForTelegram(reply, {
       useEmojis: true,
-      useMarkdown: true,
+      useHTML: true,
       maxLineLength: 80,
     });
 

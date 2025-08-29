@@ -139,7 +139,7 @@ export class RouterAgent extends AbstractAgent {
         temperature: this.defaultTemperature,
         experimental_telemetry: {
           isEnabled: true,
-          ...this.createTelemetry("classify", task, telemetry),
+          ...this.createTelemetry("classify", task),
         },
       });
 
@@ -152,7 +152,6 @@ export class RouterAgent extends AbstractAgent {
         const telemetryData = this.createTelemetry(
           "fallback-classification",
           task,
-          telemetry,
         );
 
         const { text: fallbackClassification } = await generateText({
@@ -259,7 +258,7 @@ export class RouterAgent extends AbstractAgent {
         temperature: this.defaultTemperature,
         experimental_telemetry: {
           isEnabled: true,
-          ...this.createTelemetry("route", task, telemetry),
+          ...this.createTelemetry("route", task),
           metadata: {
             operation: "route",
           },

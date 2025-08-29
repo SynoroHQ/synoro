@@ -70,11 +70,7 @@ export class DataAnalystAgent extends AbstractAgent {
         temperature: 0.1,
         experimental_telemetry: {
           isEnabled: true,
-          ...this.createTelemetry(
-            "analytics-request-detection",
-            task,
-            telemetry,
-          ),
+          ...this.createTelemetry("analytics-request-detection", task),
           metadata: { inputLength: task.input.length },
         },
       });
@@ -98,10 +94,7 @@ export class DataAnalystAgent extends AbstractAgent {
     }
   }
 
-  async process(
-    task: AgentTask,
-    telemetry?: AgentTelemetry,
-  ): Promise<AgentResult<string>> {
+  async process(task: AgentTask): Promise<AgentResult<string>> {
     const systemPrompt = getPromptSafe(PROMPT_KEYS.ASSISTANT);
 
     try {
@@ -109,7 +102,6 @@ export class DataAnalystAgent extends AbstractAgent {
         task.input,
         systemPrompt,
         task,
-        telemetry,
       );
       return this.createSuccessResult(response, 0.85);
     } catch (err) {

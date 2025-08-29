@@ -102,7 +102,7 @@ export default function WhoBenefits() {
 
               <div className="order-1 lg:order-2">
                 <div className="relative">
-                  <div className="absolute -inset-4 rounded-3xl bg-gradient-to-r from-blue-500/20 to-blue-600/20 blur-xl"></div>
+                  <div className="absolute -inset-4 rounded-3xl bg-gradient-to-r from-blue-500/20 to-blue-600/20 blur-xl" />
                   <div className="relative rounded-3xl border border-blue-100 bg-white p-8 shadow-none">
                     <div className="space-y-4">
                       <div className="flex items-center justify-between rounded-xl bg-blue-50 p-4">
@@ -140,7 +140,7 @@ export default function WhoBenefits() {
           <div className="group">
             <div className="grid items-center gap-8 sm:gap-12 lg:grid-cols-2">
               <div className="relative">
-                <div className="absolute -inset-4 rounded-3xl bg-gradient-to-r from-purple-500/20 to-purple-600/20 blur-xl"></div>
+                <div className="absolute -inset-4 rounded-3xl bg-gradient-to-r from-purple-500/20 to-purple-600/20 blur-xl" />
                 <div className="relative rounded-3xl border border-purple-100 bg-white p-8 shadow-none">
                   <div className="space-y-4">
                     <div className="mb-6 text-center">
@@ -288,7 +288,7 @@ export default function WhoBenefits() {
 
               <div className="order-1 lg:order-2">
                 <div className="relative">
-                  <div className="absolute -inset-4 rounded-3xl bg-gradient-to-r from-teal-500/20 to-teal-600/20 blur-xl"></div>
+                  <div className="absolute -inset-4 rounded-3xl bg-gradient-to-r from-teal-500/20 to-teal-600/20 blur-xl" />
                   <div className="relative rounded-3xl border border-teal-100 bg-white p-8 shadow-none">
                     <div className="mb-6 text-center">
                       <Home className="mx-auto mb-3 h-12 w-12 text-teal-600" />
@@ -337,7 +337,7 @@ export default function WhoBenefits() {
           <div className="group">
             <div className="grid items-center gap-8 sm:gap-12 lg:grid-cols-2">
               <div className="relative">
-                <div className="absolute -inset-4 rounded-3xl bg-gradient-to-r from-orange-500/20 to-orange-600/20 blur-xl"></div>
+                <div className="absolute -inset-4 rounded-3xl bg-gradient-to-r from-orange-500/20 to-orange-600/20 blur-xl" />
                 <div className="relative rounded-3xl border border-orange-100 bg-white p-8 shadow-none">
                   <div className="mb-6 text-center">
                     <User className="mx-auto mb-3 h-12 w-12 text-orange-600" />
@@ -361,7 +361,7 @@ export default function WhoBenefits() {
                           style={{
                             width: t("dashboard.freelancers.focusTimePercent"),
                           }}
-                        ></div>
+                        />
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-3">
@@ -511,7 +511,7 @@ export default function WhoBenefits() {
 
               <div className="order-1 lg:order-2">
                 <div className="relative">
-                  <div className="absolute -inset-4 rounded-3xl bg-gradient-to-r from-green-500/20 to-green-600/20 blur-xl"></div>
+                  <div className="absolute -inset-4 rounded-3xl bg-gradient-to-r from-green-500/20 to-green-600/20 blur-xl" />
                   <div className="relative rounded-3xl border border-green-100 bg-white p-8 shadow-none">
                     <div className="mb-6 text-center">
                       <Sprout className="mx-auto mb-3 h-12 w-12 text-green-600" />

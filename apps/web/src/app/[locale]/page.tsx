@@ -35,7 +35,7 @@ export default function HomePage() {
       const timer = setInterval(() => {
         step++;
         const progress = step / steps;
-        const easeOut = 1 - Math.pow(1 - progress, 3);
+        const easeOut = 1 - (1 - progress) ** 3;
 
         setCounters({
           users: Math.floor(targets.users * easeOut),

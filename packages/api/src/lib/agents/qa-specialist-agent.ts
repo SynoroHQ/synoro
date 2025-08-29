@@ -107,7 +107,7 @@ export class QASpecialistAgent extends AbstractAgent {
         temperature: 0.1,
         experimental_telemetry: {
           isEnabled: true,
-          ...this.createTelemetry("question-detection", task, telemetry),
+          ...this.createTelemetry("question-detection", task),
           metadata: { inputLength: task.input.length },
         },
       });
@@ -195,7 +195,7 @@ export class QASpecialistAgent extends AbstractAgent {
         temperature: 0.1,
         experimental_telemetry: {
           isEnabled: true,
-          ...this.createTelemetry("question-classification", task, telemetry),
+          ...this.createTelemetry("question-classification", task),
           metadata: { questionLength: question.length },
         },
       });
@@ -228,7 +228,7 @@ export class QASpecialistAgent extends AbstractAgent {
             temperature: 0.3,
             experimental_telemetry: {
               isEnabled: true,
-              ...this.createTelemetry("system-info-search", task, telemetry),
+              ...this.createTelemetry("system-info-search", task),
               metadata: { queryLength: query.length },
             },
           });
@@ -292,7 +292,7 @@ export class QASpecialistAgent extends AbstractAgent {
         },
         experimental_telemetry: {
           isEnabled: true,
-          ...this.createTelemetry("answer-question", task, telemetry),
+          ...this.createTelemetry("answer-question", task),
         },
       });
 
