@@ -244,8 +244,7 @@ export class RouterAgent extends AbstractAgent {
 - task-manager: Управляет задачами/делами пользователя
 - data-analyst: Выполняет аналитические запросы и рекомендации по визуализации
 - task-orchestrator: Координирует сложные задачи, требующие нескольких агентов
-- quality-evaluator: Оценивает и улучшает качество ответов
-- telegram-formatter: Форматирует ответы для Telegram с использованием Markdown и эмодзи`;
+- quality-evaluator: Оценивает и улучшает качество ответов`;
 
     const prompt = `Выбери агента для обработки сообщения: "${task.input}"
 
