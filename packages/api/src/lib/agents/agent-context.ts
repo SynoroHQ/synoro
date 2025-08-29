@@ -6,12 +6,13 @@ export interface AgentContext {
   userId?: string;
   chatId?: string;
   messageId?: string;
-  channel: string;
+  channel?: string;
+  timezone?: string;
   metadata?: {
     // Базовые метаданные
-    channel: string;
-    userId: string;
-    conversationId: string;
+    channel?: string;
+    userId?: string;
+    conversationId?: string;
     chatId?: string;
     messageId?: string;
     contextMessageCount?: number;
@@ -20,4 +21,5 @@ export interface AgentContext {
     // Дополнительные метаданные
     [key: string]: unknown;
   };
+  [key: string]: unknown;
 }

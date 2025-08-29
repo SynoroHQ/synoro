@@ -1,19 +1,20 @@
+import type { TRPCRouterRecord } from "@trpc/server";
 import { TRPCError } from "@trpc/server";
 
-import type { ReminderUpdate } from "@synoro/db";
+import type { ReminderUpdate } from "@synoro/validators";
 import {
-  reminderUpdateSchema,
   completeReminderSchema,
+  reminderUpdateSchema,
   snoozeReminderSchema,
-} from "@synoro/db";
+} from "@synoro/validators";
 
 import { ReminderService } from "../../lib/services/reminder-service";
-import { createTRPCRouter, protectedProcedure } from "../../trpc";
+import { protectedProcedure } from "../../trpc";
 
 // Инициализируем сервис
 const reminderService = new ReminderService();
 
-export const updateRemindersRouter = createTRPCRouter({
+export const updateRemindersRouter: TRPCRouterRecord = {
   /**
    * Обновить напоминание
    */
@@ -27,12 +28,12 @@ export const updateRemindersRouter = createTRPCRouter({
       try {
         const updateData: ReminderUpdate = {
           ...input.data,
-          tags: input.data.tags ? JSON.stringify(input.data.tags) : undefined,
+          tags: input.data.tags,
         };
 
         const reminder = await reminderService.updateReminder(
           input.id,
-          ctx.user.id,
+          ctx.session.user.id,
           updateData,
         );
         if (!reminder) {
@@ -61,7 +62,7 @@ export const updateRemindersRouter = createTRPCRouter({
       try {
         const reminder = await reminderService.completeReminder(
           input.id,
-          ctx.user.id,
+          ctx.session.user.id,
         );
         if (!reminder) {
           throw new TRPCError({
@@ -89,7 +90,7 @@ export const updateRemindersRouter = createTRPCRouter({
       try {
         const reminder = await reminderService.snoozeReminder(
           input.id,
-          ctx.user.id,
+          ctx.session.user.id,
           input.snoozeUntil,
         );
         if (!reminder) {
@@ -108,4 +109,4 @@ export const updateRemindersRouter = createTRPCRouter({
         });
       }
     }),
-});
+};

@@ -33,10 +33,7 @@ export class DataAnalystAgent extends AbstractAgent {
     super("gpt-5-mini", 0.5);
   }
 
-  async canHandle(
-    task: AgentTask,
-    telemetry?: AgentTelemetry,
-  ): Promise<boolean> {
+  async canHandle(task: AgentTask): Promise<boolean> {
     try {
       // Используем AI для определения типа запроса
       const { object: requestAnalysis } = await generateObject({

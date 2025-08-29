@@ -1,14 +1,15 @@
+import type { TRPCRouterRecord } from "@trpc/server";
 import { TRPCError } from "@trpc/server";
 
-import { reminderIdSchema } from "@synoro/db";
+import { reminderIdSchema } from "@synoro/validators";
 
 import { ReminderService } from "../../lib/services/reminder-service";
-import { createTRPCRouter, protectedProcedure } from "../../trpc";
+import { protectedProcedure } from "../../trpc";
 
 // Инициализируем сервис
 const reminderService = new ReminderService();
 
-export const deleteRemindersRouter = createTRPCRouter({
+export const deleteRemindersRouter: TRPCRouterRecord = {
   /**
    * Удалить напоминание
    */
@@ -18,7 +19,7 @@ export const deleteRemindersRouter = createTRPCRouter({
       try {
         const success = await reminderService.deleteReminder(
           input.id,
-          ctx.user.id,
+          ctx.session.user.id,
         );
         if (!success) {
           throw new TRPCError({
@@ -36,4 +37,4 @@ export const deleteRemindersRouter = createTRPCRouter({
         });
       }
     }),
-});
+};

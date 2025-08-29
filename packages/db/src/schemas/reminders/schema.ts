@@ -1,3 +1,4 @@
+import { createId } from "@paralleldrive/cuid2";
 import { relations } from "drizzle-orm";
 import {
   boolean,
@@ -9,7 +10,6 @@ import {
   text,
   timestamp,
   uniqueIndex,
-  uuid,
 } from "drizzle-orm/pg-core";
 
 import { user } from "../auth/schema";
@@ -85,8 +85,8 @@ export type ReminderMetadata = Record<string, any>;
 export const reminders = pgTable(
   "reminders",
   {
-    id: uuid("id").primaryKey().defaultRandom(),
-    userId: uuid("user_id")
+    id: text("id").primaryKey().$defaultFn(createId),
+    userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
 
@@ -118,8 +118,8 @@ export const reminders = pgTable(
     smartSuggestions: jsonb("smart_suggestions").$type<SmartSuggestions>(),
 
     // Связи и метаданные
-    chatId: uuid("chat_id"), // Связь с чатом, если напоминание создано из чата
-    parentReminderId: uuid("parent_reminder_id"), // Для связанных напоминаний
+    chatId: text("chat_id"), // Связь с чатом, если напоминание создано из чата
+    parentReminderId: text("parent_reminder_id"), // Для связанных напоминаний
     tags: jsonb("tags").$type<ReminderTags>(),
 
     // Настройки уведомлений
@@ -199,8 +199,8 @@ export const reminders = pgTable(
 export const reminderExecutions = pgTable(
   "reminder_executions",
   {
-    id: uuid("id").primaryKey().defaultRandom(),
-    reminderId: uuid("reminder_id")
+    id: text("id").primaryKey().$defaultFn(createId),
+    reminderId: text("reminder_id")
       .notNull()
       .references(() => reminders.id, { onDelete: "cascade" }),
 
@@ -255,8 +255,8 @@ export const reminderExecutions = pgTable(
 export const reminderTemplates = pgTable(
   "reminder_templates",
   {
-    id: uuid("id").primaryKey().defaultRandom(),
-    userId: uuid("user_id")
+    id: text("id").primaryKey().$defaultFn(createId),
+    userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
 

@@ -6,7 +6,7 @@ import type {
   reminderTemplates,
 } from "./schema";
 
-// Экспортируем типы из validators.ts
+// Экспортируем типы из пакета @synoro/validators (только те, которых нет в схеме)
 export type {
   ReminderType,
   ReminderStatus,
@@ -14,13 +14,7 @@ export type {
   ReminderRecurrence,
   ExecutionStatus,
   NotificationChannel,
-  RecurrencePattern,
-  AIContext,
-  SmartSuggestions,
-  ReminderTags,
-  ReminderMetadata,
   Reminder,
-  ReminderUpdate,
   ReminderExecution,
   ReminderExecutionUpdate,
   ReminderTemplate,
@@ -35,7 +29,7 @@ export type {
   GetReminderRequest,
   FindSimilarRequest,
   BulkReminderOperation,
-} from "./validators";
+} from "@synoro/validators";
 
 // Основные типы для Drizzle ORM
 export type ReminderSelect = InferSelectModel<typeof reminders>;

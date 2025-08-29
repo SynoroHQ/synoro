@@ -1,8 +1,31 @@
 // Export schema
 export * from "./schema";
 
-// Export types from validators
-export * from "./validators";
+// Export types from validators (only non-conflicting ones)
+export type {
+  ReminderType,
+  ReminderPriority,
+  ReminderStatus,
+  ReminderRecurrence,
+  ExecutionStatus,
+  NotificationChannel,
+  Reminder,
+  ReminderUpdate,
+  ReminderExecution,
+  ReminderExecutionUpdate,
+  ReminderTemplate,
+  ReminderTemplateUpdate,
+  ReminderFilters,
+  ReminderSortOptions,
+  ReminderSearch,
+  CreateFromTextRequest,
+  ReminderIdRequest,
+  CompleteReminderRequest,
+  SnoozeReminderRequest,
+  GetReminderRequest,
+  FindSimilarRequest,
+  BulkReminderOperation,
+} from "@synoro/validators";
 
 // Export utilities
 export * from "./utils";
@@ -10,5 +33,15 @@ export * from "./utils";
 // Export constants
 export * from "./constants";
 
-// Export validators (includes types)
-export * from "./validators";
+// Export validation functions from validators
+export {
+  validateReminder,
+  validateReminderUpdate,
+  validateReminderExecution,
+  validateReminderTemplate,
+  validateReminderSearch,
+  validateBulkOperation,
+  validateReminderTime,
+  validateRecurrencePattern,
+  validateTags,
+} from "@synoro/validators";

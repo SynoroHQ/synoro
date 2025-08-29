@@ -1,21 +1,18 @@
+import type { TRPCRouterRecord } from "@trpc/server";
 import { TRPCError } from "@trpc/server";
 
-import type { NewReminder } from "@synoro/db";
-import {
-  reminderSchema,
-  createFromTextSchema,
-  type CreateFromTextRequest,
-} from "@synoro/db";
+import type { Reminder } from "@synoro/validators";
+import { createFromTextSchema, reminderSchema } from "@synoro/validators";
 
 import { SmartReminderAgent } from "../../lib/agents/smart-reminder-agent";
 import { ReminderService } from "../../lib/services/reminder-service";
-import { createTRPCRouter, protectedProcedure } from "../../trpc";
+import { protectedProcedure } from "../../trpc";
 
 // Инициализируем сервисы
 const reminderService = new ReminderService();
 const smartReminderAgent = new SmartReminderAgent();
 
-export const createRemindersRouter = createTRPCRouter({
+export const createRemindersRouter: TRPCRouterRecord = {
   /**
    * Создать напоминание вручную
    */
@@ -23,10 +20,10 @@ export const createRemindersRouter = createTRPCRouter({
     .input(reminderSchema.omit({ userId: true }))
     .mutation(async ({ ctx, input }) => {
       try {
-        const reminderData: NewReminder = {
+        const reminderData: Reminder = {
           ...input,
-          userId: ctx.user.id,
-          tags: input.tags ? JSON.stringify(input.tags) : null,
+          userId: ctx.session.user.id,
+          tags: input.tags,
           aiGenerated: false,
         };
 
@@ -49,7 +46,7 @@ export const createRemindersRouter = createTRPCRouter({
       try {
         const result = await smartReminderAgent.createReminderFromText({
           text: input.text,
-          userId: ctx.user.id,
+          userId: ctx.session.user.id,
           chatId: input.chatId,
           timezone: input.timezone,
           context: input.context,
@@ -63,4 +60,4 @@ export const createRemindersRouter = createTRPCRouter({
         });
       }
     }),
-});
+};

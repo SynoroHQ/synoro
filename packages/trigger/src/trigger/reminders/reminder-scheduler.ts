@@ -1,8 +1,8 @@
 import { logger, schedules, task } from "@trigger.dev/sdk";
-import { and, eq, lte, or } from "drizzle-orm";
+import { and, eq, isNull, lte, or } from "drizzle-orm";
 
-import { db } from "@synoro/db";
-import { reminderExecutions, reminders } from "@synoro/db/schemas";
+import { db } from "@synoro/db/client";
+import { reminderExecutions, reminders } from "@synoro/db/schema";
 
 // Задача для проверки и отправки напоминаний каждую минуту
 export const reminderScheduler = schedules.task({
@@ -28,10 +28,7 @@ export const reminderScheduler = schedules.task({
             eq(reminders.status, "active"),
             lte(reminders.reminderTime, now),
             eq(reminders.notificationSent, false),
-            or(
-              eq(reminders.snoozeUntil, null),
-              lte(reminders.snoozeUntil, now),
-            ),
+            or(isNull(reminders.snoozeUntil), lte(reminders.snoozeUntil, now)),
           ),
         )
         .limit(50); // Ограничиваем количество для предотвращения перегрузки
@@ -46,7 +43,7 @@ export const reminderScheduler = schedules.task({
             reminderId: reminder.id,
             userId: reminder.userId,
             title: reminder.title,
-            description: reminder.description,
+            description: reminder.description ?? undefined,
             type: reminder.type,
             priority: reminder.priority,
           });
@@ -55,7 +52,7 @@ export const reminderScheduler = schedules.task({
         } catch (error) {
           logger.error(
             `Ошибка запуска отправки напоминания ${reminder.id}:`,
-            error,
+            error as Record<string, unknown>,
           );
 
           // Записываем ошибку в историю
@@ -74,7 +71,10 @@ export const reminderScheduler = schedules.task({
 
       logger.log("Планировщик напоминаний завершен успешно");
     } catch (error) {
-      logger.error("Ошибка в планировщике напоминаний:", error);
+      logger.error(
+        "Ошибка в планировщике напоминаний:",
+        error as Record<string, unknown>,
+      );
       throw error;
     }
   },
@@ -142,7 +142,10 @@ export const sendReminderNotification = task({
               ? channelError.message
               : "Ошибка канала";
           errors.push(`${channel}: ${errorMsg}`);
-          logger.error(`Ошибка отправки через ${channel}:`, channelError);
+          logger.error(
+            `Ошибка отправки через ${channel}:`,
+            channelError as Record<string, unknown>,
+          );
 
           // Записываем ошибку канала
           await db.insert(reminderExecutions).values({
@@ -167,13 +170,13 @@ export const sendReminderNotification = task({
 
         logger.log(`Напоминание ${reminderId} успешно отправлено`);
       } else {
-        logger.error(`Не удалось отправить напоминание ${reminderId}:`, errors);
+        logger.error(`Не удалось отправить напоминание ${reminderId}:`);
         throw new Error(`Ошибки отправки: ${errors.join(", ")}`);
       }
     } catch (error) {
       logger.error(
         `Критическая ошибка отправки напоминания ${reminderId}:`,
-        error,
+        error as Record<string, unknown>,
       );
 
       // Записываем критическую ошибку
@@ -208,43 +211,46 @@ async function processRecurringReminders() {
   for (const reminder of recurringReminders) {
     try {
       // Вычисляем следующее время напоминания
-      const nextTime = calculateNextReminderTime(
-        reminder.reminderTime,
-        reminder.recurrence,
-      );
+      if (reminder.recurrence) {
+        const nextTime = calculateNextReminderTime(
+          reminder.reminderTime,
+          reminder.recurrence,
+        );
 
-      if (
-        nextTime &&
-        (!reminder.recurrenceEndDate || nextTime <= reminder.recurrenceEndDate)
-      ) {
-        // Создаем новое напоминание
-        await db.insert(reminders).values({
-          userId: reminder.userId,
-          title: reminder.title,
-          description: reminder.description,
-          type: reminder.type,
-          priority: reminder.priority,
-          reminderTime: nextTime,
-          recurrence: reminder.recurrence,
-          recurrencePattern: reminder.recurrencePattern,
-          recurrenceEndDate: reminder.recurrenceEndDate,
-          aiGenerated: reminder.aiGenerated,
-          aiContext: reminder.aiContext,
-          tags: reminder.tags,
-          chatId: reminder.chatId,
-          parentReminderId: reminder.id,
-          status: "active",
-          notificationSent: false,
-        });
+        if (
+          nextTime &&
+          (!reminder.recurrenceEndDate ||
+            nextTime <= reminder.recurrenceEndDate)
+        ) {
+          // Создаем новое напоминание
+          await db.insert(reminders).values({
+            userId: reminder.userId,
+            title: reminder.title,
+            description: reminder.description,
+            type: reminder.type,
+            priority: reminder.priority,
+            reminderTime: nextTime,
+            recurrence: reminder.recurrence,
+            recurrencePattern: reminder.recurrencePattern,
+            recurrenceEndDate: reminder.recurrenceEndDate,
+            aiGenerated: reminder.aiGenerated,
+            aiContext: reminder.aiContext,
+            tags: reminder.tags,
+            chatId: reminder.chatId,
+            parentReminderId: reminder.id,
+            status: "active",
+            notificationSent: false,
+          });
 
-        logger.log(`Создано повторяющееся напоминание для ${reminder.id}`, {
-          nextTime: nextTime.toISOString(),
-        });
+          logger.log(`Создано повторяющееся напоминание для ${reminder.id}`, {
+            nextTime: nextTime.toISOString(),
+          });
+        }
       }
     } catch (error) {
       logger.error(
         `Ошибка создания повторяющегося напоминания для ${reminder.id}:`,
-        error,
+        error as Record<string, unknown>,
       );
     }
   }

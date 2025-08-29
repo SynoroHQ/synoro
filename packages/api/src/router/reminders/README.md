@@ -30,14 +30,14 @@ reminders/
 
 ### 2. **Единый интерфейс**
 
-Все модули объединяются в главном роутере `index.ts`, предоставляя единый API:
+Все модули объединяются в главном роутере `index.ts` с помощью spread оператора:
 
 ```typescript
 export const remindersRouter = createTRPCRouter({
-  create: createRemindersRouter, // reminders.create.*
-  read: readRemindersRouter, // reminders.read.*
-  update: updateRemindersRouter, // reminders.update.*
-  delete: deleteRemindersRouter, // reminders.delete.*
+  ...createRemindersRouter, // reminders.manual, reminders.fromText
+  ...readRemindersRouter, // reminders.list, reminders.getById, reminders.getStats, reminders.findSimilar
+  ...updateRemindersRouter, // reminders.reminder, reminders.complete, reminders.snooze
+  ...deleteRemindersRouter, // reminders.reminder
 });
 ```
 
@@ -47,14 +47,14 @@ export const remindersRouter = createTRPCRouter({
 
 ## API Endpoints
 
-### Создание напоминаний (`reminders.create.*`)
+### Создание напоминаний
 
-#### `reminders.create.manual`
+#### `reminders.manual`
 
 Создание напоминания вручную
 
 ```typescript
-POST /api/trpc/reminders.create.manual
+POST /api/trpc/reminders.manual
 {
   title: string;
   description?: string;
@@ -67,12 +67,12 @@ POST /api/trpc/reminders.create.manual
 }
 ```
 
-#### `reminders.create.fromText`
+#### `reminders.fromText`
 
 Создание напоминания из текста с помощью ИИ
 
 ```typescript
-POST /api/trpc/reminders.create.fromText
+POST /api/trpc/reminders.fromText
 {
   text: string;
   chatId?: string;
@@ -81,14 +81,14 @@ POST /api/trpc/reminders.create.fromText
 }
 ```
 
-### Чтение напоминаний (`reminders.read.*`)
+### Чтение напоминаний
 
-#### `reminders.read.list`
+#### `reminders.list`
 
 Получение списка напоминаний с фильтрацией и сортировкой
 
 ```typescript
-GET /api/trpc/reminders.read.list
+GET /api/trpc/reminders.list
 {
   filters?: ReminderFilters;
   sort?: ReminderSortOptions;
@@ -97,32 +97,32 @@ GET /api/trpc/reminders.read.list
 }
 ```
 
-#### `reminders.read.getById`
+#### `reminders.getById`
 
 Получение напоминания по ID
 
 ```typescript
-GET /api/trpc/reminders.read.getById
+GET /api/trpc/reminders.getById
 {
   id: string;
   includeExecutions?: boolean;
 }
 ```
 
-#### `reminders.read.getStats`
+#### `reminders.getStats`
 
 Получение статистики напоминаний пользователя
 
 ```typescript
-GET / api / trpc / reminders.read.getStats;
+GET / api / trpc / reminders.getStats;
 ```
 
-#### `reminders.read.findSimilar`
+#### `reminders.findSimilar`
 
 Поиск похожих напоминаний
 
 ```typescript
-GET /api/trpc/reminders.read.findSimilar
+GET /api/trpc/reminders.findSimilar
 {
   title: string;
   description?: string;
@@ -130,51 +130,51 @@ GET /api/trpc/reminders.read.findSimilar
 }
 ```
 
-### Обновление напоминаний (`reminders.update.*`)
+### Обновление напоминаний
 
-#### `reminders.update.reminder`
+#### `reminders.reminder`
 
 Обновление напоминания
 
 ```typescript
-PUT / api / trpc / reminders.update.reminder;
+PUT / api / trpc / reminders.reminder;
 {
   id: string;
   data: UpdateReminderInput;
 }
 ```
 
-#### `reminders.update.complete`
+#### `reminders.complete`
 
 Отметить напоминание как выполненное
 
 ```typescript
-PUT / api / trpc / reminders.update.complete;
+PUT / api / trpc / reminders.complete;
 {
   id: string;
 }
 ```
 
-#### `reminders.update.snooze`
+#### `reminders.snooze`
 
 Отложить напоминание
 
 ```typescript
-PUT / api / trpc / reminders.update.snooze;
+PUT / api / trpc / reminders.snooze;
 {
   id: string;
   snoozeUntil: Date;
 }
 ```
 
-### Удаление напоминаний (`reminders.delete.*`)
+### Удаление напоминаний
 
-#### `reminders.delete.reminder`
+#### `reminders.reminder`
 
 Удаление напоминания
 
 ```typescript
-DELETE / api / trpc / reminders.delete.reminder;
+DELETE / api / trpc / reminders.reminder;
 {
   id: string;
 }
@@ -286,14 +286,14 @@ import type {
   CreateReminderInput,
   ReminderFilters,
   UpdateReminderInput,
-} from "./router/reminders";
+} from "./router/reminders/types";
 ```
 
 ### Вызов API
 
 ```typescript
 // Создание
-const newReminder = await trpc.reminders.create.manual.mutate({
+const newReminder = await trpc.reminders.manual.mutate({
   title: "Встреча",
   type: "meeting",
   priority: "high",
@@ -301,13 +301,13 @@ const newReminder = await trpc.reminders.create.manual.mutate({
 });
 
 // Чтение
-const reminders = await trpc.reminders.read.list.query({
+const reminders = await trpc.reminders.list.query({
   filters: { status: ["pending", "active"] },
   limit: 10,
 });
 
 // Обновление
-const updated = await trpc.reminders.update.complete.mutate({
+const updated = await trpc.reminders.complete.mutate({
   id: "reminder-id",
 });
 ```
@@ -328,10 +328,10 @@ trpc.reminders.delete.mutate({ id });
 
 ```typescript
 // Стало
-trpc.reminders.create.manual.mutate(data);
-trpc.reminders.read.list.query(filters);
-trpc.reminders.update.reminder.mutate({ id, data });
-trpc.reminders.delete.reminder.mutate({ id });
+trpc.reminders.manual.mutate(data);
+trpc.reminders.list.query(filters);
+trpc.reminders.reminder.mutate({ id, data });
+trpc.reminders.reminder.mutate({ id });
 ```
 
 ## Заключение

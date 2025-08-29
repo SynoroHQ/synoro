@@ -85,10 +85,7 @@ export class ChatAssistantAgent extends AbstractAgent {
     }
   }
 
-  async process(
-    task: AgentTask,
-    telemetry?: AgentTelemetry,
-  ): Promise<AgentResult<string>> {
+  async process(task: AgentTask): Promise<AgentResult<string>> {
     const systemPrompt = getPromptSafe(PROMPT_KEYS.ASSISTANT);
 
     try {

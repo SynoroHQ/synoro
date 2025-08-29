@@ -1,6 +1,6 @@
 import { sql } from "drizzle-orm";
 
-import type { RecurrencePattern } from "./types";
+import type { RecurrencePattern } from "./schema";
 import { reminders } from "./schema";
 
 /**

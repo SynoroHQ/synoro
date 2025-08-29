@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 // Базовые схемы
-export const uuidSchema = z.string().uuid("Некорректный UUID");
+export const cuid2Schema = z.string().min(1, "ID обязательно").max(25, "ID слишком длинный");
 export const titleSchema = z
   .string()
   .min(1, "Название обязательно")
@@ -54,7 +54,7 @@ export const notificationChannelSchema = z.enum([
   "webhook",
 ]);
 
-// Схемы для JSON полей
+// Схемы для JSON полей (используем существующие типы из схемы)
 export const recurrencePatternSchema = z.object({
   frequency: z.string(),
   interval: z.number(),
@@ -68,7 +68,7 @@ export const aiContextSchema = z.object({
   source: z.string(),
   conversationId: z.string().optional(),
   intent: z.string().optional(),
-  entities: z.record(z.any()).optional(),
+  entities: z.record(z.string(), z.any()).optional(),
   confidence: z.number().optional(),
 });
 
@@ -80,11 +80,11 @@ export const smartSuggestionsSchema = z.object({
 });
 
 export const tagsSchema = z.array(z.string());
-export const metadataSchema = z.record(z.any());
+export const metadataSchema = z.record(z.string(), z.any());
 
 // Основные схемы для напоминаний
 export const reminderSchema = z.object({
-  userId: uuidSchema,
+  userId: cuid2Schema,
   title: titleSchema,
   description: descriptionSchema,
   type: reminderTypeSchema.optional(),
@@ -98,7 +98,7 @@ export const reminderSchema = z.object({
   aiContext: aiContextSchema.optional(),
   smartSuggestions: smartSuggestionsSchema.optional(),
   chatId: z.string().optional(),
-  parentReminderId: uuidSchema.optional(),
+  parentReminderId: cuid2Schema.optional(),
   tags: tagsSchema.optional(),
   metadata: metadataSchema.optional(),
 });
@@ -124,7 +124,7 @@ export const reminderUpdateSchema = z.object({
 
 // Схемы для выполнения напоминаний
 export const reminderExecutionSchema = z.object({
-  reminderId: uuidSchema,
+  reminderId: cuid2Schema,
   status: executionStatusSchema,
   channel: notificationChannelSchema.optional(),
   errorMessage: z.string().optional(),
@@ -140,17 +140,17 @@ export const reminderExecutionUpdateSchema = z.object({
 
 // Схемы для шаблонов
 export const reminderTemplateSchema = z.object({
-  userId: uuidSchema,
-  name: z.string().min(1, "Название шаблона обязательно"),
+  userId: cuid2Schema,
+  name: z.string().min(1),
   description: descriptionSchema,
-  template: z.record(z.any()),
+  template: z.record(z.string(), z.any()),
   isPublic: z.boolean().optional(),
 });
 
 export const reminderTemplateUpdateSchema = z.object({
   name: z.string().min(1).optional(),
   description: descriptionSchema,
-  template: z.record(z.any()).optional(),
+  template: z.record(z.string(), z.any()).optional(),
   isPublic: z.boolean().optional(),
   usageCount: z.number().optional(),
 });
@@ -181,26 +181,26 @@ export const reminderSearchSchema = z.object({
 
 // Схемы для создания из текста
 export const createFromTextSchema = z.object({
-  text: z.string().min(1, "Текст не может быть пустым"),
+  text: z.string().min(1),
   chatId: z.string().optional(),
   timezone: z.string().default("Europe/Moscow"),
-  context: z.record(z.any()).optional(),
+  context: z.record(z.string(), z.any()).optional(),
 });
 
 // Схемы для операций
 export const reminderIdSchema = z.object({
-  id: uuidSchema,
+  id: cuid2Schema,
 });
 
 export const completeReminderSchema = reminderIdSchema;
 
 export const snoozeReminderSchema = z.object({
-  id: uuidSchema,
+  id: cuid2Schema,
   snoozeUntil: dateSchema,
 });
 
 export const getReminderSchema = z.object({
-  id: uuidSchema,
+  id: cuid2Schema,
   includeExecutions: z.boolean().default(false),
 });
 
@@ -212,9 +212,9 @@ export const findSimilarSchema = z.object({
 
 // Схемы для массовых операций
 export const bulkReminderOperationSchema = z.object({
-  reminderIds: z.array(uuidSchema),
+  reminderIds: z.array(cuid2Schema),
   operation: z.enum(["complete", "delete", "snooze", "update"]),
-  data: z.record(z.any()).optional(),
+  data: z.record(z.string(), z.any()).optional(),
   snoozeUntil: dateSchema.optional(),
 });
 

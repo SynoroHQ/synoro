@@ -1,21 +1,20 @@
+import type { TRPCRouterRecord } from "@trpc/server";
 import { TRPCError } from "@trpc/server";
 
-import type { ReminderFilters, ReminderSortOptions } from "@synoro/db";
+import type { ReminderFilters, ReminderSortOptions } from "@synoro/validators";
 import {
-  reminderFiltersSchema,
-  reminderSortOptionsSchema,
-  reminderSearchSchema,
-  getReminderSchema,
   findSimilarSchema,
-} from "@synoro/db";
+  getReminderSchema,
+  reminderSearchSchema,
+} from "@synoro/validators";
 
 import { ReminderService } from "../../lib/services/reminder-service";
-import { createTRPCRouter, protectedProcedure } from "../../trpc";
+import { protectedProcedure } from "../../trpc";
 
 // Инициализируем сервис
 const reminderService = new ReminderService();
 
-export const readRemindersRouter = createTRPCRouter({
+export const readRemindersRouter: TRPCRouterRecord = {
   /**
    * Получить список напоминаний пользователя
    */
@@ -31,7 +30,7 @@ export const readRemindersRouter = createTRPCRouter({
         } = input;
 
         const reminders = await reminderService.getUserReminders(
-          ctx.user.id,
+          ctx.session.user.id,
           filters as ReminderFilters,
           sort as ReminderSortOptions,
           limit,
@@ -57,7 +56,7 @@ export const readRemindersRouter = createTRPCRouter({
         if (input.includeExecutions) {
           const reminder = await reminderService.getReminderWithExecutions(
             input.id,
-            ctx.user.id,
+            ctx.session.user.id,
           );
           if (!reminder) {
             throw new TRPCError({
@@ -69,7 +68,7 @@ export const readRemindersRouter = createTRPCRouter({
         } else {
           const reminder = await reminderService.getReminderById(
             input.id,
-            ctx.user.id,
+            ctx.session.user.id,
           );
           if (!reminder) {
             throw new TRPCError({
@@ -93,7 +92,9 @@ export const readRemindersRouter = createTRPCRouter({
    */
   getStats: protectedProcedure.query(async ({ ctx }) => {
     try {
-      const stats = await reminderService.getUserReminderStats(ctx.user.id);
+      const stats = await reminderService.getUserReminderStats(
+        ctx.session.user.id,
+      );
       return stats;
     } catch (error) {
       throw new TRPCError({
@@ -111,7 +112,7 @@ export const readRemindersRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       try {
         const similar = await reminderService.findSimilarReminders(
-          ctx.user.id,
+          ctx.session.user.id,
           input.title,
           input.description,
           input.limit,
@@ -125,4 +126,4 @@ export const readRemindersRouter = createTRPCRouter({
         });
       }
     }),
-});
+};

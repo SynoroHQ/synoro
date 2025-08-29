@@ -4,23 +4,23 @@ import { deleteRemindersRouter } from "./delete";
 import { readRemindersRouter } from "./read";
 import { updateRemindersRouter } from "./update";
 
-// Экспорт типов
-export * from "./types";
-
 /**
  * Главный роутер для напоминаний
- * Объединяет все функциональные модули
+ * Объединяет все функциональные модули в единую структуру
  */
 export const remindersRouter = createTRPCRouter({
   // Создание напоминаний
-  create: createRemindersRouter,
+  ...createRemindersRouter,
 
   // Чтение и поиск напоминаний
-  read: readRemindersRouter,
+  ...readRemindersRouter,
 
   // Обновление напоминаний
-  update: updateRemindersRouter,
+  ...updateRemindersRouter,
 
   // Удаление напоминаний
-  delete: deleteRemindersRouter,
+  ...deleteRemindersRouter,
 });
+
+// Экспортируем типы
+export * from "./types";

@@ -1,63 +1,127 @@
 import { generateObject } from "ai";
 import { z } from "zod";
-import { AbstractAgent } from "./base-agent";
-import type { AgentCapability, AgentResult, AgentTask } from "./types";
-import { ReminderService } from "../services/reminder-service";
-import type {
-  CreateReminderFromTextRequest,
-  CreateReminderFromTextResponse,
-  ReminderType,
-  ReminderPriority,
-  AIContext,
-  SmartSuggestion,
-  NewReminder,
-} from "@synoro/db";
 
-// Схема для извлечения информации о напоминании из текста
+import type {
+  AIContext,
+  CreateFromTextRequest,
+  Reminder,
+  ReminderPriority,
+  ReminderType,
+  SmartSuggestions,
+} from "@synoro/validators";
+
+import type {
+  AgentCapability,
+  AgentContext,
+  AgentResult,
+  AgentTask,
+} from "./types";
+import { ReminderService } from "../services/reminder-service";
+import { AbstractAgent } from "./base-agent";
+
+/**
+ * Схема для извлечения информации о напоминании из текста
+ * Использует AI для парсинга естественного языка в структурированные данные
+ */
 const reminderExtractionSchema = z.object({
   title: z.string().describe("Краткое название напоминания"),
   description: z.string().optional().describe("Подробное описание"),
-  type: z.enum(["task", "event", "deadline", "meeting", "call", "follow_up", "custom"])
+  type: z
+    .enum([
+      "task",
+      "event",
+      "deadline",
+      "meeting",
+      "call",
+      "follow_up",
+      "custom",
+    ])
     .describe("Тип напоминания"),
-  priority: z.enum(["low", "medium", "high", "urgent"])
+  priority: z
+    .enum(["low", "medium", "high", "urgent"])
     .describe("Приоритет напоминания"),
   reminderTime: z.string().describe("Время напоминания в ISO формате"),
   tags: z.array(z.string()).optional().describe("Теги для категоризации"),
-  recurrence: z.enum(["none", "daily", "weekly", "monthly", "yearly", "custom"])
-    .default("none").describe("Частота повторения"),
+  recurrence: z
+    .enum(["none", "daily", "weekly", "monthly", "yearly", "custom"])
+    .default("none")
+    .describe("Частота повторения"),
   confidence: z.number().min(0).max(1).describe("Уверенность в извлечении"),
-  needsConfirmation: z.boolean().describe("Требует ли подтверждения от пользователя"),
-  extractedEntities: z.object({
-    datetime: z.string().optional().describe("Извлеченная дата/время"),
-    location: z.string().optional().describe("Извлеченное место"),
-    people: z.array(z.string()).optional().describe("Упомянутые люди"),
-    keywords: z.array(z.string()).optional().describe("Ключевые слова"),
-  }).optional(),
+  needsConfirmation: z
+    .boolean()
+    .describe("Требует ли подтверждения от пользователя"),
+  extractedEntities: z
+    .object({
+      datetime: z.string().optional().describe("Извлеченная дата/время"),
+      location: z.string().optional().describe("Извлеченное место"),
+      people: z.array(z.string()).optional().describe("Упомянутые люди"),
+      keywords: z.array(z.string()).optional().describe("Ключевые слова"),
+    })
+    .optional(),
 });
 
-// Схема для умных предложений
+/**
+ * Схема для умных предложений по улучшению напоминаний
+ */
 const smartSuggestionsSchema = z.object({
-  suggestions: z.array(z.object({
-    type: z.enum(["reschedule", "priority_change", "related_task", "context_update"]),
-    suggestion: z.string(),
-    confidence: z.number().min(0).max(1),
-    metadata: z.record(z.any()).optional(),
-  })),
+  suggestions: z.array(
+    z.object({
+      type: z.enum([
+        "reschedule",
+        "priority_change",
+        "related_task",
+        "context_update",
+      ]),
+      suggestion: z.string(),
+      confidence: z.number().min(0).max(1),
+      metadata: z.record(z.unknown()).optional(),
+    }),
+  ),
 });
 
-// Схема для анализа контекста напоминания
+/**
+ * Схема для анализа контекста на предмет связи с напоминаниями
+ */
 const contextAnalysisSchema = z.object({
   isReminderRelated: z.boolean().describe("Связан ли текст с напоминаниями"),
   confidence: z.number().min(0).max(1).describe("Уверенность в анализе"),
   reasoning: z.string().describe("Объяснение решения"),
-  suggestedAction: z.enum(["create", "update", "delete", "list", "none"])
+  suggestedAction: z
+    .enum(["create", "update", "delete", "list", "none"])
     .describe("Предлагаемое действие"),
 });
 
+/**
+ * Типы для ответов агента
+ */
+interface CreateReminderFromTextResponse {
+  reminder: Reminder;
+  confidence: number;
+  suggestions: SmartSuggestions;
+  needsConfirmation: boolean;
+}
+
+interface SmartSuggestion {
+  type: "reschedule" | "priority_change" | "related_task" | "context_update";
+  suggestion: string;
+  confidence: number;
+  metadata?: Record<string, unknown>;
+}
+
+/**
+ * ИИ-агент для создания и управления умными напоминаниями
+ *
+ * Основные возможности:
+ * - Анализ естественного языка для создания напоминаний
+ * - Извлечение временной информации и контекста
+ * - Генерация умных предложений по улучшению
+ * - Интеграция с системой напоминаний
+ */
 export class SmartReminderAgent extends AbstractAgent {
   name = "Smart Reminder Agent";
-  description = "ИИ-агент для создания и управления умными напоминаниями на основе естественного языка";
-  
+  description =
+    "ИИ-агент для создания и управления умными напоминаниями на основе естественного языка";
+
   capabilities: AgentCapability[] = [
     {
       name: "create_reminder_from_text",
@@ -92,6 +156,9 @@ export class SmartReminderAgent extends AbstractAgent {
     this.reminderService = new ReminderService();
   }
 
+  /**
+   * Проверяет, может ли агент обработать задачу
+   */
   async canHandle(task: AgentTask): Promise<boolean> {
     // Проверяем, связана ли задача с напоминаниями
     if (task.type === "reminder" || task.type === "create_reminder") {
@@ -108,37 +175,45 @@ export class SmartReminderAgent extends AbstractAgent {
     }
   }
 
-  async process(task: AgentTask): Promise<AgentResult<CreateReminderFromTextResponse>> {
+  /**
+   * Основная обработка задачи по созданию напоминания
+   */
+  async process(
+    task: AgentTask,
+  ): Promise<AgentResult<CreateReminderFromTextResponse>> {
     try {
       const _telemetry = this.createTelemetry("process-reminder", task);
 
       // Анализируем контекст
       const contextAnalysis = await this.analyzeReminderContext(task.input);
-      
+
       if (!contextAnalysis.isReminderRelated) {
         return this.createErrorResult(
           "Текст не связан с созданием напоминаний",
-          contextAnalysis.confidence
+          contextAnalysis.confidence,
         );
       }
 
       // Извлекаем информацию о напоминании
-      const extractedInfo = await this.extractReminderInfo(task.input, task.context);
-      
+      const extractedInfo = await this.extractReminderInfo(
+        task.input,
+        task.context,
+      );
+
       if (extractedInfo.confidence < 0.5) {
         return this.createErrorResult(
           "Недостаточно информации для создания напоминания",
-          extractedInfo.confidence
+          extractedInfo.confidence,
         );
       }
 
       // Создаем напоминание
-      const userId = task.context?.userId as string;
+      const userId = task.context?.userId!;
       if (!userId) {
         return this.createErrorResult("Не указан пользователь");
       }
 
-      const reminderData: NewReminder = {
+      const reminderData: Reminder = {
         userId,
         title: extractedInfo.title,
         description: extractedInfo.description,
@@ -147,45 +222,59 @@ export class SmartReminderAgent extends AbstractAgent {
         reminderTime: new Date(extractedInfo.reminderTime),
         recurrence: extractedInfo.recurrence,
         aiGenerated: true,
-        aiContext: JSON.stringify({
-          originalMessage: task.input,
-          extractedEntities: extractedInfo.extractedEntities,
+        aiContext: {
+          source: "smart_reminder_agent",
+          conversationId: task.context?.chatId,
+          intent: "create_reminder",
+          entities: extractedInfo.extractedEntities,
           confidence: extractedInfo.confidence,
-          suggestedType: extractedInfo.type,
-          suggestedPriority: extractedInfo.priority,
-        } as AIContext),
-        tags: extractedInfo.tags ? JSON.stringify(extractedInfo.tags) : null,
-        chatId: task.context?.chatId as string | undefined,
+        },
+        tags: extractedInfo.tags,
+        chatId: task.context?.chatId,
       };
 
       const reminder = await this.reminderService.createReminder(reminderData);
 
       // Генерируем умные предложения
-      const suggestions = await this.generateSmartSuggestions(reminder, task.input);
+      const suggestions = await this.generateSmartSuggestions(
+        reminder,
+        task.input,
+      );
 
       const response: CreateReminderFromTextResponse = {
         reminder,
         confidence: extractedInfo.confidence,
-        suggestions,
+        suggestions: {
+          nextReminder: suggestions.find((s) => s.type === "reschedule")
+            ?.suggestion,
+          relatedTasks: suggestions
+            .filter((s) => s.type === "related_task")
+            .map((s) => s.suggestion),
+          priorityAdjustment: suggestions.find(
+            (s) => s.type === "priority_change",
+          )?.suggestion,
+          timeOptimization: suggestions.find((s) => s.type === "context_update")
+            ?.suggestion,
+        },
         needsConfirmation: extractedInfo.needsConfirmation,
       };
 
       return this.createSuccessResult(
         response,
         extractedInfo.confidence,
-        `Создано напоминание "${reminder.title}" на ${reminder.reminderTime.toLocaleString("ru-RU")}`
+        `Создано напоминание "${reminder.title}" на ${reminder.reminderTime.toLocaleString("ru-RU")}`,
       );
-
     } catch (error) {
       console.error("Ошибка обработки напоминания:", error);
       return this.createErrorResult(
-        `Ошибка создания напоминания: ${error instanceof Error ? error.message : "Неизвестная ошибка"}`
+        `Ошибка создания напоминания: ${error instanceof Error ? error.message : "Неизвестная ошибка"}`,
       );
     }
   }
 
   /**
    * Анализ контекста на предмет связи с напоминаниями
+   * Использует AI для определения релевантности текста
    */
   private async analyzeReminderContext(text: string): Promise<{
     isReminderRelated: boolean;
@@ -241,8 +330,12 @@ export class SmartReminderAgent extends AbstractAgent {
 
   /**
    * Извлечение информации о напоминании из текста
+   * Использует AI для парсинга естественного языка в структурированные данные
    */
-  private async extractReminderInfo(text: string, context?: Record<string, unknown>): Promise<{
+  private async extractReminderInfo(
+    text: string,
+    context?: AgentContext,
+  ): Promise<{
     title: string;
     description?: string;
     type: ReminderType;
@@ -311,10 +404,11 @@ export class SmartReminderAgent extends AbstractAgent {
 
   /**
    * Генерация умных предложений для напоминания
+   * Анализирует созданное напоминание и предлагает улучшения
    */
   private async generateSmartSuggestions(
-    reminder: Record<string, unknown>,
-    originalText: string
+    reminder: Reminder,
+    originalText: string,
   ): Promise<SmartSuggestion[]> {
     try {
       const { object } = await generateObject({
@@ -349,15 +443,16 @@ export class SmartReminderAgent extends AbstractAgent {
 
   /**
    * Создание напоминания из текстового запроса (публичный метод)
+   * Удобный интерфейс для внешнего использования
    */
   async createReminderFromText(
-    request: CreateReminderFromTextRequest
+    request: CreateFromTextRequest,
   ): Promise<CreateReminderFromTextResponse> {
     const task: AgentTask = {
       id: `reminder-${Date.now()}`,
       type: "create_reminder",
       input: request.text,
-      priority: "medium",
+      priority: 1,
       createdAt: new Date(),
       context: {
         userId: request.userId,
@@ -368,7 +463,7 @@ export class SmartReminderAgent extends AbstractAgent {
     };
 
     const result = await this.process(task);
-    
+
     if (!result.success || !result.data) {
       throw new Error(result.error || "Не удалось создать напоминание");
     }
