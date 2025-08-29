@@ -4,6 +4,7 @@ import { apiClient } from "../api/client";
 import { DEFAULT_AGENT_OPTIONS } from "../config/agents";
 import { env } from "../env";
 import {
+  ProcessingAnimation,
   removeProcessingMessage,
   sendProcessingMessage,
 } from "../utils/message-utils";
@@ -40,8 +41,9 @@ export async function handleSmartText(ctx: Context): Promise<void> {
   // Показываем индикатор "печатает..."
   await ctx.replyWithChatAction("typing");
 
-  // Всегда используем агентную систему
-  const processingMessageId = await sendProcessingMessage(ctx, "запрос");
+  // Запускаем анимированный индикатор обработки
+  const processingAnimation = new ProcessingAnimation(ctx, "запрос");
+  await processingAnimation.start();
 
   try {
     const messageContext = createMessageContext(ctx);
@@ -66,8 +68,8 @@ export async function handleSmartText(ctx: Context): Promise<void> {
         },
       );
 
-    // Удаляем сообщение "Обрабатываем..."
-    await removeProcessingMessage(ctx, processingMessageId, ctx.chat!.id);
+    // Останавливаем анимацию обработки
+    await processingAnimation.stop();
 
     if (!result.success) {
       await ctx.reply(result.response);
@@ -111,8 +113,8 @@ export async function handleSmartText(ctx: Context): Promise<void> {
       );
     }
   } catch (error) {
-    // Удаляем сообщение "Обрабатываем..." в случае ошибки
-    await removeProcessingMessage(ctx, processingMessageId, ctx.chat!.id);
+    // Останавливаем анимацию обработки в случае ошибки
+    await processingAnimation.stop();
 
     console.error("Smart text handling error:", error);
     await ctx.reply(
