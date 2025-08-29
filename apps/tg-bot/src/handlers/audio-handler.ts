@@ -5,6 +5,7 @@ import { DEFAULT_AGENT_OPTIONS } from "../config/agents";
 import { env } from "../env";
 import { transcribeAudio } from "../services/message-service";
 import {
+  ProcessingAnimation,
   removeProcessingMessage,
   sendProcessingMessage,
 } from "../utils/message-utils";
@@ -28,11 +29,9 @@ export async function handleAudio(ctx: Context): Promise<void> {
   // Показываем индикатор "печатает..." для аудио сообщений
   await ctx.replyWithChatAction("typing");
 
-  // Отправляем сообщение "Обрабатываем..." и сохраняем его ID для последующего удаления
-  const processingMessageId = await sendProcessingMessage(
-    ctx,
-    "аудио сообщение",
-  );
+  // Запускаем анимированный индикатор обработки
+  const processingAnimation = new ProcessingAnimation(ctx, "аудио сообщение");
+  await processingAnimation.start();
 
   try {
     const messageContext = createMessageContext(ctx);
@@ -48,8 +47,8 @@ export async function handleAudio(ctx: Context): Promise<void> {
       (ctx.message?.audio as any)?.duration;
 
     if (typeof durationSec === "number" && durationSec > maxDurationSec) {
-      // Удаляем сообщение "Обрабатываем..." перед отправкой ошибки
-      await removeProcessingMessage(ctx, processingMessageId, ctx.chat!.id);
+      // Останавливаем анимацию обработки перед отправкой ошибки
+      await processingAnimation.stop();
 
       await ctx.reply(
         `Слишком длинное аудио (${durationSec}s). Лимит — ${maxDurationSec}s. Пожалуйста, укоротите запись.`,
@@ -68,15 +67,15 @@ export async function handleAudio(ctx: Context): Promise<void> {
     );
 
     if (!transcriptionResult.success) {
-      // Удаляем сообщение "Обрабатываем..." перед отправкой ошибки
-      await removeProcessingMessage(ctx, processingMessageId, ctx.chat!.id);
+      // Останавливаем анимацию обработки перед отправкой ошибки
+      await processingAnimation.stop();
 
       await ctx.reply("Не удалось распознать аудио. Попробуйте ещё раз позже.");
       return;
     }
     if (!transcriptionResult.text.trim()) {
-      // Удаляем сообщение "Обрабатываем..." перед отправкой ошибки
-      await removeProcessingMessage(ctx, processingMessageId, ctx.chat!.id);
+      // Останавливаем анимацию обработки перед отправкой ошибки
+      await processingAnimation.stop();
 
       await ctx.reply("Голос распознан, но текста не найдено.");
       return;
@@ -115,8 +114,8 @@ export async function handleAudio(ctx: Context): Promise<void> {
         },
       );
 
-    // Удаляем сообщение "Обрабатываем..." если оно было отправлено
-    await removeProcessingMessage(ctx, processingMessageId, ctx.chat!.id);
+    // Останавливаем анимацию обработки
+    await processingAnimation.stop();
 
     if (!result.success) {
       const prefix = `Распознал: "${text}"\n\n`;
@@ -164,8 +163,8 @@ export async function handleAudio(ctx: Context): Promise<void> {
       `✅ Аудио обработано: тип=${result.messageType?.type}, релевантность=${result.relevance?.relevant}`,
     );
   } catch (error) {
-    // Удаляем сообщение "Обрабатываем..." в случае ошибки
-    await removeProcessingMessage(ctx, processingMessageId, ctx.chat!.id);
+    // Останавливаем анимацию обработки в случае ошибки
+    await processingAnimation.stop();
 
     console.error("Audio handling error:", error);
 
