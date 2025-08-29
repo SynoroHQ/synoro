@@ -1,7 +1,8 @@
-import type { AttributeValue } from "@opentelemetry/api";
+import type { LanguageModel } from "ai";
 
-import type { AgentContext } from "./types";
+import { getActiveProvider, getModelName } from "../ai";
 import { AgentManager } from "./agent-manager";
+import type { AgentContext } from "./agent-context";
 
 /**
  * Процессор сообщений с использованием мультиагентной системы

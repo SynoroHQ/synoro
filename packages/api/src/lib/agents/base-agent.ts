@@ -10,6 +10,7 @@ import type {
   AgentTelemetry,
   BaseAgent,
 } from "./types";
+import type { AgentContext as NewAgentContext } from "./agent-context";
 
 // Инициализация AI провайдеров
 const oai = openai;
@@ -82,6 +83,8 @@ export abstract class AbstractAgent implements BaseAgent {
     task: AgentTask,
     baseTelemetry?: AgentTelemetry,
   ): AgentTelemetry {
+    const context = task.context as NewAgentContext;
+    
     return {
       functionId:
         baseTelemetry?.functionId ?? this.generateFunctionId(operation),
@@ -89,11 +92,25 @@ export abstract class AbstractAgent implements BaseAgent {
         agentName: this.name,
         taskType: task.type,
         taskId: task.id,
-        userId: task.context?.userId ?? "anonymous",
-        channel: task.context?.channel ?? "unknown",
+        userId: context?.userId ?? "anonymous",
+        channel: context?.channel ?? "unknown",
         // Убираем лишние поля, оставляем только необходимые
-        ...(task.context?.chatId && { chatId: task.context.chatId }),
-        ...(task.context?.messageId && { messageId: task.context.messageId }),
+        ...(context?.chatId && { chatId: context.chatId }),
+        ...(context?.messageId && { messageId: context.messageId }),
+        
+        // Добавляем контекст разговора в телеметрию
+        ...(context?.metadata?.conversationContext && { 
+          conversationContext: context.metadata.conversationContext 
+        }),
+        ...(context?.metadata?.conversationHistory && { 
+          conversationHistory: context.metadata.conversationHistory 
+        }),
+        ...(context?.metadata?.conversationId && { 
+          conversationId: context.metadata.conversationId 
+        }),
+        ...(context?.metadata?.contextMessageCount && { 
+          contextMessageCount: context.metadata.contextMessageCount 
+        }),
       },
     };
   }

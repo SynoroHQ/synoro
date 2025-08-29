@@ -14,6 +14,7 @@ import {
   formatExecutionTime,
   safeTruncateForLogging,
 } from "../utils/message-utils";
+import { AgentContext } from "../agents/agent-context";
 
 export interface ProcessAgentMessageParams {
   text: string;
@@ -148,19 +149,38 @@ export async function processMessageWithAgents(
       },
     });
 
+    // Создаем контекст для агентов с включением истории беседы
+    const agentContext: AgentContext = {
+      userId: userId ?? undefined,
+      chatId,
+      messageId,
+      channel,
+      metadata: {
+        ...commonMetadata,
+        // Добавляем контекст разговора для трейсинга
+        conversationContext: {
+          conversationId: conversationContext.conversationId,
+          totalMessages: conversationContext.totalMessages,
+          contextMessages: trimmedContext.length,
+          hasMoreMessages: conversationContext.hasMoreMessages,
+        },
+        // Добавляем историю сообщений для трейсинга
+        conversationHistory: trimmedContext.map(msg => ({
+          id: msg.id,
+          role: msg.role,
+          content: msg.content.text,
+          createdAt: msg.createdAt,
+        })),
+      },
+    };
+
     // Обрабатываем сообщение через агентную систему
     const agentProcessingStartTime = Date.now();
     const processor = getAgentProcessor();
 
     const result = await processor.processMessage(
       text,
-      {
-        userId: userId ?? undefined,
-        chatId,
-        messageId,
-        channel,
-        metadata: commonMetadata,
-      },
+      agentContext,
       {
         useQualityControl: options.useQualityControl ?? true,
         maxQualityIterations: options.maxQualityIterations ?? 2,
