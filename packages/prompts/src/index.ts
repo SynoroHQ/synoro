@@ -17,6 +17,7 @@ export { default as dataAnalyst } from "./prompts/data-analyst";
 export { default as financialAdvisor } from "./prompts/financial-advisor";
 export { default as taskManager } from "./prompts/task-manager";
 export { default as chatAssistant } from "./prompts/chat-assistant";
+export { default as telegramFormatter } from "./prompts/telegram-formatter";
 
 export function getPrompt(key: string): string {
   return registry[key]?.prompt ?? "";

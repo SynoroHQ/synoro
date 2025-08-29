@@ -107,6 +107,12 @@ export class RouterAgent extends AbstractAgent {
 - complex_task: Сложные задачи требующие анализа данных или множественных операций
 - irrelevant: Спам, бессмысленные сообщения
 
+ВАЖНОЕ ПРАВИЛО ДЛЯ ЛОГИРОВАНИЯ:
+- Если сообщение описывает конкретное событие, действие или факт из жизни пользователя - ОБЯЗАТЕЛЬНО устанавливай needsLogging: true
+- События включают: покупки, траты, доходы, задачи, встречи, заметки, ремонт, поездки, здоровье
+- НЕ спрашивай пользователя, нужно ли записать событие - если это событие, то ЗАПИСЫВАЙ автоматически
+- needsLogging: false только для вопросов, обычного общения и спама
+
 ДОСТУПНЫЕ АГЕНТЫ:
 - qa-specialist: Отвечает на вопросы, предоставляет информацию
 - general-assistant: Универсальный помощник и дружелюбный собеседник
@@ -119,6 +125,8 @@ export class RouterAgent extends AbstractAgent {
     const prompt = `Проанализируй это сообщение: "${task.input}"
 
 Контекст: канал ${task.context?.channel || "unknown"}, пользователь ${task.context?.userId || "anonymous"}
+
+ВАЖНО: Если сообщение описывает событие (покупка, задача, встреча, заметка и т.д.) - ОБЯЗАТЕЛЬНО установи needsLogging: true. НЕ спрашивай пользователя о необходимости записи.
 
 Верни JSON с классификацией.`;
 
@@ -153,10 +161,12 @@ export class RouterAgent extends AbstractAgent {
 
 ПРАВИЛА:
 - question: вопросы, запросы информации
-- event: события для записи (покупки, задачи, встречи)
+- event: события для записи (покупки, задачи, встречи, заметки, ремонт, поездки)
 - chat: обычное общение, приветствия
 - complex_task: сложные многоэтапные задачи
 - irrelevant: спам, бессмысленные сообщения
+
+ВАЖНО: Если сообщение описывает событие - ОБЯЗАТЕЛЬНО нужно логировать (needsLogging: true).
 
 Верни только тип сообщения, ничего больше.`,
           prompt: `Классифицируй: "${task.input}"`,
@@ -180,6 +190,9 @@ export class RouterAgent extends AbstractAgent {
           ? messageType
           : "chat";
 
+        // Автоматически определяем необходимость логирования для событий
+        const needsLogging = validatedType === "event";
+
         return {
           messageType: validatedType as
             | "question"
@@ -188,12 +201,14 @@ export class RouterAgent extends AbstractAgent {
             | "complex_task"
             | "irrelevant",
           confidence: 0.4,
-          needsLogging: messageType === "event",
+          needsLogging,
           complexity: messageType === "complex_task" ? "complex" : "simple",
           suggestedAgents:
             messageType === "question"
               ? ["qa-specialist"]
-              : ["general-assistant"],
+              : messageType === "event"
+                ? ["event-processor"]
+                : ["general-assistant"],
         };
       } catch (fallbackError) {
         console.error("Fallback classification also failed:", fallbackError);
@@ -229,14 +244,7 @@ export class RouterAgent extends AbstractAgent {
 - task-manager: Управляет задачами/делами пользователя
 - data-analyst: Выполняет аналитические запросы и рекомендации по визуализации
 - task-orchestrator: Координирует сложные задачи, требующие нескольких агентов
-- quality-evaluator: Оценивает и улучшает качество ответов
-
-ПРАВИЛА ВЫБОРА:
-1. Для простых вопросов и обычного общения — general-assistant (или qa-specialist при вопросах о продукте)
-2. Для событий/покупок — event-processor; для дел/задач — task-manager
-3. Для аналитики данных — data-analyst
-4. Для сложных задач — task-orchestrator
-5. Для улучшения качества — quality-evaluator`;
+- quality-evaluator: Оценивает и улучшает качество ответов`;
 
     const prompt = `Выбери агента для обработки сообщения: "${task.input}"
 
@@ -252,6 +260,9 @@ export class RouterAgent extends AbstractAgent {
         experimental_telemetry: {
           isEnabled: true,
           ...this.createTelemetry("route", task, telemetry),
+          metadata: {
+            operation: "route",
+          },
         },
       });
 

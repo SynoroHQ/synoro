@@ -35,6 +35,7 @@ const ProcessMessageWithAgentsResponse = ProcessMessageResponse.safeExtend({
       qualityScore: z.number(),
       processingTime: z.number(),
       processingMode: z.enum(["agents"]),
+      shouldLogEvent: z.boolean().optional(), // Флаг для автоматического логирования событий
     })
     .optional(),
 });
@@ -62,7 +63,6 @@ export const processMessageAgentsRouter = {
   // Обработка сообщений с агентами для Telegram бота
   processMessageFromTelegramWithAgents: botProcedure
     .input(ProcessMessageWithAgentsInput)
-    .output(ProcessMessageWithAgentsResponse)
     .mutation(async ({ ctx, input }) => {
       const telegramUserId = input.telegramUserId;
       if (!telegramUserId) {

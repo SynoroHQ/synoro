@@ -361,7 +361,7 @@ export class EventProcessorAgent extends AbstractAgent {
         prompt: `Проанализируй и распарси это событие: "${task.input}"
         
 Контекст: пользователь ${task.context?.userId || "anonymous"} в канале ${task.context?.channel || "unknown"}
-        
+
 Извлеки всю доступную информацию и структурируй её в формате JSON согласно этой схеме:
 {
   "type": "purchase|task|meeting|note|expense|income|maintenance|other",
@@ -416,6 +416,9 @@ export class EventProcessorAgent extends AbstractAgent {
             experimental_telemetry: {
               isEnabled: true,
               ...this.createTelemetry("generate-advice", task, telemetry),
+              metadata: {
+                operation: "generate-advice",
+              },
             },
           });
           advice = adviceText;

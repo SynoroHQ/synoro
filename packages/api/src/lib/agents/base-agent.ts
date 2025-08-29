@@ -86,12 +86,12 @@ export abstract class AbstractAgent implements BaseAgent {
       functionId:
         baseTelemetry?.functionId ?? this.generateFunctionId(operation),
       metadata: {
-        ...baseTelemetry?.metadata,
         agentName: this.name,
         taskType: task.type,
         taskId: task.id,
         userId: task.context?.userId ?? "anonymous",
         channel: task.context?.channel ?? "unknown",
+        // Убираем лишние поля, оставляем только необходимые
         ...(task.context?.chatId && { chatId: task.context.chatId }),
         ...(task.context?.messageId && { messageId: task.context.messageId }),
       },

@@ -92,7 +92,57 @@ const stats = await api.messages.processMessageAgents.getAgentStats.query();
 - `event` - События для логирования
 - `chat` - Обычное общение
 - `complex_task` - Сложные задачи
-- `irrelevant` - Нерелевантные сообщения
+- `irrelevant` - Спам/бессмысленные сообщения
+
+### Telegram Formatter Agent
+
+**Возможности:**
+
+- Автоматическое форматирование всех ответов для Telegram
+- Использование Markdown разметки и эмодзи
+- Улучшение читабельности контента
+- Структурирование информации
+
+**Автоматическое участие:**
+
+`TelegramFormatterAgent` теперь **всегда участвует** в процессе обработки сообщений для Telegram:
+
+1. **Автоматическое форматирование**: После получения ответа от основного агента, `TelegramFormatterAgent` автоматически форматирует ответ для Telegram
+2. **Интеграция в процесс**: Агент вызывается в конце процесса обработки в `AgentManager.processMessage()`
+3. **Улучшение качества**: Добавляет эмодзи, структуру и Markdown разметку для лучшего восприятия
+
+**Пример работы:**
+
+```typescript
+// В AgentManager.processMessage() автоматически вызывается:
+if (context.channel === "telegram" && finalResponse) {
+  const telegramFormatter = this.getAgent("telegram-formatter");
+  if (telegramFormatter) {
+    const formattingTask = this.createAgentTask(
+      finalResponse,
+      "telegram-formatting",
+      context,
+      1,
+    );
+
+    const formattingResult = await telegramFormatter.process(
+      formattingTask,
+      telemetry,
+    );
+    if (formattingResult.success && formattingResult.data) {
+      result.finalResponse = formattingResult.data; // Отформатированный ответ
+      agentsUsed.push(telegramFormatter.name);
+    }
+  }
+}
+```
+
+**Результат:**
+
+- Все ответы для Telegram автоматически форматируются
+- Улучшенная читабельность с эмодзи и структурой
+- Консистентный стиль оформления
+- Агент всегда участвует в процессе (не может быть пропущен)
 
 ### Q&A Specialist Agent
 

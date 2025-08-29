@@ -13,6 +13,7 @@ import {
   RouterAgent,
   TaskManagerAgent,
   TaskOrchestratorAgent,
+  TelegramFormatterAgent,
 } from "../../src/lib/agents/index";
 
 describe("Agent Exports", () => {
@@ -71,6 +72,11 @@ describe("Agent Exports", () => {
     expect(typeof ChatAssistantAgent).toBe("function");
   });
 
+  it("should export TelegramFormatterAgent", () => {
+    expect(TelegramFormatterAgent).toBeDefined();
+    expect(typeof TelegramFormatterAgent).toBe("function");
+  });
+
   it("should export AgentManager", () => {
     expect(AgentManager).toBeDefined();
     expect(typeof AgentManager).toBe("function");
@@ -88,6 +94,7 @@ describe("Agent Exports", () => {
     expect(DataAnalystAgent).toBeDefined();
     expect(FinancialAdvisorAgent).toBeDefined();
     expect(ChatAssistantAgent).toBeDefined();
+    expect(TelegramFormatterAgent).toBeDefined();
     expect(AgentManager).toBeDefined();
   });
 });

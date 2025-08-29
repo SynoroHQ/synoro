@@ -52,6 +52,7 @@ export interface ProcessAgentMessageResult {
     qualityScore: number;
     processingTime: number;
     processingMode: "agents";
+    shouldLogEvent: boolean;
   };
 }
 
@@ -154,7 +155,7 @@ export async function processMessageWithAgents(
     const result = await processor.processMessage(
       text,
       {
-        userId: userId || undefined,
+        userId: userId ?? undefined,
         chatId,
         messageId,
         channel,
@@ -168,9 +169,7 @@ export async function processMessageWithAgents(
     );
 
     const agentProcessingTime = formatExecutionTime(agentProcessingStartTime);
-    console.log(
-      `🚀 [AGENTS] Обработка агентами: ${agentProcessingTime}`,
-    );
+    console.log(`🚀 [AGENTS] Обработка агентами: ${agentProcessingTime}`);
 
     // Логируем информацию об агентах
     if (result.agentMetadata) {
@@ -219,6 +218,7 @@ export async function processMessageWithAgents(
             qualityScore: 0.7,
             processingTime: totalProcessingTime,
             processingMode: "agents",
+            shouldLogEvent: false,
           },
     };
   } catch (error) {

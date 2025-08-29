@@ -6,6 +6,7 @@ import type {
   BaseAgent,
   OrchestrationResult,
 } from "./types";
+import { globalAgentRegistry } from "./agent-registry";
 import { DataAnalystAgent } from "./data-analyst-agent";
 import { EventProcessorAgent } from "./event-processor-agent";
 import { GeneralAssistantAgent } from "./general-assistant-agent";
@@ -15,13 +16,13 @@ import { QualityEvaluatorAgent } from "./quality-evaluator-agent";
 import { RouterAgent } from "./router-agent";
 import { TaskManagerAgent } from "./task-manager-agent";
 import { TaskOrchestratorAgent } from "./task-orchestrator-agent";
+import { TelegramFormatterAgent } from "./telegram-formatter-agent";
 
 /**
  * Менеджер агентов - центральная точка управления мультиагентной системой
  * Реализует паттерны orchestration и routing из AI SDK
  */
 export class AgentManager {
-  private agents = new Map<string, BaseAgent>();
   private router: RouterAgent;
   private qualityEvaluator: QualityEvaluatorAgent;
 
@@ -35,47 +36,39 @@ export class AgentManager {
    * Инициализация всех доступных агентов
    */
   private initializeAgents() {
-    const agentInstances = [
-      new QASpecialistAgent(),
-      new EventProcessorAgent(),
-      new TaskOrchestratorAgent(),
-      new GeneralAssistantAgent(),
-      new DataAnalystAgent(),
-      new TaskManagerAgent(),
-    ];
+    // Проверяем, есть ли уже зарегистрированные агенты
+    if (globalAgentRegistry.getAll().size === 0) {
+      const agentInstances = [
+        new QASpecialistAgent(),
+        new EventProcessorAgent(),
+        new TaskOrchestratorAgent(),
+        new GeneralAssistantAgent(),
+        new DataAnalystAgent(),
+        new TaskManagerAgent(),
+        new TelegramFormatterAgent(),
+      ];
 
-    agentInstances.forEach((agent) => {
-      this.agents.set(this.getAgentKey(agent.name), agent);
-    });
+      agentInstances.forEach((agent) => {
+        globalAgentRegistry.register(agent);
+      });
 
-    console.log(
-      `Initialized ${this.agents.size} agents:`,
-      Array.from(this.agents.keys()),
-    );
-  }
-
-  /**
-   * Нормализация ключа агента
-   * Удаляет все не-латинские буквы и цифры (кроме пробелов),
-   * затем заменяет последовательности пробелов на дефисы и приводит к нижнему регистру
-   */
-  private getAgentKey(agentName: string): string {
-    if (!agentName.trim()) {
-      return "";
+      console.log(
+        `Initialized ${globalAgentRegistry.getAll().size} agents:`,
+        Array.from(globalAgentRegistry.getAll().keys()),
+      );
+    } else {
+      console.log(
+        `Using existing ${globalAgentRegistry.getAll().size} agents from registry:`,
+        Array.from(globalAgentRegistry.getAll().keys()),
+      );
     }
-
-    return agentName
-      .replace(/[^a-zA-Z0-9\s]/g, "") // Удаляем все символы кроме букв, цифр и пробелов
-      .replace(/\s+/g, "-") // Заменяем последовательности пробелов на дефисы
-      .replace(/^-+|-+$/g, "") // Убираем дефисы в начале и конце
-      .toLowerCase(); // Приводим к нижнему регистру
   }
 
   /**
    * Получение агента по ключу
    */
   getAgent(agentKey: string): BaseAgent | undefined {
-    return this.agents.get(agentKey);
+    return globalAgentRegistry.get(agentKey);
   }
 
   /**
@@ -271,11 +264,46 @@ export class AgentManager {
             ? processingResult.data
             : undefined,
           qualityControlUsed: options.useQualityControl ?? false,
+          // Автоматически добавляем флаг для логирования событий
+          shouldLogEvent: classification.needsLogging,
         },
       };
 
+      // 8. Форматируем ответ для Telegram, если это Telegram канал
+      if (context.channel === "telegram" && finalResponse) {
+        console.log("📱 Formatting response for Telegram...");
+
+        const telegramFormatter = this.getAgent("telegram-formatter");
+        if (telegramFormatter) {
+          const formattingTask = this.createAgentTask(
+            finalResponse,
+            "telegram-formatting",
+            context,
+            1,
+          );
+
+          try {
+            const formattingResult = await telegramFormatter.process(
+              formattingTask,
+              telemetry,
+            );
+            if (formattingResult.success && formattingResult.data) {
+              result.finalResponse = formattingResult.data as string;
+              agentsUsed.push(telegramFormatter.name);
+              totalSteps++;
+              console.log("✅ Response formatted for Telegram");
+            }
+          } catch (error) {
+            console.warn(
+              "⚠️ Telegram formatting failed, using original response:",
+              error,
+            );
+          }
+        }
+      }
+
       console.log(
-        `✅ Processing completed in ${result.metadata.processingTime}ms`,
+        `✅ Processing completed in ${Date.now() - startTime}ms with ${totalSteps} steps`,
       );
       console.log(`📊 Agents used: ${agentsUsed.join(" → ")}`);
       console.log(`⭐ Quality score: ${qualityScore.toFixed(2)}`);
@@ -351,8 +379,9 @@ export class AgentManager {
     capabilities: AgentCapability[];
   }[] {
     const result = [];
+    const agents = globalAgentRegistry.getAll();
 
-    for (const [key, agent] of this.agents) {
+    for (const [key, agent] of agents) {
       result.push({
         key,
         name: agent.name,
@@ -368,9 +397,10 @@ export class AgentManager {
    * Получение статистики работы агентов
    */
   getAgentStats(): { totalAgents: number; agentList: string[] } {
+    const agents = globalAgentRegistry.getAll();
     return {
-      totalAgents: this.agents.size,
-      agentList: Array.from(this.agents.keys()),
+      totalAgents: agents.size,
+      agentList: Array.from(agents.keys()),
     };
   }
 }

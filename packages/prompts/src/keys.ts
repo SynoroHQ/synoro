@@ -9,6 +9,7 @@ export const PROMPT_KEYS = {
   FINANCIAL_ADVISOR: "financial-advisor",
   TASK_MANAGER: "task-manager",
   CHAT_ASSISTANT: "chat-assistant",
+  TELEGRAM_FORMATTER: "telegram-formatter",
 } as const;
 
 export type PromptKey = (typeof PROMPT_KEYS)[keyof typeof PROMPT_KEYS];

@@ -7,12 +7,12 @@ import {
   removeProcessingMessage,
   sendProcessingMessage,
 } from "../utils/message-utils";
+import { formatForTelegram } from "../utils/telegram-formatter";
 import {
   createMessageContext,
   getUserIdentifier,
   isObviousSpam,
 } from "../utils/telegram-utils";
-import { formatForTelegram } from "../utils/telegram-formatter";
 
 /**
  * Умный обработчик текстовых сообщений с автоматическим выбором агентной системы
@@ -102,7 +102,6 @@ export async function handleSmartText(ctx: Context): Promise<void> {
 
     await ctx.reply(formattedMessage.text, {
       parse_mode: formattedMessage.parse_mode,
-      disable_web_page_preview: formattedMessage.disable_web_page_preview,
     });
 
     // Логируем результат обработки
