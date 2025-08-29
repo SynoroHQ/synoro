@@ -52,6 +52,12 @@ describe("telegram-utils", () => {
     it("should format text with HTML when special chars present", () => {
       const result = formatTelegramText("Hello *world*");
       expect(result.parse_mode).toBe("HTML");
+      expect(result.text).toBe("Hello <i>world</i>");
+    });
+
+    it("should format bold text correctly", () => {
+      const result = formatTelegramText("Hello **world**");
+      expect(result.parse_mode).toBe("HTML");
       expect(result.text).toBe("Hello <b>world</b>");
     });
 
