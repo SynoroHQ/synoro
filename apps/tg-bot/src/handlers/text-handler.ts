@@ -31,12 +31,12 @@ export async function handleText(ctx: Context) {
 
     const formattedResponse = formatForTelegram(response, {
       useEmojis: true,
-      useMarkdown: true,
+      useHTML: true,
       addSeparators: false,
     });
 
     await ctx.reply(formattedResponse.text, {
-      parse_mode: formattedResponse.parse_mode || "MarkdownV2",
+      parse_mode: formattedResponse.parse_mode || "HTML",
     });
   } catch (error) {
     console.error("Error in text handler:", error);

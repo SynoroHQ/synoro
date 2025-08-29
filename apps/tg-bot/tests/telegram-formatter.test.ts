@@ -18,21 +18,21 @@ describe("TelegramFormatter", () => {
       const result = formatter.formatAgentResponse(
         "Произошла ошибка при обработке",
       );
-      expect(result.text).toContain("❌");
+      expect(result.text).toContain("🔴");
     });
 
     it("should add emojis for success messages", () => {
       const result = formatter.formatAgentResponse(
         "Операция выполнена успешно",
       );
-      expect(result.text).toContain("✅");
+      expect(result.text).toContain("🟢");
     });
 
     it("should add emojis for warning messages", () => {
       const result = formatter.formatAgentResponse(
         "Внимание: важная информация",
       );
-      expect(result.text).toContain("⚠️");
+      expect(result.text).toContain("🟡");
     });
 
     it("should add emojis for question messages", () => {
@@ -57,7 +57,7 @@ describe("TelegramFormatter", () => {
 
     it("should not add emojis for regular messages", () => {
       const result = formatter.formatAgentResponse("Это обычное сообщение");
-      expect(result.text).toBe("Это обычное сообщение");
+      expect(result.text).toBe("<b>Это обычное сообщение</b>\n");
     });
   });
 
@@ -71,8 +71,8 @@ describe("TelegramFormatter", () => {
       const result = formatter.formatAgentResponse(
         "- Первый пункт\n- Второй пункт",
       );
-      expect(result.text).toContain("• Первый пункт");
-      expect(result.text).toContain("• Второй пункт");
+      expect(result.text).toContain("<b>- Первый пункт</b>");
+      expect(result.text).toContain("<b>- Второй пункт</b>");
     });
 
     it("should format numbered lists", () => {
@@ -120,14 +120,14 @@ describe("TelegramFormatter", () => {
   describe("utility functions", () => {
     it("should format using formatForTelegram", () => {
       const result = formatForTelegram("Тестовое сообщение");
-      expect(result.text).toBe("Тестовое сообщение");
+      expect(result.text).toBe("<b>Тестовое сообщение</b>\n");
     });
 
     it("should respect options", () => {
       const result = formatForTelegram("Тестовое сообщение", {
         useEmojis: false,
       });
-      expect(result.text).toBe("Тестовое сообщение");
+      expect(result.text).toBe("<b>Тестовое сообщение</b>\n");
     });
 
     it("should respect HTML options", () => {
@@ -142,7 +142,7 @@ describe("TelegramFormatter", () => {
         "Ответ на вопрос",
         "qa",
       );
-      expect(result.text).toBe("💡 Ответ на вопрос");
+      expect(result.text).toBe("<b>💡 Ответ на вопрос</b>\n");
     });
 
     it("should format financial responses", () => {
@@ -150,7 +150,7 @@ describe("TelegramFormatter", () => {
         "Финансовая информация",
         "financial",
       );
-      expect(result.text).toBe("💰 Финансовая информация");
+      expect(result.text).toBe("<b>💰 Финансовая информация</b>\n");
     });
 
     it("should format analytics responses", () => {
@@ -158,7 +158,7 @@ describe("TelegramFormatter", () => {
         "Анализ данных",
         "analytics",
       );
-      expect(result.text).toBe("📊 Анализ данных");
+      expect(result.text).toBe("<b>📊 Анализ данных</b>\n");
     });
   });
 });

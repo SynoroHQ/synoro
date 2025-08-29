@@ -65,7 +65,7 @@ export class TelegramFormatter {
 
     return {
       text: formattedText,
-      parse_mode: "HTML",
+      parse_mode: opts.useHTML ? "HTML" : undefined,
       disable_web_page_preview: true,
     };
   }
@@ -119,13 +119,13 @@ export class TelegramFormatter {
     let formatted = text;
 
     // 1. Форматируем заголовки (только очевидные)
-    formatted = this.formatSimpleHeaders(formatted);
+    formatted = this.formatHeaders(formatted);
 
     // 2. Форматируем списки
     formatted = this.formatSimpleLists(formatted);
 
     // 3. Добавляем переносы строк для лучшей читаемости
-    formatted = this.addSimpleLineBreaks(formatted);
+    formatted = this.addLineBreaks(formatted);
 
     return formatted;
   }
