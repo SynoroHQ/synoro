@@ -230,14 +230,8 @@ export abstract class AbstractAgent implements BaseAgent {
       this.setCachedResult(cacheKey, object);
       return object;
     } catch (error) {
-      console.warn("Context analysis failed, using fallback:", error);
-      return {
-        relevantInfo: [task.input],
-        userIntent: "Обработать запрос пользователя",
-        complexity: "medium" as const,
-        suggestedApproach: "Стандартный подход обработки",
-        confidence: 0.5,
-      };
+      console.warn("Context analysis failed:", error);
+      throw new Error("Ошибка анализа контекста задачи");
     }
   }
 
@@ -372,7 +366,7 @@ export abstract class AbstractAgent implements BaseAgent {
     let hash = 0;
     for (let i = 0; i < input.length; i++) {
       const char = input.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Преобразование в 32-битное число
     }
     return Math.abs(hash).toString(36);

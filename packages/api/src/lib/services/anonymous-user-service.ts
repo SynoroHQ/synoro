@@ -1,7 +1,7 @@
 import { and, eq, gt, lt } from "drizzle-orm";
 
-import { db } from "@synoro/db";
-import { user } from "@synoro/db/schemas/auth";
+import { db } from "@synoro/db/client";
+import { user } from "@synoro/db/schema";
 
 export interface CreateAnonymousUserData {
   telegramChatId: string;
@@ -36,7 +36,7 @@ export class AnonymousUserService {
     data: CreateAnonymousUserData,
   ): Promise<AnonymousUser> {
     // Сначала пытаемся найти существующего анонимного пользователя
-    let anonymousUser = await this.findAnonymousUserByTelegramChatId(
+    const anonymousUser = await this.findAnonymousUserByTelegramChatId(
       data.telegramChatId,
     );
 
@@ -87,11 +87,14 @@ export class AnonymousUserService {
         updatedAt: user.updatedAt,
       });
 
-    if (!newUser) {
+    if (!newUser || !newUser.telegramChatId) {
       throw new Error("Не удалось создать анонимного пользователя");
     }
 
-    return newUser;
+    return {
+      ...newUser,
+      telegramChatId: newUser.telegramChatId,
+    };
   }
 
   /**

@@ -1,5 +1,4 @@
-import type { AgentTask } from "@synoro/api/lib/agents/types";
-import { FastResponseAgent } from "@synoro/api/lib/agents/fast-response-agent";
+import { apiClient } from "../api/client";
 
 export interface TelegramFastResponse {
   shouldSendFast: boolean;
@@ -11,15 +10,9 @@ export interface TelegramFastResponse {
 
 /**
  * Сервис быстрых ответов для Telegram бота
- * Использует FastResponseAgent для интеллектуальной обработки
+ * Использует API для взаимодействия с FastResponseAgent
  */
 export class TelegramFastResponseService {
-  private fastAgent: FastResponseAgent;
-
-  constructor() {
-    this.fastAgent = new FastResponseAgent();
-  }
-
   /**
    * Анализ сообщения и получение быстрого ответа
    */
@@ -27,59 +20,21 @@ export class TelegramFastResponseService {
     text: string,
     userId: string,
     chatId: string,
-    messageId?: string
+    messageId?: string,
   ): Promise<TelegramFastResponse> {
     try {
-      // Создаем задачу для агента
-      const task: AgentTask = {
-        id: `tg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        type: "chat",
-        input: text,
-        context: {
-          userId,
-          chatId,
-          messageId,
-          channel: "telegram",
-          timestamp: new Date().toISOString(),
-        },
-      };
+      // Отправляем запрос через API
+      const result = await apiClient.fastResponse.analyze.mutate({
+        text,
+        userId,
+        chatId,
+        messageId,
+      });
 
-      // Проверяем, может ли агент обработать задачу
-      const canHandle = await this.fastAgent.canHandle(task);
-      if (!canHandle) {
-        return {
-          shouldSendFast: false,
-          fastResponse: "",
-          needsFullProcessing: true,
-          confidence: 0,
-          processingType: "full",
-        };
-      }
-
-      // Обрабатываем через FastResponseAgent
-      const result = await this.fastAgent.process(task);
-
-      if (result.success && result.data) {
-        return {
-          shouldSendFast: true,
-          fastResponse: result.data as string,
-          needsFullProcessing: false,
-          confidence: result.confidence,
-          processingType: "fast",
-        };
-      } else {
-        // Если агент не смог дать быстрый ответ, отправляем на полную обработку
-        return {
-          shouldSendFast: false,
-          fastResponse: "",
-          needsFullProcessing: true,
-          confidence: result.confidence,
-          processingType: "full",
-        };
-      }
+      return result;
     } catch (error) {
       console.error("Ошибка в TelegramFastResponseService:", error);
-      
+
       // В случае ошибки отправляем на полную обработку
       return {
         shouldSendFast: false,
@@ -94,19 +49,28 @@ export class TelegramFastResponseService {
   /**
    * Получение статистики работы сервиса
    */
-  getStats() {
-    return {
-      agentStats: this.fastAgent.getStats(),
-      serviceName: "TelegramFastResponseService",
-      version: "1.0.0",
-    };
+  async getStats() {
+    try {
+      return await apiClient.fastResponse.stats.query();
+    } catch (error) {
+      console.error("Ошибка при получении статистики:", error);
+      return {
+        agentStats: {},
+        serviceName: "TelegramFastResponseService",
+        version: "1.0.0",
+      };
+    }
   }
 
   /**
    * Очистка кэша агента
    */
-  clearCache() {
-    this.fastAgent.clearCache();
+  async clearCache() {
+    try {
+      await apiClient.fastResponse.clearCache.mutate();
+    } catch (error) {
+      console.error("Ошибка при очистке кэша:", error);
+    }
   }
 }
 

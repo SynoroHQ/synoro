@@ -10,12 +10,8 @@ import type {
   SmartSuggestions,
 } from "@synoro/validators";
 
-import type {
-  AgentCapability,
-  AgentContext,
-  AgentResult,
-  AgentTask,
-} from "./types";
+import type { AgentContext } from "./agent-context";
+import type { AgentCapability, AgentResult, AgentTask } from "./types";
 import { ReminderService } from "../services/reminder-service";
 import { AbstractAgent } from "./base-agent";
 
@@ -194,6 +190,9 @@ export class SmartReminderAgent extends AbstractAgent {
         );
       }
 
+      // Подготавливаем пользователя заранее
+      const userId = await this.prepareUser(task.context);
+
       // Извлекаем информацию о напоминании
       const extractedInfo = await this.extractReminderInfo(
         task.input,
@@ -208,29 +207,6 @@ export class SmartReminderAgent extends AbstractAgent {
       }
 
       // Создаем напоминание
-      let userId = task.context?.userId;
-
-      // Если userId не указан, но есть telegramChatId, создаем анонимного пользователя
-      if (!userId && task.context?.telegramChatId) {
-        const { AnonymousUserService } = await import(
-          "../services/anonymous-user-service"
-        );
-        const anonymousUserService = new AnonymousUserService();
-
-        const anonymousUser =
-          await anonymousUserService.getOrCreateAnonymousUser({
-            telegramChatId: task.context.telegramChatId,
-          });
-
-        userId = anonymousUser.id;
-      }
-
-      if (!userId) {
-        return this.createErrorResult(
-          "Не указан пользователь или telegramChatId",
-        );
-      }
-
       const reminderData: Reminder = {
         userId,
         title: extractedInfo.title,
@@ -370,7 +346,7 @@ export class SmartReminderAgent extends AbstractAgent {
       keywords?: string[];
     };
   }> {
-    const timezone = (context?.timezone as string) ?? "Europe/Moscow";
+    const timezone = context?.timezone! ?? "Europe/Moscow";
     const currentTime = new Date().toISOString();
 
     try {
@@ -457,6 +433,45 @@ export class SmartReminderAgent extends AbstractAgent {
       console.warn("Ошибка генерации предложений:", error);
       return [];
     }
+  }
+
+  /**
+   * Предварительная подготовка пользователя для создания напоминания
+   * Создает анонимного пользователя, если необходимо
+   */
+  private async prepareUser(context?: AgentContext): Promise<string> {
+    let userId = context?.userId;
+
+    // Если userId не указан, но есть telegramChatId, создаем анонимного пользователя
+    if (!userId && context?.telegramChatId) {
+      const { AnonymousUserService } = await import(
+        "../services/anonymous-user-service"
+      );
+      const anonymousUserService = new AnonymousUserService();
+
+      const telegramChatId = context.telegramChatId as string;
+      const anonymousUser = await anonymousUserService.getOrCreateAnonymousUser(
+        {
+          telegramChatId,
+        },
+      );
+
+      userId = anonymousUser.id;
+    }
+
+    if (!userId) {
+      throw new Error("Не указан пользователь или telegramChatId");
+    }
+
+    return userId;
+  }
+
+  /**
+   * Публичный метод для предварительной подготовки пользователя
+   * Можно вызывать заранее для создания анонимного пользователя
+   */
+  async prepareUserForReminders(context: AgentContext): Promise<string> {
+    return this.prepareUser(context);
   }
 
   /**

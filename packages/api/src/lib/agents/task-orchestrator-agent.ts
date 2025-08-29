@@ -482,13 +482,7 @@ export class TaskOrchestratorAgent extends AbstractAgent {
       return quality;
     } catch (error) {
       console.error("Error in AI quality evaluation:", error);
-      // Fallback оценка
-      return {
-        score: stepResult.confidence || 0.7,
-        needsImprovement: (stepResult.confidence || 0.7) < 0.6,
-        suggestions:
-          (stepResult.confidence || 0.7) < 0.6 ? ["Улучшить детализацию"] : [],
-      };
+      throw new Error("Ошибка оценки качества выполнения этапа");
     }
   }
 
