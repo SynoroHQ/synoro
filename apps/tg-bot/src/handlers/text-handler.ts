@@ -1,105 +1,45 @@
-import type { Context } from "grammy";
+import { Context } from "grammy";
 
-import { env } from "../env";
-import { processTextMessage } from "../services/message-service";
-import {
-  ProcessingAnimation,
-  removeProcessingMessage,
-  sendProcessingMessage,
-} from "../utils/message-utils";
+import { fastResponseSystem } from "../utils/fast-response-system";
 import { formatForTelegram } from "../utils/telegram-formatter";
-import {
-  createMessageContext,
-  getUserIdentifier,
-  isObviousSpam,
-} from "../utils/telegram-utils";
 
 /**
- * Обрабатывает текстовые сообщения
+ * Обработчик обычных текстовых сообщений с Fast Response System
  */
-export async function handleText(ctx: Context): Promise<void> {
-  const text = ctx.message?.text ?? "";
-
-  // Basic input constraints
-  const maxLength = env.TG_MESSAGE_MAX_LENGTH ?? 3000;
-  if (text.length > maxLength) {
-    await ctx.reply(
-      `Слишком длинное сообщение (${text.length} символов). Пожалуйста, сократите до ${maxLength}.`,
-    );
-    return;
-  }
-
-  // Check for obvious spam
-  if (isObviousSpam(text)) {
-    await ctx.reply(
-      "Похоже на спам или бессодержательное сообщение. Отправьте, пожалуйста, более осмысленный текст.",
-    );
-    return;
-  }
-
-  // Показываем индикатор "печатает..."
-  await ctx.replyWithChatAction("typing");
-
-  // Запускаем анимированный индикатор обработки
-  const processingAnimation = new ProcessingAnimation(
-    ctx,
-    "текстовое сообщение",
-  );
-  await processingAnimation.start();
-
+export async function handleText(ctx: Context) {
   try {
-    const messageContext = createMessageContext(ctx);
-    console.log(
-      `📝 Обработка текста от ${getUserIdentifier(ctx.from)} в чате ${messageContext.chatId}: "${text.slice(0, 50)}${text.length > 50 ? "..." : ""}"`,
-    );
+    const text = ctx.message?.text || "";
 
-    // Обрабатываем сообщение через существующий сервис
-    const result = await processTextMessage(text, {
-      ...messageContext,
-      metadata: {
-        ...messageContext.metadata,
-        smartMode: true,
-      },
-    });
+    console.log(`📝 Text handler: "${text}" from user ${ctx.from?.id}`);
 
-    // Останавливаем анимацию обработки
-    await processingAnimation.stop();
+    // Проверяем, можно ли дать быстрый ответ
+    const fastResponse = fastResponseSystem.analyzeMessage(text);
 
-    if (!result.success) {
-      await ctx.reply(result.response);
+    if (fastResponse.shouldSendFast) {
+      console.log(
+        `⚡ Fast response in text handler: ${fastResponse.processingType}`,
+      );
+
+      // Отправляем быстрый ответ
+      await ctx.reply(fastResponse.fastResponse);
       return;
     }
 
-    // Отправляем ответ пользователю
-    const MAX_TG_MESSAGE = 4096;
-    let reply = result.response;
+    // Если быстрый ответ не сработал, отправляем стандартное сообщение
+    const response =
+      "Понял ваше сообщение! Для более детальной обработки используйте команду /smart";
 
-    if (reply.length > MAX_TG_MESSAGE) {
-      reply = reply.slice(0, MAX_TG_MESSAGE - 1) + "…";
-    }
-
-    // Форматируем ответ для Telegram
-    const formattedMessage = formatForTelegram(reply, {
+    const formattedResponse = formatForTelegram(response, {
       useEmojis: true,
-      useHTML: true,
-      maxLineLength: 80,
+      useMarkdown: true,
+      addSeparators: false,
     });
 
-    await ctx.reply(formattedMessage.text, {
-      parse_mode: formattedMessage.parse_mode,
-      disable_web_page_preview: formattedMessage.disable_web_page_preview,
+    await ctx.reply(formattedResponse.text, {
+      parse_mode: formattedResponse.parse_mode || "MarkdownV2",
     });
-    // Логируем результат обработки
-    console.log(
-      `✅ Сообщение обработано: тип=${result.messageType?.type}, релевантность=${result.relevance?.relevant}`,
-    );
   } catch (error) {
-    // Останавливаем анимацию обработки в случае ошибки
-    await processingAnimation.stop();
-
-    console.error("Text handling error:", error);
-    await ctx.reply(
-      "Не удалось обработать сообщение. Попробуйте ещё раз позже.",
-    );
+    console.error("Error in text handler:", error);
+    await ctx.reply("❌ Произошла ошибка. Попробуйте еще раз.");
   }
 }
