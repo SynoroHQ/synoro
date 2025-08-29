@@ -8,6 +8,20 @@
       "when": 1756217511402,
       "tag": "0000_nervous_mysterio",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1756482848172,
+      "tag": "0001_talented_hellion",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1756483316415,
+      "tag": "0002_public_blue_blade",
+      "breakpoints": true
     }
   ]
 }
