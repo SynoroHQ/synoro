@@ -5,15 +5,16 @@
 
 export interface TelegramFormattingOptions {
   useEmojis?: boolean;
-  useMarkdown?: boolean;
+  useHTML?: boolean;
   addSeparators?: boolean;
   maxLineLength?: number;
   addContextInfo?: boolean;
+  useColors?: boolean;
 }
 
 export interface FormattedMessage {
   text: string;
-  parse_mode?: "MarkdownV2" | "HTML";
+  parse_mode?: "HTML";
   disable_web_page_preview?: boolean;
 }
 
@@ -23,10 +24,11 @@ export interface FormattedMessage {
 export class TelegramFormatter {
   private defaultOptions: Required<TelegramFormattingOptions> = {
     useEmojis: true,
-    useMarkdown: true,
+    useHTML: true,
     addSeparators: true,
     maxLineLength: 80,
     addContextInfo: false,
+    useColors: true,
   };
 
   constructor(options?: Partial<TelegramFormattingOptions>) {
@@ -53,8 +55,10 @@ export class TelegramFormatter {
       formattedText = this.addContentEmojis(formattedText);
     }
 
-    // 2. Форматируем структуру текста
-    formattedText = this.formatTextStructure(formattedText, opts);
+    // 2. Применяем HTML форматирование (включая структуру текста)
+    if (opts.useHTML) {
+      formattedText = this.applyHTMLFormatting(formattedText, opts);
+    }
 
     // 3. Добавляем разделители
     if (opts.addSeparators) {
@@ -69,15 +73,9 @@ export class TelegramFormatter {
     // 5. Проверяем длину строк
     formattedText = this.wrapLongLines(formattedText, opts.maxLineLength);
 
-    // 6. Определяем режим парсинга
-    const parseMode = this.determineParseMode(formattedText, opts.useMarkdown);
-
     return {
-      text:
-        parseMode === "MarkdownV2"
-          ? this.escapeMarkdownV2(formattedText)
-          : formattedText,
-      parse_mode: parseMode,
+      text: formattedText,
+      parse_mode: "HTML",
       disable_web_page_preview: true,
     };
   }
@@ -196,7 +194,7 @@ export class TelegramFormatter {
     return text.replace(/^(.{3,50})$/gm, (match) => {
       // Если строка короткая и заканчивается двоеточием или не содержит знаков препинания
       if (match.length < 50 && (match.endsWith(":") || !/[.!?]/.test(match))) {
-        return `**${match}**`;
+        return `<b>${match}</b>`;
       }
       return match;
     });
@@ -210,7 +208,7 @@ export class TelegramFormatter {
     text = text.replace(/^[-*•]\s+/gm, "• ");
 
     // Форматируем нумерованные списки
-    text = text.replace(/^(\d+)\.\s+/gm, "$1\\. ");
+    text = text.replace(/^(\d+)\.\s+/gm, "$1. ");
 
     return text;
   }
@@ -220,15 +218,22 @@ export class TelegramFormatter {
    */
   private formatCodeBlocks(text: string): string {
     // Ищем строки, которые выглядят как код (содержат технические термины)
+    // Но только те, которые ещё не обёрнуты в <code> теги
     const codePatterns = [
-      /\b[A-Z_]{3,}\b/g, // Константы
-      /\b[a-z]+\([^)]*\)/g, // Функции
-      /\b\d+\.\d+\.\d+\b/g, // Версии
-      /\b[A-Z][a-z]+[A-Z][a-z]+\b/g, // CamelCase
+      /\b([A-Z_]{3,})\b/g, // Константы
+      /\b([a-z]+\([^)]*\))/g, // Функции
+      /\b(\d+\.\d+\.\d+)\b/g, // Версии
+      /\b([A-Z][a-z]+[A-Z][a-z]+)\b/g, // CamelCase
     ];
 
     codePatterns.forEach((pattern) => {
-      text = text.replace(pattern, (match) => `\`${match}\``);
+      text = text.replace(pattern, (match, group) => {
+        // Проверяем, не обёрнут ли уже в <code> тег
+        if (text.includes(`<code>${group}</code>`)) {
+          return match;
+        }
+        return `<code>${group}</code>`;
+      });
     });
 
     return text;
@@ -239,7 +244,7 @@ export class TelegramFormatter {
    */
   private formatQuotes(text: string): string {
     // Ищем строки в кавычках
-    return text.replace(/"([^"]+)"/g, '> "$1"');
+    return text.replace(/"([^"]+)"/g, '<i>"$1"</i>');
   }
 
   /**
@@ -247,7 +252,7 @@ export class TelegramFormatter {
    */
   private addLineBreaks(text: string): string {
     // Добавляем переносы после заголовков
-    text = text.replace(/(\*\*[^*]+\*\*)/g, "$1\n");
+    text = text.replace(/(<b>[^<]+<\/b>)/g, "$1\n");
 
     // Добавляем переносы между абзацами
     text = text.replace(/\n\n+/g, "\n\n");
@@ -272,7 +277,7 @@ export class TelegramFormatter {
       }
 
       // Добавляем разделитель после заголовков
-      if (line && line.includes("**") && line.length < 50) {
+      if (line && line.includes("<b>") && line.length < 50) {
         formattedLines.push("─".repeat(Math.min(line.length, 30)));
       }
 
@@ -336,40 +341,150 @@ export class TelegramFormatter {
   }
 
   /**
-   * Определяет режим парсинга
+   * Применяет HTML форматирование
    */
-  private determineParseMode(
+  private applyHTMLFormatting(
     text: string,
-    preferMarkdown: boolean,
-  ): "MarkdownV2" | undefined {
-    if (!preferMarkdown) return undefined;
+    options: Required<TelegramFormattingOptions>,
+  ): string {
+    let formatted = text;
 
-    // Проверяем, содержит ли текст Markdown элементы
-    const hasMarkdown = /\*\*|\*\*|`|>/.test(text);
+    // 1. Форматируем структуру текста
+    formatted = this.formatTextStructure(formatted, options);
 
-    return hasMarkdown ? "MarkdownV2" : undefined;
+    // 2. Форматируем важные части текста
+    formatted = this.formatImportantParts(formatted);
+
+    // 3. Форматируем технические термины
+    formatted = this.formatTechnicalTerms(formatted);
+
+    // 4. Добавляем цветовое выделение если включено
+    if (options.useColors) {
+      formatted = this.addColorHighlighting(formatted);
+    }
+
+    // 5. Форматируем ссылки
+    formatted = this.formatLinks(formatted);
+
+    // 6. Форматируем таблицы
+    formatted = this.formatTables(formatted);
+
+    return formatted;
   }
 
   /**
-   * Экранирует специальные символы для MarkdownV2
+   * Форматирует важные части текста
    */
-  private escapeMarkdownV2(text: string): string {
-    // 1) защитим инлайн‑код: `...`
-    const parts = text.split(/(`[^`]*`)/g);
-    const esc = (s: string) =>
-      s
-        // сохраняем наши маркеры **...** и цитаты в начале строки
-        .replace(/\*\*([^*]+)\*\*/g, "§§$1§§")
-        .replace(/^\s*> /gm, "§Q ")
-        // экранируем спецсимволы, НО не трогаем `*`, '`' и '>' (наши маркеры)
-        .replace(/[_\[\]()~#+\-=|{}.!]/g, "\\$&")
-        // возвращаем маркеры
-        .replace(/§§([^§]+)§§/g, "**$1**")
-        .replace(/^§Q /gm, "> ");
+  private formatImportantParts(text: string): string {
+    // Выделяем важные слова жирным
+    const importantWords = [
+      "важно",
+      "внимание",
+      "срочно",
+      "критично",
+      "успешно",
+      "ошибка",
+      "предупреждение",
+    ];
 
-    return parts
-      .map((seg) => (seg.startsWith("`") && seg.endsWith("`") ? seg : esc(seg)))
-      .join("");
+    importantWords.forEach((word) => {
+      const regex = new RegExp(`\\b${word}\\b`, "gi");
+      text = text.replace(regex, `<b>${word}</b>`);
+    });
+
+    return text;
+  }
+
+  /**
+   * Форматирует технические термины
+   */
+  private formatTechnicalTerms(text: string): string {
+    // Выделяем технические термины моноширинным шрифтом
+    const techTerms = [
+      "API",
+      "HTTP",
+      "JSON",
+      "XML",
+      "SQL",
+      "HTML",
+      "CSS",
+      "JavaScript",
+      "TypeScript",
+      "React",
+      "Node.js",
+      "Python",
+      "Java",
+      "C++",
+      "Git",
+      "Docker",
+      "Kubernetes",
+    ];
+
+    techTerms.forEach((term) => {
+      // Экранируем специальные символы в термине для регулярного выражения
+      const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const regex = new RegExp(`\\b${escapedTerm}\\b`, "g");
+
+      // Заменяем только если термин ещё не обёрнут в <code> тег
+      text = text.replace(regex, (match) => {
+        if (text.includes(`<code>${match}</code>`)) {
+          return match;
+        }
+        return `<code>${match}</code>`;
+      });
+    });
+
+    return text;
+  }
+
+  /**
+   * Добавляет цветовое выделение
+   */
+  private addColorHighlighting(text: string): string {
+    // Используем HTML-сущности для цветов (ограниченная поддержка в Telegram)
+    // Зелёный для успеха
+    text = text.replace(/✅/g, "🟢");
+    // Красный для ошибок
+    text = text.replace(/❌/g, "🔴");
+    // Жёлтый для предупреждений
+    text = text.replace(/⚠️/g, "🟡");
+    // Синий для информации
+    text = text.replace(/ℹ️/g, "🔵");
+
+    return text;
+  }
+
+  /**
+   * Форматирует ссылки
+   */
+  private formatLinks(text: string): string {
+    // Ищем URL и оборачиваем их в HTML ссылки
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    return text.replace(urlRegex, '<a href="$1">$1</a>');
+  }
+
+  /**
+   * Форматирует таблицы
+   */
+  private formatTables(text: string): string {
+    // Простое форматирование таблиц
+    const lines = text.split("\n");
+    const formattedLines: string[] = [];
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+
+      // Если строка содержит разделители таблицы
+      if (line.includes("|")) {
+        const cells = line.split("|").map((cell) => cell.trim());
+        const formattedCells = cells.map((cell) => `<code>${cell}</code>`);
+        formattedLines.push(formattedCells.join(" | "));
+      } else {
+        formattedLines.push(line);
+      }
+    }
+
+    return formattedLines.join("\n");
   }
 
   /**
@@ -403,6 +518,7 @@ export class TelegramFormatter {
           useEmojis: true,
           addSeparators: true,
           addContextInfo: false,
+          useColors: true,
         };
 
       case "financial":
@@ -411,6 +527,7 @@ export class TelegramFormatter {
           useEmojis: true,
           addSeparators: true,
           addContextInfo: true,
+          useColors: true,
         };
 
       case "analytics":
@@ -419,6 +536,7 @@ export class TelegramFormatter {
           useEmojis: true,
           addSeparators: true,
           addContextInfo: true,
+          useColors: true,
         };
 
       case "event":
@@ -427,6 +545,7 @@ export class TelegramFormatter {
           useEmojis: true,
           addSeparators: true,
           addContextInfo: true,
+          useColors: true,
         };
 
       case "task":
@@ -435,6 +554,7 @@ export class TelegramFormatter {
           useEmojis: true,
           addSeparators: true,
           addContextInfo: false,
+          useColors: true,
         };
 
       default:

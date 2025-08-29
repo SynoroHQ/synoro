@@ -1,7 +1,11 @@
 import { Context } from "grammy";
 
-import { apiClient } from "../../lib/api-client";
+import { apiClient } from "../api/client";
 import { fastResponseSystem } from "../utils/fast-response-system";
+import {
+  createErrorMessage,
+  createSuccessMessage,
+} from "../utils/html-message-builder";
 import { formatForTelegram } from "../utils/telegram-formatter";
 import { createMessageContext } from "../utils/telegram-utils";
 
@@ -59,7 +63,7 @@ export async function handleSmartText(ctx: Context) {
         // Форматируем ответ для Telegram
         const formattedResponse = formatForTelegram(result.response, {
           useEmojis: true,
-          useMarkdown: true,
+          useHTML: true,
           addSeparators: false,
         });
 
@@ -68,29 +72,45 @@ export async function handleSmartText(ctx: Context) {
           messageContext.chatId,
           processingMsg.message_id,
           formattedResponse.text,
-          { parse_mode: formattedResponse.parse_mode || "MarkdownV2" },
+          { parse_mode: "HTML" },
         );
       } else {
         // Обрабатываем ошибку
+        const errorMessage = createErrorMessage(
+          "Произошла ошибка при обработке запроса. Попробуйте еще раз.",
+          "Ошибка обработки",
+        );
+
         await ctx.api.editMessageText(
           messageContext.chatId,
           processingMsg.message_id,
-          "❌ Произошла ошибка при обработке запроса. Попробуйте еще раз.",
+          errorMessage,
+          { parse_mode: "HTML" },
         );
       }
     } catch (error) {
       console.error("Error in smart text processing:", error);
 
       // Обновляем сообщение с ошибкой
+      const errorMessage = createErrorMessage(
+        "Произошла ошибка при обработке запроса. Попробуйте еще раз.",
+        "Ошибка обработки",
+      );
+
       await ctx.api.editMessageText(
         messageContext.chatId,
         processingMsg.message_id,
-        "❌ Произошла ошибка при обработке запроса. Попробуйте еще раз.",
+        errorMessage,
+        { parse_mode: "HTML" },
       );
     }
   } catch (error) {
     console.error("Error in smart text handler:", error);
-    await ctx.reply("❌ Произошла ошибка. Попробуйте еще раз.");
+    const errorMessage = createErrorMessage(
+      "Произошла ошибка. Попробуйте еще раз.",
+      "Системная ошибка",
+    );
+    await ctx.reply(errorMessage, { parse_mode: "HTML" });
   }
 }
 
@@ -121,12 +141,12 @@ async function processMessageInBackground(
       const additionalInfo = `💡 Дополнительная информация от ${result.agentMetadata.agentsUsed.join(", ")}:`;
       const formattedResponse = formatForTelegram(result.response, {
         useEmojis: true,
-        useMarkdown: true,
+        useHTML: true,
         addSeparators: false,
       });
 
       await ctx.reply(`${additionalInfo}\n\n${formattedResponse.text}`, {
-        parse_mode: formattedResponse.parse_mode || "MarkdownV2",
+        parse_mode: "HTML",
       });
     }
   } catch (error) {
