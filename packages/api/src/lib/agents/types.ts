@@ -62,6 +62,7 @@ export interface ClassificationResult {
   needsLogging: boolean;
   complexity: "simple" | "medium" | "complex";
   suggestedAgents: string[];
+  reasoning?: string;
 }
 
 export interface QualityMetrics {

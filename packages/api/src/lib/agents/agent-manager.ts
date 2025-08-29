@@ -6,6 +6,21 @@ import type {
   BaseAgent,
   OrchestrationResult,
 } from "./types";
+
+// Интерфейс для параллельной обработки
+interface ParallelTask {
+  id: string;
+  agent: BaseAgent;
+  task: AgentTask;
+  priority: number;
+}
+
+// Интерфейс для кэша результатов
+interface CachedResult {
+  result: OrchestrationResult;
+  timestamp: number;
+  inputHash: string;
+}
 import { globalAgentRegistry } from "./agent-registry";
 import { DataAnalystAgent } from "./data-analyst-agent";
 import { EventProcessorAgent } from "./event-processor-agent";
@@ -19,17 +34,39 @@ import { TaskOrchestratorAgent } from "./task-orchestrator-agent";
 import { TelegramFormatterAgent } from "./telegram-formatter-agent";
 
 /**
- * Менеджер агентов - центральная точка управления мультиагентной системой
- * Реализует паттерны orchestration и routing из AI SDK
+ * Улучшенный менеджер агентов с оптимизацией производительности
+ * Реализует паттерны orchestration, routing, параллельную обработку и интеллектуальное кэширование
  */
 export class AgentManager {
   private router: RouterAgent;
   private qualityEvaluator: QualityEvaluatorAgent;
+  
+  // Система кэширования для повышения производительности
+  private resultCache = new Map<string, CachedResult>();
+  private cacheTimeout = 15 * 60 * 1000; // 15 минут
+  private maxCacheSize = 1000;
+  
+  // Очередь задач для параллельной обработки
+  private taskQueue: ParallelTask[] = [];
+  private processingTasks = new Set<string>();
+  private maxConcurrentTasks = 3;
+  
+  // Метрики производительности
+  private performanceMetrics = {
+    totalRequests: 0,
+    cacheHits: 0,
+    averageResponseTime: 0,
+    errorRate: 0,
+    parallelTasksProcessed: 0
+  };
 
   constructor() {
     this.initializeAgents();
     this.router = new RouterAgent();
     this.qualityEvaluator = new QualityEvaluatorAgent();
+    
+    // Запускаем фоновые процессы
+    this.startBackgroundTasks();
   }
 
   /**
@@ -69,6 +106,130 @@ export class AgentManager {
    */
   getAgent(agentKey: string): BaseAgent | undefined {
     return globalAgentRegistry.get(agentKey);
+  }
+
+  /**
+   * Создание хэша для входных данных
+   */
+  private createInputHash(input: string, context: AgentContext): string {
+    const contextStr = JSON.stringify({
+      channel: context.channel,
+      userId: context.userId,
+      // Исключаем изменяющиеся поля
+    });
+    return `${input.slice(0, 100)}-${contextStr}`.replace(/[^a-zA-Z0-9]/g, '').slice(0, 64);
+  }
+
+  /**
+   * Получение кэшированного результата
+   */
+  private getCachedResult(input: string, context: AgentContext): OrchestrationResult | null {
+    const hash = this.createInputHash(input, context);
+    const cached = this.resultCache.get(hash);
+    
+    if (cached && Date.now() - cached.timestamp < this.cacheTimeout) {
+      this.performanceMetrics.cacheHits++;
+      console.log('🚀 Использован кэшированный результат');
+      return cached.result;
+    }
+    
+    if (cached) {
+      this.resultCache.delete(hash);
+    }
+    
+    return null;
+  }
+
+  /**
+   * Сохранение результата в кэш
+   */
+  private setCachedResult(input: string, context: AgentContext, result: OrchestrationResult): void {
+    // Управление размером кэша
+    if (this.resultCache.size >= this.maxCacheSize) {
+      const oldestKey = this.resultCache.keys().next().value;
+      if (oldestKey) {
+        this.resultCache.delete(oldestKey);
+      }
+    }
+    
+    const hash = this.createInputHash(input, context);
+    this.resultCache.set(hash, {
+      result,
+      timestamp: Date.now(),
+      inputHash: hash
+    });
+  }
+
+  /**
+   * Запуск фоновых задач для оптимизации
+   */
+  private startBackgroundTasks(): void {
+    // Очистка кэша каждые 5 минут
+    setInterval(() => {
+      this.cleanupCache();
+    }, 5 * 60 * 1000);
+    
+    // Обработка очереди задач
+    setInterval(() => {
+      void this.processTaskQueue();
+    }, 100);
+  }
+
+  /**
+   * Очистка устаревшего кэша
+   */
+  private cleanupCache(): void {
+    const now = Date.now();
+    let cleaned = 0;
+    
+    for (const [key, cached] of this.resultCache.entries()) {
+      if (now - cached.timestamp > this.cacheTimeout) {
+        this.resultCache.delete(key);
+        cleaned++;
+      }
+    }
+    
+    if (cleaned > 0) {
+      console.log(`🧹 Очищено ${cleaned} устаревших записей кэша`);
+    }
+  }
+
+  /**
+   * Обработка очереди параллельных задач
+   */
+  private async processTaskQueue(): Promise<void> {
+    if (this.taskQueue.length === 0 || this.processingTasks.size >= this.maxConcurrentTasks) {
+      return;
+    }
+    
+    // Сортируем по приоритету
+    this.taskQueue.sort((a, b) => b.priority - a.priority);
+    
+    const task = this.taskQueue.shift();
+    if (!task) return;
+    
+    this.processingTasks.add(task.id);
+    
+    try {
+      await task.agent.process(task.task);
+      this.performanceMetrics.parallelTasksProcessed++;
+    } catch (error) {
+      console.error(`Ошибка в параллельной задаче ${task.id}:`, error);
+    } finally {
+      this.processingTasks.delete(task.id);
+    }
+  }
+
+  /**
+   * Добавление задачи в очередь для параллельной обработки
+   */
+  private addToTaskQueue(agent: BaseAgent, task: AgentTask, priority = 1): void {
+    this.taskQueue.push({
+      id: `parallel-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      agent,
+      task,
+      priority
+    });
   }
 
   /**
@@ -113,7 +274,7 @@ export class AgentManager {
   }
 
   /**
-   * Обработка сообщения с использованием мультиагентной системы
+   * Улучшенная обработка сообщения с оптимизацией производительности
    */
   async processMessage(
     input: string,
@@ -122,19 +283,34 @@ export class AgentManager {
       useQualityControl?: boolean;
       maxQualityIterations?: number;
       targetQuality?: number;
+      useCache?: boolean;
+      enableParallelProcessing?: boolean;
     } = {},
     telemetry?: AgentTelemetry,
   ): Promise<OrchestrationResult> {
     const startTime = Date.now();
     const agentsUsed: string[] = [];
     let totalSteps = 0;
+    
+    // Обновляем метрики
+    this.performanceMetrics.totalRequests++;
 
     try {
-      // 1. Создаем задачу для роутера
+      // 1. Проверяем кэш (если включен)
+      if (options.useCache !== false) {
+        const cachedResult = this.getCachedResult(input, context);
+        if (cachedResult) {
+          // Обновляем время ответа в кэшированном результате
+          cachedResult.metadata.processingTime = Date.now() - startTime;
+          cachedResult.metadata.fromCache = true;
+          return cachedResult;
+        }
+      }
+      // 2. Создаем задачу для роутера
       const routingTask = this.createAgentTask(input, "routing", context);
 
-      // 2. Классифицируем и маршрутизируем сообщение
-      console.log("🤖 Starting message routing...");
+      // 3. Классифицируем и маршрутизируем сообщение
+      console.log("🤖 Запуск интеллектуальной маршрутизации...");
       const routingResult = await this.router.process(routingTask, telemetry);
       agentsUsed.push(this.router.name);
       totalSteps++;
@@ -149,13 +325,30 @@ export class AgentManager {
       );
       console.log(`🎯 Routed to: ${routing.targetAgent}`);
 
-      // 3. Получаем целевого агента
+      // 4. Получаем целевого агента
       const targetAgent = this.getAgent(routing.targetAgent);
       if (!targetAgent) {
         throw new Error(`Target agent not found: ${routing.targetAgent}`);
       }
+      
+      // Проверяем возможность параллельной обработки
+      const canUseParallel = options.enableParallelProcessing && 
+                            classification.complexity === 'complex' &&
+                            routing.shouldParallel;
+      
+      if (canUseParallel && routing.followUpAgents?.length) {
+        console.log('⚡ Включена параллельная обработка для сложной задачи');
+        // Добавляем дополнительные агенты в очередь
+        routing.followUpAgents.forEach(agentKey => {
+          const agent = this.getAgent(agentKey);
+          if (agent) {
+            const parallelTask = this.createAgentTask(input, classification.messageType, context, 2);
+            this.addToTaskQueue(agent, parallelTask, 2);
+          }
+        });
+      }
 
-      // 4. Проверяем, может ли агент обработать задачу
+      // 5. Проверяем, может ли агент обработать задачу
       const processingTask = this.createAgentTask(
         input,
         classification.messageType,
@@ -194,31 +387,51 @@ export class AgentManager {
         }
       }
 
-      // 5. Обрабатываем задачу основным агентом
-      console.log(`⚙️ Processing with ${targetAgent.name}...`);
-      const processingResult = await targetAgent.process(
-        processingTask,
-        telemetry,
-      );
+      // 6. Обрабатываем задачу основным агентом с улучшенной обработкой ошибок
+      console.log(`⚙️ Обработка с помощью ${targetAgent.name}...`);
+      let processingResult: any;
+      
+      try {
+        processingResult = await Promise.race([
+          targetAgent.process(processingTask, telemetry),
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Timeout')), 30000) // 30 секунд таймаут
+          )
+        ]) as any;
+      } catch (error) {
+        if (error instanceof Error && error.message === 'Timeout') {
+          console.warn(`⏰ Таймаут для агента ${targetAgent.name}, используем fallback`);
+          const fallbackAgent = this.getAgent('general-assistant');
+          if (fallbackAgent) {
+            processingResult = await fallbackAgent.process(processingTask, telemetry);
+            agentsUsed.push(fallbackAgent.name + ' (fallback)');
+          } else {
+            throw new Error('Fallback agent not available');
+          }
+        } else {
+          throw error;
+        }
+      }
+      
       agentsUsed.push(targetAgent.name);
       totalSteps++;
 
-      if (!processingResult.success) {
-        throw new Error(`Agent processing failed: ${processingResult.error}`);
+      if (!processingResult?.success) {
+        throw new Error(`Agent processing failed: ${processingResult?.error ?? 'Unknown error'}`);
       }
 
       let finalResponse = "";
-      let qualityScore = processingResult.confidence ?? 0.7;
+      let qualityScore = processingResult?.confidence ?? 0.7;
 
       // Извлекаем ответ в зависимости от типа агента
-      const extracted = this.extractStringResponse(processingResult.data);
+      const extracted = this.extractStringResponse(processingResult?.data);
       if (extracted !== null) {
         finalResponse = extracted;
       } else {
         // Формируем ответ на основе данных
         finalResponse = this.formatAgentResponse(
           classification.messageType,
-          processingResult.data,
+          processingResult?.data,
         );
       }
 
@@ -250,7 +463,9 @@ export class AgentManager {
         );
       }
 
-      // 7. Формируем окончательный результат
+      // 7. Формируем окончательный результат с расширенными метриками
+      const processingTime = Date.now() - startTime;
+      
       const result: OrchestrationResult = {
         finalResponse,
         agentsUsed,
@@ -259,15 +474,23 @@ export class AgentManager {
         metadata: {
           classification,
           routing,
-          processingTime: Date.now() - startTime,
-          agentData: this.isRecord(processingResult.data)
+          processingTime,
+          agentData: this.isRecord(processingResult?.data)
             ? processingResult.data
             : undefined,
           qualityControlUsed: options.useQualityControl ?? false,
-          // Автоматически добавляем флаг для логирования событий
           shouldLogEvent: classification.needsLogging,
+          // Дополнительные метрики производительности
+          cacheUsed: false,
+          parallelProcessingUsed: canUseParallel,
+          responseTimeCategory: processingTime < 1000 ? 'fast' : 
+                               processingTime < 3000 ? 'medium' : 'slow',
+          agentEfficiency: qualityScore / (processingTime / 1000), // качество/секунда
         },
       };
+      
+      // Обновляем метрики производительности
+      this.updatePerformanceMetrics(processingTime, true);
 
       // 8. Форматируем ответ для Telegram, если это Telegram канал
       if (context.channel === "telegram" && finalResponse) {
@@ -303,27 +526,70 @@ export class AgentManager {
       }
 
       console.log(
-        `✅ Processing completed in ${Date.now() - startTime}ms with ${totalSteps} steps`,
+        `✅ Обработка завершена за ${processingTime}ms с ${totalSteps} шагами`,
       );
-      console.log(`📊 Agents used: ${agentsUsed.join(" → ")}`);
-      console.log(`⭐ Quality score: ${qualityScore.toFixed(2)}`);
+      console.log(`📊 Использованные агенты: ${agentsUsed.join(" → ")}`);
+      console.log(`⭐ Оценка качества: ${qualityScore.toFixed(2)}`);
+      console.log(`🚀 Эффективность: ${(result.metadata.agentEfficiency as number)?.toFixed(2) ?? 'N/A'} качество/сек`);
+      
+      // Сохраняем в кэш (если включен)
+      if (options.useCache !== false && qualityScore > 0.7) {
+        this.setCachedResult(input, context, result);
+      }
 
       return result;
     } catch (error) {
-      console.error("❌ Error in agent orchestration:", error);
+      console.error("❌ Ошибка в оркестрации агентов:", error);
+      
+      const processingTime = Date.now() - startTime;
+      this.updatePerformanceMetrics(processingTime, false);
 
-      // Fallback к простому ответу
+      // Интеллектуальный fallback с анализом ошибки
+      let fallbackResponse = "Извините, произошла ошибка при обработке вашего запроса.";
+      
+      if (error instanceof Error) {
+        if (error.message.includes('Timeout')) {
+          fallbackResponse = "Обработка запроса заняла слишком много времени. Попробуйте упростить вопрос.";
+        } else if (error.message.includes('not found')) {
+          fallbackResponse = "Не удалось найти подходящий агент. Попробуйте переформулировать запрос.";
+        } else if (error.message.includes('rate limit')) {
+          fallbackResponse = "Система временно перегружена. Попробуйте через несколько секунд.";
+        }
+      }
+
       return {
-        finalResponse:
-          "Извините, произошла ошибка при обработке вашего запроса. Попробуйте переформулировать вопрос.",
+        finalResponse: fallbackResponse,
         agentsUsed: agentsUsed.length > 0 ? agentsUsed : ["error-handler"],
         totalSteps: totalSteps + 1,
         qualityScore: 0.3,
         metadata: {
           error: error instanceof Error ? error.message : "Unknown error",
-          processingTime: Date.now() - startTime,
+          processingTime,
+          errorType: error instanceof Error ? error.constructor.name : 'UnknownError',
+          fallbackUsed: true,
         },
       };
+    }
+  }
+  
+  /**
+   * Обновление метрик производительности
+   */
+  private updatePerformanceMetrics(processingTime: number, success: boolean): void {
+    // Обновляем среднее время ответа
+    this.performanceMetrics.averageResponseTime = 
+      (this.performanceMetrics.averageResponseTime * (this.performanceMetrics.totalRequests - 1) + processingTime) / 
+      this.performanceMetrics.totalRequests;
+    
+    // Обновляем частоту ошибок
+    if (!success) {
+      this.performanceMetrics.errorRate = 
+        (this.performanceMetrics.errorRate * (this.performanceMetrics.totalRequests - 1) + 1) / 
+        this.performanceMetrics.totalRequests;
+    } else {
+      this.performanceMetrics.errorRate = 
+        (this.performanceMetrics.errorRate * (this.performanceMetrics.totalRequests - 1)) / 
+        this.performanceMetrics.totalRequests;
     }
   }
 
@@ -394,13 +660,86 @@ export class AgentManager {
   }
 
   /**
-   * Получение статистики работы агентов
+   * Получение расширенной статистики работы агентов
    */
-  getAgentStats(): { totalAgents: number; agentList: string[] } {
+  getAgentStats(): { 
+    totalAgents: number; 
+    agentList: string[];
+    performance: {
+      totalRequests: number;
+      cacheHits: number;
+      averageResponseTime: number;
+      errorRate: number;
+      parallelTasksProcessed: number;
+    };
+    cacheStats: {
+      size: number;
+      hitRate: number;
+      memoryUsage: string;
+    };
+    queueStats: {
+      pendingTasks: number;
+      processingTasks: number;
+      maxConcurrency: number;
+    };
+  } {
     const agents = globalAgentRegistry.getAll();
+    
     return {
       totalAgents: agents.size,
       agentList: Array.from(agents.keys()),
+      performance: { ...this.performanceMetrics },
+      cacheStats: {
+        size: this.resultCache.size,
+        hitRate: this.performanceMetrics.totalRequests > 0 ? 
+          this.performanceMetrics.cacheHits / this.performanceMetrics.totalRequests : 0,
+        memoryUsage: `${Math.round(this.resultCache.size * 0.001)} KB` // Приблизительная оценка
+      },
+      queueStats: {
+        pendingTasks: this.taskQueue.length,
+        processingTasks: this.processingTasks.size,
+        maxConcurrency: this.maxConcurrentTasks
+      }
     };
+  }
+  
+  /**
+   * Очистка всех кэшей и сброс метрик
+   */
+  resetPerformanceData(): void {
+    this.resultCache.clear();
+    this.taskQueue.length = 0;
+    this.processingTasks.clear();
+    
+    this.performanceMetrics = {
+      totalRequests: 0,
+      cacheHits: 0,
+      averageResponseTime: 0,
+      errorRate: 0,
+      parallelTasksProcessed: 0
+    };
+    
+    console.log('🔄 Данные производительности сброшены');
+  }
+  
+  /**
+   * Настройка параметров производительности
+   */
+  configurePerformance(config: {
+    maxCacheSize?: number;
+    cacheTimeout?: number;
+    maxConcurrentTasks?: number;
+  }): void {
+    if (config.maxCacheSize !== undefined) {
+      this.maxCacheSize = config.maxCacheSize;
+    }
+    if (config.cacheTimeout !== undefined) {
+      this.cacheTimeout = config.cacheTimeout;
+    }
+    if (config.maxConcurrentTasks !== undefined) {
+      this.maxConcurrentTasks = config.maxConcurrentTasks;
+    }
+    
+    console.log('⚙️ Параметры производительности обновлены:', config);
   }
 }

@@ -1,4 +1,3 @@
-import { AgentManager } from "./agent-manager";
 
 // Экспорт всех типов
 export type * from "./types";
@@ -22,10 +21,53 @@ export { FinancialAdvisorAgent } from "./financial-advisor-agent";
 export { ChatAssistantAgent } from "./chat-assistant-agent";
 export { TelegramFormatterAgent } from "./telegram-formatter-agent";
 
-// Экспорт менеджера агентов
+// Экспорт менеджера агентов с улучшениями
 export { AgentManager } from "./agent-manager";
 
-// Удобная функция для создания и использования агентной системы
-export function createAgentSystem() {
-  return new AgentManager();
+// Экспорт улучшенных функций создания агентной системы
+export { 
+  createAgentSystem, 
+  createHighPerformanceAgentSystem 
+} from "./agent-manager";
+
+// Простая функция создания агентной системы для обратной совместимости
+export function createSimpleAgentSystem() {
+  const { createAgentSystem } = require("./agent-manager");
+  return createAgentSystem();
 }
+
+// Дополнительные утилиты для работы с агентами
+export const AgentUtils = {
+  /**
+   * Создание оптимизированной конфигурации для высокой нагрузки
+   */
+  createHighLoadConfig: () => ({
+    enableCache: true,
+    enableParallelProcessing: true,
+    maxCacheSize: 5000,
+    cacheTimeout: 30 * 60 * 1000, // 30 минут
+    maxConcurrentTasks: 10,
+  }),
+  
+  /**
+   * Создание конфигурации для экономии ресурсов
+   */
+  createLowResourceConfig: () => ({
+    enableCache: false,
+    enableParallelProcessing: false,
+    maxCacheSize: 100,
+    cacheTimeout: 5 * 60 * 1000, // 5 минут
+    maxConcurrentTasks: 1,
+  }),
+  
+  /**
+   * Создание сбалансированной конфигурации (по умолчанию)
+   */
+  createBalancedConfig: () => ({
+    enableCache: true,
+    enableParallelProcessing: true,
+    maxCacheSize: 1000,
+    cacheTimeout: 15 * 60 * 1000, // 15 минут
+    maxConcurrentTasks: 3,
+  }),
+};
