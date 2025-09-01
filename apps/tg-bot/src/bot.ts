@@ -30,8 +30,8 @@ export function createBot(): Bot<Context> {
 
   // Middleware: allowlist check (if configured)
   bot.use(async (ctx, next) => {
-    const chatId = ctx.chat?.id ? String(ctx.chat.id) : null;
     if (allowedChats.size > 0) {
+      const chatId = ctx.chat?.id ? String(ctx.chat.id) : null;
       if (!chatId || !allowedChats.has(chatId)) {
         // Политика: отвечаем один раз на любое сообщение из неразрешённого чата
         try {

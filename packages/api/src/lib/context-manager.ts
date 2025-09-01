@@ -3,7 +3,16 @@ import { and, desc, eq } from "drizzle-orm";
 import { conversations, messages } from "@synoro/db/schema";
 
 import type { TRPCContext } from "../trpc";
-import type { ContextMessage } from "./message-processor";
+
+/**
+ * Тип сообщения для контекста
+ */
+export interface ContextMessage {
+  id: string;
+  role: "user" | "assistant" | "system" | "tool";
+  content: { text: string };
+  createdAt: Date;
+}
 
 /**
  * Настройки для получения контекста
@@ -33,7 +42,6 @@ export interface ConversationContext {
  * @param ctx - Контекст TRPC
  * @param userId - ID пользователя
  * @param channel - Канал связи (telegram, web, mobile)
- * @param chatId - ID чата (для Telegram)
  * @param options - Настройки контекста
  * @returns Контекст беседы
  */
@@ -41,7 +49,6 @@ export async function getConversationContext(
   ctx: TRPCContext,
   userId: string | null, // userId может быть null для анонимных пользователей
   channel: "telegram" | "web" | "mobile",
-  chatId?: string,
   options: ContextOptions = {},
 ): Promise<ConversationContext> {
   const {
@@ -68,12 +75,12 @@ export async function getConversationContext(
       (await ctx.db.query.conversations.findFirst({
         where: conditions.length === 1 ? conditions[0] : and(...conditions),
       })) ?? null;
-  } else if (channel === "telegram" && chatId) {
+  } else if (channel === "telegram") {
     // Для анонимных пользователей Telegram
     conversation =
       (await ctx.db.query.conversations.findFirst({
         where: and(
-          eq(conversations.telegramChatId, chatId),
+          eq(conversations.telegramChatId, userId || "anonymous"),
           eq(conversations.channel, "telegram"),
         ),
       })) ?? null;
@@ -90,8 +97,8 @@ export async function getConversationContext(
 
     if (userId) {
       conversationData.ownerUserId = userId;
-    } else if (channel === "telegram" && chatId) {
-      conversationData.telegramChatId = chatId;
+    } else if (channel === "telegram") {
+      conversationData.telegramChatId = userId || "anonymous";
     }
     const [newConversation] = await ctx.db
       .insert(conversations)
@@ -113,7 +120,7 @@ export async function getConversationContext(
   });
 
   // Фильтруем сообщения по роли если нужно
-  const filteredMessages = allMessages.filter((msg) => {
+  const filteredMessages = allMessages.filter((msg: any) => {
     if (!includeSystemMessages && msg.role === "system") {
       return false;
     }
@@ -125,7 +132,7 @@ export async function getConversationContext(
   const contextMessages = filteredMessages
     .slice(0, maxMessages)
     .reverse() // Возвращаем в хронологическом порядке
-    .map((msg) => ({
+    .map((msg: any) => ({
       id: msg.id,
       role: msg.role,
       content: {

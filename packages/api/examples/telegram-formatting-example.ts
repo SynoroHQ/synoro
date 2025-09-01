@@ -67,7 +67,6 @@ async function telegramFormattingExample() {
   const telegramContext = {
     userId: "user-123",
     channel: "telegram",
-    chatId: "chat-456",
     metadata: {
       platform: "telegram",
       timestamp: new Date().toISOString(),

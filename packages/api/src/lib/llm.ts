@@ -9,7 +9,7 @@ import { eventBus } from "./event-bus";
 
 // Very simple mock streaming generator.
 // Replace later with real OpenAI integration while keeping the same interface.
-// Supports both registered users (userId) and anonymous Telegram users (telegramChatId)
+// Supports both registered users (userId) and anonymous Telegram users (telegramUserId)
 export async function startCompletionRun(opts: {
   runId: string;
   conversationId: string;
@@ -17,7 +17,7 @@ export async function startCompletionRun(opts: {
   prompt: string;
   model?: string;
   userId?: string | null;
-  telegramChatId?: string; // Для анонимных пользователей Telegram
+  telegramUserId?: string; // Для анонимных пользователей Telegram
 }) {
   const { runId, conversationId, prompt } = opts;
 
@@ -63,7 +63,7 @@ export async function startCompletionRun(opts: {
           runId,
           conversationId,
           userId: opts.userId ?? "unknown",
-          telegramChatId: opts.telegramChatId ?? "unknown",
+          telegramUserId: opts.telegramUserId ?? "unknown",
         },
       },
     });

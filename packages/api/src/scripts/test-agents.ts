@@ -56,7 +56,6 @@ async function testAgentSystem() {
   // Контекст для тестирования
   const testContext = {
     userId: "test-user",
-    chatId: "test-chat",
     channel: "telegram" as const,
     metadata: {
       testMode: true,

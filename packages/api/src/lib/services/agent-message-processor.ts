@@ -21,7 +21,6 @@ export interface ProcessAgentMessageParams {
   channel: "telegram" | "web" | "mobile";
   userId: string | null;
   ctx: TRPCContext;
-  chatId?: string;
   messageId?: string;
   metadata?: Record<string, unknown>;
   options?: {
@@ -78,7 +77,6 @@ export async function processMessageWithAgents(
     channel,
     userId,
     ctx,
-    chatId,
     messageId,
     metadata,
     options = {},
@@ -107,7 +105,6 @@ export async function processMessageWithAgents(
       ctx,
       userId,
       channel,
-      chatId,
       {
         maxMessages: MESSAGE_PROCESSING_CONFIG.CONTEXT.MAX_MESSAGES,
         includeSystemMessages:
@@ -140,7 +137,6 @@ export async function processMessageWithAgents(
       channel,
       userId,
       conversationId: conversationContext.conversationId,
-      chatId,
       messageId,
       metadata: {
         ...metadata,
@@ -152,7 +148,6 @@ export async function processMessageWithAgents(
     // Создаем контекст для агентов
     const agentContext: AgentContext = {
       userId: userId ?? undefined,
-      chatId,
       messageId,
       channel,
       metadata: {
@@ -229,7 +224,6 @@ export async function processMessageWithAgents(
       text: safeTruncateForLogging(text),
       channel,
       userId,
-      chatId,
       messageId,
     });
 

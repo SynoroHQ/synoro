@@ -12,7 +12,6 @@ export const fastResponseRouter = createTRPCRouter({
       z.object({
         text: z.string(),
         userId: z.string(),
-        chatId: z.string(),
         messageId: z.string().optional(),
       }),
     )
@@ -25,13 +24,11 @@ export const fastResponseRouter = createTRPCRouter({
           input: input.text,
           context: {
             userId: input.userId,
-            chatId: input.chatId,
             messageId: input.messageId,
             channel: "telegram",
             metadata: {
               channel: "telegram",
               userId: input.userId,
-              chatId: input.chatId,
               messageId: input.messageId,
               timestamp: new Date().toISOString(),
             },

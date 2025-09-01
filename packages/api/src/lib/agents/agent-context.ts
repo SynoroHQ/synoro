@@ -4,7 +4,6 @@
 
 export interface AgentContext {
   userId?: string;
-  chatId?: string;
   messageId?: string;
   channel?: string;
   timezone?: string;
@@ -13,7 +12,6 @@ export interface AgentContext {
     channel?: string;
     userId?: string;
     conversationId?: string;
-    chatId?: string;
     messageId?: string;
     contextMessageCount?: number;
     agentMode?: boolean;

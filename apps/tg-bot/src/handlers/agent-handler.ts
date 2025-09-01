@@ -26,7 +26,7 @@ export async function handleAgentsCommand(ctx: Context): Promise<void> {
       await apiClient.messages.processMessageAgents.getAgentStatsForBot.query();
 
     // Получаем статистику быстрых ответов
-    const fastResponseStats = telegramFastResponseService.getStats();
+    const fastResponseStats = await telegramFastResponseService.getStats();
 
     const response = `🤖 *Агентная система Synoro AI активна*
 
@@ -224,7 +224,7 @@ export async function handleFastTestCommand(ctx: Context): Promise<void> {
     }
 
     // Добавляем статистику
-    const stats = telegramFastResponseService.getStats();
+    const stats = await telegramFastResponseService.getStats();
     response += "📊 *Статистика агента:*\n";
     response += `• Кэш ответов: ${stats.agentStats.cacheSize}\n`;
     response += `• ИИ-шаблоны: ${stats.agentStats.templatesCount}\n`;

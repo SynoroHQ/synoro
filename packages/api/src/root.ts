@@ -4,6 +4,7 @@ import { messagesRouter } from "./router/messages";
 import { remindersRouter } from "./router/reminders";
 import { fastResponseRouter } from "./router/telegram/fast-response";
 import { telegramUsersRouter } from "./router/telegram/telegram-users";
+import { analyticsRouter } from "./router/analytics";
 import { createTRPCRouter } from "./trpc";
 
 export const appRouter = createTRPCRouter({
@@ -13,6 +14,7 @@ export const appRouter = createTRPCRouter({
   reminders: remindersRouter,
   telegramUsers: telegramUsersRouter,
   fastResponse: fastResponseRouter,
+  analytics: analyticsRouter,
 });
 
 export type AppRouter = typeof appRouter;

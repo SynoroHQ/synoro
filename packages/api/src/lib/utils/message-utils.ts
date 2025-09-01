@@ -19,18 +19,16 @@ export function createCommonMetadata(params: {
   channel: string;
   userId: string | null; // null для анонимных пользователей
   conversationId: string;
-  chatId?: string;
   messageId?: string;
   metadata?: Record<string, unknown>;
 }) {
-  const { channel, userId, conversationId, chatId, messageId, metadata } =
+  const { channel, userId, conversationId, messageId, metadata } =
     params;
 
   return {
     channel,
     userId: userId ?? "anonymous", // Используем "anonymous" для null userId
     conversationId,
-    ...(chatId && { chatId }),
     ...(messageId && { messageId }),
     ...metadata,
   };

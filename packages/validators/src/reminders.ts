@@ -100,7 +100,6 @@ export const reminderSchema = z.object({
   aiGenerated: z.boolean().optional(),
   aiContext: aiContextSchema.optional(),
   smartSuggestions: smartSuggestionsSchema.optional(),
-  chatId: z.string().optional(),
   parentReminderId: cuid2Schema.optional(),
   tags: tagsSchema.optional(),
   metadata: metadataSchema.optional(),
@@ -185,7 +184,6 @@ export const reminderSearchSchema = z.object({
 // Схемы для создания из текста
 export const createFromTextSchema = z.object({
   text: z.string().min(1),
-  chatId: z.string().optional(),
   timezone: z.string().default("Europe/Moscow"),
   context: z.record(z.string(), z.any()).optional(),
 });

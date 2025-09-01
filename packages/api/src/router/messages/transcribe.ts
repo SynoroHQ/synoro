@@ -19,7 +19,6 @@ export const transcribeRouter = {
           metadata: {
             channel: input.channel,
             userId: ctx.session.user.id,
-            ...(input.chatId && { chatId: input.chatId }),
             ...(input.messageId && { messageId: input.messageId }),
             filename: input.filename,
             ...input.metadata,

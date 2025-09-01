@@ -40,7 +40,7 @@ export class ReminderRecurrenceService extends BaseReminderService {
       aiGenerated: originalReminder.aiGenerated,
       aiContext: originalReminder.aiContext || undefined,
       smartSuggestions: originalReminder.smartSuggestions || undefined,
-      chatId: originalReminder.chatId || undefined,
+
       parentReminderId: originalReminder.id,
       tags: originalReminder.tags || undefined,
       metadata: originalReminder.metadata || undefined,
