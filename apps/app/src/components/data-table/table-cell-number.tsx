@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn } from "@synoro/ui";
 
 export function TableCellNumber({
   value,
@@ -7,7 +7,7 @@ export function TableCellNumber({
   ...props
 }: React.ComponentProps<"div"> & { value: unknown; unit?: string }) {
   const _value = Number(value);
-  if (isNaN(_value)) {
+  if (Number.isNaN(_value)) {
     return <div className="font-mono text-muted-foreground">N/A</div>;
   }
 

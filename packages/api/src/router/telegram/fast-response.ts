@@ -63,7 +63,7 @@ export const fastResponseRouter = createTRPCRouter({
             confidence: result.confidence,
             processingType: "fast" as const,
           };
-        } else {
+        }
           // Если агент не смог дать быстрый ответ, отправляем на полную обработку
           return {
             shouldSendFast: false,
@@ -72,7 +72,6 @@ export const fastResponseRouter = createTRPCRouter({
             confidence: result.confidence,
             processingType: "full" as const,
           };
-        }
       } catch (error) {
         console.error("Ошибка в FastResponseRouter:", error);
 

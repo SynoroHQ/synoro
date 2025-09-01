@@ -1,4 +1,4 @@
-import { Context } from "grammy";
+import type { Context } from "grammy";
 
 import { apiClient } from "../api/client";
 import { telegramFastResponseService } from "../services/fast-response-service";

@@ -1,4 +1,4 @@
-import { Context } from "telegraf";
+import type { Context } from "telegraf";
 import { SmartReminderAgent } from "@synoro/api/lib/agents/smart-reminder-agent";
 import { ReminderService } from "@synoro/api/lib/services/reminder-service";
 import type { ReminderFilters } from "@synoro/db";
@@ -34,21 +34,21 @@ export class ReminderHandler {
         minute: "2-digit",
       });
 
-      let message = `✅ Создано напоминание:\n\n`;
+      let message = "✅ Создано напоминание:\n\n";
       message += `📝 **${reminder.title}**\n`;
       if (reminder.description) {
         message += `📄 ${reminder.description}\n`;
       }
       message += `⏰ ${timeStr}\n`;
-      message += `🏷️ Тип: ${this.getTypeEmoji(reminder.type)} ${this.getTypeName(reminder.type)}\n`;
-      message += `⚡ Приоритет: ${this.getPriorityEmoji(reminder.priority)} ${this.getPriorityName(reminder.priority)}\n`;
+      message += `🏷️ Тип: ${ReminderHandler.getTypeEmoji(reminder.type)} ${ReminderHandler.getTypeName(reminder.type)}\n`;
+      message += `⚡ Приоритет: ${ReminderHandler.getPriorityEmoji(reminder.priority)} ${ReminderHandler.getPriorityName(reminder.priority)}\n`;
 
       if (result.confidence < 0.8) {
         message += `\n⚠️ Уверенность: ${Math.round(result.confidence * 100)}%`;
       }
 
       if (result.suggestions.length > 0) {
-        message += `\n\n💡 **Предложения:**\n`;
+        message += "\n\n💡 **Предложения:**\n";
         result.suggestions.slice(0, 3).forEach((suggestion, index) => {
           message += `${index + 1}. ${suggestion.suggestion}\n`;
         });
@@ -131,8 +131,8 @@ export class ReminderHandler {
           minute: "2-digit",
         });
 
-        const statusEmoji = this.getStatusEmoji(reminder.status);
-        const priorityEmoji = this.getPriorityEmoji(reminder.priority);
+        const statusEmoji = ReminderHandler.getStatusEmoji(reminder.status);
+        const priorityEmoji = ReminderHandler.getPriorityEmoji(reminder.priority);
 
         message += `${offset + index + 1}. ${statusEmoji} **${reminder.title}**\n`;
         message += `   ⏰ ${timeStr} ${priorityEmoji}\n\n`;
@@ -176,7 +176,7 @@ export class ReminderHandler {
     try {
       const stats = await reminderService.getUserReminderStats(userId);
 
-      let message = `📊 **Статистика напоминаний:**\n\n`;
+      let message = "📊 **Статистика напоминаний:**\n\n";
       message += `📝 Всего: ${stats.total}\n`;
       message += `⏳ Ожидают: ${stats.pending}\n`;
       message += `🔔 Активные: ${stats.active}\n`;
@@ -205,26 +205,26 @@ export class ReminderHandler {
    * Показать примеры использования
    */
   static async handleReminderExamples(ctx: Context) {
-    const message = `💡 **Примеры создания напоминаний:**\n\n` +
-      `🕐 **Время:**\n` +
+    const message = "💡 **Примеры создания напоминаний:**\n\n" +
+      "🕐 **Время:**\n" +
       `• "Напомни завтра в 15:00 позвонить врачу"\n` +
       `• "Встреча через 2 часа"\n` +
       `• "В понедельник в 9 утра совещание"\n\n` +
       
-      `📅 **События:**\n` +
+      "📅 **События:**\n" +
       `• "День рождения мамы 15 марта"\n` +
       `• "Отпуск с 1 по 10 июля"\n\n` +
       
-      `📋 **Задачи:**\n` +
+      "📋 **Задачи:**\n" +
       `• "Сдать отчет до пятницы"\n` +
       `• "Купить продукты вечером"\n` +
       `• "Записаться к стоматологу на следующей неделе"\n\n` +
       
-      `🔄 **Повторяющиеся:**\n` +
+      "🔄 **Повторяющиеся:**\n" +
       `• "Каждый день в 8:00 принять витамины"\n` +
       `• "Еженедельно по понедельникам планерка"\n\n` +
       
-      `Просто напишите мне, что и когда нужно напомнить!`;
+      "Просто напишите мне, что и когда нужно напомнить!";
 
     await ctx.reply(message, {
       parse_mode: "Markdown",
@@ -242,20 +242,20 @@ export class ReminderHandler {
   static async handleCallback(ctx: Context, data: string, userId: string) {
     try {
       if (data === "list_reminders") {
-        await this.handleListReminders(ctx, userId);
+        await ReminderHandler.handleListReminders(ctx, userId);
       } else if (data.startsWith("list_reminders_")) {
-        const page = parseInt(data.split("_")[2]) || 0;
-        await this.handleListReminders(ctx, userId, page);
+        const page = Number.parseInt(data.split("_")[2]) || 0;
+        await ReminderHandler.handleListReminders(ctx, userId, page);
       } else if (data === "reminder_stats") {
-        await this.handleReminderStats(ctx, userId);
+        await ReminderHandler.handleReminderStats(ctx, userId);
       } else if (data === "reminder_examples") {
-        await this.handleReminderExamples(ctx);
+        await ReminderHandler.handleReminderExamples(ctx);
       } else if (data.startsWith("delete_reminder_")) {
         const reminderId = data.split("_")[2];
-        await this.handleDeleteReminder(ctx, reminderId, userId);
+        await ReminderHandler.handleDeleteReminder(ctx, reminderId, userId);
       } else if (data.startsWith("edit_reminder_")) {
         const reminderId = data.split("_")[2];
-        await this.handleEditReminder(ctx, reminderId, userId);
+        await ReminderHandler.handleEditReminder(ctx, reminderId, userId);
       }
     } catch (error) {
       console.error("Ошибка обработки callback:", error);

@@ -1,4 +1,4 @@
-import { Context } from "grammy";
+import type { Context } from "grammy";
 
 import { fastResponseSystem } from "../utils/fast-response-system";
 import { formatForTelegram } from "../utils/telegram-formatter";

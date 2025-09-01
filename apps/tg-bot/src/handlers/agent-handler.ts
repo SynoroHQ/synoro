@@ -227,7 +227,7 @@ export async function handleFastTestCommand(ctx: Context): Promise<void> {
 
     // Добавляем статистику
     const stats = telegramFastResponseService.getStats();
-    response += `📊 *Статистика агента:*\n`;
+    response += "📊 *Статистика агента:*\n";
     response += `• Кэш ответов: ${stats.agentStats.cacheSize}\n`;
     response += `• ИИ-шаблоны: ${stats.agentStats.templatesCount}\n`;
     response += `• Общее использование: ${stats.agentStats.totalUsage}\n`;

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { cn } from "@/lib/utils";
+import { cn } from "@synoro/ui";
 import { Key, Settings, Shield, Users } from "lucide-react";
 
 import { Button } from "@synoro/ui";

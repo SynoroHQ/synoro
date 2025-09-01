@@ -73,7 +73,7 @@ export class QualityEvaluatorAgent extends AbstractAgent {
   };
 
   constructor() {
-    super("gpt-5o", 0.2); // Низкая температура для объективной оценки
+    super("gpt-5", 0.2); // Низкая температура для объективной оценки
   }
 
   async canHandle(task: AgentTask): Promise<boolean> {

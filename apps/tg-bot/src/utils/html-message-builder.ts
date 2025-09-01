@@ -71,35 +71,35 @@ export class HTMLMessageBuilder {
    * Создаёт блок с предупреждением
    */
   static createWarningBlock(content: string, useEmojis = true): string {
-    return this.createInfoBlock(content, "⚠️", useEmojis);
+    return HTMLMessageBuilder.createInfoBlock(content, "⚠️", useEmojis);
   }
 
   /**
    * Создаёт блок с ошибкой
    */
   static createErrorBlock(content: string, useEmojis = true): string {
-    return this.createInfoBlock(content, "❌", useEmojis);
+    return HTMLMessageBuilder.createInfoBlock(content, "❌", useEmojis);
   }
 
   /**
    * Создаёт блок с успехом
    */
   static createSuccessBlock(content: string, useEmojis = true): string {
-    return this.createInfoBlock(content, "✅", useEmojis);
+    return HTMLMessageBuilder.createInfoBlock(content, "✅", useEmojis);
   }
 
   /**
    * Создаёт блок с вопросом
    */
   static createQuestionBlock(content: string, useEmojis = true): string {
-    return this.createInfoBlock(content, "❓", useEmojis);
+    return HTMLMessageBuilder.createInfoBlock(content, "❓", useEmojis);
   }
 
   /**
    * Создаёт блок с ответом
    */
   static createAnswerBlock(content: string, useEmojis = true): string {
-    return this.createInfoBlock(content, "💡", useEmojis);
+    return HTMLMessageBuilder.createInfoBlock(content, "💡", useEmojis);
   }
 
   /**
@@ -207,7 +207,7 @@ export class HTMLMessageBuilder {
 
     // Заголовок
     if (title) {
-      message += this.createHeader(title, subtitle, useEmojis);
+      message += HTMLMessageBuilder.createHeader(title, subtitle, useEmojis);
       message += "\n\n";
     }
 
@@ -233,16 +233,16 @@ export class HTMLMessageBuilder {
     details: string[],
     recommendations?: string[],
   ): string {
-    let message = this.createHeader(title);
+    let message = HTMLMessageBuilder.createHeader(title);
     message += "\n\n";
 
     // Краткое резюме
-    message += this.createInfoBlock(summary, "📊");
+    message += HTMLMessageBuilder.createInfoBlock(summary, "📊");
     message += "\n\n";
 
     // Детали
     if (details.length > 0) {
-      message += this.createList({
+      message += HTMLMessageBuilder.createList({
         items: details,
         title: "📋 Детали:",
         type: "bullet",
@@ -252,7 +252,7 @@ export class HTMLMessageBuilder {
 
     // Рекомендации
     if (recommendations && recommendations.length > 0) {
-      message += this.createList({
+      message += HTMLMessageBuilder.createList({
         items: recommendations,
         title: "💡 Рекомендации:",
         type: "bullet",
@@ -272,7 +272,7 @@ export class HTMLMessageBuilder {
     details: Record<string, string>,
     trend?: "up" | "down" | "stable",
   ): string {
-    let message = this.createHeader(title);
+    let message = HTMLMessageBuilder.createHeader(title);
     message += "\n\n";
 
     // Сумма с трендом
@@ -303,7 +303,7 @@ export class HTMLMessageBuilder {
       low: "🟢",
     };
 
-    let message = this.createHeader(title);
+    let message = HTMLMessageBuilder.createHeader(title);
     message += "\n\n";
 
     // Приоритет

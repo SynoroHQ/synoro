@@ -3,7 +3,6 @@ import Link from "next/link";
 import { Calendar, CheckSquare, Plus, Search } from "lucide-react";
 
 import {
-  Badge,
   Button,
   Card,
   CardContent,

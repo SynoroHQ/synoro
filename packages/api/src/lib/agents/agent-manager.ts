@@ -533,7 +533,6 @@ export class AgentManager {
           options.targetQuality ?? 0.8,
           processingTask,
           context,
-          telemetry,
         );
 
         agentsUsed.push(this.qualityEvaluator.name);

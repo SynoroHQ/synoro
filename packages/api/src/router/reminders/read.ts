@@ -65,7 +65,7 @@ export const readRemindersRouter: TRPCRouterRecord = {
             });
           }
           return reminder;
-        } else {
+        }
           const reminder = await reminderService.getReminderById(
             input.id,
             ctx.session.user.id,
@@ -77,7 +77,6 @@ export const readRemindersRouter: TRPCRouterRecord = {
             });
           }
           return reminder;
-        }
       } catch (error) {
         if (error instanceof TRPCError) throw error;
         throw new TRPCError({

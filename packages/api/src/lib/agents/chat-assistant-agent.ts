@@ -24,7 +24,7 @@ export class ChatAssistantAgent extends AbstractAgent {
     },
   ];
   constructor() {
-    super("gpt-5o", 0.8);
+    super("gpt-5", 0.8);
   }
 
   async canHandle(task: AgentTask): Promise<boolean> {
