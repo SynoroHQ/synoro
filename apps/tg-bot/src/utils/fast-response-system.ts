@@ -5,6 +5,8 @@
  * Все решения принимаются через AI, никаких локальных алгоритмов
  */
 
+import type { ApiClient } from "../api/client";
+
 export interface FastResponse {
   shouldSendFast: boolean;
   fastResponse: string;
@@ -21,21 +23,21 @@ export interface AIAnalysisResult {
 }
 
 export class FastResponseSystem {
-  private apiClient: any;
+  private apiClient: ApiClient;
 
-  constructor(apiClient: any) {
+  constructor(apiClient: ApiClient) {
     this.apiClient = apiClient;
   }
 
   /**
    * Анализ сообщения через AI для определения быстрого ответа
    */
-  async analyzeMessage(message: string): Promise<FastResponse> {
+  async analyzeMessage(message: string, userId?: string, messageId?: string): Promise<FastResponse> {
     try {
       console.log(`🤖 AI analyzing message for fast response: "${message}"`);
 
       // Используем AI для анализа сообщения
-      const aiResult = await this.analyzeMessageWithAI(message);
+      const aiResult = await this.analyzeMessageWithAI(message, userId, messageId);
 
       if (aiResult.shouldSendFast) {
         console.log(`⚡ AI decided to send fast response: ${aiResult.reasoning}`);
@@ -74,21 +76,22 @@ export class FastResponseSystem {
   /**
    * Анализ сообщения через AI
    */
-  private async analyzeMessageWithAI(message: string): Promise<AIAnalysisResult> {
+  private async analyzeMessageWithAI(message: string, userId?: string, messageId?: string): Promise<AIAnalysisResult> {
     try {
       // Используем API для анализа через AI
       const result = await this.apiClient.messages.analyzeMessageForFastResponse.mutate({
         text: message,
-        context: "telegram_bot_fast_response"
+        userId: userId || "",
+        messageId: messageId || "",
       });
 
-      if (result.success) {
+      if (result.shouldSendFast && result.fastResponse) {
         return {
           shouldSendFast: result.shouldSendFast,
           fastResponse: result.fastResponse || "",
           needsFullProcessing: result.needsFullProcessing,
           confidence: result.confidence || 0.8,
-          reasoning: result.reasoning || "AI analysis completed"
+          reasoning: "AI analysis completed"
         };
       }
 
@@ -114,15 +117,14 @@ export class FastResponseSystem {
    */
   async getStats() {
     try {
-      const result = await this.apiClient.analytics.getFastResponseStats.mutate();
+      const result = await this.apiClient.analytics.getFastResponseStats.query({});
       
-      if (result.success) {
+      if (result.agentStats) {
         return {
-          aiAnalysisCount: result.totalAnalyses,
-          fastResponseCount: result.fastResponsesSent,
-          fullProcessingCount: result.fullProcessingCount,
-          averageConfidence: result.averageConfidence,
-          lastUpdated: result.lastUpdated
+          aiAnalysisCount: result.agentStats.totalUsage,
+          fastResponseCount: result.agentStats.templatesCount,
+          fullProcessingCount: result.agentStats.cacheSize,
+          averageConfidence: result.agentStats.averageResponseTime,
         };
       }
 

@@ -2,11 +2,11 @@ import { z } from "zod";
 
 import type { AgentTask } from "../../lib/agents/types";
 import { FastResponseAgent } from "../../lib/agents/fast-response-agent";
-import { createTRPCRouter, protectedProcedure } from "../../trpc";
+import {  protectedProcedure } from "../../trpc";
 
 const fastResponseAgent = new FastResponseAgent();
 
-export const fastResponseRouter = createTRPCRouter({
+export const fastResponseRouter = {
   analyze: protectedProcedure
     .input(
       z.object({
@@ -55,7 +55,7 @@ export const fastResponseRouter = createTRPCRouter({
         if (result.success && result.data) {
           return {
             shouldSendFast: true,
-            fastResponse: result.data as string,
+            fastResponse: result.data,
             needsFullProcessing: false,
             confidence: result.confidence,
             processingType: "fast" as const,
@@ -95,4 +95,4 @@ export const fastResponseRouter = createTRPCRouter({
     fastResponseAgent.clearCache();
     return { success: true };
   }),
-});
+  };

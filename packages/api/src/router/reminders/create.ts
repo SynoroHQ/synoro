@@ -46,7 +46,6 @@ export const createRemindersRouter: TRPCRouterRecord = {
       try {
         const result = await smartReminderAgent.createReminderFromText({
           text: input.text,
-          userId: ctx.session.user.id,
           timezone: input.timezone,
           context: input.context,
         });

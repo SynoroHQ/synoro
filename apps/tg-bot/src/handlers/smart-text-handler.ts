@@ -57,7 +57,7 @@ export async function handleSmartText(ctx: Context) {
           {
             text,
             channel: "telegram",
-            userId: messageContext.userId,
+            telegramUserId: messageContext.userId,
             messageId: messageContext.messageId,
           },
         );
@@ -133,9 +133,8 @@ async function processMessageInBackground(
         {
           text,
           channel: "telegram",
-          userId: messageContext.userId,
-          messageId: messageContext.messageId,
           telegramUserId: messageContext.userId,
+          messageId: messageContext.messageId,
         },
       );
 

@@ -2,11 +2,7 @@ import type { Context } from "grammy";
 import { Bot } from "grammy";
 
 import { env } from "./env";
-import {
-  handleAgentsCommand,
-  handleAgentTestCommand,
-  handleFastTestCommand,
-} from "./handlers/agent-handler";
+
 import { handleAudio } from "./handlers/audio-handler";
 import { handleOther } from "./handlers/other-handler";
 import { handleSmartText } from "./handlers/smart-text-handler";
@@ -93,11 +89,6 @@ export function createBot(): Bot<Context> {
         "Просто начинай разговор!",
     );
   });
-
-  // Команды для агентной системы
-  bot.command("agents", handleAgentsCommand);
-  bot.command("agent_test", handleAgentTestCommand);
-  bot.command("fast_test", handleFastTestCommand);
 
   // Обработчики сообщений
   // Используем умный обработчик, если включена агентная система

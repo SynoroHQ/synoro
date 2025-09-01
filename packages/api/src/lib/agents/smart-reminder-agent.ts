@@ -218,13 +218,11 @@ export class SmartReminderAgent extends AbstractAgent {
         aiGenerated: true,
         aiContext: {
           source: "smart_reminder_agent",
-          conversationId: task.context?.chatId,
           intent: "create_reminder",
           entities: extractedInfo.extractedEntities,
           confidence: extractedInfo.confidence,
         },
         tags: extractedInfo.tags,
-        chatId: task.context?.chatId,
       };
 
       const reminder = await this.reminderService.createReminder(reminderData);
@@ -488,7 +486,6 @@ export class SmartReminderAgent extends AbstractAgent {
       priority: 1,
       createdAt: new Date(),
       context: {
-        chatId: request.chatId,
         timezone: request.timezone,
         ...request.context,
       },
