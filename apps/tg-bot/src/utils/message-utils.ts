@@ -16,7 +16,6 @@ const PROCESSING_STAGES = [
  */
 export class ProcessingAnimation {
   private messageId: number | undefined;
-  private chatId: number;
   private ctx: Context;
   private intervalId: NodeJS.Timeout | undefined;
   private currentStage = 0;
@@ -24,7 +23,6 @@ export class ProcessingAnimation {
 
   constructor(ctx: Context, messageType = "сообщение") {
     this.ctx = ctx;
-    this.chatId = ctx.chat!.id;
     this.messageType = messageType;
   }
 
@@ -61,7 +59,7 @@ export class ProcessingAnimation {
 
     try {
       await this.ctx.api.editMessageText(
-        this.chatId,
+        this.ctx.chat!.id,
         this.messageId,
         `${stage.emoji} ${stage.text}`,
         {
@@ -84,7 +82,7 @@ export class ProcessingAnimation {
 
     if (this.messageId) {
       try {
-        await this.ctx.api.deleteMessage(this.chatId, this.messageId);
+        await this.ctx.api.deleteMessage(this.ctx.chat!.id, this.messageId);
       } catch (error) {
         console.warn("Не удалось удалить сообщение анимации:", error);
       }
@@ -107,11 +105,10 @@ export class ProcessingAnimation {
 export async function smoothDeleteMessage(
   ctx: Context,
   messageId: number,
-  chatId: number,
 ): Promise<void> {
   try {
     // Сначала делаем сообщение полупрозрачным
-    await ctx.api.editMessageText(chatId, messageId, "⏳ Обрабатываем...", {
+    await ctx.api.editMessageText(ctx.chat!.id, messageId, "⏳ Обрабатываем...", {
       parse_mode: "HTML",
       reply_markup: {
         inline_keyboard: [
@@ -129,13 +126,13 @@ export async function smoothDeleteMessage(
     await new Promise((resolve) => setTimeout(resolve, 300));
 
     // Удаляем сообщение
-    await ctx.api.deleteMessage(chatId, messageId);
+    await ctx.api.deleteMessage(ctx.chat!.id, messageId);
   } catch (error) {
     console.warn("Не удалось плавно удалить сообщение:", error);
 
     // Fallback: пытаемся удалить напрямую
     try {
-      await ctx.api.deleteMessage(chatId, messageId);
+      await ctx.api.deleteMessage(ctx.chat!.id, messageId);
     } catch (deleteError) {
       console.warn("Не удалось удалить сообщение даже напрямую:", deleteError);
     }
@@ -169,12 +166,11 @@ export async function sendProcessingMessage(
 export async function removeProcessingMessage(
   ctx: Context,
   messageId: number | undefined,
-  chatId: number,
 ): Promise<void> {
   if (!messageId) return;
 
   try {
-    await ctx.api.deleteMessage(chatId, messageId);
+    await ctx.api.deleteMessage(ctx.chat!.id, messageId);
   } catch (error) {
     console.warn("Не удалось удалить сообщение 'Обрабатываем':", error);
   }

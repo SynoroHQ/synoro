@@ -4,7 +4,6 @@ import { apiClient } from "../src/api/client";
 
 describe("Context System Test", () => {
   const testUserId = "test-user-123";
-  const testChatId = "test-chat-456";
   const testMessageId = "test-message-789";
 
   beforeEach(() => {
@@ -19,7 +18,6 @@ describe("Context System Test", () => {
   describe("Message Context Creation", () => {
     it("should create proper message context", () => {
       const mockContext = {
-        chatId: testChatId,
         userId: testUserId,
         messageId: testMessageId,
         metadata: {
@@ -29,7 +27,6 @@ describe("Context System Test", () => {
         },
       };
 
-      expect(mockContext.chatId).toBe(testChatId);
       expect(mockContext.userId).toBe(testUserId);
       expect(mockContext.messageId).toBe(testMessageId);
       expect(mockContext.metadata.user).toBe("testuser");
@@ -41,7 +38,6 @@ describe("Context System Test", () => {
       const apiCallStructure = {
         text: "Тестовое сообщение",
         channel: "telegram" as const,
-        chatId: testChatId,
         messageId: testMessageId,
         telegramUserId: testUserId,
         agentOptions: {
@@ -56,7 +52,6 @@ describe("Context System Test", () => {
       };
 
       expect(apiCallStructure.channel).toBe("telegram");
-      expect(apiCallStructure.chatId).toBe(testChatId);
       expect(apiCallStructure.telegramUserId).toBe(testUserId);
       expect(apiCallStructure.agentOptions.useQualityControl).toBe(true);
     });
@@ -68,14 +63,12 @@ describe("Context System Test", () => {
       const flow = {
         step1: {
           telegramMessage: {
-            chatId: testChatId,
             userId: testUserId,
             messageId: testMessageId,
           },
         },
         step2: {
           apiCall: {
-            chatId: testChatId,
             telegramUserId: testUserId,
             messageId: testMessageId,
           },
@@ -83,15 +76,12 @@ describe("Context System Test", () => {
         step3: {
           agentContext: {
             userId: testUserId,
-            chatId: testChatId,
             channel: "telegram",
           },
         },
       };
 
       // Проверяем, что контекст сохраняется на всех этапах
-      expect(flow.step1.telegramMessage.chatId).toBe(flow.step2.apiCall.chatId);
-      expect(flow.step2.apiCall.chatId).toBe(flow.step3.agentContext.chatId);
       expect(flow.step1.telegramMessage.userId).toBe(
         flow.step2.apiCall.telegramUserId,
       );
@@ -128,7 +118,6 @@ describe("Context System Test", () => {
         contextMessageCount: 5,
         agentMode: true,
         telegramUserId: testUserId,
-        telegramChatId: testChatId,
         conversationId: "conv-123",
         smartMode: true,
         timestamp: new Date().toISOString(),
@@ -137,7 +126,6 @@ describe("Context System Test", () => {
       expect(metadata.contextMessageCount).toBeGreaterThan(0);
       expect(metadata.agentMode).toBe(true);
       expect(metadata.telegramUserId).toBe(testUserId);
-      expect(metadata.telegramChatId).toBe(testChatId);
       expect(metadata.conversationId).toBeDefined();
     });
   });

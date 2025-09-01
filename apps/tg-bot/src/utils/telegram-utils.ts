@@ -47,7 +47,6 @@ export function getUserIdentifier(from?: User): string {
  * Создает контекст для обработки сообщения
  */
 export function createMessageContext(ctx: Context) {
-  const chatId = String(ctx.chat?.id ?? "unknown");
   const userId = ctx.from?.id ? String(ctx.from.id) : "unknown";
   const messageId =
     ctx.message && "message_id" in ctx.message
@@ -55,7 +54,6 @@ export function createMessageContext(ctx: Context) {
       : undefined;
 
   return {
-    chatId,
     userId,
     messageId,
     metadata: {

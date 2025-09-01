@@ -18,7 +18,7 @@ export async function handleAgentsCommand(ctx: Context): Promise<void> {
 
     const messageContext = createMessageContext(ctx);
     console.log(
-      `🤖 Команда /agents от ${getUserIdentifier(ctx.from)} в чате ${messageContext.chatId}`,
+      `🤖 Команда /agents от ${getUserIdentifier(ctx.from)} в чате ${ctx.chat?.id}`,
     );
 
     // Получаем статистику агентов
@@ -80,7 +80,7 @@ export async function handleAgentTestCommand(ctx: Context): Promise<void> {
 
     const messageContext = createMessageContext(ctx);
     console.log(
-      `🧪 Команда /agent_test от ${getUserIdentifier(ctx.from)} в чате ${messageContext.chatId}`,
+      `🧪 Команда /agent_test от ${getUserIdentifier(ctx.from)} в чате ${ctx.chat?.id}`,
     );
 
     // Отправляем тестовое сообщение через агентную систему
@@ -107,7 +107,6 @@ export async function handleAgentTestCommand(ctx: Context): Promise<void> {
         {
           text: testMessage,
           channel: "telegram",
-          chatId: messageContext.chatId,
           messageId: messageContext.messageId,
           telegramUserId: messageContext.userId,
           agentOptions: {
@@ -193,7 +192,7 @@ export async function handleFastTestCommand(ctx: Context): Promise<void> {
 
     const messageContext = createMessageContext(ctx);
     console.log(
-      `⚡ Команда /fast_test от ${getUserIdentifier(ctx.from)} в чате ${messageContext.chatId}`,
+      `⚡ Команда /fast_test от ${getUserIdentifier(ctx.from)} в чате ${ctx.chat?.id}`,
     );
 
     const testMessages = [
@@ -212,7 +211,6 @@ export async function handleFastTestCommand(ctx: Context): Promise<void> {
       const fastResponse = await telegramFastResponseService.analyzeMessage(
         testMessage,
         messageContext.userId,
-        messageContext.chatId,
         messageContext.messageId
       );
       const responseTime = Date.now() - startTime;

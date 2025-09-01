@@ -25,7 +25,6 @@ export async function handleSmartText(ctx: Context) {
     const fastResponse = await telegramFastResponseService.analyzeMessage(
       text,
       messageContext.userId,
-      messageContext.chatId,
       messageContext.messageId
     );
 
@@ -59,7 +58,6 @@ export async function handleSmartText(ctx: Context) {
             text,
             channel: "telegram",
             userId: messageContext.userId,
-            chatId: messageContext.chatId,
             messageId: messageContext.messageId,
           },
         );
@@ -74,7 +72,7 @@ export async function handleSmartText(ctx: Context) {
 
         // Обновляем сообщение с результатом
         await ctx.api.editMessageText(
-          messageContext.chatId,
+          ctx.chat!.id,
           processingMsg.message_id,
           formattedResponse.text,
           { parse_mode: "HTML" },
@@ -87,7 +85,7 @@ export async function handleSmartText(ctx: Context) {
         );
 
         await ctx.api.editMessageText(
-          messageContext.chatId,
+          ctx.chat!.id,
           processingMsg.message_id,
           errorMessage,
           { parse_mode: "HTML" },
@@ -102,12 +100,12 @@ export async function handleSmartText(ctx: Context) {
         "Ошибка обработки",
       );
 
-      await ctx.api.editMessageText(
-        messageContext.chatId,
-        processingMsg.message_id,
-        errorMessage,
-        { parse_mode: "HTML" },
-      );
+              await ctx.api.editMessageText(
+          ctx.chat!.id,
+          processingMsg.message_id,
+          errorMessage,
+          { parse_mode: "HTML" },
+        );
     }
   } catch (error) {
     console.error("Error in smart text handler:", error);
@@ -136,8 +134,8 @@ async function processMessageInBackground(
           text,
           channel: "telegram",
           userId: messageContext.userId,
-          chatId: messageContext.chatId,
           messageId: messageContext.messageId,
+          telegramUserId: messageContext.userId,
         },
       );
 

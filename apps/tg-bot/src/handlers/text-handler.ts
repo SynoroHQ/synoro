@@ -1,19 +1,27 @@
 import type { Context } from "grammy";
 
-import { fastResponseSystem } from "../utils/fast-response-system";
+import { apiClient } from "../api/client";
+import { FastResponseSystem } from "../utils/fast-response-system";
 import { formatForTelegram } from "../utils/telegram-formatter";
+import { createMessageContext } from "../utils/telegram-utils";
+import { createErrorMessage } from "../utils/html-message-builder";
 
 /**
  * Обработчик обычных текстовых сообщений с Fast Response System
+ * Все сообщения проходят через бота для детальной обработки
  */
 export async function handleText(ctx: Context) {
   try {
+    const messageContext = createMessageContext(ctx);
     const text = ctx.message?.text || "";
 
-    console.log(`📝 Text handler: "${text}" from user ${ctx.from?.id}`);
+    console.log(`📝 Text handler: "${text}" from user ${messageContext.userId}`);
 
-    // Проверяем, можно ли дать быстрый ответ
-    const fastResponse = fastResponseSystem.analyzeMessage(text);
+    // 1. Создаем экземпляр системы быстрых ответов с API клиентом
+    const fastResponseSystem = new FastResponseSystem(apiClient);
+    
+    // 2. Проверяем, можно ли дать быстрый ответ через AI
+    const fastResponse = await fastResponseSystem.analyzeMessage(text);
 
     if (fastResponse.shouldSendFast) {
       console.log(
@@ -22,24 +30,124 @@ export async function handleText(ctx: Context) {
 
       // Отправляем быстрый ответ
       await ctx.reply(fastResponse.fastResponse);
+
+      // Если нужна полная обработка, запускаем её в фоне
+      if (fastResponse.needsFullProcessing) {
+        console.log(`🔄 Starting background processing for: "${text}"`);
+        processMessageInBackground(text, messageContext, ctx);
+      }
+
       return;
     }
 
-    // Если быстрый ответ не сработал, отправляем стандартное сообщение
-    const response =
-      "Понял ваше сообщение! Для более детальной обработки используйте команду /smart";
+          // 2. Если быстрый ответ не сработал, обрабатываем через бота
+      console.log(`🔄 Processing message through bot system: "${text}"`);
 
-    const formattedResponse = formatForTelegram(response, {
-      useEmojis: true,
-      useHTML: true,
-      addSeparators: false,
-    });
+      // Показываем индикатор обработки
+      const processingMsg = await ctx.reply("🤔 Обрабатываю ваш запрос...");
 
-    await ctx.reply(formattedResponse.text, {
-      parse_mode: formattedResponse.parse_mode || "HTML",
-    });
+      try {
+        const result =
+          await apiClient.messages.processMessageAgents.processMessageFromTelegramWithAgents.mutate(
+            {
+              text,
+              channel: "telegram",
+              userId: messageContext.userId,
+              messageId: messageContext.messageId,
+            },
+          );
+
+      if (result.success) {
+        // Форматируем ответ для Telegram
+        const formattedResponse = formatForTelegram(result.response, {
+          useEmojis: true,
+          useHTML: true,
+          addSeparators: false,
+        });
+
+        // Обновляем сообщение с результатом
+        await ctx.api.editMessageText(
+          ctx.chat!.id,
+          processingMsg.message_id,
+          formattedResponse.text,
+          { parse_mode: "HTML" },
+        );
+      } else {
+        // Обрабатываем ошибку
+        const errorMessage = createErrorMessage(
+          "Произошла ошибка при обработке запроса. Попробуйте еще раз.",
+          "Ошибка обработки",
+        );
+
+        await ctx.api.editMessageText(
+          ctx.chat!.id,
+          processingMsg.message_id,
+          errorMessage,
+          { parse_mode: "HTML" },
+        );
+      }
+    } catch (error) {
+      console.error("Error in text processing:", error);
+
+      // Обновляем сообщение с ошибкой
+      const errorMessage = createErrorMessage(
+        "Произошла ошибка при обработке запроса. Попробуйте еще раз.",
+        "Ошибка обработки",
+      );
+
+              await ctx.api.editMessageText(
+          ctx.chat!.id,
+          processingMsg.message_id,
+          errorMessage,
+          { parse_mode: "HTML" },
+        );
+    }
   } catch (error) {
     console.error("Error in text handler:", error);
-    await ctx.reply("❌ Произошла ошибка. Попробуйте еще раз.");
+    const errorMessage = createErrorMessage(
+      "Произошла ошибка. Попробуйте еще раз.",
+      "Системная ошибка",
+    );
+    await ctx.reply(errorMessage, { parse_mode: "HTML" });
+  }
+}
+
+/**
+ * Обработка сообщения в фоне для случаев, когда нужна полная обработка
+ */
+async function processMessageInBackground(
+  text: string,
+  messageContext: ReturnType<typeof createMessageContext>,
+  ctx: Context,
+) {
+  try {
+    console.log(`🔄 Background processing started for: "${text}"`);
+
+    const result =
+      await apiClient.messages.processMessageAgents.processMessageFromTelegramWithAgents.mutate(
+        {
+          text,
+          channel: "telegram",
+          userId: messageContext.userId,
+          messageId: messageContext.messageId,
+        },
+      );
+
+    if (result.success && result.agentMetadata?.agentsUsed.length) {
+      // Если в фоне получили результат от агентов, отправляем дополнительное сообщение
+      const additionalInfo = `💡 Дополнительная информация от ${result.agentMetadata.agentsUsed.join(", ")}:`;
+      const formattedResponse = formatForTelegram(result.response, {
+        useEmojis: true,
+        useHTML: true,
+        addSeparators: false,
+      });
+
+      await ctx.reply(`${additionalInfo}\n\n${formattedResponse.text}`, {
+        parse_mode: "HTML",
+      });
+    }
+  } catch (error) {
+    console.error("Error in background processing:", error);
+    // Не отправляем ошибку пользователю, так как у него уже есть быстрый ответ
   }
 }

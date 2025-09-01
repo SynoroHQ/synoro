@@ -47,11 +47,10 @@ export function createBot(): Bot<Context> {
     await next();
   });
 
-  // Middleware: basic rate limiting per chat+user
+  // Middleware: basic rate limiting per user
   bot.use(async (ctx, next) => {
-    const chatId = ctx.chat?.id ? String(ctx.chat.id) : "unknown";
     const userId = ctx.from?.id ? String(ctx.from.id) : "anon";
-    const key = buildRateLimitKey(["tg", chatId, userId]);
+    const key = buildRateLimitKey(["tg", userId]);
     const { allowed, remaining, resetMs } = checkRateLimit(key, {
       windowMs: rlWindow,
       limit: rlLimit,
@@ -70,11 +69,10 @@ export function createBot(): Bot<Context> {
   // Middleware для логирования входящих сообщений
   bot.use(async (ctx, next) => {
     const user = getUserIdentifier(ctx.from);
-    const chatId = ctx.chat?.id || "unknown";
     const messageType = getMessageType(ctx.message);
 
     console.log(
-      `📨 Получено сообщение: тип=${messageType}, пользователь=${user}, чат=${chatId}`,
+      `📨 Получено сообщение: тип=${messageType}, пользователь=${user}`,
     );
     await next();
   });

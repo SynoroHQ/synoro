@@ -19,7 +19,6 @@ export class TelegramFastResponseService {
   async analyzeMessage(
     text: string,
     userId: string,
-    chatId: string,
     messageId?: string,
   ): Promise<TelegramFastResponse> {
     try {
@@ -27,7 +26,6 @@ export class TelegramFastResponseService {
       const result = await apiClient.fastResponse.analyze.mutate({
         text,
         userId,
-        chatId,
         messageId,
       });
 

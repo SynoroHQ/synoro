@@ -11,22 +11,21 @@ export const ProcessMessageInput = z
       .min(1, "Текст сообщения не может быть пустым")
       .max(5000, "Текст сообщения слишком длинный"),
     channel: Channel,
-    chatId: z.string().optional(),
     messageId: z.string().optional(),
     metadata: z.record(z.string(), z.unknown()).optional(),
     telegramUserId: z.string().optional(), // ID пользователя Telegram (не связан с таблицей users)
   })
   .refine(
     (data) => {
-      // Для Telegram канала telegramUserId и chatId обязательны
+      // Для Telegram канала telegramUserId обязателен
       if (data.channel === "telegram") {
-        return data.telegramUserId && data.chatId;
+        return data.telegramUserId;
       }
       return true;
     },
     {
-      message: "Для Telegram канала telegramUserId и chatId обязательны",
-      path: ["telegramUserId", "chatId"],
+      message: "Для Telegram канала telegramUserId обязателен",
+      path: ["telegramUserId"],
     },
   );
 
@@ -60,22 +59,21 @@ export const TranscribeInput = z
     audio: z.string(), // base64-encoded audio data
     filename: z.string(),
     channel: Channel,
-    chatId: z.string().optional(),
     messageId: z.string().optional(),
     metadata: z.record(z.string(), z.unknown()).optional(),
     telegramUserId: z.string().optional(), // ID пользователя Telegram (не связан с таблицей users)
   })
   .refine(
     (data) => {
-      // Для Telegram канала telegramUserId и chatId обязательны
+      // Для Telegram канала telegramUserId обязателен
       if (data.channel === "telegram") {
-        return data.telegramUserId && data.chatId;
+        return data.telegramUserId;
       }
       return true;
     },
     {
-      message: "Для Telegram канала telegramUserId и chatId обязательны",
-      path: ["telegramUserId", "chatId"],
+      message: "Для Telegram канала telegramUserId обязателен",
+      path: ["telegramUserId"],
     },
   );
 

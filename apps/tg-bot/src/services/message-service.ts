@@ -8,7 +8,6 @@ import { DEFAULT_AGENT_OPTIONS } from "../config/agents";
  */
 export interface MessageContext {
   userId: string;
-  chatId: string;
   messageId?: string;
   metadata?: Record<string, unknown>;
 }
@@ -52,7 +51,6 @@ export async function processTextMessage(
         {
           text,
           channel: "telegram",
-          chatId: context.chatId,
           messageId: context.messageId,
           telegramUserId: context.userId, // Передаем ID пользователя Telegram
           agentOptions: DEFAULT_AGENT_OPTIONS,
@@ -107,7 +105,6 @@ export async function transcribeAudio(
         audio: buffer.toString("base64"),
         filename,
         channel: "telegram",
-        chatId: context.chatId,
         messageId: context.messageId,
         telegramUserId: context.userId, // Передаем ID пользователя Telegram
         metadata: {

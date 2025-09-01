@@ -69,7 +69,6 @@ export type TRPCContext = Awaited<ReturnType<typeof createTRPCContext>> & {
   botUserId?: string;
   isBotRequest?: boolean;
   telegramUserId?: string;
-  telegramChatId?: string;
   isTelegramAnonymous?: boolean;
 };
 
@@ -323,31 +322,22 @@ const telegramAnonymousAuthMiddleware = t.middleware(
 
       // Parse user data - Telegram WebApp initData содержит user как JSON строку
       let telegramUserId: string | undefined;
-      let chatId: string | undefined;
 
       try {
         if (userData.user) {
           const userObj = JSON.parse(userData.user);
           telegramUserId = userObj.id;
         }
-        if (userData.chat) {
-          const chatObj = JSON.parse(userData.chat);
-          chatId = chatObj.id;
-        }
         // Fallback to direct values if JSON parsing fails
         if (!telegramUserId && userData.user_id) {
           telegramUserId = userData.user_id;
         }
-        if (!chatId && userData.chat_instance) {
-          chatId = userData.chat_instance;
-        }
       } catch (parseError) {
         // If JSON parsing fails, try direct access
         telegramUserId = userData.user_id || userData.user;
-        chatId = userData.chat_instance || userData.chat;
       }
 
-      if (!telegramUserId || !chatId) {
+      if (!telegramUserId) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
           message: "Invalid Telegram user data",
@@ -358,7 +348,6 @@ const telegramAnonymousAuthMiddleware = t.middleware(
         ctx: {
           ...ctx,
           telegramUserId,
-          telegramChatId: chatId,
           isTelegramAnonymous: true,
         },
       });

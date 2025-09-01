@@ -53,7 +53,6 @@ export const processMessageAgentsRouter = {
         channel: input.channel,
         userId,
         ctx,
-        chatId: input.chatId,
         messageId: input.messageId,
         metadata: input.metadata,
         options: input.agentOptions,
@@ -72,18 +71,9 @@ export const processMessageAgentsRouter = {
         });
       }
 
-      const chatId = input.chatId;
-      if (!chatId) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "ID чата Telegram не указан в запросе",
-        });
-      }
-
       // Получаем контекст пользователя
       const userContext = await TelegramUserService.getUserContext(
         telegramUserId,
-        chatId,
         input.messageId,
       );
 
@@ -92,12 +82,10 @@ export const processMessageAgentsRouter = {
         channel: input.channel,
         userId: userContext.userId ?? null,
         ctx,
-        chatId: chatId,
         messageId: input.messageId,
         metadata: {
           ...input.metadata,
           telegramUserId,
-          telegramChatId: chatId,
           isAnonymous: userContext.isAnonymous,
           conversationId: userContext.conversationId,
         },

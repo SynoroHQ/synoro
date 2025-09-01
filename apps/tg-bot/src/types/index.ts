@@ -5,7 +5,6 @@
 export interface MessageContext {
   channel: "telegram";
   userId: string;
-  chatId?: string;
   messageId?: string;
   metadata?: Record<string, unknown>;
 }

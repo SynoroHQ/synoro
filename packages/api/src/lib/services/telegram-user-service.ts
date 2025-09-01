@@ -12,7 +12,6 @@ import {
 export interface TelegramUserContext {
   userId: string | null; // null для анонимных пользователей
   telegramUserId: string;
-  chatId: string;
   isAnonymous: boolean;
   conversationId: string;
 }
@@ -25,13 +24,11 @@ export class TelegramUserService {
   /**
    * Получает или создает контекст пользователя Telegram
    * @param telegramUserId - ID пользователя в Telegram
-   * @param chatId - ID чата в Telegram
    * @param messageId - ID сообщения для идемпотентности
    * @returns Контекст пользователя с userId (null для анонимных) и conversationId
    */
   static async getUserContext(
     telegramUserId: string,
-    chatId: string,
     messageId?: string,
   ): Promise<TelegramUserContext> {
     // 1. Пытаемся найти связанного пользователя через identityLinks
@@ -68,13 +65,13 @@ export class TelegramUserService {
     // 2. Получаем или создаем conversation
     const conversation = await TelegramUserService.getOrCreateConversation(
       userId,
-      chatId,
+      telegramUserId,
       isAnonymous,
     );
 
     // 3. Если это анонимный пользователь и есть messageId, проверяем идемпотентность
     if (isAnonymous && messageId) {
-      await TelegramUserService.checkIdempotency(chatId, messageId);
+      await TelegramUserService.checkIdempotency(telegramUserId, messageId);
     }
 
     if (!conversation) {
@@ -87,7 +84,6 @@ export class TelegramUserService {
     return {
       userId,
       telegramUserId,
-      chatId,
       isAnonymous,
       conversationId: conversation.id,
     };
@@ -98,17 +94,17 @@ export class TelegramUserService {
    */
   private static async getOrCreateConversation(
     userId: string | null,
-    chatId: string,
+    telegramUserId: string,
     isAnonymous: boolean,
   ) {
     if (isAnonymous) {
-      // Для анонимных пользователей ищем по telegramChatId
+      // Для анонимных пользователей ищем по telegramUserId
       const existingConversation = await db
         .select()
         .from(conversations)
         .where(
           and(
-            eq(conversations.telegramChatId, chatId),
+            eq(conversations.telegramUserId, telegramUserId),
             eq(conversations.channel, "telegram"),
           ),
         )
@@ -122,9 +118,9 @@ export class TelegramUserService {
       const [newConversation] = await db
         .insert(conversations)
         .values({
-          telegramChatId: chatId,
+          telegramUserId: telegramUserId,
           channel: "telegram",
-          title: `Telegram Chat ${chatId}`,
+          title: `Telegram User ${telegramUserId}`,
           status: "active",
         })
         .returning();
@@ -153,7 +149,7 @@ export class TelegramUserService {
         .values({
           ownerUserId: userId!,
           channel: "telegram",
-          title: `Telegram Chat ${chatId}`,
+          title: `Telegram User ${telegramUserId}`,
           status: "active",
         })
         .returning();
@@ -164,13 +160,13 @@ export class TelegramUserService {
   /**
    * Проверяет идемпотентность для анонимных пользователей
    */
-  private static async checkIdempotency(chatId: string, messageId: string) {
+  private static async checkIdempotency(telegramUserId: string, messageId: string) {
     const existingKey = await db
       .select()
       .from(processedIdempotencyKeys)
       .where(
         and(
-          eq(processedIdempotencyKeys.telegramChatId, chatId),
+          eq(processedIdempotencyKeys.telegramUserId, telegramUserId),
           eq(processedIdempotencyKeys.idempotencyKey, messageId),
         ),
       )

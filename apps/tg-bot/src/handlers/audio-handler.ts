@@ -37,7 +37,7 @@ export async function handleAudio(ctx: Context): Promise<void> {
     const messageContext = createMessageContext(ctx);
 
     console.log(
-      `🎤 Обработка аудио от ${getUserIdentifier(ctx.from)} в чате ${messageContext.chatId}`,
+      `🎤 Обработка аудио от ${getUserIdentifier(ctx.from)}`,
     );
 
     // Проверяем ограничения по длительности
@@ -99,7 +99,6 @@ export async function handleAudio(ctx: Context): Promise<void> {
         {
           text,
           channel: "telegram",
-          chatId: messageContext.chatId,
           messageId: messageContext.messageId,
           telegramUserId: messageContext.userId,
           agentOptions: DEFAULT_AGENT_OPTIONS,
@@ -134,7 +133,6 @@ export async function handleAudio(ctx: Context): Promise<void> {
 
       await ctx.reply(formattedMessage.text, {
         parse_mode: formattedMessage.parse_mode,
-        disable_web_page_preview: formattedMessage.disable_web_page_preview,
       });
       return;
     }
@@ -156,7 +154,6 @@ export async function handleAudio(ctx: Context): Promise<void> {
 
     await ctx.reply(formattedMessage.text, {
       parse_mode: formattedMessage.parse_mode,
-      disable_web_page_preview: formattedMessage.disable_web_page_preview,
     });
     // Логируем результат обработки
     console.log(

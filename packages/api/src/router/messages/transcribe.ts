@@ -51,16 +51,9 @@ export const transcribeRouter = {
           throw new Error("ID пользователя Telegram не указан в запросе");
         }
 
-        // Получаем chatId из input
-        const chatId = input.chatId;
-        if (!chatId) {
-          throw new Error("ID чата Telegram не указан в запросе");
-        }
-
         // Получаем контекст пользователя через TelegramUserService
         const userContext = await TelegramUserService.getUserContext(
           telegramUserId,
-          chatId,
           input.messageId,
         );
 
@@ -72,11 +65,9 @@ export const transcribeRouter = {
           metadata: {
             channel: input.channel,
             userId: userContext.userId || "anonymous", // "anonymous" для null userId
-            chatId: chatId, // Используем Telegram chatId
             ...(input.messageId && { messageId: input.messageId }),
             filename: input.filename,
             telegramUserId,
-            telegramChatId: chatId,
             isAnonymous: userContext.isAnonymous,
             conversationId: userContext.conversationId,
             ...input.metadata,

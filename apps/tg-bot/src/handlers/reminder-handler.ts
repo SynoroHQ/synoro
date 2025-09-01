@@ -15,12 +15,9 @@ export class ReminderHandler {
    */
   static async handleCreateReminder(ctx: Context, text: string, userId: string) {
     try {
-      const chatId = ctx.chat?.id.toString();
-      
       const result = await reminderAgent.createReminderFromText({
         text,
         userId,
-        chatId,
         timezone: "Europe/Moscow", // TODO: получать из настроек пользователя
       });
 
