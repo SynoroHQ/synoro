@@ -1,4 +1,4 @@
-import { generateText, generateObject } from "ai";
+import { generateObject, generateText } from "ai";
 import { z } from "zod";
 
 import type {
@@ -33,7 +33,8 @@ const fastResponseSchema = z.object({
  */
 export class FastResponseAgent extends AbstractAgent {
   name = "Fast Response Agent";
-  description = "Обеспечивает быстрые интеллектуальные ответы через ИИ для простых запросов";
+  description =
+    "Обеспечивает быстрые интеллектуальные ответы через ИИ для простых запросов";
 
   capabilities: AgentCapability[] = [
     {
@@ -57,27 +58,37 @@ export class FastResponseAgent extends AbstractAgent {
   ];
 
   // Кэш для быстрых ИИ-ответов
-  private aiResponseCache = new Map<string, {
-    response: string;
-    confidence: number;
-    timestamp: number;
-    usageCount: number;
-  }>();
+  private aiResponseCache = new Map<
+    string,
+    {
+      response: string;
+      confidence: number;
+      timestamp: number;
+      usageCount: number;
+    }
+  >();
 
   // Шаблоны ответов, генерируемые ИИ
-  private aiTemplates = new Map<string, {
-    template: string;
-    confidence: number;
-    lastUpdated: number;
-  }>();
+  private aiTemplates = new Map<
+    string,
+    {
+      template: string;
+      confidence: number;
+      lastUpdated: number;
+    }
+  >();
 
   constructor() {
     super("gpt-5-mini", 0.1); // Низкая температура для быстрых точных ответов
     void this.initializeAITemplates();
   }
 
-  async canHandle(_task: AgentTask): Promise<boolean> {
-    return Promise.resolve(true); // Может обрабатывать любые запросы
+  async canHandle(task: AgentTask): Promise<boolean> {
+    // Анализируем сообщение, чтобы определить, подходит ли оно для быстрого ответа
+    const analysis = await this.fastAnalyzeQuery(task);
+
+    // Можем обработать только простые запросы, которые не требуют полной обработки
+    return analysis.isSimpleQuery && !analysis.needsFullProcessing;
   }
 
   /**
@@ -86,16 +97,17 @@ export class FastResponseAgent extends AbstractAgent {
   private async initializeAITemplates(): Promise<void> {
     const commonQueries = [
       "приветствие",
-      "благодарность", 
+      "благодарность",
       "вопрос о возможностях",
       "просьба о помощи",
       "подтверждение",
-      "прощание"
+      "прощание",
     ];
 
     for (const queryType of commonQueries) {
       try {
-        const templateData: Record<string, unknown> = await this.generateTemplateData(queryType);
+        const templateData: Record<string, unknown> =
+          await this.generateTemplateData(queryType);
         this.aiTemplates.set(queryType, {
           template: JSON.stringify(templateData),
           confidence: 0.9,
@@ -110,7 +122,9 @@ export class FastResponseAgent extends AbstractAgent {
   /**
    * Генерация ИИ-шаблона для типа запроса
    */
-  private async generateTemplateData(input: string): Promise<Record<string, unknown>> {
+  private async generateTemplateData(
+    input: string,
+  ): Promise<Record<string, unknown>> {
     const { text } = await generateText({
       model: this.getModel(),
       system: `Ты - эксперт по созданию шаблонов ответов для чат-бота. 
@@ -157,12 +171,28 @@ export class FastResponseAgent extends AbstractAgent {
         system: `Ты - эксперт по быстрому анализу пользовательских запросов.
         Определи, можно ли дать быстрый ответ на этот запрос или нужна полная обработка.
         
-        КРИТЕРИИ ДЛЯ БЫСТРОГО ОТВЕТА:
-        - Простые приветствия, благодарности
-        - Базовые вопросы о возможностях бота
-        - Подтверждения (да/нет/ок)
-        - Простые просьбы о помощи
-        - Общие вопросы
+        КРИТЕРИИ ДЛЯ БЫСТРОГО ОТВЕТА (isSimpleQuery: true):
+        - Простые приветствия: "привет", "здравствуй", "добрый день"
+        - Благодарности: "спасибо", "благодарю"
+        - Подтверждения: "да", "нет", "ок", "хорошо", "согласен"
+        - Прощания: "пока", "до свидания", "увидимся"
+        - Базовые вопросы о возможностях: "что ты умеешь?", "какие у тебя функции?"
+        - Общие вопросы не по теме: "как дела?", "что нового?"
+        
+        КРИТЕРИИ ДЛЯ ПОЛНОЙ ОБРАБОТКИ (isSimpleQuery: false, needsFullProcessing: true):
+        - Запись дел/задач: "записать", "добавить дело", "создать задачу", "запомни", "отметь"
+        - Управление задачами: "показать дела", "удалить задачу", "отметить выполненным", "мои задачи"
+        - Работа с событиями: "напомни", "создать событие", "планирование", "встреча", "дедлайн"
+        - Анализ данных: "статистика", "отчет", "анализ", "сколько", "когда", "где"
+        - Сложные запросы: многоэтапные задачи, требующие взаимодействия с базой данных
+        - Любые запросы, связанные с продуктивностью и управлением временем
+        - Запросы с конкретными датами, временем, местами
+        - Запросы на поиск, фильтрацию, сортировку информации
+        
+        ВАЖНО: Если сообщение содержит слова "напомни", "завтра", "сегодня", "завтра", "послезавтра", 
+        "в понедельник", "вторник", "среда", "четверг", "пятница", "суббота", "воскресенье" 
+        или конкретные действия (купить, сделать, позвонить, встретиться и т.д.) - 
+        это ВСЕГДА требует полной обработки через мультиагентов!
         
         ТИПЫ ОТВЕТОВ:
         - direct: Прямой короткий ответ
@@ -285,9 +315,21 @@ export class FastResponseAgent extends AbstractAgent {
 
         case "template": {
           const templateType = this.detectTemplateType(task.input);
+
+          // Если это напоминание или действие, не обрабатываем как простой запрос
+          if (templateType === "напоминание" || templateType === "действие") {
+            return this.createErrorResult(
+              "Запрос требует полной обработки через мультиагентов",
+              analysis.confidence,
+            );
+          }
+
           const template = this.aiTemplates.get(templateType);
           if (template) {
-            const templateData = JSON.parse(template.template) as Record<string, unknown>;
+            const templateData = JSON.parse(template.template) as Record<
+              string,
+              unknown
+            >;
             response = this.fillTemplate(templateData, task);
           } else {
             response = await this.generateFastAIResponse(task.input, task);
@@ -323,21 +365,64 @@ export class FastResponseAgent extends AbstractAgent {
    */
   private detectTemplateType(input: string): string {
     const lowerInput = input.toLowerCase();
-    
+
+    // Проверяем на напоминания и задачи - они НЕ должны обрабатываться как простые
+    if (
+      /напомни|завтра|сегодня|послезавтра|понедельник|вторник|среда|четверг|пятница|суббота|воскресенье/.test(
+        lowerInput,
+      )
+    ) {
+      return "напоминание"; // Это будет обработано как сложный запрос
+    }
+
+    // Проверяем на конкретные действия
+    if (
+      /купить|сделать|позвонить|встретиться|записать|добавить|создать|показать|удалить/.test(
+        lowerInput,
+      )
+    ) {
+      return "действие"; // Это будет обработано как сложный запрос
+    }
+
+    // Простые приветствия
     if (/привет|здравствуй|добрый/.test(lowerInput)) return "приветствие";
+
+    // Благодарности
     if (/спасибо|благодарю/.test(lowerInput)) return "благодарность";
-    if (/что.*можешь|что.*умеешь|возможности/.test(lowerInput)) return "вопрос о возможностях";
-    if (/помоги|помощь/.test(lowerInput)) return "просьба о помощи";
-    if (/да|нет|ок|хорошо|согласен/.test(lowerInput)) return "подтверждение";
+
+    // Базовые вопросы о возможностях (только общие, не конкретные)
+    if (
+      /что.*можешь|что.*умеешь|возможности/.test(lowerInput) &&
+      !/записать|добавить|создать|показать|удалить/.test(lowerInput)
+    ) {
+      return "вопрос о возможностях";
+    }
+
+    // Простые просьбы о помощи (не связанные с задачами)
+    if (
+      /помоги|помощь/.test(lowerInput) &&
+      !/записать|добавить|создать|показать|удалить/.test(lowerInput)
+    ) {
+      return "просьба о помощи";
+    }
+
+    // Подтверждения
+    if (/^да$|^нет$|^ок$|^хорошо$|^согласен$/.test(lowerInput))
+      return "подтверждение";
+
+    // Прощания
     if (/пока|до свидания|увидимся/.test(lowerInput)) return "прощание";
-    
+
     return "общий";
   }
 
   /**
    * Заполнение шаблона переменными
    */
-  private fillTemplate(template: Record<string, unknown>, task: AgentTask): string {
+  private fillTemplate(
+    template: Record<string, unknown>,
+    task: AgentTask,
+  ): string {
     return JSON.stringify(template)
       .replace(/{user}/g, task.context.userId ?? "друг")
       .replace(/{time}/g, new Date().toLocaleTimeString("ru-RU"))
@@ -353,8 +438,10 @@ export class FastResponseAgent extends AbstractAgent {
     totalUsage: number;
     averageResponseTime: number;
   } {
-    const totalUsage = Array.from(this.aiResponseCache.values())
-      .reduce((sum, item) => sum + item.usageCount, 0);
+    const totalUsage = Array.from(this.aiResponseCache.values()).reduce(
+      (sum, item) => sum + item.usageCount,
+      0,
+    );
 
     return {
       cacheSize: this.aiResponseCache.size,
