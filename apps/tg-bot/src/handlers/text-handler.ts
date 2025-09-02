@@ -1,9 +1,9 @@
 import type { Context } from "grammy";
 
 import { apiClient } from "../api/client";
+import { runWithAnimation } from "../utils/animation-helpers";
 import { FastResponseSystem } from "../utils/fast-response-system";
 import { createErrorMessage } from "../utils/html-message-builder";
-import { createMessageAnimation } from "../utils/message-animation";
 import { formatForTelegram } from "../utils/telegram-formatter";
 import { createMessageContext } from "../utils/telegram-utils";
 
@@ -31,27 +31,10 @@ export async function handleText(ctx: Context) {
         `⚡ Fast response in text handler: ${fastResponse.processingType}`,
       );
 
-      // Показываем быструю анимацию
-      const quickAnim = await createMessageAnimation();
-      await quickAnim.start(ctx, "fast", { maxDuration: 1000 });
-
-      // Удаляем анимацию
-      const messageId = quickAnim.getMessageId();
-      const chatId = quickAnim.getChatId();
-
-      if (messageId && chatId) {
-        try {
-          await ctx.api.deleteMessage(chatId, messageId);
-        } catch (error) {
-          console.warn("Не удалось удалить быструю анимацию:", error);
-        }
-      }
-
-      // Останавливаем анимацию
-      await quickAnim.stop();
-
-      // Отправляем быстрый ответ
-      await ctx.reply(fastResponse.fastResponse);
+      // Отправляем быстрый ответ с анимацией
+      await runWithAnimation(ctx, "fast", 1000, async () => {
+        await ctx.reply(fastResponse.fastResponse);
+      });
 
       // Если нужна полная обработка, запускаем её в фоне
       if (fastResponse.needsFullProcessing) {
@@ -65,48 +48,41 @@ export async function handleText(ctx: Context) {
     // 2. Если быстрый ответ не сработал, обрабатываем через систему
     console.log(`🔄 Processing message through system: "${text}"`);
 
-    // Запускаем анимацию обработки
-    const processingAnim = await createMessageAnimation();
-    await processingAnim.start(ctx, "processing", { maxDuration: 30000 });
+    // Обрабатываем через систему с анимацией
+    await runWithAnimation(ctx, "processing", 30000, async () => {
+      try {
+        const result =
+          await apiClient.messages.processMessageAgents.processMessageFromTelegramWithAgents.mutate(
+            {
+              text,
+              channel: "telegram",
+              messageId: messageContext.messageId,
+              telegramUserId: messageContext.userId,
+            },
+          );
 
-    try {
-      const result =
-        await apiClient.messages.processMessageAgents.processMessageFromTelegramWithAgents.mutate(
-          {
-            text,
-            channel: "telegram",
-            messageId: messageContext.messageId,
-            telegramUserId: messageContext.userId,
-          },
-        );
+        if (result.success) {
+          // Форматируем ответ для Telegram
+          const formattedResponse = formatForTelegram(result.response, {
+            useEmojis: true,
+            useHTML: true,
+            addSeparators: false,
+          });
 
-      // Удаляем анимацию
-      const messageId = processingAnim.getMessageId();
-      const chatId = processingAnim.getChatId();
+          // Отправляем новый ответ
+          await ctx.reply(formattedResponse.text, { parse_mode: "HTML" });
+        } else {
+          // Обрабатываем ошибку
+          const errorMessage = createErrorMessage(
+            "Произошла ошибка при обработке запроса. Попробуйте еще раз.",
+            "Ошибка обработки",
+          );
 
-      if (messageId && chatId) {
-        try {
-          await ctx.api.deleteMessage(chatId, messageId);
-        } catch (error) {
-          console.warn("Не удалось удалить анимацию:", error);
+          await ctx.reply(errorMessage, { parse_mode: "HTML" });
         }
-      }
+      } catch (error) {
+        console.error("Error in text processing:", error);
 
-      // Останавливаем анимацию
-      await processingAnim.stop();
-
-      if (result.success) {
-        // Форматируем ответ для Telegram
-        const formattedResponse = formatForTelegram(result.response, {
-          useEmojis: true,
-          useHTML: true,
-          addSeparators: false,
-        });
-
-        // Отправляем новый ответ
-        await ctx.reply(formattedResponse.text, { parse_mode: "HTML" });
-      } else {
-        // Обрабатываем ошибку
         const errorMessage = createErrorMessage(
           "Произошла ошибка при обработке запроса. Попробуйте еще раз.",
           "Ошибка обработки",
@@ -114,31 +90,7 @@ export async function handleText(ctx: Context) {
 
         await ctx.reply(errorMessage, { parse_mode: "HTML" });
       }
-    } catch (error) {
-      console.error("Error in text processing:", error);
-
-      // Удаляем анимацию
-      const messageId = processingAnim.getMessageId();
-      const chatId = processingAnim.getChatId();
-
-      if (messageId && chatId) {
-        try {
-          await ctx.api.deleteMessage(chatId, messageId);
-        } catch (deleteError) {
-          console.warn("Не удалось удалить анимацию:", deleteError);
-        }
-      }
-
-      // Останавливаем анимацию
-      await processingAnim.stop();
-
-      const errorMessage = createErrorMessage(
-        "Произошла ошибка при обработке запроса. Попробуйте еще раз.",
-        "Ошибка обработки",
-      );
-
-      await ctx.reply(errorMessage, { parse_mode: "HTML" });
-    }
+    });
   } catch (error) {
     console.error("Error in text handler:", error);
     const errorMessage = createErrorMessage(

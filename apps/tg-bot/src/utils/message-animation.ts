@@ -24,7 +24,7 @@ export class MessageAnimation {
   private isActive: boolean = false;
 
   // Различные варианты анимации - естественные для пользователя
-  private readonly animations = {
+  public readonly animations = {
     processing: ["🤔 Думаю...", "🤔 Думаю.", "🤔 Думаю..", "🤔 Думаю..."],
     thinking: [
       "💭 Размышляю...",
@@ -70,7 +70,11 @@ export class MessageAnimation {
 
     try {
       // Отправляем начальное сообщение
-      const initialMessage = await ctx.reply(this.animations[type][0]);
+      const initialText = this.animations[type][0];
+      if (!initialText) {
+        throw new Error(`Invalid animation type: ${type}`);
+      }
+      const initialMessage = await ctx.reply(initialText);
       this.messageId = initialMessage.message_id;
 
       // Запускаем анимацию
@@ -88,11 +92,14 @@ export class MessageAnimation {
 
         try {
           frameIndex = (frameIndex + 1) % this.animations[type].length;
-          await ctx.api.editMessageText(
-            this.chatId,
-            this.messageId,
-            this.animations[type][frameIndex],
-          );
+          const frameText = this.animations[type][frameIndex];
+          if (frameText) {
+            await ctx.api.editMessageText(
+              this.chatId,
+              this.messageId,
+              frameText,
+            );
+          }
         } catch (error) {
           console.warn("Ошибка обновления анимации:", error);
           // Не останавливаем анимацию при ошибке редактирования

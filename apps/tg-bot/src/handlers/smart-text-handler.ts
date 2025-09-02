@@ -2,14 +2,12 @@ import type { Context } from "grammy";
 
 import { apiClient } from "../api/client";
 import { telegramFastResponseService } from "../services/fast-response-service";
+import { runWithAnimation } from "../utils/animation-helpers";
 import {
   createErrorMessage,
   createSuccessMessage,
 } from "../utils/html-message-builder";
-import {
-  agentsAnimation,
-  createMessageAnimation,
-} from "../utils/message-animation";
+import { agentsAnimation } from "../utils/message-animation";
 import { formatForTelegram } from "../utils/telegram-formatter";
 import { createMessageContext } from "../utils/telegram-utils";
 
@@ -37,33 +35,17 @@ export async function handleSmartText(ctx: Context) {
         `⚡ Fast response triggered: ${fastResponse.processingType} (confidence: ${fastResponse.confidence})`,
       );
 
-      // Показываем быструю анимацию для простых ответов
-      const quickAnim = await createMessageAnimation();
-      await quickAnim.start(ctx, "fast", { maxDuration: 1500 });
+      // Отправляем быстрый ответ с анимацией
+      await runWithAnimation(ctx, "fast", 1500, async () => {
+        await ctx.reply(fastResponse.fastResponse);
+      });
 
-      // Удаляем анимацию
-      const messageId = quickAnim.getMessageId();
-      const chatId = quickAnim.getChatId();
-
-      if (messageId && chatId) {
-        try {
-          await ctx.api.deleteMessage(chatId, messageId);
-        } catch (error) {
-          console.warn("Не удалось удалить быструю анимацию:", error);
-        }
+      // Если нужна полная обработка, запускаем её в фоне
+      if (fastResponse.needsFullProcessing) {
+        console.log(`🔄 Starting background processing for: "${text}"`);
+        processMessageInBackground(text, messageContext, ctx);
       }
 
-      // Останавливаем анимацию
-      await quickAnim.stop();
-
-      // Отправляем быстрый ответ
-      await ctx.reply(fastResponse.fastResponse);
-
-      // Новая логика: если FastResponseAgent дал ответ, значит это простое сообщение
-      // и полная обработка не нужна
-      console.log(
-        `✅ Simple message handled by fast response, no further processing needed`,
-      );
       return;
     }
 
@@ -72,47 +54,41 @@ export async function handleSmartText(ctx: Context) {
       `🔄 Useful message detected, processing through system: "${text}"`,
     );
 
-    // Запускаем анимацию для обработки
-    const agentsAnim = await agentsAnimation(ctx, 30000);
+    // Обрабатываем через систему с анимацией
+    await runWithAnimation(ctx, "agents", 30000, async () => {
+      try {
+        const result =
+          await apiClient.messages.processMessageAgents.processMessageFromTelegramWithAgents.mutate(
+            {
+              text,
+              channel: "telegram",
+              telegramUserId: messageContext.userId,
+              messageId: messageContext.messageId,
+            },
+          );
 
-    try {
-      const result =
-        await apiClient.messages.processMessageAgents.processMessageFromTelegramWithAgents.mutate(
-          {
-            text,
-            channel: "telegram",
-            telegramUserId: messageContext.userId,
-            messageId: messageContext.messageId,
-          },
-        );
+        if (result.success) {
+          // Форматируем ответ для Telegram
+          const formattedResponse = formatForTelegram(result.response, {
+            useEmojis: true,
+            useHTML: true,
+            addSeparators: false,
+          });
 
-      // Удаляем анимацию
-      const messageId = agentsAnim.getMessageId();
-      const chatId = agentsAnim.getChatId();
+          // Отправляем новый ответ
+          await ctx.reply(formattedResponse.text, { parse_mode: "HTML" });
+        } else {
+          // Обрабатываем ошибку
+          const errorMessage = createErrorMessage(
+            "Произошла ошибка при обработке запроса. Попробуйте еще раз.",
+            "Ошибка обработки",
+          );
 
-      if (messageId && chatId) {
-        try {
-          await ctx.api.deleteMessage(chatId, messageId);
-        } catch (error) {
-          console.warn("Не удалось удалить анимацию:", error);
+          await ctx.reply(errorMessage, { parse_mode: "HTML" });
         }
-      }
+      } catch (error) {
+        console.error("Error in smart text processing:", error);
 
-      // Останавливаем анимацию
-      await agentsAnim.stop();
-
-      if (result.success) {
-        // Форматируем ответ для Telegram
-        const formattedResponse = formatForTelegram(result.response, {
-          useEmojis: true,
-          useHTML: true,
-          addSeparators: false,
-        });
-
-        // Отправляем новый ответ
-        await ctx.reply(formattedResponse.text, { parse_mode: "HTML" });
-      } else {
-        // Обрабатываем ошибку
         const errorMessage = createErrorMessage(
           "Произошла ошибка при обработке запроса. Попробуйте еще раз.",
           "Ошибка обработки",
@@ -120,31 +96,7 @@ export async function handleSmartText(ctx: Context) {
 
         await ctx.reply(errorMessage, { parse_mode: "HTML" });
       }
-    } catch (error) {
-      console.error("Error in smart text processing:", error);
-
-      // Удаляем анимацию
-      const messageId = agentsAnim.getMessageId();
-      const chatId = agentsAnim.getChatId();
-
-      if (messageId && chatId) {
-        try {
-          await ctx.api.deleteMessage(chatId, messageId);
-        } catch (deleteError) {
-          console.warn("Не удалось удалить анимацию:", deleteError);
-        }
-      }
-
-      // Останавливаем анимацию
-      await agentsAnim.stop();
-
-      const errorMessage = createErrorMessage(
-        "Произошла ошибка при обработке запроса. Попробуйте еще раз.",
-        "Ошибка обработки",
-      );
-
-      await ctx.reply(errorMessage, { parse_mode: "HTML" });
-    }
+    });
   } catch (error) {
     console.error("Error in smart text handler:", error);
     const errorMessage = createErrorMessage(
