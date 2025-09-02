@@ -2,11 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { and, eq } from "drizzle-orm";
 
 import { db } from "@synoro/db/client";
-import {
-  conversations,
-  identityLinks,
-  users,
-} from "@synoro/db/schema";
+import { conversations, users } from "@synoro/db/schema";
 
 export interface TelegramUserContext {
   userId: string;
@@ -16,8 +12,8 @@ export interface TelegramUserContext {
 
 /**
  * Сервис для управления пользователями Telegram
- * Обеспечивает связь между telegramUserId и внутренними пользователями системы
- * Теперь все пользователи должны быть зарегистрированы в системе
+ * Автоматически создает анонимных пользователей для Telegram пользователей
+ * Убирает необходимость в identityLinks для базовой функциональности
  */
 export class TelegramUserService {
   /**
@@ -28,34 +24,40 @@ export class TelegramUserService {
   static async getUserContext(
     telegramUserId: string,
   ): Promise<TelegramUserContext> {
-    // 1. Ищем связанного пользователя через identityLinks
-    const identityLink = await db
+    // 1. Ищем существующего пользователя по telegramUserId в email
+    const existingUser = await db
       .select()
-      .from(identityLinks)
-      .where(
-        and(
-          eq(identityLinks.provider, "telegram"),
-          eq(identityLinks.providerUserId, telegramUserId),
-        ),
-      )
+      .from(users)
+      .where(eq(users.email, `telegram_${telegramUserId}@anonymous.local`))
       .limit(1);
 
-    if (identityLink.length === 0) {
-      throw new TRPCError({
-        code: "UNAUTHORIZED",
-        message: "Пользователь не зарегистрирован в системе",
-      });
-    }
+    let userId: string;
 
-    const link = identityLink[0];
-    if (!link) {
-      throw new TRPCError({
-        code: "UNAUTHORIZED",
-        message: "Пользователь не зарегистрирован в системе",
-      });
-    }
+    if (existingUser.length > 0) {
+      // Пользователь уже существует
+      userId = existingUser[0]!.id;
+    } else {
+      // Создаем нового анонимного пользователя
+      const [newUser] = await db
+        .insert(users)
+        .values({
+          name: `Telegram User ${telegramUserId}`,
+          email: `telegram_${telegramUserId}@anonymous.local`,
+          emailVerified: false,
+          role: "user",
+          status: "active",
+        })
+        .returning();
 
-    const userId = link.userId;
+      if (!newUser) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Не удалось создать пользователя",
+        });
+      }
+
+      userId = newUser.id;
+    }
 
     // 2. Получаем или создаем conversation
     const conversation = await TelegramUserService.getOrCreateConversation(
@@ -114,103 +116,42 @@ export class TelegramUserService {
     return newConversation;
   }
 
-
-
   /**
-   * Связывает Telegram пользователя с внутренним пользователем
+   * Получает информацию о пользователе Telegram
    * @param telegramUserId - ID пользователя в Telegram
-   * @param internalUserId - ID пользователя в системе
+   * @returns Объект с данными пользователя или null если пользователь не найден
    */
-  static async linkUser(
-    telegramUserId: string,
-    internalUserId: string,
-  ): Promise<void> {
-    // Проверяем, что пользователь существует
-    const usersExists = await db
-      .select()
-      .from(users)
-      .where(eq(users.id, internalUserId))
-      .limit(1);
-
-    if (usersExists.length === 0) {
-      throw new TRPCError({
-        code: "NOT_FOUND",
-        message: "Пользователь не найден",
-      });
-    }
-
-    // Создаем связь
-    await db
-      .insert(identityLinks)
-      .values({
-        userId: internalUserId,
-        provider: "telegram",
-        providerUserId: telegramUserId,
-      })
-      .onConflictDoNothing(); // Игнорируем дубликаты
-  }
-
-  /**
-   * Отвязывает Telegram пользователя от внутреннего пользователя
-   */
-  static async unlinkUser(telegramUserId: string): Promise<void> {
-    await db
-      .delete(identityLinks)
-      .where(
-        and(
-          eq(identityLinks.provider, "telegram"),
-          eq(identityLinks.providerUserId, telegramUserId),
-        ),
-      );
-  }
-
-  /**
-   * Получает информацию о связанном пользователе
-   * ⚠️ ВНИМАНИЕ: Этот метод возвращает PII (имя, email) и должен использоваться
-   * только авторизованными источниками (бот, внутренние сервисы)
-   * @param telegramUserId - ID пользователя в Telegram
-   * @returns Объект с данными пользователя или null если связь не найдена
-   */
-  static async getLinkedUser(telegramUserId: string) {
-    const link = await db
+  static async getTelegramUser(telegramUserId: string) {
+    const user = await db
       .select({
-        userId: identityLinks.userId,
-        users: {
-          id: users.id,
-          name: users.name,
-          email: users.email,
-        },
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        role: users.role,
+        status: users.status,
+        createdAt: users.createdAt,
       })
-      .from(identityLinks)
-      .innerJoin(users, eq(identityLinks.userId, users.id))
-      .where(
-        and(
-          eq(identityLinks.provider, "telegram"),
-          eq(identityLinks.providerUserId, telegramUserId),
-        ),
-      )
+      .from(users)
+      .where(eq(users.email, `telegram_${telegramUserId}@anonymous.local`))
       .limit(1);
 
-    return link.length > 0 ? link[0] : null;
+    return user.length > 0 ? user[0] : null;
   }
 
   /**
-   * Проверяет статус связи пользователя Telegram (без возврата PII)
+   * Проверяет существование пользователя Telegram
    * @param telegramUserId - ID пользователя в Telegram
-   * @returns true если пользователь связан, false если нет
+   * @returns true если пользователь существует, false если нет
    */
-  static async checkUserLinkStatus(telegramUserId: string): Promise<boolean> {
-    const link = await db
-      .select({ userId: identityLinks.userId })
-      .from(identityLinks)
-      .where(
-        and(
-          eq(identityLinks.provider, "telegram"),
-          eq(identityLinks.providerUserId, telegramUserId),
-        ),
-      )
+  static async checkTelegramUserExists(
+    telegramUserId: string,
+  ): Promise<boolean> {
+    const user = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.email, `telegram_${telegramUserId}@anonymous.local`))
       .limit(1);
 
-    return link.length > 0;
+    return user.length > 0;
   }
 }

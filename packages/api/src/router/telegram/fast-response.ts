@@ -2,12 +2,12 @@ import { z } from "zod";
 
 import type { AgentTask } from "../../lib/agents/types";
 import { FastResponseAgent } from "../../lib/agents/fast-response-agent";
-import {  protectedProcedure } from "../../trpc";
+import { enhancedBotProcedure, protectedProcedure } from "../../trpc";
 
 const fastResponseAgent = new FastResponseAgent();
 
 export const fastResponseRouter = {
-  analyze: protectedProcedure
+  analyze: enhancedBotProcedure
     .input(
       z.object({
         text: z.string(),
@@ -61,14 +61,14 @@ export const fastResponseRouter = {
             processingType: "fast" as const,
           };
         }
-          // Если агент не смог дать быстрый ответ, отправляем на полную обработку
-          return {
-            shouldSendFast: false,
-            fastResponse: "",
-            needsFullProcessing: true,
-            confidence: result.confidence,
-            processingType: "full" as const,
-          };
+        // Если агент не смог дать быстрый ответ, отправляем на полную обработку
+        return {
+          shouldSendFast: false,
+          fastResponse: "",
+          needsFullProcessing: true,
+          confidence: result.confidence,
+          processingType: "full" as const,
+        };
       } catch (error) {
         console.error("Ошибка в FastResponseRouter:", error);
 
@@ -95,4 +95,4 @@ export const fastResponseRouter = {
     fastResponseAgent.clearCache();
     return { success: true };
   }),
-  };
+};

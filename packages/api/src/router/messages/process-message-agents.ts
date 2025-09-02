@@ -45,12 +45,17 @@ export const processMessageAgentsRouter = {
     .input(ProcessMessageWithAgentsInput)
     .output(ProcessMessageWithAgentsResponse)
     .mutation(async ({ ctx, input }) => {
-      const userId = ctx.session.user.id;
-
+      const userId = ctx.session?.user.id;
+      if (!userId) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Пользователь не зарегистрирован в системе",
+        });
+      }
       return processMessageWithAgents({
         text: input.text,
         channel: input.channel,
-        userId,
+        userId: userId,
         ctx,
         messageId: input.messageId,
         metadata: input.metadata,

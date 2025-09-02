@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
 
-import type { TRPCInstance } from "../trpc";
+import type { TRPCInstance } from "../../trpc";
 
 // RBAC helpers
 export type Role = "user" | "admin";

@@ -10,9 +10,9 @@ import { initTRPC } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
-import type { TRPCContext } from "./lib/trpc-context";
-import { createHonoContext, createTRPCContext } from "./lib/trpc-context";
-import { createProcedures } from "./lib/trpc-procedures";
+import type { TRPCContext } from "./lib/trpc/trpc-context";
+import { createHonoContext, createTRPCContext } from "./lib/trpc/trpc-context";
+import { createProcedures } from "./lib/trpc/trpc-procedures";
 
 // Re-export context functions for backward compatibility
 export { createTRPCContext, createHonoContext, type TRPCContext };
@@ -61,7 +61,6 @@ const procedures = createProcedures(t);
 export const {
   publicProcedure,
   telegramAnonymousProcedure,
-  botProcedure,
   enhancedBotProcedure,
   protectedProcedure,
   adminProcedure,

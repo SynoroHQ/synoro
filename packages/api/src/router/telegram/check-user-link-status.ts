@@ -10,11 +10,11 @@ export const checkUserLinkStatus = publicProcedure
     }),
   )
   .query(async ({ input }) => {
-    const isLinked = await TelegramUserService.checkUserLinkStatus(
+    const exists = await TelegramUserService.checkTelegramUserExists(
       input.telegramUserId,
     );
     return {
-      isLinked,
+      isLinked: exists,
       // Не возвращаем name, email или другие PII
     };
   });

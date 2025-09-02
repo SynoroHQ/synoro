@@ -1,8 +1,7 @@
 import { TRPCError } from "@trpc/server";
 
-import type { TRPCInstance } from "../trpc";
+import type { TRPCInstance } from "../../trpc";
 import {
-  createBotAuthMiddleware,
   createCsrfMiddleware,
   createEnhancedBotAuthMiddleware,
   createLoggingMiddleware,
@@ -20,7 +19,6 @@ export const createProcedures = (t: TRPCInstance) => {
   const loggingMiddleware = createLoggingMiddleware(t);
   const rateLimitMiddleware = createRateLimitMiddleware(t);
   const csrfMiddleware = createCsrfMiddleware(t);
-  const botAuthMiddleware = createBotAuthMiddleware(t);
   const enhancedBotAuthMiddleware = createEnhancedBotAuthMiddleware(t);
   const telegramAnonymousAuthMiddleware =
     createTelegramAnonymousAuthMiddleware(t);
@@ -49,18 +47,6 @@ export const createProcedures = (t: TRPCInstance) => {
     .use(csrfMiddleware)
     .use(rateLimitMiddleware)
     .use(telegramAnonymousAuthMiddleware);
-
-  /**
-   * Bot (authenticated) procedure
-   *
-   * This procedure is specifically for Telegram bot requests. It validates the bot token
-   * and provides bot-specific context.
-   */
-  const botProcedure = t.procedure
-    .use(timingMiddleware)
-    .use(csrfMiddleware)
-    .use(rateLimitMiddleware)
-    .use(botAuthMiddleware);
 
   /**
    * Enhanced bot procedure
@@ -94,7 +80,6 @@ export const createProcedures = (t: TRPCInstance) => {
 
       return next({
         ctx: {
-          // ✅ user value is known to be non-null now
           session: { ...ctx.session, user: ctx.session.user },
         },
       });
@@ -111,7 +96,6 @@ export const createProcedures = (t: TRPCInstance) => {
   return {
     publicProcedure,
     telegramAnonymousProcedure,
-    botProcedure,
     enhancedBotProcedure,
     protectedProcedure,
     adminProcedure,
