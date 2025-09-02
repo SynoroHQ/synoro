@@ -29,7 +29,7 @@ export async function handleOther(ctx: Context): Promise<void> {
     const caption = typeof msg.caption === "string" ? msg.caption.trim() : "";
 
     // Удаляем сообщение "Обрабатываем..." если оно было отправлено
-    await removeProcessingMessage(ctx, processingMessageId, ctx.chat!.id);
+    await removeProcessingMessage(ctx, processingMessageId);
 
     if (caption) {
       await ctx.reply(
@@ -47,7 +47,7 @@ export async function handleOther(ctx: Context): Promise<void> {
     );
   } catch (error) {
     // Удаляем сообщение "Обрабатываем..." в случае ошибки
-    await removeProcessingMessage(ctx, processingMessageId, ctx.chat!.id);
+    await removeProcessingMessage(ctx, processingMessageId);
 
     console.error("Other message handling error:", error);
     await ctx.reply(

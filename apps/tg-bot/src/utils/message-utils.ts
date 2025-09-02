@@ -57,6 +57,8 @@ export class ProcessingAnimation {
     this.currentStage = (this.currentStage + 1) % PROCESSING_STAGES.length;
     const stage = PROCESSING_STAGES[this.currentStage];
 
+    if (!stage) return;
+
     try {
       await this.ctx.api.editMessageText(
         this.ctx.chat!.id,

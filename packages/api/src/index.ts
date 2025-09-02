@@ -6,7 +6,6 @@ import { appRouter } from "./root";
 import { main } from "./server";
 import {
   createCallerFactory,
-  createExpressContext,
   createTRPCContext,
 } from "./trpc";
 
@@ -37,7 +36,6 @@ type RouterOutputs = inferRouterOutputs<AppRouter>;
 
 export {
   createTRPCContext,
-  createExpressContext,
   appRouter,
   createCaller,
   startTracing,

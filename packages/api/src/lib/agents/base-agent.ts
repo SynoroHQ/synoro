@@ -112,11 +112,9 @@ export abstract class AbstractAgent implements BaseAgent {
         agentName: this.name,
         taskType: task.type,
         taskId: task.id,
-        userId: context?.userId ?? "anonymous",
-        channel: context?.channel ?? "unknown",
-        // Убираем лишние поля, оставляем только необходимые
-        ...(context?.chatId && { chatId: context.chatId }),
-        ...(context?.messageId && { messageId: context.messageId }),
+        userId: context.userId ?? "anonymous",
+        channel: context.channel ?? "unknown",
+        ...(context.messageId ? { messageId: context.messageId } : undefined),
       },
     };
   }

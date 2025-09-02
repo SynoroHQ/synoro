@@ -438,27 +438,10 @@ export class SmartReminderAgent extends AbstractAgent {
    * Создает анонимного пользователя, если необходимо
    */
   private async prepareUser(context?: AgentContext): Promise<string> {
-    let userId = context?.userId;
-
-    // Если userId не указан, но есть telegramChatId, создаем анонимного пользователя
-    if (!userId && context?.telegramChatId) {
-      const { AnonymousUserService } = await import(
-        "../services/anonymous-user-service"
-      );
-      const anonymousUserService = new AnonymousUserService();
-
-      const telegramChatId = context.telegramChatId as string;
-      const anonymousUser = await anonymousUserService.getOrCreateAnonymousUser(
-        {
-          telegramChatId,
-        },
-      );
-
-      userId = anonymousUser.id;
-    }
+    const userId = context?.userId;
 
     if (!userId) {
-      throw new Error("Не указан пользователь или telegramChatId");
+      throw new Error("Не указан пользователь");
     }
 
     return userId;

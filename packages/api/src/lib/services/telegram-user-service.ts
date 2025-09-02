@@ -5,33 +5,30 @@ import { db } from "@synoro/db/client";
 import {
   conversations,
   identityLinks,
-  processedIdempotencyKeys,
-  user,
+  users,
 } from "@synoro/db/schema";
 
 export interface TelegramUserContext {
-  userId: string | null; // null для анонимных пользователей
+  userId: string;
   telegramUserId: string;
-  isAnonymous: boolean;
   conversationId: string;
 }
 
 /**
  * Сервис для управления пользователями Telegram
  * Обеспечивает связь между telegramUserId и внутренними пользователями системы
+ * Теперь все пользователи должны быть зарегистрированы в системе
  */
 export class TelegramUserService {
   /**
    * Получает или создает контекст пользователя Telegram
    * @param telegramUserId - ID пользователя в Telegram
-   * @param messageId - ID сообщения для идемпотентности
-   * @returns Контекст пользователя с userId (null для анонимных) и conversationId
+   * @returns Контекст пользователя с usersId и conversationId
    */
   static async getUserContext(
     telegramUserId: string,
-    messageId?: string,
   ): Promise<TelegramUserContext> {
-    // 1. Пытаемся найти связанного пользователя через identityLinks
+    // 1. Ищем связанного пользователя через identityLinks
     const identityLink = await db
       .select()
       .from(identityLinks)
@@ -43,36 +40,28 @@ export class TelegramUserService {
       )
       .limit(1);
 
-    let userId: string | null = null;
-    let isAnonymous = false;
-
-    if (identityLink.length > 0) {
-      // Пользователь зарегистрирован в системе
-      const link = identityLink[0];
-      if (link) {
-        userId = link.userId;
-        isAnonymous = false;
-      } else {
-        userId = null;
-        isAnonymous = true;
-      }
-    } else {
-      // Анонимный пользователь
-      userId = null;
-      isAnonymous = true;
+    if (identityLink.length === 0) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "Пользователь не зарегистрирован в системе",
+      });
     }
+
+    const link = identityLink[0];
+    if (!link) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "Пользователь не зарегистрирован в системе",
+      });
+    }
+
+    const userId = link.userId;
 
     // 2. Получаем или создаем conversation
     const conversation = await TelegramUserService.getOrCreateConversation(
       userId,
       telegramUserId,
-      isAnonymous,
     );
-
-    // 3. Если это анонимный пользователь и есть messageId, проверяем идемпотентность
-    if (isAnonymous && messageId) {
-      await TelegramUserService.checkIdempotency(telegramUserId, messageId);
-    }
 
     if (!conversation) {
       throw new TRPCError({
@@ -84,7 +73,6 @@ export class TelegramUserService {
     return {
       userId,
       telegramUserId,
-      isAnonymous,
       conversationId: conversation.id,
     };
   }
@@ -93,92 +81,40 @@ export class TelegramUserService {
    * Получает или создает conversation для пользователя
    */
   private static async getOrCreateConversation(
-    userId: string | null,
+    userId: string,
     telegramUserId: string,
-    isAnonymous: boolean,
   ) {
-    if (isAnonymous) {
-      // Для анонимных пользователей ищем по telegramUserId
-      const existingConversation = await db
-        .select()
-        .from(conversations)
-        .where(
-          and(
-            eq(conversations.telegramUserId, telegramUserId),
-            eq(conversations.channel, "telegram"),
-          ),
-        )
-        .limit(1);
-
-      if (existingConversation.length > 0) {
-        return existingConversation[0];
-      }
-
-      // Создаем новую conversation для анонимного пользователя
-      const [newConversation] = await db
-        .insert(conversations)
-        .values({
-          telegramUserId: telegramUserId,
-          channel: "telegram",
-          title: `Telegram User ${telegramUserId}`,
-          status: "active",
-        })
-        .returning();
-
-      return newConversation;
-    }
-      // Для зарегистрированных пользователей ищем по userId
-      const existingConversation = await db
-        .select()
-        .from(conversations)
-        .where(
-          and(
-            eq(conversations.ownerUserId, userId!),
-            eq(conversations.channel, "telegram"),
-          ),
-        )
-        .limit(1);
-
-      if (existingConversation.length > 0) {
-        return existingConversation[0];
-      }
-
-      // Создаем новую conversation для зарегистрированного пользователя
-      const [newConversation] = await db
-        .insert(conversations)
-        .values({
-          ownerUserId: userId!,
-          channel: "telegram",
-          title: `Telegram User ${telegramUserId}`,
-          status: "active",
-        })
-        .returning();
-
-      return newConversation;
-  }
-
-  /**
-   * Проверяет идемпотентность для анонимных пользователей
-   */
-  private static async checkIdempotency(telegramUserId: string, messageId: string) {
-    const existingKey = await db
+    // Ищем существующую conversation по userId
+    const existingConversation = await db
       .select()
-      .from(processedIdempotencyKeys)
+      .from(conversations)
       .where(
         and(
-          eq(processedIdempotencyKeys.telegramUserId, telegramUserId),
-          eq(processedIdempotencyKeys.idempotencyKey, messageId),
+          eq(conversations.ownerUserId, userId),
+          eq(conversations.channel, "telegram"),
         ),
       )
       .limit(1);
 
-    if (existingKey.length > 0) {
-      throw new TRPCError({
-        code: "CONFLICT",
-        message: "Сообщение уже было обработано",
-      });
+    if (existingConversation.length > 0) {
+      return existingConversation[0];
     }
+
+    // Создаем новую conversation для пользователя
+    const [newConversation] = await db
+      .insert(conversations)
+      .values({
+        ownerUserId: userId,
+        channel: "telegram",
+        title: `Telegram User ${telegramUserId}`,
+        status: "active",
+      })
+      .returning();
+
+    return newConversation;
   }
+
+
 
   /**
    * Связывает Telegram пользователя с внутренним пользователем
@@ -190,13 +126,13 @@ export class TelegramUserService {
     internalUserId: string,
   ): Promise<void> {
     // Проверяем, что пользователь существует
-    const userExists = await db
+    const usersExists = await db
       .select()
-      .from(user)
-      .where(eq(user.id, internalUserId))
+      .from(users)
+      .where(eq(users.id, internalUserId))
       .limit(1);
 
-    if (userExists.length === 0) {
+    if (usersExists.length === 0) {
       throw new TRPCError({
         code: "NOT_FOUND",
         message: "Пользователь не найден",
@@ -239,14 +175,14 @@ export class TelegramUserService {
     const link = await db
       .select({
         userId: identityLinks.userId,
-        user: {
-          id: user.id,
-          name: user.name,
-          email: user.email,
+        users: {
+          id: users.id,
+          name: users.name,
+          email: users.email,
         },
       })
       .from(identityLinks)
-      .innerJoin(user, eq(identityLinks.userId, user.id))
+      .innerJoin(users, eq(identityLinks.userId, users.id))
       .where(
         and(
           eq(identityLinks.provider, "telegram"),

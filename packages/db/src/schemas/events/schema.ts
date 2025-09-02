@@ -52,15 +52,15 @@ export const eventLogs = pgTable(
       .notNull()
       .defaultNow(),
   },
-  (table) => ({
-    sourceIdx: index("event_log_source_idx").on(table.source),
-    chatIdx: index("event_log_chat_idx").on(table.chatId),
-    typeIdx: index("event_log_type_idx").on(table.type),
-    statusIdx: index("event_log_status_idx").on(table.status),
-    createdAtIdx: index("event_log_created_at_idx").on(table.createdAt),
-    sourceChatIdx: index("event_log_source_chat_idx").on(
+  (table) => [
+    index("event_log_source_idx").on(table.source),
+    index("event_log_chat_idx").on(table.chatId),
+    index("event_log_type_idx").on(table.type),
+    index("event_log_status_idx").on(table.status),
+    index("event_log_created_at_idx").on(table.createdAt),
+    index("event_log_source_chat_idx").on(
       table.source,
       table.chatId,
     ),
-  }),
+  ],
 );

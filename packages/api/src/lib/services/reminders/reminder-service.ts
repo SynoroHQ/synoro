@@ -5,7 +5,6 @@ import type {
   ReminderSortOptions as ValidatorReminderSortOptions,
 } from "@synoro/validators";
 
-import { AnonymousReminderService } from "./anonymous-reminder-service";
 import { BaseReminderService } from "./base-reminder-service";
 import { ReminderRecurrenceService } from "./reminder-recurrence-service";
 import { ReminderSearchService } from "./reminder-search-service";
@@ -18,14 +17,12 @@ export class ReminderService extends BaseReminderService {
   private searchService: ReminderSearchService;
   private statsService: ReminderStatsService;
   private recurrenceService: ReminderRecurrenceService;
-  private anonymousService: AnonymousReminderService;
 
   constructor() {
     super();
     this.searchService = new ReminderSearchService();
     this.statsService = new ReminderStatsService();
     this.recurrenceService = new ReminderRecurrenceService();
-    this.anonymousService = new AnonymousReminderService();
   }
 
   // Методы поиска и фильтрации
@@ -73,9 +70,7 @@ export class ReminderService extends BaseReminderService {
     return this.statsService.getUserReminderStats(userId);
   }
 
-  async getAnonymousUserReminderStats(telegramChatId: string) {
-    return this.statsService.getAnonymousUserReminderStats(telegramChatId);
-  }
+
 
   // Методы для повторяющихся напоминаний
   async createRecurringReminder(
@@ -100,20 +95,5 @@ export class ReminderService extends BaseReminderService {
     );
   }
 
-  // Методы для анонимных пользователей
-  async getRemindersByTelegramChatId(
-    telegramChatId: string,
-  ): Promise<Reminder[]> {
-    return this.anonymousService.getRemindersByTelegramChatId(telegramChatId);
-  }
 
-  async createReminderForAnonymousUser(
-    telegramChatId: string,
-    reminderData: Omit<ValidatorReminder, "userId">,
-  ): Promise<Reminder> {
-    return this.anonymousService.createReminderForAnonymousUser(
-      telegramChatId,
-      reminderData,
-    );
-  }
 }

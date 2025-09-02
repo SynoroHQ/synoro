@@ -29,7 +29,7 @@ export class TelegramFastResponseService {
         messageId,
       });
 
-      return result;
+      return result as TelegramFastResponse;
     } catch (error) {
       console.error("Ошибка в TelegramFastResponseService:", error);
 

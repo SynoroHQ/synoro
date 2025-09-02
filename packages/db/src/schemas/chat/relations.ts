@@ -5,7 +5,6 @@ import { files } from "../core/files";
 import {
   conversations,
   identityLinks,
-  messageAttachments,
   messages,
 } from "./schema";
 
@@ -36,24 +35,10 @@ export const messageRelations = relations(messages, ({ one, many }) => ({
   children: many(messages, {
     relationName: "messageThread",
   }),
-  attachments: many(messageAttachments),
+
 }));
 
-// Relations for messageAttachment
-export const messageAttachmentRelations = relations(
-  messageAttachments,
-  ({ one }) => ({
-    message: one(messages, {
-      fields: [messageAttachments.messageId],
-      references: [messages.id],
-    }),
-    // Связь с новой системой файлов
-    file: one(files, {
-      fields: [messageAttachments.fileId],
-      references: [files.id],
-    }),
-  }),
-);
+
 
 // Relations for identityLink
 export const identityLinkRelations = relations(identityLinks, ({ one }) => ({

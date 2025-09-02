@@ -416,12 +416,12 @@ export class TelegramFormatter {
       const line = lines[i];
 
       // Если строка содержит разделители таблицы
-      if (line.includes("|")) {
+      if (line && line.includes("|")) {
         const cells = line.split("|").map((cell) => cell.trim());
         const formattedCells = cells.map((cell) => `<code>${cell}</code>`);
         formattedLines.push(formattedCells.join(" | "));
       } else {
-        formattedLines.push(line);
+        formattedLines.push(line ?? "");
       }
     }
 

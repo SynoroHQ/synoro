@@ -7,7 +7,7 @@
  * The pieces you will need to use are documented accordingly near the end
  */
 import crypto from "crypto";
-import type { CreateExpressContextOptions } from "@trpc/server/adapters/express";
+// Removed Express-specific imports
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
@@ -73,21 +73,15 @@ export type TRPCContext = Awaited<ReturnType<typeof createTRPCContext>> & {
 };
 
 /**
- * Express adapter context creation
- * This is used by the Express adapter to create context for each request
+ * Hono adapter context creation
+ * This is used by the Hono adapter to create context for each request
  */
-export const createExpressContext = async (
-  opts: CreateExpressContextOptions,
-) => {
+export const createHonoContext = async (opts: { req: Request }) => {
   const headers = new Headers();
 
-  // Copy headers from Express request to Headers object
-  Object.entries(opts.req.headers).forEach(([key, value]) => {
-    if (typeof value === "string") {
-      headers.set(key, value);
-    } else if (Array.isArray(value)) {
-      headers.set(key, value.join(", "));
-    }
+  // Copy headers from Hono request to Headers object
+  opts.req.headers.forEach((value, key) => {
+    headers.set(key, value);
   });
 
   return createTRPCContext({

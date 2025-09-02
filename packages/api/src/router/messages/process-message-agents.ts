@@ -74,7 +74,6 @@ export const processMessageAgentsRouter = {
       // Получаем контекст пользователя
       const userContext = await TelegramUserService.getUserContext(
         telegramUserId,
-        input.messageId,
       );
 
       return processMessageWithAgents({
@@ -86,7 +85,6 @@ export const processMessageAgentsRouter = {
         metadata: {
           ...input.metadata,
           telegramUserId,
-          isAnonymous: userContext.isAnonymous,
           conversationId: userContext.conversationId,
         },
         options: input.agentOptions,

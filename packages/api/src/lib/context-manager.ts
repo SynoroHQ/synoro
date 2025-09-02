@@ -40,14 +40,14 @@ export interface ConversationContext {
  * Получает контекст беседы для пользователя и канала связи
  *
  * @param ctx - Контекст TRPC
- * @param userId - ID пользователя
+ * @param userId - ID пользователя (обязательно)
  * @param channel - Канал связи (telegram, web, mobile)
  * @param options - Настройки контекста
  * @returns Контекст беседы
  */
 export async function getConversationContext(
   ctx: TRPCContext,
-  userId: string | null, // userId может быть null для анонимных пользователей
+  userId: string, // userId теперь обязателен
   channel: "telegram" | "web" | "mobile",
   options: ContextOptions = {},
 ): Promise<ConversationContext> {
@@ -57,49 +57,25 @@ export async function getConversationContext(
     maxAgeHours = 24,
   } = options;
 
-  let conversation: typeof conversations.$inferSelect | null = null;
-
-  if (userId) {
-    // Для зарегистрированных пользователей
-    const conditions = [
-      eq(conversations.ownerUserId, userId),
-      eq(conversations.channel, channel),
-    ];
-
-    // Убираем поиск по title, так как chatId это Telegram chatId, а не заголовок conversation
-    // if (chatId) {
-    //   conditions.push(eq(conversations.title, chatId));
-    // }
-
-    conversation =
-      (await ctx.db.query.conversations.findFirst({
-        where: conditions.length === 1 ? conditions[0] : and(...conditions),
-      })) ?? null;
-  } else if (channel === "telegram") {
-    // Для анонимных пользователей Telegram
-    conversation =
-      (await ctx.db.query.conversations.findFirst({
-        where: and(
-          eq(conversations.telegramChatId, userId || "anonymous"),
-          eq(conversations.channel, "telegram"),
-        ),
-      })) ?? null;
-  }
+  // Ищем существующую беседу для пользователя
+  let conversation =
+    (await ctx.db.query.conversations.findFirst({
+      where: and(
+        eq(conversations.ownerUserId, userId),
+        eq(conversations.channel, channel),
+      ),
+    })) ?? null;
 
   // Если беседа не найдена, создаем новую
   if (!conversation) {
     const conversationData: typeof conversations.$inferInsert = {
+      ownerUserId: userId,
       channel,
-      title: `${channel}_conversation_${Date.now()}`, // Уникальный заголовок, не связанный с chatId
+      title: `${channel}_conversation_${Date.now()}`,
       status: "active",
       lastMessageAt: new Date(),
     };
 
-    if (userId) {
-      conversationData.ownerUserId = userId;
-    } else if (channel === "telegram") {
-      conversationData.telegramChatId = userId || "anonymous";
-    }
     const [newConversation] = await ctx.db
       .insert(conversations)
       .values(conversationData)
