@@ -10,7 +10,6 @@ import {
   getAgentSystemStats,
   processMessageWithAgents,
 } from "../../lib/services/agent-message-processor";
-import { TelegramUserService } from "../../lib/services/telegram-user-service";
 import { enhancedBotProcedure, protectedProcedure } from "../../trpc";
 
 // Схема для агентных опций

@@ -1,6 +1,6 @@
 import { pathToFileURL } from "url";
-import { Hono } from "hono";
 import { trpcServer } from "@hono/trpc-server";
+import { Hono } from "hono";
 
 import { startTracing, stopTracing } from "./otel";
 import { appRouter } from "./root";
@@ -23,7 +23,7 @@ async function main() {
 
     // Add tRPC middleware
     app.use(
-      "/api/trpc/*",
+      "/trpc/*",
       trpcServer({
         router: appRouter,
         createContext: createHonoContext,
@@ -31,20 +31,22 @@ async function main() {
     );
 
     // Start the server
-    const port = process.env.PORT ? Number.parseInt(process.env.PORT, 10) : 4000;
+    const port = process.env.PORT
+      ? Number.parseInt(process.env.PORT, 10)
+      : 4000;
     const server = {
       close: (callback?: () => void) => {
         // Hono doesn't have a built-in close method, so we'll simulate it
         if (callback) callback();
-      }
+      },
     };
-    
+
     // Start the server using Bun's serve
     Bun.serve({
       port,
       fetch: app.fetch,
     });
-    
+
     console.log(`🚀 Server running on http://localhost:${port}`);
     console.log(`📡 tRPC API available at http://localhost:${port}/api/trpc`);
 

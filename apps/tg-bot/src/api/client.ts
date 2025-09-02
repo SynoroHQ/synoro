@@ -9,7 +9,7 @@ import { env } from "../env";
 export const apiClient = createTRPCClient<typeof appRouter>({
   links: [
     httpBatchLink({
-      url: `${env.API_BASE_URL}/api/trpc`,
+      url: `${env.API_BASE_URL}/trpc`,
       headers: () => ({
         Authorization: `Bearer ${env.TELEGRAM_BOT_TOKEN}`,
       }),

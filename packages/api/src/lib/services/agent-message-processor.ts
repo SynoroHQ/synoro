@@ -19,7 +19,7 @@ import {
 export interface ProcessAgentMessageParams {
   text: string;
   channel: "telegram" | "web" | "mobile";
-  userId: string | null;
+  userId: string;
   ctx: TRPCContext;
   messageId?: string;
   metadata?: Record<string, unknown>;
