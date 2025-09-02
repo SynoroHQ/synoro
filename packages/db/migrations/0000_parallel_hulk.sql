@@ -54,20 +54,15 @@ CREATE TABLE "sessions" (
 CREATE TABLE "users" (
 	"id" text PRIMARY KEY NOT NULL,
 	"name" text NOT NULL,
-	"email" text,
-	"email_verified" boolean DEFAULT false,
+	"email" text NOT NULL,
+	"email_verified" boolean DEFAULT false NOT NULL,
 	"image" text,
 	"role" "user_role" DEFAULT 'user' NOT NULL,
 	"status" "user_status" DEFAULT 'active' NOT NULL,
 	"last_login_at" timestamp with time zone,
-	"is_anonymous" boolean DEFAULT false NOT NULL,
-	"telegram_chat_id" text,
-	"telegram_username" text,
-	"telegram_first_name" text,
-	"telegram_last_name" text,
-	"anonymous_expires_at" timestamp with time zone,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "users_email_unique" UNIQUE("email")
 );
 --> statement-breakpoint
 CREATE TABLE "verifications" (
@@ -235,15 +230,13 @@ CREATE TABLE "attachments" (
 --> statement-breakpoint
 CREATE TABLE "conversations" (
 	"id" text PRIMARY KEY NOT NULL,
-	"owner_user_id" text,
-	"telegram_chat_id" text,
+	"owner_user_id" text NOT NULL,
 	"channel" "chat_channel" NOT NULL,
 	"title" text,
 	"status" text DEFAULT 'active' NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"last_message_at" timestamp with time zone,
-	CONSTRAINT "conversation_owner_or_telegram_uidx" UNIQUE("owner_user_id","telegram_chat_id")
+	"last_message_at" timestamp with time zone
 );
 --> statement-breakpoint
 CREATE TABLE "identity_links" (
@@ -266,15 +259,6 @@ CREATE TABLE "messages" (
 	"status" text DEFAULT 'completed' NOT NULL,
 	"parent_id" text,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL
-);
---> statement-breakpoint
-CREATE TABLE "processed_idempotency_keys" (
-	"id" text PRIMARY KEY NOT NULL,
-	"telegram_chat_id" text NOT NULL,
-	"idempotency_key" text NOT NULL,
-	"message_id" text NOT NULL,
-	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
-	CONSTRAINT "idempotency_telegram_key_uidx" UNIQUE("telegram_chat_id","idempotency_key")
 );
 --> statement-breakpoint
 CREATE TABLE "reminder_executions" (
@@ -360,10 +344,6 @@ CREATE INDEX "user_email_idx" ON "users" USING btree ("email");--> statement-bre
 CREATE INDEX "user_role_idx" ON "users" USING btree ("role");--> statement-breakpoint
 CREATE INDEX "user_status_idx" ON "users" USING btree ("status");--> statement-breakpoint
 CREATE INDEX "user_created_at_idx" ON "users" USING btree ("created_at");--> statement-breakpoint
-CREATE INDEX "user_anonymous_idx" ON "users" USING btree ("is_anonymous");--> statement-breakpoint
-CREATE INDEX "user_telegram_chat_idx" ON "users" USING btree ("telegram_chat_id");--> statement-breakpoint
-CREATE INDEX "user_anonymous_expires_idx" ON "users" USING btree ("anonymous_expires_at");--> statement-breakpoint
-CREATE UNIQUE INDEX "user_telegram_chat_anonymous_uidx" ON "users" USING btree ("telegram_chat_id","is_anonymous");--> statement-breakpoint
 CREATE INDEX "verification_identifier_idx" ON "verifications" USING btree ("identifier");--> statement-breakpoint
 CREATE INDEX "verification_type_idx" ON "verifications" USING btree ("type");--> statement-breakpoint
 CREATE INDEX "verification_expires_idx" ON "verifications" USING btree ("expires_at");--> statement-breakpoint
@@ -419,7 +399,6 @@ CREATE INDEX "attachment_type_idx" ON "attachments" USING btree ("type");--> sta
 CREATE INDEX "attachment_created_at_idx" ON "attachments" USING btree ("created_at");--> statement-breakpoint
 CREATE INDEX "attachment_file_idx" ON "attachments" USING btree ("file_id");--> statement-breakpoint
 CREATE INDEX "conversation_owner_user_idx" ON "conversations" USING btree ("owner_user_id");--> statement-breakpoint
-CREATE INDEX "conversation_telegram_chat_idx" ON "conversations" USING btree ("telegram_chat_id");--> statement-breakpoint
 CREATE INDEX "conversation_channel_idx" ON "conversations" USING btree ("channel");--> statement-breakpoint
 CREATE INDEX "conversation_status_idx" ON "conversations" USING btree ("status");--> statement-breakpoint
 CREATE INDEX "conversation_last_message_idx" ON "conversations" USING btree ("last_message_at");--> statement-breakpoint
@@ -431,9 +410,6 @@ CREATE INDEX "message_status_idx" ON "messages" USING btree ("status");--> state
 CREATE INDEX "message_parent_idx" ON "messages" USING btree ("parent_id");--> statement-breakpoint
 CREATE INDEX "message_created_at_idx" ON "messages" USING btree ("created_at");--> statement-breakpoint
 CREATE INDEX "message_conversation_created_idx" ON "messages" USING btree ("conversation_id","created_at");--> statement-breakpoint
-CREATE INDEX "idempotency_telegram_chat_idx" ON "processed_idempotency_keys" USING btree ("telegram_chat_id");--> statement-breakpoint
-CREATE INDEX "idempotency_key_idx" ON "processed_idempotency_keys" USING btree ("idempotency_key");--> statement-breakpoint
-CREATE INDEX "idempotency_created_at_idx" ON "processed_idempotency_keys" USING btree ("created_at");--> statement-breakpoint
 CREATE INDEX "reminder_executions_reminder_id_idx" ON "reminder_executions" USING btree ("reminder_id");--> statement-breakpoint
 CREATE INDEX "reminder_executions_executed_at_idx" ON "reminder_executions" USING btree ("executed_at");--> statement-breakpoint
 CREATE INDEX "reminder_executions_status_idx" ON "reminder_executions" USING btree ("status");--> statement-breakpoint

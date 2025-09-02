@@ -70,6 +70,8 @@ export type TRPCContext = Awaited<ReturnType<typeof createTRPCContext>> & {
   isBotRequest?: boolean;
   telegramUserId?: string;
   isTelegramAnonymous?: boolean;
+  userId?: string | null;
+  conversationId?: string;
 };
 
 /**
@@ -225,8 +227,63 @@ const botAuthMiddleware = t.middleware(async ({ ctx, next }) => {
   return next({
     ctx: {
       ...ctx,
-      botUserId: ctx.session?.user?.id || "bot_user", // Fallback if no session user
+      botUserId: ctx.session?.user?.id ?? "bot_user", // Fallback if no session user
       isBotRequest: true,
+    },
+  });
+});
+
+// Enhanced bot middleware that extracts telegramUserId and resolves userId
+const enhancedBotAuthMiddleware = t.middleware(async ({ ctx, input, next }) => {
+  const authHeader = ctx.token;
+
+  if (!authHeader?.startsWith("Bearer ")) {
+    throw new TRPCError({
+      code: "UNAUTHORIZED",
+      message: "Missing or invalid Authorization header",
+    });
+  }
+
+  const token = authHeader.substring(7); // Remove "Bearer " prefix
+
+  // Validate the bot token
+  if (token !== env.TELEGRAM_BOT_TOKEN) {
+    throw new TRPCError({
+      code: "UNAUTHORIZED",
+      message: "Invalid bot token",
+    });
+  }
+
+  // Extract telegramUserId from input if available
+  let telegramUserId: string | undefined;
+  let userId: string | null = null;
+  let conversationId: string | undefined;
+
+  if (input && typeof input === "object" && "telegramUserId" in input) {
+    telegramUserId = (input as { telegramUserId?: string }).telegramUserId;
+    
+    if (telegramUserId) {
+      try {
+        // Import TelegramUserService dynamically to avoid circular dependencies
+        const { TelegramUserService } = await import("./lib/services/telegram-user-service");
+        const userContext = await TelegramUserService.getUserContext(telegramUserId);
+        userId = userContext.userId;
+        conversationId = userContext.conversationId;
+      } catch (error) {
+        // If user is not registered, we'll handle it in the procedure
+        console.warn(`User ${telegramUserId} not registered in system:`, error);
+      }
+    }
+  }
+
+  return next({
+    ctx: {
+      ...ctx,
+      botUserId: ctx.session?.user?.id ?? "bot_user",
+      isBotRequest: true,
+      telegramUserId,
+      userId,
+      conversationId,
     },
   });
 });
@@ -392,6 +449,18 @@ export const botProcedure = t.procedure
   .use(csrfMiddleware)
   .use(rateLimitMiddleware)
   .use(botAuthMiddleware);
+
+/**
+ * Enhanced bot procedure
+ *
+ * This procedure automatically extracts telegramUserId from input and resolves userId
+ * through TelegramUserService. Use this when you need userId to be available in context.
+ */
+export const enhancedBotProcedure = t.procedure
+  .use(timingMiddleware)
+  .use(csrfMiddleware)
+  .use(rateLimitMiddleware)
+  .use(enhancedBotAuthMiddleware);
 
 /**
  * Protected (authenticated) procedure

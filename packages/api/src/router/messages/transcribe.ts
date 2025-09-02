@@ -2,7 +2,7 @@ import { TranscribeInput, TranscribeResponse } from "@synoro/validators";
 
 import { transcribe } from "../../lib/ai/transcriber";
 import { TelegramUserService } from "../../lib/services/telegram-user-service";
-import { botProcedure, protectedProcedure, publicProcedure } from "../../trpc";
+import { enhancedBotProcedure, protectedProcedure, publicProcedure } from "../../trpc";
 
 export const transcribeRouter = {
   // Универсальный эндпоинт для транскрипции аудио (для веб/мобайл клиентов)
@@ -39,22 +39,15 @@ export const transcribeRouter = {
     }),
 
   // Публичный эндпоинт для Telegram бота
-  transcribeFromTelegram: botProcedure
+  transcribeFromTelegram: enhancedBotProcedure
     .input(TranscribeInput)
     .output(TranscribeResponse)
     .mutation(async ({ ctx, input }) => {
       try {
-        // Получаем telegramUserId из input
-        const telegramUserId = input.telegramUserId;
-        if (!telegramUserId) {
-          throw new Error("ID пользователя Telegram не указан в запросе");
+        // userId теперь автоматически доступен в контексте
+        if (!ctx.userId) {
+          throw new Error("Пользователь не зарегистрирован в системе");
         }
-
-        // Получаем контекст пользователя через TelegramUserService
-        const userContext = await TelegramUserService.getUserContext(
-          telegramUserId,
-          input.messageId,
-        );
 
         // Decode base64 audio string to Buffer
         const audioBuffer = Buffer.from(input.audio, "base64");
@@ -63,12 +56,11 @@ export const transcribeRouter = {
           functionId: "api-transcribe",
           metadata: {
             channel: input.channel,
-            userId: userContext.userId || "anonymous", // "anonymous" для null userId
+            userId: ctx.userId,
             ...(input.messageId && { messageId: input.messageId }),
             filename: input.filename,
-            telegramUserId,
-            isAnonymous: userContext.isAnonymous,
-            conversationId: userContext.conversationId,
+            telegramUserId: ctx.telegramUserId,
+            conversationId: ctx.conversationId,
             ...input.metadata,
           },
         });

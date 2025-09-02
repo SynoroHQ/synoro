@@ -11,7 +11,7 @@ import {
   processMessageWithAgents,
 } from "../../lib/services/agent-message-processor";
 import { TelegramUserService } from "../../lib/services/telegram-user-service";
-import { botProcedure, protectedProcedure } from "../../trpc";
+import { enhancedBotProcedure, protectedProcedure } from "../../trpc";
 
 // Схема для агентных опций
 const AgentOptionsSchema = z.object({
@@ -60,32 +60,27 @@ export const processMessageAgentsRouter = {
     }),
 
   // Обработка сообщений с агентами для Telegram бота
-  processMessageFromTelegramWithAgents: botProcedure
+  processMessageFromTelegramWithAgents: enhancedBotProcedure
     .input(ProcessMessageWithAgentsInput)
     .mutation(async ({ ctx, input }) => {
-      const telegramUserId = input.telegramUserId;
-      if (!telegramUserId) {
+      // userId теперь автоматически доступен в контексте
+      if (!ctx.userId) {
         throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "ID пользователя Telegram не указан в запросе",
+          code: "UNAUTHORIZED",
+          message: "Пользователь не зарегистрирован в системе",
         });
       }
-
-      // Получаем контекст пользователя
-      const userContext = await TelegramUserService.getUserContext(
-        telegramUserId,
-      );
 
       return processMessageWithAgents({
         text: input.text,
         channel: input.channel,
-        userId: userContext.userId ?? null,
+        userId: ctx.userId,
         ctx,
         messageId: input.messageId,
         metadata: {
           ...input.metadata,
-          telegramUserId,
-          conversationId: userContext.conversationId,
+          telegramUserId: ctx.telegramUserId,
+          conversationId: ctx.conversationId,
         },
         options: input.agentOptions,
       });
@@ -121,7 +116,7 @@ export const processMessageAgentsRouter = {
     }),
 
   // Публичное получение статистики для бота
-  getAgentStatsForBot: botProcedure
+  getAgentStatsForBot: enhancedBotProcedure
     .output(
       z.object({
         totalAgents: z.number(),
