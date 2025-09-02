@@ -1,10 +1,11 @@
 import type { Context } from "grammy";
 
 import { apiClient } from "../api/client";
+import { runWithAnimation } from "../utils/animation-helpers";
 import { FastResponseSystem } from "../utils/fast-response-system";
+import { createErrorMessage } from "../utils/html-message-builder";
 import { formatForTelegram } from "../utils/telegram-formatter";
 import { createMessageContext } from "../utils/telegram-utils";
-import { createErrorMessage } from "../utils/html-message-builder";
 
 /**
  * Обработчик обычных текстовых сообщений с Fast Response System
@@ -15,11 +16,13 @@ export async function handleText(ctx: Context) {
     const messageContext = createMessageContext(ctx);
     const text = ctx.message?.text || "";
 
-    console.log(`📝 Text handler: "${text}" from user ${messageContext.userId}`);
+    console.log(
+      `📝 Text handler: "${text}" from user ${messageContext.userId}`,
+    );
 
     // 1. Создаем экземпляр системы быстрых ответов с API клиентом
     const fastResponseSystem = new FastResponseSystem(apiClient);
-    
+
     // 2. Проверяем, можно ли дать быстрый ответ через AI
     const fastResponse = await fastResponseSystem.analyzeMessage(text);
 
@@ -28,8 +31,10 @@ export async function handleText(ctx: Context) {
         `⚡ Fast response in text handler: ${fastResponse.processingType}`,
       );
 
-      // Отправляем быстрый ответ
-      await ctx.reply(fastResponse.fastResponse);
+      // Отправляем быстрый ответ с анимацией
+      await runWithAnimation(ctx, "fast", 1000, async () => {
+        await ctx.reply(fastResponse.fastResponse);
+      });
 
       // Если нужна полная обработка, запускаем её в фоне
       if (fastResponse.needsFullProcessing) {
@@ -40,12 +45,11 @@ export async function handleText(ctx: Context) {
       return;
     }
 
-          // 2. Если быстрый ответ не сработал, обрабатываем через бота
-      console.log(`🔄 Processing message through bot system: "${text}"`);
+    // 2. Если быстрый ответ не сработал, обрабатываем через систему
+    console.log(`🔄 Processing message through system: "${text}"`);
 
-      // Показываем индикатор обработки
-      const processingMsg = await ctx.reply("🤔 Обрабатываю ваш запрос...");
-
+    // Обрабатываем через систему с анимацией
+    await runWithAnimation(ctx, "processing", 30000, async () => {
       try {
         const result =
           await apiClient.messages.processMessageAgents.processMessageFromTelegramWithAgents.mutate(
@@ -57,51 +61,36 @@ export async function handleText(ctx: Context) {
             },
           );
 
-      if (result.success) {
-        // Форматируем ответ для Telegram
-        const formattedResponse = formatForTelegram(result.response, {
-          useEmojis: true,
-          useHTML: true,
-          addSeparators: false,
-        });
+        if (result.success) {
+          // Форматируем ответ для Telegram
+          const formattedResponse = formatForTelegram(result.response, {
+            useEmojis: true,
+            useHTML: true,
+            addSeparators: false,
+          });
 
-        // Обновляем сообщение с результатом
-        await ctx.api.editMessageText(
-          ctx.chat!.id,
-          processingMsg.message_id,
-          formattedResponse.text,
-          { parse_mode: "HTML" },
-        );
-      } else {
-        // Обрабатываем ошибку
+          // Отправляем новый ответ
+          await ctx.reply(formattedResponse.text, { parse_mode: "HTML" });
+        } else {
+          // Обрабатываем ошибку
+          const errorMessage = createErrorMessage(
+            "Произошла ошибка при обработке запроса. Попробуйте еще раз.",
+            "Ошибка обработки",
+          );
+
+          await ctx.reply(errorMessage, { parse_mode: "HTML" });
+        }
+      } catch (error) {
+        console.error("Error in text processing:", error);
+
         const errorMessage = createErrorMessage(
           "Произошла ошибка при обработке запроса. Попробуйте еще раз.",
           "Ошибка обработки",
         );
 
-        await ctx.api.editMessageText(
-          ctx.chat!.id,
-          processingMsg.message_id,
-          errorMessage,
-          { parse_mode: "HTML" },
-        );
+        await ctx.reply(errorMessage, { parse_mode: "HTML" });
       }
-    } catch (error) {
-      console.error("Error in text processing:", error);
-
-      // Обновляем сообщение с ошибкой
-      const errorMessage = createErrorMessage(
-        "Произошла ошибка при обработке запроса. Попробуйте еще раз.",
-        "Ошибка обработки",
-      );
-
-              await ctx.api.editMessageText(
-          ctx.chat!.id,
-          processingMsg.message_id,
-          errorMessage,
-          { parse_mode: "HTML" },
-        );
-    }
+    });
   } catch (error) {
     console.error("Error in text handler:", error);
     const errorMessage = createErrorMessage(
