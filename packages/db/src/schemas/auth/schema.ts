@@ -1,5 +1,4 @@
 import { createId } from "@paralleldrive/cuid2";
-import { relations } from "drizzle-orm";
 import {
   boolean,
   index,
@@ -24,8 +23,8 @@ export const userStatus = pgEnum("user_status", [
  * Основная таблица пользователей системы
  * Хранит базовую информацию: имя, email, роль, статус, время последнего входа
  */
-export const user = pgTable(
-  "user",
+export const users = pgTable(
+  "users",
   (t) => ({
     id: text("id").primaryKey().$defaultFn(createId),
     name: t.text().notNull(),
@@ -77,8 +76,8 @@ export const user = pgTable(
  * Таблица активных сессий пользователей
  * Хранит токены аутентификации, IP адреса, user agent и время истечения
  */
-export const session = pgTable(
-  "session",
+export const sessions = pgTable(
+  "sessions",
   (t) => ({
     id: text("id").primaryKey().$defaultFn(createId),
     expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
@@ -88,7 +87,7 @@ export const session = pgTable(
     isActive: boolean("is_active").notNull().default(true),
     userId: text("user_id")
       .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
+      .references(() => users.id, { onDelete: "cascade" }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -109,15 +108,15 @@ export const session = pgTable(
  * Таблица внешних аккаунтов пользователей
  * Связывает внутренних пользователей с OAuth провайдерами (Google, GitHub, etc.)
  */
-export const account = pgTable(
-  "account",
+export const accounts = pgTable(
+  "accounts",
   (t) => ({
     id: text("id").primaryKey().$defaultFn(createId),
     accountId: text("account_id").notNull(),
     providerId: text("provider_id").notNull(),
     userId: text("user_id")
       .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
+      .references(() => users.id, { onDelete: "cascade" }),
     accessToken: text("access_token"),
     refreshToken: text("refresh_token"),
     idToken: text("id_token"),
@@ -155,8 +154,8 @@ export const verificationType = pgEnum("verification_type", [
  * Таблица кодов верификации и OTP
  * Хранит временные коды для подтверждения email, сброса пароля и двухфакторной аутентификации
  */
-export const verification = pgTable(
-  "verification",
+export const verifications = pgTable(
+  "verifications",
   (t) => ({
     id: text("id").primaryKey().$defaultFn(createId),
     identifier: text("identifier").notNull(), // email или phone

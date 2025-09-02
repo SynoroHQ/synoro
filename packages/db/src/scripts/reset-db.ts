@@ -30,6 +30,13 @@ async function resetDatabase() {
     await db.execute(sql`CREATE SCHEMA public;`);
 
     console.log("✅ Схема public успешно пересоздана");
+    console.log("🧹 Удаление схемы drizzle...");
+    await db.execute(sql`DROP SCHEMA IF EXISTS drizzle CASCADE;`);
+
+    // Создаем схему public заново
+    console.log("🔨 Создание схемы drizzle...");
+    await db.execute(sql`CREATE SCHEMA drizzle;`);
+
     console.log("🎉 База данных успешно обнулена и готова к миграциям");
   } catch (error) {
     console.error("❌ Ошибка при обнулении базы данных:", error);

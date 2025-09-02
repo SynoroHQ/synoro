@@ -1,6 +1,6 @@
 import { relations } from "drizzle-orm";
 
-import { user } from "../auth/schema";
+import { users } from "../auth/schema";
 import { files } from "../core/files";
 import {
   conversations,
@@ -14,9 +14,9 @@ export const conversationRelations = relations(
   conversations,
   ({ one, many }) => ({
     // Владелец может быть опциональным для анонимных пользователей
-    owner: one(user, {
+    owner: one(users, {
       fields: [conversations.ownerUserId],
-      references: [user.id],
+      references: [users.id],
     }),
     messages: many(messages),
   }),
@@ -57,14 +57,14 @@ export const messageAttachmentRelations = relations(
 
 // Relations for identityLink
 export const identityLinkRelations = relations(identityLinks, ({ one }) => ({
-  user: one(user, {
+  user: one(users, {
     fields: [identityLinks.userId],
-    references: [user.id],
+    references: [users.id],
   }),
 }));
 
 // Relations for user (from auth schema)
-export const userChatRelations = relations(user, ({ many }) => ({
+export const userChatRelations = relations(users, ({ many }) => ({
   conversations: many(conversations),
   identityLinks: many(identityLinks),
 }));

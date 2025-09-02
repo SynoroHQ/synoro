@@ -7,7 +7,7 @@ import {
   timestamp,
 } from "drizzle-orm/pg-core";
 
-import { user } from "../auth/schema";
+import { users } from "../auth/schema";
 
 export const themeMode = pgEnum("theme_mode", ["light", "dark", "system"]);
 
@@ -28,7 +28,7 @@ export const userProfiles = pgTable(
   {
     userId: text("user_id")
       .primaryKey()
-      .references(() => user.id, { onDelete: "cascade" }),
+      .references(() => users.id, { onDelete: "cascade" }),
     // Локализация
     timezone: text("timezone").notNull().default("UTC"),
     locale: text("locale").notNull().default("ru-RU"),

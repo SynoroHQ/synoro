@@ -1,6 +1,6 @@
 import { relations } from "drizzle-orm";
 
-import { user } from "../auth/schema";
+import { users } from "../auth/schema";
 import { householdMembers, households, userProfiles } from "./";
 
 // Relations for household
@@ -16,23 +16,23 @@ export const householdMemberRelations = relations(
       fields: [householdMembers.householdId],
       references: [households.id],
     }),
-    user: one(user, {
+    user: one(users, {
       fields: [householdMembers.userId],
-      references: [user.id],
+      references: [users.id],
     }),
   }),
 );
 
 // Relations for userProfile
 export const userProfileRelations = relations(userProfiles, ({ one }) => ({
-  user: one(user, {
+  user: one(users, {
     fields: [userProfiles.userId],
-    references: [user.id],
+    references: [users.id],
   }),
 }));
 
 // Relations for user (extending from auth)
-export const userCoreRelations = relations(user, ({ one, many }) => ({
+export const userCoreRelations = relations(users, ({ one, many }) => ({
   profile: one(userProfiles),
   householdMemberships: many(householdMembers),
 }));

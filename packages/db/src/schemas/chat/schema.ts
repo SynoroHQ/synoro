@@ -10,7 +10,7 @@ import {
   unique,
 } from "drizzle-orm/pg-core";
 
-import { user } from "../auth/schema";
+import { users } from "../auth/schema";
 import { files } from "../core/files";
 
 export const chatChannel = pgEnum("chat_channel", [
@@ -37,7 +37,7 @@ export const conversations = pgTable(
     id: text("id").primaryKey().$defaultFn(createId),
     ownerUserId: t
       .text("owner_user_id")
-      .references(() => user.id, { onDelete: "cascade" }),
+      .references(() => users.id, { onDelete: "cascade" }),
     // Для анонимных пользователей в Telegram
     telegramChatId: t.text("telegram_chat_id"),
     channel: chatChannel("channel").notNull(),
@@ -164,7 +164,7 @@ export const identityLinks = pgTable(
     userId: t
       .text("user_id")
       .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
+      .references(() => users.id, { onDelete: "cascade" }),
     provider: t.text("provider").notNull(), // e.g. 'telegram'
     providerUserId: t.text("provider_user_id").notNull(), // e.g. chat_id
     createdAt: t

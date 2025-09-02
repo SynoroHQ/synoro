@@ -1,6 +1,6 @@
 import { relations } from "drizzle-orm";
 
-import { user } from "../auth/schema";
+import { users } from "../auth/schema";
 import { households } from "../core/household";
 import { attachments } from "./attachment";
 import { eventProperties } from "./event-property";
@@ -14,9 +14,9 @@ export const eventRelations = relations(events, ({ one, many }) => ({
     fields: [events.householdId],
     references: [households.id],
   }),
-  user: one(user, {
+  user: one(users, {
     fields: [events.userId],
-    references: [user.id],
+    references: [users.id],
   }),
   attachments: many(attachments),
   properties: many(eventProperties),
@@ -78,7 +78,7 @@ export const eventPropertyRelations = relations(eventProperties, ({ one }) => ({
 }));
 
 // Relations from other schemas
-export const userEventRelations = relations(user, ({ many }) => ({
+export const userEventRelations = relations(users, ({ many }) => ({
   events: many(events),
 }));
 

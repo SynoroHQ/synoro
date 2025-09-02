@@ -12,7 +12,7 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 
-import { user } from "../auth/schema";
+import { users } from "../auth/schema";
 import { households } from "../core/household";
 
 export const eventStatus = pgEnum("event_status", [
@@ -53,7 +53,7 @@ export const events = pgTable(
     householdId: text("household_id")
       .notNull()
       .references(() => households.id, { onDelete: "cascade" }),
-    userId: text("user_id").references(() => user.id, { onDelete: "set null" }),
+    userId: text("user_id").references(() => users.id, { onDelete: "set null" }),
     source: eventSource("source").notNull(),
     type: eventType("type").notNull(),
     status: eventStatus("status").notNull().default("active"),

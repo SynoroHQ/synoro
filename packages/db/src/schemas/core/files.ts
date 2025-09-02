@@ -10,7 +10,7 @@ import {
   unique,
 } from "drizzle-orm/pg-core";
 
-import { user } from "../auth/schema";
+import { users } from "../auth/schema";
 import { households } from "./household";
 
 // Branded types for better type safety
@@ -86,7 +86,7 @@ export const files = pgTable(
     // Владелец и контекст
     uploadedBy: text("uploaded_by")
       .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
+      .references(() => users.id, { onDelete: "cascade" }),
     householdId: text("household_id").references(() => households.id, {
       onDelete: "cascade",
     }),

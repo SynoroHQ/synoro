@@ -10,7 +10,7 @@ import {
   uniqueIndex,
 } from "drizzle-orm/pg-core";
 
-import { user } from "../auth/schema";
+import { users } from "../auth/schema";
 import { households } from "./household";
 
 export const memberRole = pgEnum("member_role", [
@@ -40,7 +40,7 @@ export const householdMembers = pgTable(
       .references(() => households.id, { onDelete: "cascade" }),
     userId: text("user_id")
       .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
+      .references(() => users.id, { onDelete: "cascade" }),
     role: memberRole("role").notNull().default("member"),
     status: memberStatus("status").notNull().default("active"),
     // Персональные настройки участника в этом домохозяйстве

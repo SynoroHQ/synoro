@@ -1,6 +1,6 @@
 import { relations } from "drizzle-orm";
 
-import { user } from "../auth/schema";
+import { users } from "../auth/schema";
 import { fileRelations } from "./file-relations";
 import { files } from "./files";
 import { households } from "./household";
@@ -8,9 +8,9 @@ import { households } from "./household";
 // Relations for files
 export const filesRelations = relations(files, ({ one, many }) => ({
   // Связь с пользователем, который загрузил файл
-  uploadedByUser: one(user, {
+  uploadedByUser: one(users, {
     fields: [files.uploadedBy],
-    references: [user.id],
+    references: [users.id],
   }),
 
   // Связь с домохозяйством
