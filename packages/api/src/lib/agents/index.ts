@@ -19,7 +19,6 @@ export { DataAnalystAgent } from "./data-analyst-agent";
 export { FinancialAdvisorAgent } from "./financial-advisor-agent";
 export { ChatAssistantAgent } from "./chat-assistant-agent";
 export { TelegramFormatterAgent } from "./telegram-formatter-agent";
-export { FastResponseAgent } from "./fast-response-agent";
 
 // Экспорт менеджера агентов с улучшениями
 export { AgentManager } from "./agent-manager";

@@ -2,13 +2,12 @@ import type { Context } from "grammy";
 
 import { apiClient } from "../api/client";
 import { runWithAnimation } from "../utils/animation-helpers";
-import { FastResponseSystem } from "../utils/fast-response-system";
 import { createErrorMessage } from "../utils/html-message-builder";
 import { formatForTelegram } from "../utils/telegram-formatter";
 import { createMessageContext } from "../utils/telegram-utils";
 
 /**
- * Обработчик обычных текстовых сообщений с Fast Response System
+ * Обработчик обычных текстовых сообщений с агентной системой
  * Все сообщения проходят через бота для детальной обработки
  */
 export async function handleText(ctx: Context) {
@@ -20,33 +19,8 @@ export async function handleText(ctx: Context) {
       `📝 Text handler: "${text}" from user ${messageContext.userId}`,
     );
 
-    // 1. Создаем экземпляр системы быстрых ответов с API клиентом
-    const fastResponseSystem = new FastResponseSystem(apiClient);
-
-    // 2. Проверяем, можно ли дать быстрый ответ через AI
-    const fastResponse = await fastResponseSystem.analyzeMessage(text);
-
-    if (fastResponse.shouldSendFast) {
-      console.log(
-        `⚡ Fast response in text handler: ${fastResponse.processingType}`,
-      );
-
-      // Отправляем быстрый ответ с анимацией
-      await runWithAnimation(ctx, "fast", 1000, async () => {
-        await ctx.reply(fastResponse.fastResponse);
-      });
-
-      // Если нужна полная обработка, запускаем её в фоне
-      if (fastResponse.needsFullProcessing) {
-        console.log(`🔄 Starting background processing for: "${text}"`);
-        processMessageInBackground(text, messageContext, ctx);
-      }
-
-      return;
-    }
-
-    // 2. Если быстрый ответ не сработал, обрабатываем через систему
-    console.log(`🔄 Processing message through system: "${text}"`);
+    // Обрабатываем сообщение через агентную систему
+    console.log(`🤖 Processing through agent system: "${text}"`);
 
     // Обрабатываем через систему с анимацией
     await runWithAnimation(ctx, "processing", 30000, async () => {

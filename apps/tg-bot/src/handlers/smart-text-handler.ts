@@ -1,14 +1,13 @@
 import type { Context } from "grammy";
 
 import { apiClient } from "../api/client";
-import { telegramFastResponseService } from "../services/fast-response-service";
 import { runWithAnimation } from "../utils/animation-helpers";
 import { createErrorMessage } from "../utils/html-message-builder";
 import { formatForTelegram } from "../utils/telegram-formatter";
 import { createMessageContext } from "../utils/telegram-utils";
 
 /**
- * Обработчик умных текстовых сообщений с использованием FastResponseAgent
+ * Обработчик умных текстовых сообщений с использованием агентной системы
  */
 export async function handleSmartText(ctx: Context) {
   try {
@@ -19,36 +18,8 @@ export async function handleSmartText(ctx: Context) {
       `🤖 Smart text handler: "${text}" from user ${messageContext.userId}`,
     );
 
-    // 1. Анализируем сообщение через FastResponseAgent
-    const fastResponse = await telegramFastResponseService.analyzeMessage(
-      text,
-      messageContext.userId,
-      messageContext.messageId,
-    );
-
-    if (fastResponse.shouldSendFast) {
-      console.log(
-        `⚡ Fast response triggered: ${fastResponse.processingType} (confidence: ${fastResponse.confidence})`,
-      );
-
-      // Отправляем быстрый ответ с анимацией
-      await runWithAnimation(ctx, "fast", 1500, async () => {
-        await ctx.reply(fastResponse.fastResponse);
-      });
-
-      // Если нужна полная обработка, запускаем её в фоне
-      if (fastResponse.needsFullProcessing) {
-        console.log(`🔄 Starting background processing for: "${text}"`);
-        processMessageInBackground(text, messageContext, ctx);
-      }
-
-      return;
-    }
-
-    // 2. Если быстрый ответ не сработал, значит это полезное сообщение - обрабатываем через систему
-    console.log(
-      `🔄 Useful message detected, processing through system: "${text}"`,
-    );
+    // Обрабатываем сообщение через агентную систему
+    console.log(`🤖 Processing through agent system: "${text}"`);
 
     // Обрабатываем через систему с анимацией
     await runWithAnimation(ctx, "agents", 30000, async () => {

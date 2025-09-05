@@ -13,7 +13,6 @@ export const appRouter = createTRPCRouter({
   messages: messagesRouter,
   reminders: remindersRouter,
   telegramUsers: telegramUsersRouter,
-  // fastResponse: fastResponseRouter,
   analytics: analyticsRouter,
 });
 

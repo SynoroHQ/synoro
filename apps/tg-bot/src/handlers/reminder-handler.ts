@@ -1,8 +1,33 @@
 import type { Context } from "grammy";
 
-import type { ReminderFilters } from "@synoro/validators";
+import type { Reminder, ReminderFilters } from "@synoro/validators";
 
 import { apiClient } from "../api/client";
+
+// Типы для API ответов
+interface CreateFromTextResponse {
+  reminder: Reminder & { id: string };
+  confidence: number;
+  suggestions: {
+    nextReminder?: string;
+    relatedTasks?: string[];
+    priorityAdjustment?: string;
+    timeOptimization?: string;
+  };
+  needsConfirmation: boolean;
+}
+
+interface ReminderStats {
+  total: number;
+  pending: number;
+  active: number;
+  completed: number;
+  overdue: number;
+}
+
+interface DeleteReminderResponse {
+  success: boolean;
+}
 
 /**
  * Обработчик команд напоминаний для Telegram бота
@@ -17,10 +42,10 @@ export class ReminderHandler {
     userId: string,
   ) {
     try {
-      const result = await apiClient.reminders.fromText.mutate({
+      const result = (await (apiClient as any).reminders.fromText.mutate({
         text,
         timezone: "Europe/Moscow", // TODO: получать из настроек пользователя
-      });
+      })) as CreateFromTextResponse;
 
       const reminder = result.reminder;
       const timeStr = reminder.reminderTime.toLocaleString("ru-RU", {
@@ -38,19 +63,22 @@ export class ReminderHandler {
         message += `📄 ${reminder.description}\n`;
       }
       message += `⏰ ${timeStr}\n`;
-      message += `🏷️ Тип: ${ReminderHandler.getTypeEmoji(reminder.type)} ${ReminderHandler.getTypeName(reminder.type)}\n`;
-      message += `⚡ Приоритет: ${ReminderHandler.getPriorityEmoji(reminder.priority)} ${ReminderHandler.getPriorityName(reminder.priority)}\n`;
+      message += `🏷️ Тип: ${ReminderHandler.getTypeEmoji(reminder.type || "custom")} ${ReminderHandler.getTypeName(reminder.type || "custom")}\n`;
+      message += `⚡ Приоритет: ${ReminderHandler.getPriorityEmoji(reminder.priority || "medium")} ${ReminderHandler.getPriorityName(reminder.priority || "medium")}\n`;
 
       if (result.confidence < 0.8) {
         message += `\n⚠️ Уверенность: ${Math.round(result.confidence * 100)}%`;
       }
 
-      if (result.suggestions && result.suggestions.length > 0) {
+      if (
+        result.suggestions.relatedTasks &&
+        result.suggestions.relatedTasks.length > 0
+      ) {
         message += "\n\n💡 **Предложения:**\n";
-        result.suggestions
+        result.suggestions.relatedTasks
           .slice(0, 3)
-          .forEach((suggestion: any, index: number) => {
-            message += `${index + 1}. ${suggestion.suggestion}\n`;
+          .forEach((suggestion: string, index: number) => {
+            message += `${index + 1}. ${suggestion}\n`;
           });
       }
 
@@ -99,12 +127,12 @@ export class ReminderHandler {
         status: ["pending", "active", "snoozed"],
       };
 
-      const reminders = await (apiClient as any).reminders.list.query({
+      const reminders = (await (apiClient as any).reminders.list.query({
         filters,
         sort: { field: "reminderTime", direction: "asc" },
         limit,
         offset,
-      });
+      })) as Reminder[];
 
       if (reminders.length === 0) {
         await ctx.reply(
@@ -124,7 +152,7 @@ export class ReminderHandler {
 
       let message = `📋 **Ваши напоминания** (стр. ${page + 1}):\n\n`;
 
-      reminders.forEach((reminder: any, index: number) => {
+      reminders.forEach((reminder: Reminder, index: number) => {
         const timeStr = reminder.reminderTime.toLocaleString("ru-RU", {
           timeZone: "Europe/Moscow",
           month: "short",
@@ -133,9 +161,11 @@ export class ReminderHandler {
           minute: "2-digit",
         });
 
-        const statusEmoji = ReminderHandler.getStatusEmoji(reminder.status);
+        const statusEmoji = ReminderHandler.getStatusEmoji(
+          reminder.status || "pending",
+        );
         const priorityEmoji = ReminderHandler.getPriorityEmoji(
-          reminder.priority,
+          reminder.priority || "medium",
         );
 
         message += `${offset + index + 1}. ${statusEmoji} **${reminder.title}**\n`;
@@ -183,7 +213,9 @@ export class ReminderHandler {
    */
   static async handleReminderStats(ctx: Context, userId: string) {
     try {
-      const stats = await (apiClient as any).reminders.getStats.query();
+      const stats = (await (
+        apiClient as any
+      ).reminders.getStats.query()) as ReminderStats;
 
       let message = "📊 **Статистика напоминаний:**\n\n";
       message += `📝 Всего: ${stats.total}\n`;
@@ -282,9 +314,9 @@ export class ReminderHandler {
     userId: string,
   ) {
     try {
-      const result = await (apiClient as any).reminders.delete.mutate({
+      const result = (await (apiClient as any).reminders.delete.mutate({
         id: reminderId,
-      });
+      })) as DeleteReminderResponse;
 
       if (result.success) {
         await ctx.reply("✅ Напоминание удалено.", {

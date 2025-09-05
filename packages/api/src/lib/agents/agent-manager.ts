@@ -9,7 +9,6 @@ import type {
 import { globalAgentRegistry } from "./agent-registry";
 import { DataAnalystAgent } from "./data-analyst-agent";
 import { EventProcessorAgent } from "./event-processor-agent";
-import { FastResponseAgent } from "./fast-response-agent";
 import { GeneralAssistantAgent } from "./general-assistant-agent";
 import { QASpecialistAgent } from "./qa-specialist-agent";
 import { QualityEvaluatorAgent } from "./quality-evaluator-agent";
@@ -41,7 +40,6 @@ interface CachedResult {
 export class AgentManager {
   private router: RouterAgent;
   private qualityEvaluator: QualityEvaluatorAgent;
-  private fastResponseAgent: FastResponseAgent;
 
   // Система кэширования для повышения производительности
   private resultCache = new Map<string, CachedResult>();
@@ -66,7 +64,6 @@ export class AgentManager {
     this.initializeAgents();
     this.router = new RouterAgent();
     this.qualityEvaluator = new QualityEvaluatorAgent();
-    this.fastResponseAgent = new FastResponseAgent();
 
     // Запускаем фоновые процессы
     this.startBackgroundTasks();
@@ -86,7 +83,6 @@ export class AgentManager {
         new DataAnalystAgent(),
         new TaskManagerAgent(),
         new TelegramFormatterAgent(),
-        new FastResponseAgent(),
       ];
 
       agentInstances.forEach((agent) => {
@@ -330,55 +326,10 @@ export class AgentManager {
         }
       }
 
-      // 2. Проверяем возможность быстрого ответа через ИИ
-      if (
-        await this.fastResponseAgent.canHandle(
-          this.createAgentTask(input, "fast-response", context),
-        )
-      ) {
-        console.log("⚡ Попытка быстрого ИИ-ответа...");
-        const fastResult = await this.fastResponseAgent.process(
-          this.createAgentTask(input, "fast-response", context),
-          telemetry,
-        );
-
-        if (
-          fastResult.success &&
-          fastResult.confidence &&
-          fastResult.confidence > 0.7
-        ) {
-          const fastProcessingTime = Date.now() - startTime;
-          agentsUsed.push(this.fastResponseAgent.name);
-          totalSteps++;
-
-          const fastResponse: OrchestrationResult = {
-            finalResponse: fastResult.data!,
-            agentsUsed,
-            totalSteps,
-            qualityScore: fastResult.confidence,
-            metadata: {
-              processingTime: fastProcessingTime,
-              fastResponse: true,
-              responseTimeCategory: "fast",
-              agentEfficiency:
-                fastResult.confidence / (fastProcessingTime / 1000),
-            },
-          };
-
-          console.log(`⚡ Быстрый ИИ-ответ за ${fastProcessingTime}ms`);
-
-          // Кэшируем быстрый ответ
-          if (options.useCache !== false) {
-            this.setCachedResult(input, context, fastResponse);
-          }
-
-          return fastResponse;
-        }
-      }
-      // 3. Создаем задачу для роутера
+      // 2. Создаем задачу для роутера
       const routingTask = this.createAgentTask(input, "routing", context);
 
-      // 4. Классифицируем и маршрутизируем сообщение
+      // 3. Классифицируем и маршрутизируем сообщение
       console.log("🤖 Запуск интеллектуальной маршрутизации...");
       const routingResult = await this.router.process(routingTask, telemetry);
       agentsUsed.push(this.router.name);
