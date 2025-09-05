@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import { apiClient } from "../api/client";
+import { apiClient, createApiClientWithHeaders } from "../api/client";
 import { DEFAULT_AGENT_OPTIONS } from "../config/agents";
 
 /**
@@ -8,6 +8,7 @@ import { DEFAULT_AGENT_OPTIONS } from "../config/agents";
  */
 export interface MessageContext {
   userId: string;
+  username?: string;
   messageId?: string;
   metadata?: Record<string, unknown>;
 }
@@ -46,13 +47,20 @@ export async function processTextMessage(
   try {
     const traceId = randomUUID();
 
+    // Создаем API клиент с дополнительными headers
+    const clientWithHeaders = createApiClientWithHeaders({
+      "X-Telegram-User-Id": context.userId,
+      "X-Telegram-Username": context.username || "",
+    });
+
     const result =
-      await apiClient.messages.processMessageAgents.processMessageFromTelegramWithAgents.mutate(
+      await clientWithHeaders.messages.processMessageAgents.processMessageFromTelegramWithAgents.mutate(
         {
           text,
           channel: "telegram",
           messageId: context.messageId,
           telegramUserId: context.userId, // Передаем ID пользователя Telegram
+          telegramUsername: context.username, // Передаем username пользователя Telegram
           agentOptions: DEFAULT_AGENT_OPTIONS,
           metadata: {
             ...context.metadata,
@@ -100,13 +108,20 @@ export async function transcribeAudio(
   try {
     const traceId = randomUUID();
 
+    // Создаем API клиент с дополнительными headers
+    const clientWithHeaders = createApiClientWithHeaders({
+      "X-Telegram-User-Id": context.userId,
+      "X-Telegram-Username": context.username || "",
+    });
+
     const result =
-      await apiClient.messages.transcribe.transcribeFromTelegram.mutate({
+      await clientWithHeaders.messages.transcribe.transcribeFromTelegram.mutate({
         audio: buffer.toString("base64"),
         filename,
         channel: "telegram",
         messageId: context.messageId,
         telegramUserId: context.userId, // Передаем ID пользователя Telegram
+        telegramUsername: context.username, // Передаем username пользователя Telegram
         metadata: {
           ...context.metadata,
           traceId,

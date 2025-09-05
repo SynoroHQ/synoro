@@ -1,6 +1,6 @@
 import type { Context } from "grammy";
 
-import { apiClient } from "../api/client";
+import { apiClient, createApiClientWithHeaders } from "../api/client";
 import { runWithAnimation } from "../utils/animation-helpers";
 import { createErrorMessage } from "../utils/html-message-builder";
 import { formatForTelegram } from "../utils/telegram-formatter";
@@ -25,13 +25,20 @@ export async function handleText(ctx: Context) {
     // Обрабатываем через систему с анимацией
     await runWithAnimation(ctx, "processing", 30000, async () => {
       try {
+        // Создаем API клиент с дополнительными headers
+        const clientWithHeaders = createApiClientWithHeaders({
+          "X-Telegram-User-Id": messageContext.userId,
+          "X-Telegram-Username": messageContext.username || "",
+        });
+        
         const result =
-          await apiClient.messages.processMessageAgents.processMessageFromTelegramWithAgents.mutate(
+          await clientWithHeaders.messages.processMessageAgents.processMessageFromTelegramWithAgents.mutate(
             {
               text,
               channel: "telegram",
               messageId: messageContext.messageId,
               telegramUserId: messageContext.userId,
+              telegramUsername: messageContext.username,
             },
           );
 
@@ -86,12 +93,19 @@ async function processMessageInBackground(
   try {
     console.log(`🔄 Background processing started for: "${text}"`);
 
+    // Создаем API клиент с дополнительными headers
+    const clientWithHeaders = createApiClientWithHeaders({
+      "X-Telegram-User-Id": messageContext.userId,
+      "X-Telegram-Username": messageContext.username || "",
+    });
+    
     const result =
-      await apiClient.messages.processMessageAgents.processMessageFromTelegramWithAgents.mutate(
+      await clientWithHeaders.messages.processMessageAgents.processMessageFromTelegramWithAgents.mutate(
         {
           text,
           channel: "telegram",
           telegramUserId: messageContext.userId,
+          telegramUsername: messageContext.username,
           messageId: messageContext.messageId,
         },
       );

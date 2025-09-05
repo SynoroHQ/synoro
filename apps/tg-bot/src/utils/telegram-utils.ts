@@ -56,6 +56,7 @@ export function createMessageContext(ctx: Context) {
   return {
     userId,
     messageId,
+    username: ctx.from?.username,
     metadata: {
       user: ctx.from?.username ?? ctx.from?.id,
       chatType: ctx.chat?.type,

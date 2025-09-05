@@ -81,7 +81,6 @@ export async function processMessageWithAgents(
     metadata,
     options = {},
   } = params;
-
   // Валидация входных данных
   if (!text.trim()) {
     throw new TRPCError({

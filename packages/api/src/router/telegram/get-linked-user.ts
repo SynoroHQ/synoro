@@ -1,9 +1,9 @@
 import { z } from "zod";
 
 import { TelegramUserService } from "../../lib/services/telegram-user-service";
-import { enhancedBotProcedure } from "../../trpc";
+import { botProcedure } from "../../trpc";
 
-export const getLinkedUser = enhancedBotProcedure
+export const getLinkedUser = botProcedure
   .input(
     z.object({
       telegramUserId: z.string(),

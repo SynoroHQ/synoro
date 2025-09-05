@@ -14,6 +14,7 @@ export const ProcessMessageInput = z
     messageId: z.string().optional(),
     metadata: z.record(z.string(), z.unknown()).optional(),
     telegramUserId: z.string().optional(), // ID пользователя Telegram (не связан с таблицей users)
+    telegramUsername: z.string().optional(), // Username пользователя Telegram
   })
   .refine(
     (data) => {
@@ -62,6 +63,7 @@ export const TranscribeInput = z
     messageId: z.string().optional(),
     metadata: z.record(z.string(), z.unknown()).optional(),
     telegramUserId: z.string().optional(), // ID пользователя Telegram (не связан с таблицей users)
+    telegramUsername: z.string().optional(), // Username пользователя Telegram
   })
   .refine(
     (data) => {

@@ -7,6 +7,7 @@ import { conversations, users } from "@synoro/db/schema";
 export interface TelegramUserContext {
   userId: string;
   telegramUserId: string;
+  telegramUsername?: string;
   conversationId: string;
 }
 
@@ -19,64 +20,87 @@ export class TelegramUserService {
   /**
    * Получает или создает контекст пользователя Telegram
    * @param telegramUserId - ID пользователя в Telegram
+   * @param telegramUsername - Username пользователя в Telegram (опционально)
    * @returns Контекст пользователя с usersId и conversationId
    */
   static async getUserContext(
     telegramUserId: string,
+    telegramUsername?: string,
   ): Promise<TelegramUserContext> {
-    // 1. Ищем существующего пользователя по telegramUserId в email
-    const existingUser = await db
-      .select()
-      .from(users)
-      .where(eq(users.email, `telegram_${telegramUserId}@anonymous.local`))
-      .limit(1);
+    try {
+      // 1. Ищем существующего пользователя по telegramUserId в email
+      const existingUser = await db
+        .select()
+        .from(users)
+        .where(eq(users.email, `telegram_${telegramUserId}@anonymous.local`))
+        .limit(1);
+      let userId: string;
 
-    let userId: string;
+      if (existingUser.length > 0) {
+        // Пользователь уже существует, обновляем username если он изменился
+        const user = existingUser[0]!;
+        userId = user.id;
+        
+        // Обновляем username если он предоставлен и отличается от текущего
+        if (telegramUsername && user.username !== telegramUsername) {
+          await db
+            .update(users)
+            .set({ 
+              username: telegramUsername,
+              updatedAt: new Date()
+            })
+            .where(eq(users.id, userId));
+        }
+      } else {
+        // Создаем нового анонимного пользователя
+        const [newUser] = await db
+          .insert(users)
+          .values({
+            name: `Telegram User ${telegramUserId}`,
+            email: `telegram_${telegramUserId}@anonymous.local`,
+            emailVerified: false,
+            username: telegramUsername,
+            role: "user",
+            status: "active",
+          })
+          .returning();
+        console.log("newUser", newUser);
+        if (!newUser) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Не удалось создать пользователя",
+          });
+        }
 
-    if (existingUser.length > 0) {
-      // Пользователь уже существует
-      userId = existingUser[0]!.id;
-    } else {
-      // Создаем нового анонимного пользователя
-      const [newUser] = await db
-        .insert(users)
-        .values({
-          name: `Telegram User ${telegramUserId}`,
-          email: `telegram_${telegramUserId}@anonymous.local`,
-          emailVerified: false,
-          role: "user",
-          status: "active",
-        })
-        .returning();
+        userId = newUser.id;
+      }
 
-      if (!newUser) {
+      // 2. Получаем или создаем conversation
+      const conversation = await TelegramUserService.getOrCreateConversation(
+        userId,
+        telegramUserId,
+      );
+
+      if (!conversation) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Не удалось создать пользователя",
+          message: "Не удалось создать или найти conversation",
         });
       }
 
-      userId = newUser.id;
-    }
-
-    // 2. Получаем или создаем conversation
-    const conversation = await TelegramUserService.getOrCreateConversation(
-      userId,
-      telegramUserId,
-    );
-
-    if (!conversation) {
+      return {
+        userId,
+        telegramUserId,
+        telegramUsername,
+        conversationId: conversation.id,
+      };
+    } catch (error) {
+      console.error("Error in getUserContext:", error);
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
-        message: "Не удалось создать или найти conversation",
+        message: "Ошибка при получении контекста пользователя",
       });
     }
-
-    return {
-      userId,
-      telegramUserId,
-      conversationId: conversation.id,
-    };
   }
 
   /**
@@ -108,7 +132,7 @@ export class TelegramUserService {
       .values({
         ownerUserId: userId,
         channel: "telegram",
-        title: `Telegram User ${telegramUserId}`,
+        title: `telegram_conversation_${Date.now()}`,
         status: "active",
       })
       .returning();
@@ -127,6 +151,7 @@ export class TelegramUserService {
         id: users.id,
         name: users.name,
         email: users.email,
+        username: users.username,
         role: users.role,
         status: users.status,
         createdAt: users.createdAt,

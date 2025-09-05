@@ -31,6 +31,7 @@ export const users = pgTable(
     email: t.text().notNull().unique(),
     emailVerified: boolean("email_verified").notNull().default(false),
     image: t.text(),
+    username: t.text(), // Username для Telegram и других платформ
     role: userRole("role").notNull().default("user"),
     status: userStatus("status").notNull().default("active"),
     lastLoginAt: timestamp("last_login_at", { withTimezone: true }),
@@ -45,6 +46,7 @@ export const users = pgTable(
   }),
   (table) => [
     index("user_email_idx").on(table.email),
+    index("user_username_idx").on(table.username),
     index("user_role_idx").on(table.role),
     index("user_status_idx").on(table.status),
     index("user_created_at_idx").on(table.createdAt),

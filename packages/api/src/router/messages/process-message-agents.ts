@@ -67,8 +67,6 @@ export const processMessageAgentsRouter = {
   processMessageFromTelegramWithAgents: enhancedBotProcedure
     .input(ProcessMessageWithAgentsInput)
     .mutation(async ({ ctx, input }) => {
-      // userId теперь автоматически создается в middleware
-
       return processMessageWithAgents({
         text: input.text,
         channel: input.channel,

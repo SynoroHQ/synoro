@@ -125,9 +125,9 @@ export const createCsrfMiddleware = (t: TRPCInstance) =>
     },
   );
 
-// Enhanced bot middleware that extracts telegramUserId and resolves userId
-export const createEnhancedBotAuthMiddleware = (t: TRPCInstance) =>
-  t.middleware(async ({ ctx, input, next }) => {
+// Simple bot authentication middleware that only validates the bot token
+export const createBotAuthMiddleware = (t: TRPCInstance) =>
+  t.middleware(async ({ ctx, next }) => {
     const authHeader = ctx.token;
 
     if (!authHeader?.startsWith("Bearer ")) {
@@ -147,61 +147,71 @@ export const createEnhancedBotAuthMiddleware = (t: TRPCInstance) =>
       });
     }
 
-    // Extract telegramUserId from input if available
+    return next({
+      ctx: {
+        ...ctx,
+        botUserId: ctx.session?.user?.id ?? "bot_user",
+        isBotRequest: true,
+      },
+    });
+  });
+
+// Enhanced bot middleware that extracts telegramUserId and resolves userId
+// This should be used as a second middleware after input validation
+export const createEnhancedBotAuthMiddleware = (t: TRPCInstance) =>
+  t.middleware(async ({ ctx, input, next }) => {
+    // Extract telegramUserId from validated input or headers
     let telegramUserId: string | undefined;
+    let telegramUsername: string | undefined;
     let userId: string | null = null;
     let conversationId: string | undefined;
-
+    
+    // Сначала пытаемся получить из input (если он валидирован)
     if (input && typeof input === "object" && "telegramUserId" in input) {
-      telegramUserId = (input as { telegramUserId?: string }).telegramUserId;
+      const inputData = input as {
+        telegramUserId?: string;
+        telegramUsername?: string;
+      };
+      telegramUserId = inputData.telegramUserId;
+      telegramUsername = inputData.telegramUsername;
+    }
+    
+    // Если не получили из input, пытаемся получить из headers
+    if (!telegramUserId) {
+      telegramUserId = ctx.headers?.["x-telegram-user-id"];
+      telegramUsername = ctx.headers?.["x-telegram-username"];
+    }
 
-      if (telegramUserId) {
-        try {
-          // Import TelegramUserService dynamically to avoid circular dependencies
-          const { TelegramUserService } = await import(
-            "../services/telegram-user-service"
-          );
-          const userContext =
-            await TelegramUserService.getUserContext(telegramUserId);
-          userId = userContext.userId;
-          conversationId = userContext.conversationId;
-        } catch (error) {
-          // If user is not registered, create anonymous user automatically
-          console.warn(
-            `User ${telegramUserId} not found, creating anonymous user:`,
-            error,
-          );
-          
-          try {
-            // Import TelegramUserService dynamically to avoid circular dependencies
-            const { TelegramUserService } = await import(
-              "../services/telegram-user-service"
-            );
-            const userContext =
-              await TelegramUserService.getUserContext(telegramUserId);
-            userId = userContext.userId;
-            conversationId = userContext.conversationId;
-          } catch (createError) {
-            console.error(
-              `Failed to create anonymous user ${telegramUserId}:`,
-              createError,
-            );
-            // If we still can't create the user, throw an error
-            throw new TRPCError({
-              code: "INTERNAL_SERVER_ERROR",
-              message: "Не удалось создать пользователя в системе",
-            });
-          }
-        }
+    if (telegramUserId) {
+      try {
+        // Import TelegramUserService dynamically to avoid circular dependencies
+        const { TelegramUserService } = await import(
+          "../services/telegram-user-service"
+        );
+        const userContext = await TelegramUserService.getUserContext(
+          telegramUserId,
+          telegramUsername,
+        );
+        userId = userContext.userId;
+        conversationId = userContext.conversationId;
+      } catch (error) {
+        console.error(
+          `Failed to get or create user context for ${telegramUserId}:`,
+          error,
+        );
+        // If we can't get or create the user, throw an error
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Не удалось создать пользователя в системе",
+        });
       }
     }
 
     return next({
       ctx: {
         ...ctx,
-        botUserId: ctx.session?.user?.id ?? "bot_user",
-        isBotRequest: true,
         telegramUserId,
+        telegramUsername,
         userId: userId!, // userId is guaranteed to be non-null after our logic
         conversationId,
       },

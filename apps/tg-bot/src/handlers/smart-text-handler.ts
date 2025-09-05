@@ -1,6 +1,6 @@
 import type { Context } from "grammy";
 
-import { apiClient } from "../api/client";
+import { apiClient, createApiClientWithHeaders } from "../api/client";
 import { runWithAnimation } from "../utils/animation-helpers";
 import { createErrorMessage } from "../utils/html-message-builder";
 import { formatForTelegram } from "../utils/telegram-formatter";
@@ -24,12 +24,21 @@ export async function handleSmartText(ctx: Context) {
     // Обрабатываем через систему с анимацией
     await runWithAnimation(ctx, "agents", 30000, async () => {
       try {
+        console.log("messageContext", messageContext);
+
+        // Создаем API клиент с дополнительными headers
+        const clientWithHeaders = createApiClientWithHeaders({
+          "X-Telegram-User-Id": messageContext.userId,
+          "X-Telegram-Username": messageContext.username || "",
+        });
+
         const result =
-          await apiClient.messages.processMessageAgents.processMessageFromTelegramWithAgents.mutate(
+          await clientWithHeaders.messages.processMessageAgents.processMessageFromTelegramWithAgents.mutate(
             {
               text,
               channel: "telegram",
               telegramUserId: messageContext.userId,
+              telegramUsername: messageContext.username,
               messageId: messageContext.messageId,
             },
           );
@@ -91,6 +100,7 @@ async function processMessageInBackground(
           text,
           channel: "telegram",
           telegramUserId: messageContext.userId,
+          telegramUsername: messageContext.username,
           messageId: messageContext.messageId,
         },
       );

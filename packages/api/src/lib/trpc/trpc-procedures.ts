@@ -2,6 +2,7 @@ import { TRPCError } from "@trpc/server";
 
 import type { TRPCInstance } from "../../trpc";
 import {
+  createBotAuthMiddleware,
   createCsrfMiddleware,
   createEnhancedBotAuthMiddleware,
   createLoggingMiddleware,
@@ -19,6 +20,7 @@ export const createProcedures = (t: TRPCInstance) => {
   const loggingMiddleware = createLoggingMiddleware(t);
   const rateLimitMiddleware = createRateLimitMiddleware(t);
   const csrfMiddleware = createCsrfMiddleware(t);
+  const botAuthMiddleware = createBotAuthMiddleware(t);
   const enhancedBotAuthMiddleware = createEnhancedBotAuthMiddleware(t);
   const telegramAnonymousAuthMiddleware =
     createTelegramAnonymousAuthMiddleware(t);
@@ -49,15 +51,26 @@ export const createProcedures = (t: TRPCInstance) => {
     .use(telegramAnonymousAuthMiddleware);
 
   /**
+   * Bot procedure - only validates bot token
+   */
+  const botProcedure = t.procedure
+    .use(timingMiddleware)
+    .use(csrfMiddleware)
+    .use(rateLimitMiddleware)
+    .use(botAuthMiddleware);
+
+  /**
    * Enhanced bot procedure
    *
    * This procedure automatically extracts telegramUserId from input and resolves userId
    * through TelegramUserService. Use this when you need userId to be available in context.
+   * Note: This should be used with input validation first, then this middleware.
    */
   const enhancedBotProcedure = t.procedure
     .use(timingMiddleware)
     .use(csrfMiddleware)
     .use(rateLimitMiddleware)
+    .use(botAuthMiddleware)
     .use(enhancedBotAuthMiddleware);
 
   /**
@@ -96,6 +109,7 @@ export const createProcedures = (t: TRPCInstance) => {
   return {
     publicProcedure,
     telegramAnonymousProcedure,
+    botProcedure,
     enhancedBotProcedure,
     protectedProcedure,
     adminProcedure,

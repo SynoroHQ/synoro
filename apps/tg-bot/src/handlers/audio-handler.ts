@@ -1,6 +1,6 @@
 import type { Context } from "grammy";
 
-import { apiClient } from "../api/client";
+import { apiClient, createApiClientWithHeaders } from "../api/client";
 import { DEFAULT_AGENT_OPTIONS } from "../config/agents";
 import { env } from "../env";
 import { transcribeAudio } from "../services/message-service";
@@ -91,14 +91,21 @@ export async function handleAudio(ctx: Context): Promise<void> {
       `🎯 Аудио транскрибировано: "${text.slice(0, 50)}${text.length > 50 ? "..." : ""}"`,
     );
 
+    // Создаем API клиент с дополнительными headers
+    const clientWithHeaders = createApiClientWithHeaders({
+      "X-Telegram-User-Id": messageContext.userId,
+      "X-Telegram-Username": messageContext.username || "",
+    });
+    
     // Обрабатываем транскрибированный текст через агентную систему
     const result =
-      await apiClient.messages.processMessageAgents.processMessageFromTelegramWithAgents.mutate(
+      await clientWithHeaders.messages.processMessageAgents.processMessageFromTelegramWithAgents.mutate(
         {
           text,
           channel: "telegram",
           messageId: messageContext.messageId,
           telegramUserId: messageContext.userId,
+          telegramUsername: messageContext.username,
           agentOptions: DEFAULT_AGENT_OPTIONS,
           metadata: {
             ...messageContext.metadata,

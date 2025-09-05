@@ -46,6 +46,7 @@ export const createTRPCContext = async (opts: {
     clientIp,
     origin,
     referer,
+    headers: opts.headers,
   };
 };
 
@@ -53,6 +54,7 @@ export type TRPCContext = Awaited<ReturnType<typeof createTRPCContext>> & {
   botUserId?: string;
   isBotRequest?: boolean;
   telegramUserId?: string;
+  telegramUsername?: string;
   isTelegramAnonymous?: boolean;
   userId?: string; // For enhancedBotProcedure, userId is guaranteed to be non-null
   conversationId?: string;

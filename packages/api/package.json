@@ -17,7 +17,7 @@
   "scripts": {
     "build": "tsup",
     "clean": "git clean -xdf .cache .turbo dist node_modules",
-    "dev": "bun with-env bun run src/server.ts",
+    "dev": "bun with-env bun run --watch src/server.ts",
     "start": "bun with-env bun run src/server.ts",
     "format": "prettier --check . --ignore-path ../../.gitignore",
     "lint": "eslint",

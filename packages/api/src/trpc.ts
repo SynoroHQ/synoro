@@ -61,6 +61,7 @@ const procedures = createProcedures(t);
 export const {
   publicProcedure,
   telegramAnonymousProcedure,
+  botProcedure,
   enhancedBotProcedure,
   protectedProcedure,
   adminProcedure,

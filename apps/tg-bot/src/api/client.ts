@@ -18,5 +18,21 @@ export const apiClient = createTRPCProxyClient<typeof appRouter>({
   ],
 });
 
+// Функция для создания API клиента с дополнительными headers
+export function createApiClientWithHeaders(additionalHeaders: Record<string, string>) {
+  return createTRPCProxyClient<typeof appRouter>({
+    links: [
+      httpBatchLink({
+        url: `${env.API_BASE_URL}/trpc`,
+        headers: () => ({
+          Authorization: `Bearer ${env.TELEGRAM_BOT_TOKEN}`,
+          ...additionalHeaders,
+        }),
+        transformer: superjson,
+      }),
+    ],
+  });
+}
+
 // Типы для удобства
 export type ApiClient = typeof apiClient;
