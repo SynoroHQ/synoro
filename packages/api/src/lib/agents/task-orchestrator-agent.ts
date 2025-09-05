@@ -175,7 +175,6 @@ export class TaskOrchestratorAgent extends AbstractAgent {
         prompt: `Проанализируй задачу: "${task.input}"
 
 Определи, является ли она сложной и требует ли координации нескольких агентов.`,
-        temperature: 0.2,
         experimental_telemetry: {
           isEnabled: true,
           ...this.createTelemetry("task-complexity-analysis", task),
@@ -471,7 +470,6 @@ export class TaskOrchestratorAgent extends AbstractAgent {
 Уверенность: ${stepResult.confidence}
 
 Дай объективную оценку качества.`,
-        temperature: 0.2,
         experimental_telemetry: {
           isEnabled: true,
           ...this.createTelemetry("step-quality-evaluation", task),
@@ -512,7 +510,6 @@ ${JSON.stringify(plan, null, 2)}
 ${results.map((r) => `- ${r.stepId}: ${r.result}`).join("\n")}
 
 Сформируй понятное и полезное резюме для пользователя.`,
-      temperature: 0.5,
       experimental_telemetry: {
         isEnabled: true,
         ...this.createTelemetry("generate-summary", task),

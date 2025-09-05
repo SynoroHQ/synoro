@@ -479,7 +479,7 @@ export class AgentManager {
         finalResponse,
         agentsUsed,
         totalSteps,
-        qualityScore,
+        qualityScore: 1.0, // Fixed quality score since evaluation is disabled
         metadata: {
           classification,
           routing,

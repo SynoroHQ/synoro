@@ -304,7 +304,6 @@ export class SmartReminderAgent extends AbstractAgent {
 ❌ "Как дела?"
 ❌ "Какая погода сегодня?"`,
         prompt: `Анализируемый текст: "${text}"`,
-        temperature: 0.1,
       });
 
       this.setCachedResult(cacheKey, object);
@@ -384,7 +383,6 @@ export class SmartReminderAgent extends AbstractAgent {
 "Сдать отчет до пятницы" → title: "Сдать отчет", type: "deadline", priority: "high"`,
         prompt: `Текст: "${text}"
 Контекст: ${JSON.stringify(context || {})}`,
-        temperature: 0.1,
       });
 
       return object;
@@ -423,7 +421,6 @@ export class SmartReminderAgent extends AbstractAgent {
 - Оптимальное планирование`,
         prompt: `Напоминание: ${JSON.stringify(reminder)}
 Исходный текст: "${originalText}"`,
-        temperature: 0.3,
       });
 
       return object.suggestions;

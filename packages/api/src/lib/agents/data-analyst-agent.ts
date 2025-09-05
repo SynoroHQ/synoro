@@ -59,7 +59,6 @@ export class DataAnalystAgent extends AbstractAgent {
         prompt: `Проанализируй запрос: "${task.input}"
 
 Определи, является ли он аналитическим и требует ли анализа данных.`,
-        temperature: 0.1,
         experimental_telemetry: {
           isEnabled: true,
           ...this.createTelemetry("analytics-request-detection", task),

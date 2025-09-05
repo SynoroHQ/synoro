@@ -172,9 +172,7 @@ export async function processMessageWithAgents(
       console.log(
         `🤖 [AGENTS] Использованы агенты: ${result.agentMetadata.agentsUsed.join(" → ")}`,
       );
-      console.log(
-        `📊 [AGENTS] Шагов: ${result.agentMetadata.totalSteps}`,
-      );
+      console.log(`📊 [AGENTS] Шагов: ${result.agentMetadata.totalSteps}`);
     }
 
     // Сохраняем ответ ассистента
@@ -211,7 +209,7 @@ export async function processMessageWithAgents(
         : {
             agentsUsed: ["agent-processor"],
             totalSteps: 1,
-            qualityScore: 0.7,
+            qualityScore: 1.0, // Fixed quality score since evaluation is disabled
             processingTime: totalProcessingTime,
             processingMode: "agents",
             shouldLogEvent: false,

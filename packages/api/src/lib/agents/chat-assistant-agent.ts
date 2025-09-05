@@ -24,7 +24,7 @@ export class ChatAssistantAgent extends AbstractAgent {
     },
   ];
   constructor() {
-    super("gpt-5", 0.8);
+    super("gpt-5"); // Temperature removed
   }
 
   async canHandle(task: AgentTask): Promise<boolean> {
@@ -57,7 +57,6 @@ export class ChatAssistantAgent extends AbstractAgent {
         prompt: `Проанализируй сообщение: "${task.input}"
 
 Определи, является ли это обычным общением для чата.`,
-        temperature: 0.1,
         experimental_telemetry: {
           isEnabled: true,
           ...this.createTelemetry("chat-message-detection", task),

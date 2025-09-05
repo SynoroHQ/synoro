@@ -79,7 +79,7 @@ export class AgentMessageProcessor {
         agentMetadata: {
           agentsUsed: orchestrationResult.agentsUsed,
           totalSteps: orchestrationResult.totalSteps,
-          qualityScore: orchestrationResult.qualityScore,
+          qualityScore: 1.0, // Fixed quality score since evaluation is disabled
           processingTime: orchestrationResult.metadata.processingTime,
           // Передаем флаг для автоматического логирования событий
           shouldLogEvent: orchestrationResult.metadata.shouldLogEvent ?? false,

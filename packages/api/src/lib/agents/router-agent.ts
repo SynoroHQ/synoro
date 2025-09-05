@@ -83,7 +83,7 @@ export class RouterAgent extends AbstractAgent {
   protected cacheTimeout = 10 * 60 * 1000; // 10 минут для классификаций
 
   constructor() {
-    super("gpt-5-mini", 0.05); // Используем более точную модель с минимальной температурой для роутинга
+    super("gpt-5-mini"); // Temperature removed
   }
 
   canHandle(_task: AgentTask): Promise<boolean> {
@@ -286,7 +286,6 @@ export class RouterAgent extends AbstractAgent {
 
 Верни только тип сообщения, ничего больше.`,
           prompt: `Классифицируй: "${task.input}"`,
-          temperature: 0.1,
           experimental_telemetry: {
             isEnabled: true,
             ...telemetryData,

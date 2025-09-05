@@ -58,7 +58,6 @@ export class FinancialAdvisorAgent extends AbstractAgent {
         prompt: `Проанализируй запрос: "${task.input}"
 
 Определи, является ли он финансовым и требует ли финансового совета.`,
-        temperature: 0.1,
         experimental_telemetry: {
           isEnabled: true,
           ...this.createTelemetry("financial-request-detection", task),

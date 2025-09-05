@@ -58,7 +58,6 @@ export class TaskManagerAgent extends AbstractAgent {
         prompt: `Проанализируй запрос: "${task.input}"
 
 Определи, связан ли он с управлением задачами.`,
-        temperature: 0.1,
         experimental_telemetry: {
           isEnabled: true,
           ...this.createTelemetry("task-management-detection", task),

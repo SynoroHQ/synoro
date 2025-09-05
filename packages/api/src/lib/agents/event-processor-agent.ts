@@ -61,7 +61,7 @@ export class EventProcessorAgent extends AbstractAgent {
   ];
 
   constructor() {
-    super("gpt-5-nano", 0.2); // Низкая температура для точного парсинга
+    super("gpt-5-nano"); // Temperature removed
   }
 
   async canHandle(task: AgentTask): Promise<boolean> {
@@ -106,7 +106,6 @@ export class EventProcessorAgent extends AbstractAgent {
 }
 
 ВАЖНО: Верни только валидный JSON без дополнительного текста.`,
-        temperature: 0.1,
         experimental_telemetry: {
           isEnabled: true,
           ...this.createTelemetry("event-type-detection", task),
@@ -237,7 +236,6 @@ export class EventProcessorAgent extends AbstractAgent {
 }
 
 ВАЖНО: Верни только валидный JSON без дополнительного текста.`,
-            temperature: 0.2,
             experimental_telemetry: {
               isEnabled: true,
               ...this.createTelemetry("event-categorization", task),
@@ -306,7 +304,6 @@ export class EventProcessorAgent extends AbstractAgent {
 }
 
 ВАЖНО: Верни только валидный JSON без дополнительного текста.`,
-            temperature: 0.1,
             experimental_telemetry: {
               isEnabled: true,
               ...this.createTelemetry("financial-extraction", task),
@@ -403,7 +400,6 @@ export class EventProcessorAgent extends AbstractAgent {
             model: this.getModel(),
             system: getPromptSafe(PROMPT_KEYS.EVENT_PROCESSOR),
             prompt: `Дай краткий полезный совет для события: "${task.input}"`,
-            temperature: 0.4,
             experimental_telemetry: {
               isEnabled: true,
               ...this.createTelemetry("generate-advice", task),

@@ -65,9 +65,9 @@ export abstract class AbstractAgent implements BaseAgent {
   protected cache = new Map<string, { result: any; timestamp: number }>();
   protected cacheTimeout = 5 * 60 * 1000; // 5 минут
 
-  constructor(defaultModel = "gpt-5-mini", defaultTemperature = 0.3) {
+  constructor(defaultModel = "gpt-5-mini") {
     this.defaultModel = defaultModel;
-    this.defaultTemperature = defaultTemperature;
+    this.defaultTemperature = 0; // Temperature removed
   }
 
   /**
@@ -218,7 +218,6 @@ export abstract class AbstractAgent implements BaseAgent {
 4. Рекомендуемый подход к решению
 5. Уровень уверенности в анализе`,
         prompt: `Задача: ${task.input}\nКонтекст: ${JSON.stringify(task.context)}\nТип: ${task.type}`,
-        temperature: 0.2,
         experimental_telemetry: {
           isEnabled: true,
           ...this.createTelemetry("analyze-context", task),
@@ -260,7 +259,6 @@ export abstract class AbstractAgent implements BaseAgent {
 - Общая оценка (overallScore): средневзвешенная оценка
 - Улучшения (improvements): конкретные предложения по улучшению`,
         prompt: `Запрос: ${input}\nОтвет: ${response}\nКонтекст: ${task.type}`,
-        temperature: 0.1,
         experimental_telemetry: {
           isEnabled: true,
           ...this.createTelemetry("assess-quality", task),
@@ -314,7 +312,6 @@ export abstract class AbstractAgent implements BaseAgent {
           model: this.getModel(),
           system: enhancedSystem,
           prompt: input,
-          temperature: this.defaultTemperature + attempt * 0.1, // Увеличиваем креативность при повторах
           experimental_telemetry: {
             isEnabled: true,
             ...this.createTelemetry(`respond-attempt-${attempt}`, task),

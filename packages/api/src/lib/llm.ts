@@ -55,7 +55,6 @@ export async function startCompletionRun(opts: {
     const result = streamText({
       model: openai(model),
       prompt,
-      temperature: 0.7,
       experimental_telemetry: {
         isEnabled: true,
         functionId: "api-chat-stream",

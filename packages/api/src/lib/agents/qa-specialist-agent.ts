@@ -96,7 +96,6 @@ export class QASpecialistAgent extends AbstractAgent {
         prompt: `Проанализируй сообщение: "${task.input}"
 
 Определи, является ли это вопросом или просьбой о помощи.`,
-        temperature: 0.1,
         experimental_telemetry: {
           isEnabled: true,
           ...this.createTelemetry("question-detection", task),
@@ -183,7 +182,6 @@ export class QASpecialistAgent extends AbstractAgent {
         prompt: `Классифицируй этот вопрос: "${question}"
 
 Выбери наиболее подходящий подтип.`,
-        temperature: 0.1,
         experimental_telemetry: {
           isEnabled: true,
           ...this.createTelemetry("question-classification", task),
@@ -216,7 +214,6 @@ export class QASpecialistAgent extends AbstractAgent {
             prompt: `Пользователь спрашивает: "${query}"
 
 Дай подробный и полезный ответ о возможностях Synoro AI.`,
-            temperature: 0.3,
             experimental_telemetry: {
               isEnabled: true,
               ...this.createTelemetry("system-info-search", task),

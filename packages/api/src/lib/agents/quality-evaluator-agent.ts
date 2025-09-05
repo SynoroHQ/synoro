@@ -73,7 +73,7 @@ export class QualityEvaluatorAgent extends AbstractAgent {
   };
 
   constructor() {
-    super("gpt-5", 0.2); // Низкая температура для объективной оценки
+    super("gpt-5"); // Temperature removed
   }
 
   async canHandle(task: AgentTask): Promise<boolean> {
@@ -186,7 +186,6 @@ ${evaluation.suggestions.join("\n- ")}
 Обоснование: ${evaluation.reasoning}
 
 Создай улучшенную версию ответа, исправив указанные проблемы.`,
-        temperature: 0.5,
         experimental_telemetry: {
           isEnabled: true,
           ...this.createTelemetry("response-improvement", task),
