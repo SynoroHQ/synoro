@@ -10,6 +10,11 @@ export const PROMPT_KEYS = {
   TASK_MANAGER: "task-manager",
   CHAT_ASSISTANT: "chat-assistant",
   TELEGRAM_FORMATTER: "telegram-formatter",
+  ROUTER_CLASSIFICATION: "router-classification",
+  ROUTER_ROUTING: "router-routing",
+  ROUTER_FALLBACK: "router-fallback",
+  BASE_AGENT_CONTEXT: "base-agent-context",
+  BASE_AGENT_QUALITY: "base-agent-quality",
 } as const;
 
 export type PromptKey = (typeof PROMPT_KEYS)[keyof typeof PROMPT_KEYS];

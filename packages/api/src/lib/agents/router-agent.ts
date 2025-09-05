@@ -1,5 +1,6 @@
 import { generateObject, generateText } from "ai";
 import { z } from "zod";
+import { getPromptSafe, PROMPT_KEYS } from "@synoro/prompts";
 
 import type {
   AgentCapability,
@@ -198,42 +199,7 @@ export class RouterAgent extends AbstractAgent {
       console.log("⚡ Использована быстрая классификация");
       return result;
     }
-    const systemPrompt = `Ты - агент классификации сообщений в системе Synoro AI.
-
-Твоя задача - проанализировать сообщение пользователя и определить:
-1. Тип сообщения (question, event, chat, complex_task, irrelevant)
-2. Подтип (если применимо)
-3. Уровень сложности (simple, medium, complex)
-4. Нужно ли логировать в базу данных
-5. Какие агенты лучше всего подходят для обработки
-
-ТИПЫ СООБЩЕНИЙ:
-- question: Вопросы к боту, запросы информации, просьбы о помощи
-- event: События для логирования (покупки, задачи, встречи, заметки)
-- chat: Обычное общение, приветствия, благодарности
-- complex_task: Сложные задачи требующие анализа данных или множественных операций
-- irrelevant: Спам, бессмысленные сообщения
-
-ВАЖНОЕ ПРАВИЛО ДЛЯ ЛОГИРОВАНИЯ:
-- Если сообщение описывает конкретное событие, действие или факт из жизни пользователя - ОБЯЗАТЕЛЬНО устанавливай needsLogging: true
-- События включают: покупки, траты, доходы, задачи, встречи, заметки, ремонт, поездки, здоровье
-- НЕ спрашивай пользователя, нужно ли записать событие - если это событие, то ЗАПИСЫВАЙ автоматически
-- needsLogging: false только для вопросов, обычного общения и спама
-
-ДОСТУПНЫЕ АГЕНТЫ:
-- qa-specialist: Отвечает на вопросы, предоставляет информацию (высокая точность)
-- general-assistant: Универсальный помощник и дружелюбный собеседник (быстрый)
-- event-processor: Обрабатывает и парсит события для логирования (специализированный)
-- task-manager: Управляет задачами/делами пользователя (организационный)
-- data-analyst: Анализирует числа, метрики, тренды и отчеты (аналитический)
-- task-orchestrator: Координирует сложные многоэтапные задачи (мультиагентный)
-- quality-evaluator: Оценивает и улучшает качество ответов (контроль качества)
-
-ВЫБИРАЙ АГЕНТА НА ОСНОВЕ:
-1. Специализации агента
-2. Сложности задачи
-3. Требуемой скорости ответа
-4. Необходимой точности`;
+    const systemPrompt = getPromptSafe(PROMPT_KEYS.ROUTER_CLASSIFICATION);
 
     const prompt = `Проанализируй это сообщение: "${task.input}"
 
@@ -250,7 +216,6 @@ export class RouterAgent extends AbstractAgent {
         schema: classificationSchema,
         system: systemPrompt,
         prompt,
-        temperature: this.defaultTemperature,
         experimental_telemetry: {
           isEnabled: true,
           ...this.createTelemetry("classify", task),
@@ -273,18 +238,7 @@ export class RouterAgent extends AbstractAgent {
 
         const { text: fallbackClassification } = await generateText({
           model: this.getModel(),
-          system: `Ты - эксперт по классификации сообщений. Классифицируй сообщение по типам: question, event, chat, complex_task, irrelevant.
-
-ПРАВИЛА:
-- question: вопросы, запросы информации
-- event: события для записи (покупки, задачи, встречи, заметки, ремонт, поездки)
-- chat: обычное общение, приветствия
-- complex_task: сложные многоэтапные задачи
-- irrelevant: спам, бессмысленные сообщения
-
-ВАЖНО: Если сообщение описывает событие - ОБЯЗАТЕЛЬНО нужно логировать (needsLogging: true).
-
-Верни только тип сообщения, ничего больше.`,
+          system: getPromptSafe(PROMPT_KEYS.ROUTER_FALLBACK),
           prompt: `Классифицируй: "${task.input}"`,
           experimental_telemetry: {
             isEnabled: true,
@@ -346,27 +300,7 @@ export class RouterAgent extends AbstractAgent {
     task: AgentTask,
     _telemetry?: AgentTelemetry,
   ): Promise<RoutingDecision> {
-    const systemPrompt = `Ты - агент маршрутизации в мультиагентной системе Synoro AI.
-
-На основе классификации сообщения выбери наиболее подходящего агента для обработки.
-
-КЛАССИФИКАЦИЯ: ${JSON.stringify(classification, null, 2)}
-
-ДОСТУПНЫЕ АГЕНТЫ И ИХ СПЕЦИАЛИЗАЦИЯ:
-- qa-specialist: Отвечает на вопросы о функциях бота, дает информацию (точность: 95%, скорость: средняя)
-- general-assistant: Универсальный помощник и собеседник (точность: 85%, скорость: высокая)
-- event-processor: Парсит и обрабатывает события для записи в базу (точность: 90%, скорость: средняя)
-- task-manager: Управляет задачами/делами пользователя (точность: 88%, скорость: средняя)
-- data-analyst: Выполняет аналитические запросы и рекомендации по визуализации (точность: 92%, скорость: низкая)
-- task-orchestrator: Координирует сложные задачи, требующие нескольких агентов (точность: 85%, скорость: низкая)
-- quality-evaluator: Оценивает и улучшает качество ответов (точность: 90%, скорость: низкая)
-
-ПРИОРИТЕТЫ ВЫБОРА:
-1. Для простых вопросов → general-assistant (быстро)
-2. Для сложных вопросов → qa-specialist (точно)
-3. Для событий → event-processor (специализированно)
-4. Для анализа данных → data-analyst (глубоко)
-5. Для многоэтапных задач → task-orchestrator (комплексно)`;
+    const systemPrompt = getPromptSafe(PROMPT_KEYS.ROUTER_ROUTING);
 
     const prompt = `Выбери агента для обработки сообщения: "${task.input}"
 

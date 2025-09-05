@@ -18,6 +18,11 @@ export { default as financialAdvisor } from "./prompts/financial-advisor";
 export { default as taskManager } from "./prompts/task-manager";
 export { default as chatAssistant } from "./prompts/chat-assistant";
 export { default as telegramFormatter } from "./prompts/telegram-formatter";
+export { default as routerClassification } from "./prompts/router-classification";
+export { default as routerRouting } from "./prompts/router-routing";
+export { default as routerFallback } from "./prompts/router-fallback";
+export { default as baseAgentContext } from "./prompts/base-agent-context";
+export { default as baseAgentQuality } from "./prompts/base-agent-quality";
 
 export function getPrompt(key: string): string {
   return registry[key]?.prompt ?? "";

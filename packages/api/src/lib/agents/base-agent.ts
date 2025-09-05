@@ -3,6 +3,7 @@ import { openai } from "@ai-sdk/openai";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { generateObject, generateText } from "ai";
 import { z } from "zod";
+import { getPromptSafe, PROMPT_KEYS } from "@synoro/prompts";
 
 import type {
   AgentCapability,
@@ -211,12 +212,7 @@ export abstract class AbstractAgent implements BaseAgent {
       const { object } = await generateObject({
         model: this.getModel(),
         schema: contextAnalysisSchema,
-        system: `Ты - эксперт по анализу контекста. Проанализируй задачу и определи:
-1. Ключевую релевантную информацию
-2. Намерение пользователя
-3. Сложность задачи
-4. Рекомендуемый подход к решению
-5. Уровень уверенности в анализе`,
+        system: getPromptSafe(PROMPT_KEYS.BASE_AGENT_CONTEXT),
         prompt: `Задача: ${task.input}\nКонтекст: ${JSON.stringify(task.context)}\nТип: ${task.type}`,
         experimental_telemetry: {
           isEnabled: true,
@@ -251,13 +247,7 @@ export abstract class AbstractAgent implements BaseAgent {
       const { object } = await generateObject({
         model: this.getModel(),
         schema: qualityAssessmentSchema,
-        system: `Ты - эксперт по оценке качества ответов ИИ. Оцени ответ по критериям:
-- Точность (accuracy): насколько ответ фактически корректен
-- Полнота (completeness): насколько полно отвечает на вопрос
-- Релевантность (relevance): насколько соответствует запросу
-- Ясность (clarity): насколько понятен и структурирован
-- Общая оценка (overallScore): средневзвешенная оценка
-- Улучшения (improvements): конкретные предложения по улучшению`,
+        system: getPromptSafe(PROMPT_KEYS.BASE_AGENT_QUALITY),
         prompt: `Запрос: ${input}\nОтвет: ${response}\nКонтекст: ${task.type}`,
         experimental_telemetry: {
           isEnabled: true,

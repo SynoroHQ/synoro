@@ -40,7 +40,7 @@ export class TelegramFormatterAgent extends AbstractAgent {
       task.type === "formatting" ||
       task.type === "telegram-response";
 
-    const isTelegramChannel = task.context?.channel === "telegram";
+    const isTelegramChannel = task.context.channel === "telegram";
 
     // Всегда участвуем для Telegram канала или задач форматирования
     return Promise.resolve(isFormattingTask || isTelegramChannel);

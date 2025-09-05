@@ -74,7 +74,7 @@ export class DataAnalystAgent extends AbstractAgent {
   }
 
   async process(task: AgentTask): Promise<AgentResult<string>> {
-    const systemPrompt = getPromptSafe(PROMPT_KEYS.ASSISTANT);
+    const systemPrompt = getPromptSafe(PROMPT_KEYS.DATA_ANALYST);
 
     try {
       const response = await this.generateResponse(

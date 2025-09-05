@@ -73,7 +73,7 @@ export class TaskManagerAgent extends AbstractAgent {
   }
 
   async process(task: AgentTask): Promise<AgentResult<string>> {
-    const systemPrompt = getPromptSafe(PROMPT_KEYS.ASSISTANT);
+    const systemPrompt = getPromptSafe(PROMPT_KEYS.TASK_MANAGER);
 
     try {
       const response = await this.generateResponse(

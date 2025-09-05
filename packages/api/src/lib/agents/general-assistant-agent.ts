@@ -57,7 +57,7 @@ export class GeneralAssistantAgent extends AbstractAgent {
   shouldLog(task: AgentTask): Promise<boolean> {
     // Логируем только важные взаимодействия
     return Promise.resolve(
-      task.input.length > 50 || task.context?.channel === "telegram",
+      task.input.length > 50 || task.context.channel === "telegram",
     );
   }
 }
