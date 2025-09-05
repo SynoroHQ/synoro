@@ -12,6 +12,19 @@ export interface TelegramFormattingOptions {
   useColors?: boolean;
 }
 
+/**
+ * Оптимальные настройки форматирования для Telegram
+ */
+export const OPTIMAL_TELEGRAM_FORMATTING: Required<TelegramFormattingOptions> =
+  {
+    useEmojis: true,
+    useHTML: true,
+    addSeparators: false,
+    maxLineLength: 100,
+    addContextInfo: false,
+    useColors: false,
+  };
+
 export interface FormattedMessage {
   text: string;
   parse_mode?: "HTML";
@@ -25,14 +38,28 @@ export class TelegramFormatter {
   private defaultOptions: Required<TelegramFormattingOptions> = {
     useEmojis: true,
     useHTML: true,
-    addSeparators: true,
-    maxLineLength: 80,
+    addSeparators: false, // Убираем разделители для более чистого вида
+    maxLineLength: 100, // Увеличиваем длину строк для лучшей читаемости
     addContextInfo: false,
-    useColors: true,
+    useColors: false, // Отключаем цвета для лучшей совместимости
   };
+
+  // Кэш для скомпилированных регулярных выражений
+  private regexCache = new Map<string, RegExp>();
 
   constructor(options?: Partial<TelegramFormattingOptions>) {
     this.defaultOptions = { ...this.defaultOptions, ...options };
+  }
+
+  /**
+   * Получает кэшированное регулярное выражение
+   */
+  private getRegex(pattern: string, flags?: string): RegExp {
+    const key = `${pattern}:${flags || ""}`;
+    if (!this.regexCache.has(key)) {
+      this.regexCache.set(key, new RegExp(pattern, flags));
+    }
+    return this.regexCache.get(key)!;
   }
 
   /**
@@ -131,51 +158,92 @@ export class TelegramFormatter {
   }
 
   /**
-   * Форматирует только очевидные заголовки
+   * Форматирует заголовки в HTML
    */
   private formatHeaders(text: string): string {
-    // Ищем строки, которые выглядят как заголовки
-    return text.replace(/^(.{3,50})$/gm, (match) => {
-      // Если строка короткая и заканчивается двоеточием или не содержит знаков препинания
-      if (match.length < 50 && (match.endsWith(":") || !/[.!?]/.test(match))) {
-        return `<b>${match}</b>`;
+    // Форматируем заголовки с # (Markdown стиль)
+    const headerRegex = this.getRegex("^#{1,6}\\s+(.+)$", "gm");
+    text = text.replace(headerRegex, (match, content) => {
+      const level = match.match(/^#+/)?.[0].length || 1;
+      return `<b>${content.trim()}</b>`;
+    });
+
+    // Форматируем заголовки с ** (жирный текст)
+    const boldRegex = this.getRegex("^\\*\\*(.+)\\*\\*$", "gm");
+    text = text.replace(boldRegex, "<b>$1</b>");
+
+    // Ищем строки, которые выглядят как заголовки (короткие, без знаков препинания в конце)
+    const shortLineRegex = this.getRegex("^(.{3,50})$", "gm");
+    const punctuationRegex = this.getRegex("[.!?]");
+    text = text.replace(shortLineRegex, (match) => {
+      const trimmed = match.trim();
+      // Если строка короткая, заканчивается двоеточием или не содержит знаков препинания
+      if (
+        trimmed.length < 50 &&
+        (trimmed.endsWith(":") || !punctuationRegex.test(trimmed))
+      ) {
+        return `<b>${trimmed}</b>`;
       }
       return match;
     });
-  }
-
-  /**
-   * Форматирует списки
-   */
-  private formatSimpleLists(text: string): string {
-    // Форматируем маркированные списки
-    text = text.replace(/^[-*•]\s+/gm, "• ");
-
-    // Форматируем нумерованные списки
-    text = text.replace(/^(\d+)\.\s+/gm, "$1. ");
 
     return text;
   }
 
   /**
-   * Добавляет простые переносы строк
+   * Форматирует списки в HTML
+   */
+  private formatSimpleLists(text: string): string {
+    // Форматируем маркированные списки
+    text = text.replace(/^[-*•]\s+(.+)$/gm, "• $1");
+
+    // Форматируем нумерованные списки
+    text = text.replace(/^(\d+)\.\s+(.+)$/gm, "$1. $2");
+
+    // Форматируем вложенные списки
+    text = text.replace(/^(\s+)[-*•]\s+(.+)$/gm, "$1  • $2");
+
+    return text;
+  }
+
+  /**
+   * Форматирует код блоки в HTML
    */
   private formatCodeBlocks(text: string): string {
-    // Ищем строки, которые выглядят как код (содержат технические термины)
-    // Но только те, которые ещё не обёрнуты в <code> теги
+    // Форматируем блоки кода с ```
+    const codeBlockRegex = this.getRegex("```(\\w+)?\\n([\\s\\S]*?)```", "g");
+    text = text.replace(codeBlockRegex, (match, lang, code) => {
+      const trimmedCode = code.trim();
+      return `<pre><code>${trimmedCode}</code></pre>`;
+    });
+
+    // Форматируем инлайн код с `
+    const inlineCodeRegex = this.getRegex("`([^`]+)`", "g");
+    text = text.replace(inlineCodeRegex, "<code>$1</code>");
+
+    // Форматируем строки, которые выглядят как код (только если не в тегах)
     const codePatterns = [
-      /\b([A-Z_]{3,})\b/g, // Константы
-      /\b([a-z]+\([^)]*\))/g, // Функции
-      /\b(\d+\.\d+\.\d+)\b/g, // Версии
-      /\b([A-Z][a-z]+[A-Z][a-z]+)\b/g, // CamelCase
+      this.getRegex("\\b([A-Z_]{3,})\\b", "g"), // Константы
+      this.getRegex("\\b([a-z]+\\([^)]*\\))", "g"), // Функции
+      this.getRegex("\\b(\\d+\\.\\d+\\.\\d+)\\b", "g"), // Версии
+      this.getRegex("\\b([A-Z][a-z]+[A-Z][a-z]+)\\b", "g"), // CamelCase
     ];
+
+    const openTagRegex = this.getRegex("<[^>]*>", "g");
+    const closeTagRegex = this.getRegex("</[^>]*>", "g");
 
     codePatterns.forEach((pattern) => {
       text = text.replace(pattern, (match, group) => {
-        // Проверяем, не обёрнут ли уже в <code> тег
-        if (text.includes(`<code>${group}</code>`)) {
+        // Проверяем, не находится ли уже внутри HTML тегов
+        const beforeMatch = text.substring(0, text.indexOf(match));
+        const openTags = (beforeMatch.match(openTagRegex) || []).length;
+        const closeTags = (beforeMatch.match(closeTagRegex) || []).length;
+
+        // Если мы внутри тега, не форматируем
+        if (openTags > closeTags) {
           return match;
         }
+
         return `<code>${group}</code>`;
       });
     });
@@ -184,11 +252,16 @@ export class TelegramFormatter {
   }
 
   /**
-   * Форматирует цитаты
+   * Форматирует цитаты в HTML
    */
   private formatQuotes(text: string): string {
+    // Форматируем блоки цитат с >
+    text = text.replace(/^>\s*(.+)$/gm, "<i>$1</i>");
+
     // Ищем строки в кавычках
-    return text.replace(/"([^"]+)"/g, '<i>"$1"</i>');
+    text = text.replace(/"([^"]+)"/g, '<i>"$1"</i>');
+
+    return text;
   }
 
   /**
@@ -290,27 +363,68 @@ export class TelegramFormatter {
   ): string {
     let formatted = text;
 
-    // 1. Форматируем структуру текста
+    // 1. Экранируем HTML символы в начале
+    formatted = this.escapeHtmlCharacters(formatted);
+
+    // 2. Форматируем код блоки (до других форматирований)
+    formatted = this.formatCodeBlocks(formatted);
+
+    // 3. Форматируем структуру текста
     formatted = this.formatTextStructure(formatted, options);
 
-    // 2. Форматируем важные части текста
+    // 4. Форматируем важные части текста
     formatted = this.formatImportantParts(formatted);
 
-    // 3. Форматируем технические термины
+    // 5. Форматируем технические термины
     formatted = this.formatTechnicalTerms(formatted);
 
-    // 4. Добавляем цветовое выделение если включено
+    // 6. Форматируем цитаты
+    formatted = this.formatQuotes(formatted);
+
+    // 7. Добавляем цветовое выделение если включено
     if (options.useColors) {
       formatted = this.addColorHighlighting(formatted);
     }
 
-    // 5. Форматируем ссылки
+    // 8. Форматируем ссылки
     formatted = this.formatLinks(formatted);
 
-    // 6. Форматируем таблицы
+    // 9. Форматируем таблицы
     formatted = this.formatTables(formatted);
 
+    // 10. Добавляем разделители если включено
+    if (options.addSeparators) {
+      formatted = this.addSeparators(formatted);
+    }
+
+    // 11. Добавляем контекстную информацию если включено
+    if (options.addContextInfo) {
+      formatted = this.addContextInfo(formatted);
+    }
+
     return formatted;
+  }
+
+  /**
+   * Экранирует HTML символы для безопасного отображения
+   */
+  private escapeHtmlCharacters(text: string): string {
+    // Экранируем только те символы, которые не находятся внутри HTML тегов
+    const parts = text.split(/(<[^>]+>)/g);
+    return parts
+      .map((part, index) => {
+        // Если это HTML тег (нечетные индексы), не экранируем
+        if (index % 2 === 1) {
+          return part;
+        }
+
+        // Если это обычный текст, экранируем HTML символы
+        return part
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+      })
+      .join("");
   }
 
   /**
@@ -400,8 +514,20 @@ export class TelegramFormatter {
    */
   private formatLinks(text: string): string {
     // Ищем URL и оборачиваем их в HTML ссылки
-    const urlRegex = /(https?:\/\/[^\s]+)/g;
-    return text.replace(urlRegex, '<a href="$1">$1</a>');
+    const urlRegex = /(https?:\/\/[^\s<>]+)/g;
+    return text.replace(urlRegex, (url) => {
+      // Проверяем, не находится ли URL уже внутри HTML тегов
+      const beforeUrl = text.substring(0, text.indexOf(url));
+      const openTags = (beforeUrl.match(/<[^>]*>/g) || []).length;
+      const closeTags = (beforeUrl.match(/<\/[^>]*>/g) || []).length;
+
+      // Если мы внутри тега, не форматируем
+      if (openTags > closeTags) {
+        return url;
+      }
+
+      return `<a href="${url}">${url}</a>`;
+    });
   }
 
   /**

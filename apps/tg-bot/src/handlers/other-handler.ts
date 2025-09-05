@@ -35,6 +35,9 @@ export async function handleOther(ctx: Context): Promise<void> {
       await ctx.reply(
         `Получил ${getMessageTypeDisplayName(messageType)} с подписью: "${caption}"\n\n` +
           "Для более точного анализа отправьте текст отдельным сообщением.",
+        {
+          parse_mode: "HTML",
+        },
       );
       return;
     }
@@ -44,6 +47,9 @@ export async function handleOther(ctx: Context): Promise<void> {
       `Получил ${getMessageTypeDisplayName(messageType)}. ` +
         "Я умею обрабатывать текстовые и голосовые сообщения. " +
         "Отправьте текст или голосовое сообщение для анализа.",
+      {
+        parse_mode: "HTML",
+      },
     );
   } catch (error) {
     // Удаляем сообщение "Обрабатываем..." в случае ошибки
@@ -53,6 +59,9 @@ export async function handleOther(ctx: Context): Promise<void> {
     await ctx.reply(
       "Получил ваше сообщение, но не смог его обработать. " +
         "Попробуйте отправить текстовое или голосовое сообщение.",
+      {
+        parse_mode: "HTML",
+      },
     );
   }
 }

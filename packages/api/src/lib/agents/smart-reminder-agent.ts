@@ -148,7 +148,7 @@ export class SmartReminderAgent extends AbstractAgent {
   private reminderService: ReminderService;
 
   constructor() {
-    super("gpt-4o-mini", 0.2);
+    super("gpt-4o-mini");
     this.reminderService = new ReminderService();
   }
 

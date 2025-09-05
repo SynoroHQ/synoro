@@ -25,7 +25,7 @@ export class TaskManagerAgent extends AbstractAgent {
     },
   ];
   constructor() {
-    super("gpt-5-mini", 0.6);
+    super("gpt-5-mini");
   }
 
   async canHandle(task: AgentTask): Promise<boolean> {

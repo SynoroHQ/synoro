@@ -2,7 +2,6 @@ import type { Context } from "grammy";
 import { Bot } from "grammy";
 
 import { env } from "./env";
-
 import { handleAudio } from "./handlers/audio-handler";
 import { handleOther } from "./handlers/other-handler";
 import { handleSmartText } from "./handlers/smart-text-handler";
@@ -83,6 +82,9 @@ export function createBot(): Bot<Context> {
         "🎤 Отправь голосовое — переведу в текст и обработаю\n" +
         "📋 Помогу с делами, вопросами и дам полезные советы\n\n" +
         "Просто начинай разговор!",
+      {
+        parse_mode: "HTML",
+      },
     );
   });
 

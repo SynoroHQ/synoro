@@ -25,7 +25,7 @@ export class DataAnalystAgent extends AbstractAgent {
     },
   ];
   constructor() {
-    super("gpt-5-mini", 0.5);
+    super("gpt-5-mini");
   }
 
   async canHandle(task: AgentTask): Promise<boolean> {

@@ -129,7 +129,7 @@ export class TaskOrchestratorAgent extends AbstractAgent {
   ];
 
   constructor() {
-    super("gpt-5-mini", 0.3); // Более мощная модель для планирования
+    super("gpt-5-mini"); // Более мощная модель для планирования
   }
 
   async canHandle(task: AgentTask): Promise<boolean> {

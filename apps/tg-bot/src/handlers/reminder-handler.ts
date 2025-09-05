@@ -58,7 +58,7 @@ export class ReminderHandler {
       });
 
       let message = "✅ Создано напоминание:\n\n";
-      message += `📝 **${reminder.title}**\n`;
+      message += `📝 <b>${reminder.title}</b>\n`;
       if (reminder.description) {
         message += `📄 ${reminder.description}\n`;
       }
@@ -74,7 +74,7 @@ export class ReminderHandler {
         result.suggestions.relatedTasks &&
         result.suggestions.relatedTasks.length > 0
       ) {
-        message += "\n\n💡 **Предложения:**\n";
+        message += "\n\n💡 <b>Предложения:</b>\n";
         result.suggestions.relatedTasks
           .slice(0, 3)
           .forEach((suggestion: string, index: number) => {
@@ -83,33 +83,14 @@ export class ReminderHandler {
       }
 
       await ctx.reply(message, {
-        parse_mode: "Markdown",
-        reply_markup: {
-          inline_keyboard: [
-            [
-              {
-                text: "✏️ Редактировать",
-                callback_data: `edit_reminder_${reminder.id}`,
-              },
-              {
-                text: "❌ Удалить",
-                callback_data: `delete_reminder_${reminder.id}`,
-              },
-            ],
-            [{ text: "📋 Мои напоминания", callback_data: "list_reminders" }],
-          ],
-        },
+        parse_mode: "HTML",
       });
     } catch (error) {
       console.error("Ошибка создания напоминания:", error);
       await ctx.reply(
         "❌ Не удалось создать напоминание. Попробуйте переформулировать запрос или указать время более точно.",
         {
-          reply_markup: {
-            inline_keyboard: [
-              [{ text: "💡 Примеры", callback_data: "reminder_examples" }],
-            ],
-          },
+          parse_mode: "HTML",
         },
       );
     }
@@ -140,17 +121,13 @@ export class ReminderHandler {
             ? '📭 У вас пока нет активных напоминаний.\n\nЧтобы создать напоминание, просто напишите мне что-то вроде:\n• "Напомни завтра в 15:00 позвонить врачу"\n• "Встреча с клиентом в понедельник"\n• "Сдать отчет до пятницы"'
             : "📭 Больше напоминаний нет.",
           {
-            reply_markup: {
-              inline_keyboard: [
-                [{ text: "💡 Примеры", callback_data: "reminder_examples" }],
-              ],
-            },
+            parse_mode: "HTML",
           },
         );
         return;
       }
 
-      let message = `📋 **Ваши напоминания** (стр. ${page + 1}):\n\n`;
+      let message = `📋 <b>Ваши напоминания</b> (стр. ${page + 1}):\n\n`;
 
       reminders.forEach((reminder: Reminder, index: number) => {
         const timeStr = reminder.reminderTime.toLocaleString("ru-RU", {
@@ -168,39 +145,12 @@ export class ReminderHandler {
           reminder.priority || "medium",
         );
 
-        message += `${offset + index + 1}. ${statusEmoji} **${reminder.title}**\n`;
+        message += `${offset + index + 1}. ${statusEmoji} <b>${reminder.title}</b>\n`;
         message += `   ⏰ ${timeStr} ${priorityEmoji}\n\n`;
       });
 
-      const keyboard = [];
-
-      // Кнопки навигации
-      const navRow = [];
-      if (page > 0) {
-        navRow.push({
-          text: "⬅️ Назад",
-          callback_data: `list_reminders_${page - 1}`,
-        });
-      }
-      if (reminders.length === limit) {
-        navRow.push({
-          text: "➡️ Далее",
-          callback_data: `list_reminders_${page + 1}`,
-        });
-      }
-      if (navRow.length > 0) {
-        keyboard.push(navRow);
-      }
-
-      // Кнопки действий
-      keyboard.push([
-        { text: "📊 Статистика", callback_data: "reminder_stats" },
-        { text: "🔄 Обновить", callback_data: `list_reminders_${page}` },
-      ]);
-
       await ctx.reply(message, {
-        parse_mode: "Markdown",
-        reply_markup: { inline_keyboard: keyboard },
+        parse_mode: "HTML",
       });
     } catch (error) {
       console.error("Ошибка получения списка напоминаний:", error);
@@ -217,7 +167,7 @@ export class ReminderHandler {
         apiClient as any
       ).reminders.getStats.query()) as ReminderStats;
 
-      let message = "📊 **Статистика напоминаний:**\n\n";
+      let message = "📊 <b>Статистика напоминаний:</b>\n\n";
       message += `📝 Всего: ${stats.total}\n`;
       message += `⏳ Ожидают: ${stats.pending}\n`;
       message += `🔔 Активные: ${stats.active}\n`;
@@ -228,12 +178,7 @@ export class ReminderHandler {
       }
 
       await ctx.reply(message, {
-        parse_mode: "Markdown",
-        reply_markup: {
-          inline_keyboard: [
-            [{ text: "📋 Показать список", callback_data: "list_reminders" }],
-          ],
-        },
+        parse_mode: "HTML",
       });
     } catch (error) {
       console.error("Ошибка получения статистики:", error);
@@ -246,30 +191,25 @@ export class ReminderHandler {
    */
   static async handleReminderExamples(ctx: Context) {
     const message =
-      "💡 **Примеры создания напоминаний:**\n\n" +
-      "🕐 **Время:**\n" +
+      "💡 <b>Примеры создания напоминаний:</b>\n\n" +
+      "🕐 <b>Время:</b>\n" +
       `• "Напомни завтра в 15:00 позвонить врачу"\n` +
       `• "Встреча через 2 часа"\n` +
       `• "В понедельник в 9 утра совещание"\n\n` +
-      "📅 **События:**\n" +
+      "📅 <b>События:</b>\n" +
       `• "День рождения мамы 15 марта"\n` +
       `• "Отпуск с 1 по 10 июля"\n\n` +
-      "📋 **Задачи:**\n" +
+      "📋 <b>Задачи:</b>\n" +
       `• "Сдать отчет до пятницы"\n` +
       `• "Купить продукты вечером"\n` +
       `• "Записаться к стоматологу на следующей неделе"\n\n` +
-      "🔄 **Повторяющиеся:**\n" +
+      "🔄 <b>Повторяющиеся:</b>\n" +
       `• "Каждый день в 8:00 принять витамины"\n` +
       `• "Еженедельно по понедельникам планерка"\n\n` +
       "Просто напишите мне, что и когда нужно напомнить!";
 
     await ctx.reply(message, {
-      parse_mode: "Markdown",
-      reply_markup: {
-        inline_keyboard: [
-          [{ text: "📋 Мои напоминания", callback_data: "list_reminders" }],
-        ],
-      },
+      parse_mode: "HTML",
     });
   }
 
@@ -320,11 +260,7 @@ export class ReminderHandler {
 
       if (result.success) {
         await ctx.reply("✅ Напоминание удалено.", {
-          reply_markup: {
-            inline_keyboard: [
-              [{ text: "📋 Показать список", callback_data: "list_reminders" }],
-            ],
-          },
+          parse_mode: "HTML",
         });
       } else {
         await ctx.reply("❌ Напоминание не найдено или уже удалено.");
@@ -347,17 +283,7 @@ export class ReminderHandler {
       "✏️ Редактирование напоминаний будет добавлено в следующих версиях.\n\n" +
         "Пока что вы можете удалить старое напоминание и создать новое.",
       {
-        reply_markup: {
-          inline_keyboard: [
-            [
-              {
-                text: "❌ Удалить",
-                callback_data: `delete_reminder_${reminderId}`,
-              },
-              { text: "📋 К списку", callback_data: "list_reminders" },
-            ],
-          ],
-        },
+        parse_mode: "HTML",
       },
     );
   }

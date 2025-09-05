@@ -30,7 +30,7 @@ export class TelegramFormatterAgent extends AbstractAgent {
   ];
 
   constructor() {
-    super("gpt-5-nano", 0.3);
+    super("gpt-5-nano");
   }
 
   canHandle(task: AgentTask): Promise<boolean> {

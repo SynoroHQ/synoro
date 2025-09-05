@@ -43,7 +43,7 @@ export class QASpecialistAgent extends AbstractAgent {
   ];
 
   constructor() {
-    super("gpt-5-nano", 0.4);
+    super("gpt-5-nano");
   }
 
   async canHandle(task: AgentTask): Promise<boolean> {

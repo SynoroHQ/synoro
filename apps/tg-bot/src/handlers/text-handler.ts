@@ -3,7 +3,10 @@ import type { Context } from "grammy";
 import { apiClient, createApiClientWithHeaders } from "../api/client";
 import { runWithAnimation } from "../utils/animation-helpers";
 import { createErrorMessage } from "../utils/html-message-builder";
-import { formatForTelegram } from "../utils/telegram-formatter";
+import {
+  formatForTelegram,
+  OPTIMAL_TELEGRAM_FORMATTING,
+} from "../utils/telegram-formatter";
 import { createMessageContext } from "../utils/telegram-utils";
 
 /**
@@ -30,7 +33,7 @@ export async function handleText(ctx: Context) {
           "X-Telegram-User-Id": messageContext.userId,
           "X-Telegram-Username": messageContext.username || "",
         });
-        
+
         const result =
           await clientWithHeaders.messages.processMessageAgents.processMessageFromTelegramWithAgents.mutate(
             {
@@ -44,11 +47,10 @@ export async function handleText(ctx: Context) {
 
         if (result.success) {
           // Форматируем ответ для Telegram
-          const formattedResponse = formatForTelegram(result.response, {
-            useEmojis: true,
-            useHTML: true,
-            addSeparators: false,
-          });
+          const formattedResponse = formatForTelegram(
+            result.response,
+            OPTIMAL_TELEGRAM_FORMATTING,
+          );
 
           // Отправляем новый ответ
           await ctx.reply(formattedResponse.text, { parse_mode: "HTML" });
@@ -98,7 +100,7 @@ async function processMessageInBackground(
       "X-Telegram-User-Id": messageContext.userId,
       "X-Telegram-Username": messageContext.username || "",
     });
-    
+
     const result =
       await clientWithHeaders.messages.processMessageAgents.processMessageFromTelegramWithAgents.mutate(
         {
@@ -113,11 +115,10 @@ async function processMessageInBackground(
     if (result.success && result.agentMetadata?.agentsUsed.length) {
       // Если в фоне получили результат от агентов, отправляем дополнительное сообщение
       const additionalInfo = `💡 Дополнительная информация от ${result.agentMetadata.agentsUsed.join(", ")}:`;
-      const formattedResponse = formatForTelegram(result.response, {
-        useEmojis: true,
-        useHTML: true,
-        addSeparators: false,
-      });
+      const formattedResponse = formatForTelegram(
+        result.response,
+        OPTIMAL_TELEGRAM_FORMATTING,
+      );
 
       await ctx.reply(`${additionalInfo}\n\n${formattedResponse.text}`, {
         parse_mode: "HTML",

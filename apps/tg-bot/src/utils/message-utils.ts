@@ -110,19 +110,14 @@ export async function smoothDeleteMessage(
 ): Promise<void> {
   try {
     // Сначала делаем сообщение полупрозрачным
-    await ctx.api.editMessageText(ctx.chat!.id, messageId, "⏳ Обрабатываем...", {
-      parse_mode: "HTML",
-      reply_markup: {
-        inline_keyboard: [
-          [
-            {
-              text: "⏳",
-              callback_data: "processing",
-            },
-          ],
-        ],
+    await ctx.api.editMessageText(
+      ctx.chat!.id,
+      messageId,
+      "⏳ Обрабатываем...",
+      {
+        parse_mode: "HTML",
       },
-    });
+    );
 
     // Небольшая задержка для плавности
     await new Promise((resolve) => setTimeout(resolve, 300));

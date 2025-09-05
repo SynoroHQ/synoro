@@ -4,15 +4,16 @@ import { apiClient, createApiClientWithHeaders } from "../api/client";
 import { DEFAULT_AGENT_OPTIONS } from "../config/agents";
 import { env } from "../env";
 import { transcribeAudio } from "../services/message-service";
+import { ProcessingAnimation } from "../utils/message-utils";
 import {
-  ProcessingAnimation,
-} from "../utils/message-utils";
+  formatAgentResponse,
+  OPTIMAL_TELEGRAM_FORMATTING,
+} from "../utils/telegram-formatter";
 import {
   createMessageContext,
   downloadTelegramFile,
   getUserIdentifier,
 } from "../utils/telegram-utils";
-import { formatAgentResponse } from "../utils/telegram-formatter";
 
 /**
  * Обрабатывает аудио и голосовые сообщения
@@ -34,9 +35,7 @@ export async function handleAudio(ctx: Context): Promise<void> {
   try {
     const messageContext = createMessageContext(ctx);
 
-    console.log(
-      `🎤 Обработка аудио от ${getUserIdentifier(ctx.from)}`,
-    );
+    console.log(`🎤 Обработка аудио от ${getUserIdentifier(ctx.from)}`);
 
     // Проверяем ограничения по длительности
     const maxDurationSec = env.TG_AUDIO_MAX_DURATION_SEC ?? 120; // 2 min default
@@ -96,7 +95,7 @@ export async function handleAudio(ctx: Context): Promise<void> {
       "X-Telegram-User-Id": messageContext.userId,
       "X-Telegram-Username": messageContext.username || "",
     });
-    
+
     // Обрабатываем транскрибированный текст через агентную систему
     const result =
       await clientWithHeaders.messages.processMessageAgents.processMessageFromTelegramWithAgents.mutate(
@@ -143,12 +142,11 @@ export async function handleAudio(ctx: Context): Promise<void> {
         ? result.response.slice(0, room - 1) + "…"
         : result.response;
 
-    const formattedMessage = formatAgentResponse(prefix + body, "audio", {
-      useEmojis: true,
-      useHTML: true,
-      addSeparators: true,
-      useColors: true,
-    });
+    const formattedMessage = formatAgentResponse(
+      prefix + body,
+      "audio",
+      OPTIMAL_TELEGRAM_FORMATTING,
+    );
 
     await ctx.reply(formattedMessage.text, {
       parse_mode: formattedMessage.parse_mode,
