@@ -469,32 +469,8 @@ export class AgentManager {
         );
       }
 
-      // 8. Контроль качества (если включен)
-      if (options.useQualityControl && finalResponse) {
-        console.log("🔍 Running quality control...");
-
-        const {
-          iterationsUsed,
-          finalResponse: improvedResponse,
-          finalQuality,
-        } = await this.qualityEvaluator.evaluateAndImprove(
-          input,
-          finalResponse,
-          options.maxQualityIterations ?? 2,
-          options.targetQuality ?? 0.8,
-          processingTask,
-          context,
-        );
-
-        agentsUsed.push(this.qualityEvaluator.name);
-        totalSteps += iterationsUsed;
-        finalResponse = improvedResponse;
-        qualityScore = finalQuality;
-
-        console.log(
-          `✨ Quality improved: ${qualityScore.toFixed(2)} (${iterationsUsed} iterations)`,
-        );
-      }
+      // 8. Контроль качества отключен
+      // Quality control is disabled for better performance
 
       // 9. Формируем окончательный результат с расширенными метриками
       const processingTime = Date.now() - startTime;
@@ -511,7 +487,7 @@ export class AgentManager {
           agentData: this.isRecord(processingResult?.data)
             ? processingResult.data
             : undefined,
-          qualityControlUsed: options.useQualityControl ?? false,
+          qualityControlUsed: false, // Always disabled
           shouldLogEvent: classification.needsLogging,
           // Дополнительные метрики производительности
           cacheUsed: false,

@@ -28,6 +28,8 @@ export class TelegramUserService {
     telegramUsername?: string,
   ): Promise<TelegramUserContext> {
     try {
+      console.log("telegramUserId", telegramUserId);
+      console.log("telegramUsername", telegramUsername);
       // 1. Ищем существующего пользователя по telegramUserId в email
       const existingUser = await db
         .select()
@@ -40,14 +42,14 @@ export class TelegramUserService {
         // Пользователь уже существует, обновляем username если он изменился
         const user = existingUser[0]!;
         userId = user.id;
-        
+
         // Обновляем username если он предоставлен и отличается от текущего
         if (telegramUsername && user.username !== telegramUsername) {
           await db
             .update(users)
-            .set({ 
+            .set({
               username: telegramUsername,
-              updatedAt: new Date()
+              updatedAt: new Date(),
             })
             .where(eq(users.id, userId));
         }

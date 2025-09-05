@@ -159,9 +159,9 @@ export async function processMessageWithAgents(
     const processor = getAgentProcessor();
 
     const result = await processor.processMessage(text, agentContext, {
-      useQualityControl: options.useQualityControl ?? true,
-      maxQualityIterations: options.maxQualityIterations ?? 2,
-      targetQuality: options.targetQuality ?? 0.8,
+      useQualityControl: false, // Отключен контроль качества
+      maxQualityIterations: 0,
+      targetQuality: 0,
     });
 
     const agentProcessingTime = formatExecutionTime(agentProcessingStartTime);
@@ -173,7 +173,7 @@ export async function processMessageWithAgents(
         `🤖 [AGENTS] Использованы агенты: ${result.agentMetadata.agentsUsed.join(" → ")}`,
       );
       console.log(
-        `📊 [AGENTS] Качество: ${result.agentMetadata.qualityScore.toFixed(2)}, шагов: ${result.agentMetadata.totalSteps}`,
+        `📊 [AGENTS] Шагов: ${result.agentMetadata.totalSteps}`,
       );
     }
 

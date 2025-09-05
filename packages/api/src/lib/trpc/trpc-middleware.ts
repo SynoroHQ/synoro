@@ -159,29 +159,18 @@ export const createBotAuthMiddleware = (t: TRPCInstance) =>
 // Enhanced bot middleware that extracts telegramUserId and resolves userId
 // This should be used as a second middleware after input validation
 export const createEnhancedBotAuthMiddleware = (t: TRPCInstance) =>
-  t.middleware(async ({ ctx, input, next }) => {
+  t.middleware(async ({ ctx, next }) => {
     // Extract telegramUserId from validated input or headers
     let telegramUserId: string | undefined;
     let telegramUsername: string | undefined;
     let userId: string | null = null;
     let conversationId: string | undefined;
-    
-    // Сначала пытаемся получить из input (если он валидирован)
-    if (input && typeof input === "object" && "telegramUserId" in input) {
-      const inputData = input as {
-        telegramUserId?: string;
-        telegramUsername?: string;
-      };
-      telegramUserId = inputData.telegramUserId;
-      telegramUsername = inputData.telegramUsername;
-    }
-    
+
     // Если не получили из input, пытаемся получить из headers
     if (!telegramUserId) {
-      telegramUserId = ctx.headers?.["x-telegram-user-id"];
-      telegramUsername = ctx.headers?.["x-telegram-username"];
+      telegramUserId = ctx.headers.get("x-telegram-user-id") || undefined;
+      telegramUsername = ctx.headers.get("x-telegram-username") || undefined;
     }
-
     if (telegramUserId) {
       try {
         // Import TelegramUserService dynamically to avoid circular dependencies

@@ -50,9 +50,9 @@ export class AgentMessageProcessor {
         text,
         context,
         {
-          useQualityControl: options.useQualityControl ?? true,
-          maxQualityIterations: options.maxQualityIterations ?? 2,
-          targetQuality: options.targetQuality ?? 0.8,
+          useQualityControl: false, // Отключен контроль качества
+          maxQualityIterations: 0,
+          targetQuality: 0,
         },
         telemetry,
       );
