@@ -166,11 +166,32 @@ export const createEnhancedBotAuthMiddleware = (t: TRPCInstance) =>
           userId = userContext.userId;
           conversationId = userContext.conversationId;
         } catch (error) {
-          // If user is not registered, we'll handle it in the procedure
+          // If user is not registered, create anonymous user automatically
           console.warn(
-            `User ${telegramUserId} not registered in system:`,
+            `User ${telegramUserId} not found, creating anonymous user:`,
             error,
           );
+          
+          try {
+            // Import TelegramUserService dynamically to avoid circular dependencies
+            const { TelegramUserService } = await import(
+              "../services/telegram-user-service"
+            );
+            const userContext =
+              await TelegramUserService.getUserContext(telegramUserId);
+            userId = userContext.userId;
+            conversationId = userContext.conversationId;
+          } catch (createError) {
+            console.error(
+              `Failed to create anonymous user ${telegramUserId}:`,
+              createError,
+            );
+            // If we still can't create the user, throw an error
+            throw new TRPCError({
+              code: "INTERNAL_SERVER_ERROR",
+              message: "Не удалось создать пользователя в системе",
+            });
+          }
         }
       }
     }
@@ -181,7 +202,7 @@ export const createEnhancedBotAuthMiddleware = (t: TRPCInstance) =>
         botUserId: ctx.session?.user?.id ?? "bot_user",
         isBotRequest: true,
         telegramUserId,
-        userId,
+        userId: userId!, // userId is guaranteed to be non-null after our logic
         conversationId,
       },
     });

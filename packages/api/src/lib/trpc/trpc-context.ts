@@ -54,7 +54,7 @@ export type TRPCContext = Awaited<ReturnType<typeof createTRPCContext>> & {
   isBotRequest?: boolean;
   telegramUserId?: string;
   isTelegramAnonymous?: boolean;
-  userId?: string | null;
+  userId?: string; // For enhancedBotProcedure, userId is guaranteed to be non-null
   conversationId?: string;
 };
 

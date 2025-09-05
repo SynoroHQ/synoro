@@ -14,6 +14,6 @@ export default defineConfig({
   sourcemap: false,
   clean: true,
   minify: false,
-  external: ["@synoro/lib"],
+  external: ["@synoro/lib", "@synoro/validators"],
   outDir: "dist",
 });

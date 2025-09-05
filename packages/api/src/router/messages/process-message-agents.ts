@@ -67,13 +67,7 @@ export const processMessageAgentsRouter = {
   processMessageFromTelegramWithAgents: enhancedBotProcedure
     .input(ProcessMessageWithAgentsInput)
     .mutation(async ({ ctx, input }) => {
-      // userId теперь автоматически доступен в контексте
-      if (!ctx.userId) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "Пользователь не зарегистрирован в системе",
-        });
-      }
+      // userId теперь автоматически создается в middleware
 
       return processMessageWithAgents({
         text: input.text,

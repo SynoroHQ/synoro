@@ -44,10 +44,7 @@ export const transcribeRouter = {
     .output(TranscribeResponse)
     .mutation(async ({ ctx, input }) => {
       try {
-        // userId теперь автоматически доступен в контексте
-        if (!ctx.userId) {
-          throw new Error("Пользователь не зарегистрирован в системе");
-        }
+        // userId теперь автоматически создается в middleware
 
         // Decode base64 audio string to Buffer
         const audioBuffer = Buffer.from(input.audio, "base64");
