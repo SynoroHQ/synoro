@@ -38,13 +38,13 @@ export const routerClassificationTemplate = `Ты - агент классифи�
 4. Необходимой точности`;
 
 const routerClassification: PromptDefinition = {
-  key: "router-classification",
-  name: "router-classification",
-  type: "text",
-  prompt: routerClassificationTemplate,
-  labels: ["agent", "router", "classification"],
-  defaultModel: "gpt-4o-mini",
-  defaultTemperature: 0.1,
+    key: "router-classification",
+    name: "router-classification",
+    type: "text",
+    prompt: routerClassificationTemplate,
+    labels: ["agent", "router", "classification"],
+    defaultModel: "gpt-5-mini",
+    defaultTemperature: 0.1,
 };
 
 export default routerClassification;

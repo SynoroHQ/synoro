@@ -14,13 +14,13 @@ export const routerFallbackTemplate = `Ты - эксперт по классиф
 Верни только тип сообщения, ничего больше.`;
 
 const routerFallback: PromptDefinition = {
-  key: "router-fallback",
-  name: "router-fallback",
-  type: "text", 
-  prompt: routerFallbackTemplate,
-  labels: ["agent", "router", "fallback"],
-  defaultModel: "gpt-4o-mini",
-  defaultTemperature: 0.1,
+    key: "router-fallback",
+    name: "router-fallback",
+    type: "text",
+    prompt: routerFallbackTemplate,
+    labels: ["agent", "router", "fallback"],
+    defaultModel: "gpt-5-mini",
+    defaultTemperature: 0.1,
 };
 
 export default routerFallback;

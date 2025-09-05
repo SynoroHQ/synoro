@@ -235,7 +235,7 @@ const parserTask: PromptDefinition = {
   type: "parser",
   prompt: parserTaskTemplate,
   labels: ["production", "staging", "latest", "nlp-processing", "entity-extraction"],
-  defaultModel: "gpt-4o",
+  defaultModel: "gpt-5",
   defaultTemperature: 0.1,
 };
 

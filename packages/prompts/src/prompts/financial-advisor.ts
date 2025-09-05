@@ -382,7 +382,7 @@ const financialAdvisor: PromptDefinition = {
   type: "advisor",
   prompt: financialAdvisorTemplate,
   labels: ["production", "staging", "latest", "financial-planning", "wealth-management"],
-  defaultModel: "gpt-4o",
+  defaultModel: "gpt-5",
   defaultTemperature: 0.3,
 };
 

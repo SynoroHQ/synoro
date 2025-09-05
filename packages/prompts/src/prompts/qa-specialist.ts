@@ -175,7 +175,7 @@ const qaSpecialist: PromptDefinition = {
   type: "assistant",
   prompt: qaSpecialistTemplate,
   labels: ["production", "staging", "latest", "expert-support", "technical-consulting"],
-  defaultModel: "gpt-4o",
+  defaultModel: "gpt-5",
   defaultTemperature: 0.3,
 };
 

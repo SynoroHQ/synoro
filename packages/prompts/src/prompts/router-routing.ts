@@ -29,11 +29,11 @@ export const routerRoutingTemplate = `Ты - агент маршрутизаци
 
 const routerRouting: PromptDefinition = {
   key: "router-routing",
-  name: "router-routing", 
+  name: "router-routing",
   type: "text",
   prompt: routerRoutingTemplate,
   labels: ["agent", "router", "routing"],
-  defaultModel: "gpt-4o-mini",
+  defaultModel: "gpt-5-mini",
   defaultTemperature: 0.1,
 };
 
