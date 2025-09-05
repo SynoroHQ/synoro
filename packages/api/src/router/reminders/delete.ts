@@ -13,7 +13,7 @@ export const deleteRemindersRouter: TRPCRouterRecord = {
   /**
    * Удалить напоминание
    */
-  reminder: protectedProcedure
+  delete: protectedProcedure
     .input(reminderIdSchema)
     .mutation(async ({ ctx, input }) => {
       try {

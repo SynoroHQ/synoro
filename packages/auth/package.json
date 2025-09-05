@@ -3,16 +3,31 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "react-server": "./dist/index.rsc.js",
       "default": "./dist/index.js"
     },
-    "./env": "./env.ts",
-    "./client": "./dist/client.js",
-    "./middleware": "./dist/middleware.js",
-    "./util": "./dist/util.js"
+    "./env": {
+      "types": "./env.ts",
+      "default": "./env.ts"
+    },
+    "./client": {
+      "types": "./dist/client.d.ts",
+      "default": "./dist/client.js"
+    },
+    "./middleware": {
+      "types": "./dist/middleware.d.ts",
+      "default": "./dist/middleware.js"
+    }
   },
+  "files": [
+    "dist",
+    "env.ts"
+  ],
   "license": "MIT",
   "scripts": {
     "build": "tsup",

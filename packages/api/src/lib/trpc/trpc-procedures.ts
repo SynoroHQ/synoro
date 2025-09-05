@@ -72,7 +72,7 @@ export const createProcedures = (t: TRPCInstance) => {
     .use(timingMiddleware)
     .use(csrfMiddleware)
     .use(rateLimitMiddleware)
-    .use(function isAuthed({ ctx, next }: { ctx: any; next: any }) {
+    .use(function isAuthed({ ctx, next }) {
       // `ctx.session.user` is nullable
       if (!ctx.session?.user) {
         throw new TRPCError({ code: "UNAUTHORIZED" });

@@ -3,11 +3,7 @@ import type { Context } from "grammy";
 import { apiClient } from "../api/client";
 import { telegramFastResponseService } from "../services/fast-response-service";
 import { runWithAnimation } from "../utils/animation-helpers";
-import {
-  createErrorMessage,
-  createSuccessMessage,
-} from "../utils/html-message-builder";
-import { agentsAnimation } from "../utils/message-animation";
+import { createErrorMessage } from "../utils/html-message-builder";
 import { formatForTelegram } from "../utils/telegram-formatter";
 import { createMessageContext } from "../utils/telegram-utils";
 

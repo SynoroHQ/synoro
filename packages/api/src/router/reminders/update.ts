@@ -18,7 +18,7 @@ export const updateRemindersRouter: TRPCRouterRecord = {
   /**
    * Обновить напоминание
    */
-  reminder: protectedProcedure
+  update: protectedProcedure
     .input(
       completeReminderSchema.extend({
         data: reminderUpdateSchema,

@@ -1,10 +1,10 @@
+import { analyticsRouter } from "./router/analytics";
 import { attachmentsRouter } from "./router/attachments";
 import { chatRouter } from "./router/chat";
 import { messagesRouter } from "./router/messages";
 import { remindersRouter } from "./router/reminders";
-import { fastResponseRouter } from "./router/telegram/fast-response";
+// import { fastResponseRouter } from "./router/telegram/fast-response";
 import { telegramUsersRouter } from "./router/telegram/telegram-users";
-import { analyticsRouter } from "./router/analytics";
 import { createTRPCRouter } from "./trpc";
 
 export const appRouter = createTRPCRouter({
@@ -13,7 +13,7 @@ export const appRouter = createTRPCRouter({
   messages: messagesRouter,
   reminders: remindersRouter,
   telegramUsers: telegramUsersRouter,
-  fastResponse: fastResponseRouter,
+  // fastResponse: fastResponseRouter,
   analytics: analyticsRouter,
 });
 
