@@ -39,9 +39,12 @@ export class GeneralAssistantAgent extends AbstractAgent {
     const systemPrompt = await getPrompt(PROMPT_KEYS.ASSISTANT);
 
     try {
+      // Используем историю сообщений для лучшего понимания контекста
       const response = await this.generateResponse(
         task.input,
-        systemPrompt,
+        this.createPromptWithHistory(systemPrompt, task, {
+          includeSummary: true,
+        }),
         task,
       );
 

@@ -4,6 +4,7 @@ import type {
   AgentTask,
   AgentTelemetry,
   BaseAgent,
+  MessageHistoryItem,
   OrchestrationResult,
 } from "./types";
 import { globalAgentRegistry } from "./agent-registry";
@@ -281,6 +282,7 @@ export class AgentManager {
     type: string,
     context: AgentContext,
     priority = 1,
+    messageHistory?: MessageHistoryItem[],
   ): AgentTask {
     return {
       id: `task-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -289,6 +291,7 @@ export class AgentManager {
       context,
       priority,
       createdAt: new Date(),
+      messageHistory,
     };
   }
 
@@ -304,6 +307,7 @@ export class AgentManager {
       targetQuality?: number;
       useCache?: boolean;
       enableParallelProcessing?: boolean;
+      messageHistory?: MessageHistoryItem[];
     } = {},
     telemetry?: AgentTelemetry,
   ): Promise<OrchestrationResult> {
@@ -327,7 +331,13 @@ export class AgentManager {
       }
 
       // 2. Создаем задачу для роутера
-      const routingTask = this.createAgentTask(input, "routing", context);
+      const routingTask = this.createAgentTask(
+        input,
+        "routing",
+        context,
+        1,
+        options.messageHistory,
+      );
 
       // 3. Классифицируем и маршрутизируем сообщение
       console.log("🤖 Запуск интеллектуальной маршрутизации...");
@@ -368,6 +378,7 @@ export class AgentManager {
               classification.messageType,
               context,
               2,
+              options.messageHistory,
             );
             this.addToTaskQueue(agent, parallelTask, 2);
           }
@@ -379,6 +390,8 @@ export class AgentManager {
         input,
         classification.messageType,
         context,
+        1,
+        options.messageHistory,
       );
 
       const canHandle = await targetAgent.canHandle(processingTask);
@@ -516,6 +529,7 @@ export class AgentManager {
             "telegram-formatting",
             context,
             1,
+            options.messageHistory,
           );
 
           try {

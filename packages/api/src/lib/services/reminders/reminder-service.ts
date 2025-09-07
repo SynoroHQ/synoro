@@ -1,6 +1,5 @@
-import type { Reminder } from "@synoro/db/schema";
 import type {
-  Reminder as ValidatorReminder,
+  Reminder,
   ReminderFilters as ValidatorReminderFilters,
   ReminderSortOptions as ValidatorReminderSortOptions,
 } from "@synoro/validators";
@@ -70,8 +69,6 @@ export class ReminderService extends BaseReminderService {
     return this.statsService.getUserReminderStats(userId);
   }
 
-
-
   // Методы для повторяющихся напоминаний
   async createRecurringReminder(
     originalReminder: Reminder,
@@ -94,6 +91,4 @@ export class ReminderService extends BaseReminderService {
       pattern,
     );
   }
-
-
 }

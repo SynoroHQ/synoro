@@ -15,6 +15,7 @@ import {
   formatExecutionTime,
   safeTruncateForLogging,
 } from "../utils/message-utils";
+import { AgentMessageHistoryService } from "./agent-message-history-service";
 
 export interface ProcessAgentMessageParams {
   text: string;
@@ -112,15 +113,17 @@ export async function processMessageWithAgents(
       },
     );
 
-    // Умная обрезка контекста
-    const maxTokens = determineMaxTokens(text);
-    const trimmedContext = trimContextByTokens(
-      conversationContext.messages,
-      maxTokens,
-    );
+    // Получаем историю сообщений для агентов
+    const messageHistory =
+      await AgentMessageHistoryService.getMessageHistoryWithTokenLimit(
+        ctx,
+        userId,
+        channel,
+        determineMaxTokens(text),
+      );
 
     console.log(
-      `🤖 [AGENTS] Контекст беседы: ${trimmedContext.length} сообщений (ID: ${conversationContext.conversationId})`,
+      `🤖 [AGENTS] Контекст беседы: ${conversationContext.messages.length} сообщений, история для агентов: ${messageHistory.length} сообщений (ID: ${conversationContext.conversationId})`,
     );
 
     // Сохраняем пользовательское сообщение
@@ -139,7 +142,7 @@ export async function processMessageWithAgents(
       messageId,
       metadata: {
         ...metadata,
-        contextMessageCount: trimmedContext.length,
+        contextMessageCount: messageHistory.length,
         agentMode: true,
       },
     });
@@ -154,6 +157,17 @@ export async function processMessageWithAgents(
       },
     };
 
+    // Создаем задачу агента с историей сообщений
+    const agentTask = {
+      id: `agent-task-${Date.now()}`,
+      type: "general",
+      input: text,
+      context: agentContext,
+      priority: 1,
+      createdAt: new Date(),
+      messageHistory: messageHistory,
+    };
+
     // Обрабатываем сообщение через агентную систему
     const agentProcessingStartTime = Date.now();
     const processor = getAgentProcessor();
@@ -162,6 +176,7 @@ export async function processMessageWithAgents(
       useQualityControl: false, // Отключен контроль качества
       maxQualityIterations: 0,
       targetQuality: 0,
+      messageHistory: messageHistory, // Передаем историю в процессор
     });
 
     const agentProcessingTime = formatExecutionTime(agentProcessingStartTime);

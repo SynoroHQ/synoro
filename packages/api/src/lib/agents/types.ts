@@ -4,6 +4,20 @@ import type { LanguageModel } from "ai";
 // Импортируем AgentContext из отдельного файла
 import type { AgentContext } from "./agent-context";
 
+// Типы для истории сообщений
+export interface MessageHistoryItem {
+  id: string;
+  role: "user" | "assistant" | "system" | "tool";
+  content: string;
+  timestamp: Date;
+  metadata?: {
+    agentName?: string;
+    model?: string;
+    confidence?: number;
+    [key: string]: unknown;
+  };
+}
+
 export interface AgentTelemetry {
   functionId?: string;
   metadata?: Record<string, AttributeValue>;
@@ -24,6 +38,7 @@ export interface AgentTask {
   context: AgentContext;
   priority: number;
   createdAt: Date;
+  messageHistory?: MessageHistoryItem[];
 }
 
 export interface AgentCapability {

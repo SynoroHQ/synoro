@@ -12,6 +12,7 @@ import type {
   AgentTask,
   AgentTelemetry,
   BaseAgent,
+  MessageHistoryItem,
 } from "./types";
 
 // Инициализация AI провайдеров
@@ -377,5 +378,179 @@ export abstract class AbstractAgent implements BaseAgent {
       size: validEntries,
       hitRate: validEntries / Math.max(this.cache.size, 1),
     };
+  }
+
+  /**
+   * Форматирует историю сообщений для включения в промпт
+   * @param task - Задача агента
+   * @param maxHistoryLength - Максимальная длина истории в символах
+   * @returns Форматированная история сообщений
+   */
+  protected formatMessageHistory(
+    task: AgentTask,
+    maxHistoryLength: number = 1500,
+  ): string {
+    if (!task.messageHistory || task.messageHistory.length === 0) {
+      return "";
+    }
+
+    const historyText = task.messageHistory
+      .map((msg) => {
+        const timestamp = msg.timestamp.toLocaleString("ru-RU", {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+        const role =
+          msg.role === "user"
+            ? "Пользователь"
+            : msg.role === "assistant"
+              ? "Ассистент"
+              : msg.role === "system"
+                ? "Система"
+                : "Инструмент";
+
+        return `[${timestamp}] ${role}: ${msg.content}`;
+      })
+      .join("\n");
+
+    // Обрезаем если слишком длинно
+    if (historyText.length > maxHistoryLength) {
+      return historyText.substring(0, maxHistoryLength - 3) + "...";
+    }
+
+    return historyText;
+  }
+
+  /**
+   * Получает краткую сводку истории для контекста
+   * @param task - Задача агента
+   * @param maxMessages - Максимальное количество сообщений для сводки
+   * @returns Краткая сводка истории
+   */
+  protected getHistorySummary(
+    task: AgentTask,
+    maxMessages: number = 3,
+  ): string {
+    if (!task.messageHistory || task.messageHistory.length === 0) {
+      return "История диалога пуста";
+    }
+
+    const recentMessages = task.messageHistory.slice(-maxMessages);
+    const summary = recentMessages
+      .map((msg, index) => {
+        const role = msg.role === "user" ? "Пользователь" : "Ассистент";
+        const content =
+          msg.content.length > 100
+            ? msg.content.substring(0, 100) + "..."
+            : msg.content;
+        return `${index + 1}. ${role}: ${content}`;
+      })
+      .join("\n");
+
+    return `Последние ${recentMessages.length} сообщений:\n${summary}`;
+  }
+
+  /**
+   * Создает расширенный промпт с учетом истории сообщений
+   * @param basePrompt - Базовый промпт
+   * @param task - Задача агента
+   * @param options - Опции форматирования
+   * @returns Расширенный промпт с историей
+   */
+  protected createPromptWithHistory(
+    basePrompt: string,
+    task: AgentTask,
+    options: {
+      includeFullHistory?: boolean;
+      maxHistoryLength?: number;
+      includeSummary?: boolean;
+    } = {},
+  ): string {
+    const {
+      includeFullHistory = false,
+      maxHistoryLength = 1500,
+      includeSummary = true,
+    } = options;
+
+    let historySection = "";
+
+    if (task.messageHistory && task.messageHistory.length > 0) {
+      if (includeFullHistory) {
+        const fullHistory = this.formatMessageHistory(task, maxHistoryLength);
+        historySection = `\n\nИСТОРИЯ ДИАЛОГА:\n${fullHistory}`;
+      } else if (includeSummary) {
+        const summary = this.getHistorySummary(task);
+        historySection = `\n\nКОНТЕКСТ ДИАЛОГА:\n${summary}`;
+      }
+    }
+
+    return basePrompt + historySection;
+  }
+
+  /**
+   * Анализирует историю сообщений для понимания контекста
+   * @param task - Задача агента
+   * @returns Анализ истории сообщений
+   */
+  protected async analyzeMessageHistory(task: AgentTask): Promise<{
+    conversationTopic: string;
+    userIntent: string;
+    conversationMood: "positive" | "neutral" | "negative";
+    keyTopics: string[];
+    needsFollowUp: boolean;
+  }> {
+    if (!task.messageHistory || task.messageHistory.length === 0) {
+      return {
+        conversationTopic: "Новый диалог",
+        userIntent: "Неизвестно",
+        conversationMood: "neutral",
+        keyTopics: [],
+        needsFollowUp: false,
+      };
+    }
+
+    const cacheKey = `history-analysis-${this.createInputHash(JSON.stringify(task.messageHistory))}`;
+    const cached = this.getCachedResult<any>(cacheKey);
+    if (cached) return cached;
+
+    try {
+      const { object } = await generateObject({
+        model: this.getModel(),
+        schema: z.object({
+          conversationTopic: z.string().describe("Основная тема разговора"),
+          userIntent: z.string().describe("Намерение пользователя"),
+          conversationMood: z
+            .enum(["positive", "neutral", "negative"])
+            .describe("Настроение диалога"),
+          keyTopics: z.array(z.string()).describe("Ключевые темы"),
+          needsFollowUp: z.boolean().describe("Нужно ли продолжение диалога"),
+        }),
+        system: `Ты - эксперт по анализу диалогов. Проанализируй историю сообщений и определи:
+1. Основную тему разговора
+2. Намерение пользователя
+3. Настроение диалога (позитивное, нейтральное, негативное)
+4. Ключевые темы, которые обсуждались
+5. Нужно ли продолжение диалога
+
+Будь кратким и точным в анализе.`,
+        prompt: `Проанализируй историю диалога:\n${this.formatMessageHistory(task, 2000)}`,
+        experimental_telemetry: {
+          isEnabled: true,
+          ...this.createTelemetry("analyze-history", task),
+        },
+      });
+
+      this.setCachedResult(cacheKey, object);
+      return object;
+    } catch (error) {
+      console.warn("History analysis failed:", error);
+      return {
+        conversationTopic: "Анализ недоступен",
+        userIntent: "Неизвестно",
+        conversationMood: "neutral",
+        keyTopics: [],
+        needsFollowUp: false,
+      };
+    }
   }
 }

@@ -202,9 +202,15 @@ export class RouterAgent extends AbstractAgent {
     }
     const systemPrompt = await getPrompt(PROMPT_KEYS.ROUTER_CLASSIFICATION);
 
+    // Добавляем историю сообщений в промпт, если она есть
+    const historyContext =
+      task.messageHistory && task.messageHistory.length > 0
+        ? `\n\nИСТОРИЯ ДИАЛОГА:\n${this.formatMessageHistory(task, 1000)}`
+        : "";
+
     const prompt = `Проанализируй это сообщение: "${task.input}"
 
-Контекст: канал ${task.context.channel ?? "unknown"}, пользователь ${task.context.userId ?? "anonymous"}
+Контекст: канал ${task.context.channel ?? "unknown"}, пользователь ${task.context.userId ?? "anonymous"}${historyContext}
 
 ВАЖНО: Если сообщение описывает событие (покупка, задача, встреча, заметка и т.д.) - ОБЯЗАТЕЛЬНО установи needsLogging: true. НЕ спрашивай пользователя о необходимости записи.
 

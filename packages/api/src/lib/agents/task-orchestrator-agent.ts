@@ -204,13 +204,19 @@ export class TaskOrchestratorAgent extends AbstractAgent {
     const { text } = await generateText({
       model: this.getModel(),
       system: await getPrompt(PROMPT_KEYS.TASK_ORCHESTRATOR),
-      prompt: `Создай план выполнения задачи: "${task.input}"
+      prompt:
+        this.createPromptWithHistory(
+          `Создай план выполнения задачи: "${task.input}"
 
 Контекст: пользователь ${task.context?.userId || "anonymous"} в канале ${task.context?.channel || "unknown"}
 
 Определи этапы, их последовательность и ответственных агентов.
 
-Верни результат в формате JSON со следующей структурой:
+Верни результат в формате JSON со следующей структурой:`,
+          task,
+          { includeSummary: true },
+        ) +
+        `
 {
   "steps": [
     {

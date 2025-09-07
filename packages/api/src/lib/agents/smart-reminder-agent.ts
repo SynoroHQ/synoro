@@ -339,8 +339,12 @@ export class SmartReminderAgent extends AbstractAgent {
         system: prompt
           .replace("{currentTime}", currentTime)
           .replace("{timezone}", timezone),
-        prompt: `Текст: "${text}"
+        prompt: this.createPromptWithHistory(
+          `Текст: "${text}"
 Контекст: ${JSON.stringify(context || {})}`,
+          { input: text, context, messageHistory: [] } as any,
+          { includeSummary: true },
+        ),
       });
 
       return object;

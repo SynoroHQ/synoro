@@ -1,14 +1,9 @@
-import { generateObject, generateText, tool } from "ai";
+import { generateText, tool } from "ai";
 import { z } from "zod";
 
 import { getPrompt, PROMPT_KEYS } from "@synoro/prompts";
 
-import type {
-  AgentCapability,
-  AgentResult,
-  AgentTask,
-  AgentTelemetry,
-} from "./types";
+import type { AgentCapability, AgentResult, AgentTask } from "./types";
 import { parseAIJsonResponseWithSchema } from "../utils/ai-response-parser";
 import { AbstractAgent } from "./base-agent";
 import {
@@ -321,11 +316,17 @@ export class EventProcessorAgent extends AbstractAgent {
       const { text } = await generateText({
         model: this.getModel(),
         system: await getPrompt(PROMPT_KEYS.EVENT_PROCESSOR),
-        prompt: `Проанализируй и распарси это событие: "${task.input}"
+        prompt:
+          this.createPromptWithHistory(
+            `Проанализируй и распарси это событие: "${task.input}"
         
 Контекст: пользователь ${task.context?.userId || "anonymous"} в канале ${task.context?.channel || "unknown"}
 
-Извлеки всю доступную информацию и структурируй её в формате JSON согласно этой схеме:
+Извлеки всю доступную информацию и структурируй её в формате JSON согласно этой схеме:`,
+            task,
+            { includeSummary: true },
+          ) +
+          `
 {
   "type": "purchase|task|meeting|note|expense|income|maintenance|other",
   "description": "описание события",

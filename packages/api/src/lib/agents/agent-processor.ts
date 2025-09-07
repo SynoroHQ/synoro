@@ -1,4 +1,5 @@
 import type { AgentContext } from "./agent-context";
+import type { MessageHistoryItem } from "./types";
 import { AgentManager } from "./agent-manager";
 
 /**
@@ -22,6 +23,7 @@ export class AgentMessageProcessor {
       useQualityControl?: boolean;
       maxQualityIterations?: number;
       targetQuality?: number;
+      messageHistory?: MessageHistoryItem[];
     } = {},
   ): Promise<{
     response: string;
@@ -53,6 +55,7 @@ export class AgentMessageProcessor {
           useQualityControl: false, // Отключен контроль качества
           maxQualityIterations: 0,
           targetQuality: 0,
+          messageHistory: options.messageHistory,
         },
         telemetry,
       );

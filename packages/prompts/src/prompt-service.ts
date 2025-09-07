@@ -1,4 +1,4 @@
-import type { LangfuseClientLike, PromptMessage } from "./core/types";
+import type { LangfuseClientLike } from "./core/types";
 import { compilePrompt } from "./core/prompt";
 import { registry } from "./registry";
 
