@@ -81,3 +81,4 @@ const eventProcessorExtraction: PromptDefinition = {
 };
 
 export default eventProcessorTypeAnalysis;
+export { eventProcessorExtraction };

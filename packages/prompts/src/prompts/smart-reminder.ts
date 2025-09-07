@@ -81,3 +81,4 @@ const smartReminderSuggestions: PromptDefinition = {
 };
 
 export default smartReminderContextAnalysis;
+export { smartReminderExtraction, smartReminderSuggestions };

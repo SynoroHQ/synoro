@@ -73,3 +73,4 @@ const qualityEvaluatorImprovement: PromptDefinition = {
 };
 
 export default qualityEvaluatorAssessment;
+export { qualityEvaluatorImprovement };
