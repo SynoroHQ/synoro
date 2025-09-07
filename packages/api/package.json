@@ -48,6 +48,7 @@
     "langfuse-vercel": "^3.38.5",
     "multer": "^2.0.2",
     "nanoid": "^5.1.5",
+    "openai": "^5.19.1",
     "superjson": "2.2.2",
     "zod": "4.1.5"
   },
