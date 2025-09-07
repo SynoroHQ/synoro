@@ -9,9 +9,11 @@ import { createHonoContext } from "./trpc";
 async function main() {
   try {
     // Initialize OpenTelemetry tracing
-    console.log("Starting OpenTelemetry tracing...");
-    await startTracing("synoro-api");
-    console.log("OpenTelemetry tracing started successfully");
+    await startTracing({
+      serviceName: "synoro-api",
+      serviceVersion: process.env.npm_package_version || "1.0.0",
+      environment: process.env.NODE_ENV || "development",
+    });
 
     // Initialize Hono app
     const app = new Hono();
@@ -68,9 +70,7 @@ async function main() {
 
       try {
         // Stop OpenTelemetry tracing
-        console.log("Stopping OpenTelemetry tracing...");
         await stopTracing();
-        console.log("OpenTelemetry tracing stopped successfully");
 
         // Close Express server
         if (server) {

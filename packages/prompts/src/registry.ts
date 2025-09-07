@@ -3,7 +3,6 @@ import assistant from "./prompts/assistant";
 import base_agent_context from "./prompts/base-agent-context";
 import base_agent_quality from "./prompts/base-agent-quality";
 import chat_assistant from "./prompts/chat-assistant";
-import classifier_combined from "./prompts/classifier.combined";
 import data_analyst from "./prompts/data-analyst";
 import event_processor_smart from "./prompts/event-processor-smart";
 import event_processor from "./prompts/event-processor";
@@ -26,7 +25,6 @@ export const registry: Record<string, PromptDefinition> = {
   [base_agent_context.key]: base_agent_context,
   [base_agent_quality.key]: base_agent_quality,
   [chat_assistant.key]: chat_assistant,
-  [classifier_combined.key]: classifier_combined,
   [data_analyst.key]: data_analyst,
   [event_processor_smart.key]: event_processor_smart,
   [event_processor.key]: event_processor,
@@ -39,14 +37,8 @@ export const registry: Record<string, PromptDefinition> = {
   [router_fallback.key]: router_fallback,
   [router_routing.key]: router_routing,
   [smart_reminder.key]: smart_reminder,
-  [smartReminderExtraction.key]: smartReminderExtraction,
-  [smartReminderSuggestions.key]: smartReminderSuggestions,
   [task_manager.key]: task_manager,
   [task_orchestrator_smart.key]: task_orchestrator_smart,
-  [taskOrchestratorQualityEvaluation.key]: taskOrchestratorQualityEvaluation,
-  [taskOrchestratorSummary.key]: taskOrchestratorSummary,
   [task_orchestrator.key]: task_orchestrator,
   [telegram_formatter.key]: telegram_formatter,
-  [eventProcessorExtraction.key]: eventProcessorExtraction,
-  [qualityEvaluatorImprovement.key]: qualityEvaluatorImprovement,
 };
