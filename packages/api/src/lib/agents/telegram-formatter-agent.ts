@@ -1,4 +1,4 @@
-import { getPromptSafe, PROMPT_KEYS } from "@synoro/prompts";
+import { getPrompt, PROMPT_KEYS } from "@synoro/prompts";
 
 import type { AgentCapability, AgentResult, AgentTask } from "./types";
 import { AbstractAgent } from "./base-agent";
@@ -49,7 +49,7 @@ export class TelegramFormatterAgent extends AbstractAgent {
   }
 
   async process(task: AgentTask): Promise<AgentResult<string>> {
-    const systemPrompt = getPromptSafe(PROMPT_KEYS.TELEGRAM_FORMATTER);
+    const systemPrompt = await getPrompt(PROMPT_KEYS.TELEGRAM_FORMATTER);
 
     try {
       const response = await this.generateResponse(

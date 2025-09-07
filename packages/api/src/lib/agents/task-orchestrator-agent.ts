@@ -2,7 +2,7 @@ import type { JSONSchema7 } from "json-schema";
 import { generateObject, generateText } from "ai";
 import * as z from "zod";
 
-import { getPromptSafe, PROMPT_KEYS } from "@synoro/prompts";
+import { getPrompt, PROMPT_KEYS } from "@synoro/prompts";
 
 import type {
   AgentCapability,
@@ -203,7 +203,7 @@ export class TaskOrchestratorAgent extends AbstractAgent {
   ): Promise<OrchestrationPlan> {
     const { text } = await generateText({
       model: this.getModel(),
-      system: getPromptSafe(PROMPT_KEYS.TASK_ORCHESTRATOR),
+      system: await getPrompt(PROMPT_KEYS.TASK_ORCHESTRATOR),
       prompt: `Создай план выполнения задачи: "${task.input}"
 
 Контекст: пользователь ${task.context?.userId || "anonymous"} в канале ${task.context?.channel || "unknown"}

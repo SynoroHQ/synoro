@@ -1,7 +1,7 @@
 import { generateObject, generateText, tool } from "ai";
 import { z } from "zod";
 
-import { getPromptSafe, PROMPT_KEYS } from "@synoro/prompts";
+import { getPrompt, PROMPT_KEYS } from "@synoro/prompts";
 
 import type { AgentCapability, AgentResult, AgentTask } from "./types";
 import { AbstractAgent } from "./base-agent";
@@ -210,7 +210,7 @@ export class QASpecialistAgent extends AbstractAgent {
           // Используем AI для поиска системной информации
           const { text: systemInfo } = await generateText({
             model: this.getModel(),
-            system: getPromptSafe(PROMPT_KEYS.QA_SPECIALIST),
+            system: await getPrompt(PROMPT_KEYS.QA_SPECIALIST),
             prompt: `Пользователь спрашивает: "${query}"
 
 Дай подробный и полезный ответ о возможностях Synoro AI.`,
@@ -233,7 +233,7 @@ export class QASpecialistAgent extends AbstractAgent {
   async process(task: AgentTask): Promise<AgentResult<string>> {
     try {
       // Получаем системный промпт
-      const assistantPrompt = getPromptSafe(PROMPT_KEYS.ASSISTANT);
+      const assistantPrompt = await getPrompt(PROMPT_KEYS.ASSISTANT);
 
       // Определяем подтип вопроса
       const subtype = await this.classifyQuestionSubtype(task.input, task);

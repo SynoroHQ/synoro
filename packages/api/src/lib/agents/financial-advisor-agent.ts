@@ -1,7 +1,7 @@
 import { generateObject } from "ai";
 import { z } from "zod";
 
-import { getPromptSafe, PROMPT_KEYS } from "@synoro/prompts";
+import { getPrompt, PROMPT_KEYS } from "@synoro/prompts";
 
 import type { AgentCapability, AgentResult, AgentTask } from "./types";
 import { AbstractAgent } from "./base-agent";
@@ -54,7 +54,7 @@ export class FinancialAdvisorAgent extends AbstractAgent {
             .describe("Уверенность в классификации"),
           reasoning: z.string().describe("Обоснование классификации"),
         }),
-        system: getPromptSafe(PROMPT_KEYS.FINANCIAL_ADVISOR),
+        system: await getPrompt(PROMPT_KEYS.FINANCIAL_ADVISOR),
         prompt: `Проанализируй запрос: "${task.input}"
 
 Определи, является ли он финансовым и требует ли финансового совета.`,
@@ -73,7 +73,7 @@ export class FinancialAdvisorAgent extends AbstractAgent {
   }
 
   async process(task: AgentTask): Promise<AgentResult<string>> {
-    const systemPrompt = getPromptSafe(PROMPT_KEYS.FINANCIAL_ADVISOR);
+    const systemPrompt = await getPrompt(PROMPT_KEYS.FINANCIAL_ADVISOR);
 
     try {
       const response = await this.generateResponse(

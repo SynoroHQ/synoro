@@ -9,12 +9,12 @@ import type {
   ReminderType,
   SmartSuggestions,
 } from "@synoro/validators";
+import { getPrompt, PROMPT_KEYS } from "@synoro/prompts";
 
 import type { AgentContext } from "./agent-context";
 import type { AgentCapability, AgentResult, AgentTask } from "./types";
 import { ReminderService } from "../services/reminder-service";
 import { AbstractAgent } from "./base-agent";
-import { getPromptSafe, PROMPT_KEYS } from "@synoro/prompts";
 
 /**
  * Схема для извлечения информации о напоминании из текста
@@ -288,7 +288,7 @@ export class SmartReminderAgent extends AbstractAgent {
       const { object } = await generateObject({
         model: this.getModel(),
         schema: contextAnalysisSchema,
-        system: getPromptSafe(PROMPT_KEYS.SMART_REMINDER_CONTEXT_ANALYSIS),
+        system: await getPrompt(PROMPT_KEYS.SMART_REMINDER_CONTEXT_ANALYSIS),
         prompt: `Анализируемый текст: "${text}"`,
       });
 
@@ -336,7 +336,7 @@ export class SmartReminderAgent extends AbstractAgent {
       const { object } = await generateObject({
         model: this.getModel(),
         schema: reminderExtractionSchema,
-        system: getPromptSafe(PROMPT_KEYS.SMART_REMINDER_EXTRACTION)
+        system: await getPrompt(PROMPT_KEYS.SMART_REMINDER_EXTRACTION)
           .replace("{currentTime}", currentTime)
           .replace("{timezone}", timezone),
         prompt: `Текст: "${text}"
@@ -362,7 +362,7 @@ export class SmartReminderAgent extends AbstractAgent {
       const { object } = await generateObject({
         model: this.getModel(),
         schema: smartSuggestionsSchema,
-        system: getPromptSafe(PROMPT_KEYS.SMART_REMINDER_SUGGESTIONS),
+        system: await getPrompt(PROMPT_KEYS.SMART_REMINDER_SUGGESTIONS),
         prompt: `Напоминание: ${JSON.stringify(reminder)}
 Исходный текст: "${originalText}"`,
       });

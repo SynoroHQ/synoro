@@ -1,7 +1,7 @@
 import { generateObject } from "ai";
 import { z } from "zod";
 
-import { getPromptSafe, PROMPT_KEYS } from "@synoro/prompts";
+import { getPrompt, PROMPT_KEYS } from "@synoro/prompts";
 
 import type { AgentCapability, AgentResult, AgentTask } from "./types";
 import { AbstractAgent } from "./base-agent";
@@ -54,7 +54,7 @@ export class TaskManagerAgent extends AbstractAgent {
             .describe("Уверенность в классификации"),
           reasoning: z.string().describe("Обоснование классификации"),
         }),
-        system: getPromptSafe(PROMPT_KEYS.TASK_MANAGER),
+        system: await getPrompt(PROMPT_KEYS.TASK_MANAGER),
         prompt: `Проанализируй запрос: "${task.input}"
 
 Определи, связан ли он с управлением задачами.`,
@@ -73,7 +73,7 @@ export class TaskManagerAgent extends AbstractAgent {
   }
 
   async process(task: AgentTask): Promise<AgentResult<string>> {
-    const systemPrompt = getPromptSafe(PROMPT_KEYS.TASK_MANAGER);
+    const systemPrompt = await getPrompt(PROMPT_KEYS.TASK_MANAGER);
 
     try {
       const response = await this.generateResponse(

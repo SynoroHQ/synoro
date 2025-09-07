@@ -3,7 +3,8 @@ import { openai } from "@ai-sdk/openai";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { generateObject, generateText } from "ai";
 import { z } from "zod";
-import { getPromptSafe, PROMPT_KEYS } from "@synoro/prompts";
+
+import { getPrompt, PROMPT_KEYS } from "@synoro/prompts";
 
 import type {
   AgentCapability,
@@ -212,7 +213,7 @@ export abstract class AbstractAgent implements BaseAgent {
       const { object } = await generateObject({
         model: this.getModel(),
         schema: contextAnalysisSchema,
-        system: getPromptSafe(PROMPT_KEYS.BASE_AGENT_CONTEXT),
+        system: await getPrompt(PROMPT_KEYS.BASE_AGENT_CONTEXT),
         prompt: `Задача: ${task.input}\nКонтекст: ${JSON.stringify(task.context)}\nТип: ${task.type}`,
         experimental_telemetry: {
           isEnabled: true,
@@ -247,7 +248,7 @@ export abstract class AbstractAgent implements BaseAgent {
       const { object } = await generateObject({
         model: this.getModel(),
         schema: qualityAssessmentSchema,
-        system: getPromptSafe(PROMPT_KEYS.BASE_AGENT_QUALITY),
+        system: await getPrompt(PROMPT_KEYS.BASE_AGENT_QUALITY),
         prompt: `Запрос: ${input}\nОтвет: ${response}\nКонтекст: ${task.type}`,
         experimental_telemetry: {
           isEnabled: true,

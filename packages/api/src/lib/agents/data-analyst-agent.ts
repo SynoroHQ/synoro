@@ -1,7 +1,7 @@
 import { generateObject } from "ai";
 import { z } from "zod";
 
-import { getPromptSafe, PROMPT_KEYS } from "@synoro/prompts";
+import { getPrompt, PROMPT_KEYS } from "@synoro/prompts";
 
 import type { AgentCapability, AgentResult, AgentTask } from "./types";
 import { AbstractAgent } from "./base-agent";
@@ -55,7 +55,7 @@ export class DataAnalystAgent extends AbstractAgent {
             .describe("Уверенность в классификации"),
           reasoning: z.string().describe("Обоснование классификации"),
         }),
-        system: getPromptSafe(PROMPT_KEYS.DATA_ANALYST),
+        system: await getPrompt(PROMPT_KEYS.DATA_ANALYST),
         prompt: `Проанализируй запрос: "${task.input}"
 
 Определи, является ли он аналитическим и требует ли анализа данных.`,
@@ -74,7 +74,7 @@ export class DataAnalystAgent extends AbstractAgent {
   }
 
   async process(task: AgentTask): Promise<AgentResult<string>> {
-    const systemPrompt = getPromptSafe(PROMPT_KEYS.DATA_ANALYST);
+    const systemPrompt = await getPrompt(PROMPT_KEYS.DATA_ANALYST);
 
     try {
       const response = await this.generateResponse(

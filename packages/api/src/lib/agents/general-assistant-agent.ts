@@ -1,4 +1,4 @@
-import { getPromptSafe, PROMPT_KEYS } from "@synoro/prompts";
+import { getPrompt, PROMPT_KEYS } from "@synoro/prompts";
 
 import type { AgentCapability, AgentResult, AgentTask } from "./types";
 import { AbstractAgent } from "./base-agent";
@@ -36,7 +36,7 @@ export class GeneralAssistantAgent extends AbstractAgent {
   }
 
   async process(task: AgentTask): Promise<AgentResult<string>> {
-    const systemPrompt = getPromptSafe(PROMPT_KEYS.ASSISTANT);
+    const systemPrompt = await getPrompt(PROMPT_KEYS.ASSISTANT);
 
     try {
       const response = await this.generateResponse(

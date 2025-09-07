@@ -1,6 +1,8 @@
 import { generateObject, generateText, tool } from "ai";
 import { z } from "zod";
 
+import { getPrompt, PROMPT_KEYS } from "@synoro/prompts";
+
 import type {
   AgentCapability,
   AgentResult,
@@ -9,7 +11,6 @@ import type {
 } from "./types";
 import { parseAIJsonResponseWithSchema } from "../utils/ai-response-parser";
 import { AbstractAgent } from "./base-agent";
-import { getPromptSafe, PROMPT_KEYS } from "@synoro/prompts";
 import {
   categorizationSchema,
   eventAnalysisSchema,
@@ -68,7 +69,7 @@ export class EventProcessorAgent extends AbstractAgent {
       // Используем AI для определения типа события
       const { text: eventAnalysisText } = await generateText({
         model: this.getModel(),
-        system: getPromptSafe(PROMPT_KEYS.EVENT_PROCESSOR),
+        system: await getPrompt(PROMPT_KEYS.EVENT_PROCESSOR),
         prompt: `Проанализируй сообщение: "${task.input}"
 
 Верни ответ в формате JSON:
@@ -319,7 +320,7 @@ export class EventProcessorAgent extends AbstractAgent {
       // Структурированный парсинг с помощью AI
       const { text } = await generateText({
         model: this.getModel(),
-        system: getPromptSafe(PROMPT_KEYS.EVENT_PROCESSOR),
+        system: await getPrompt(PROMPT_KEYS.EVENT_PROCESSOR),
         prompt: `Проанализируй и распарси это событие: "${task.input}"
         
 Контекст: пользователь ${task.context?.userId || "anonymous"} в канале ${task.context?.channel || "unknown"}
@@ -372,7 +373,7 @@ export class EventProcessorAgent extends AbstractAgent {
         try {
           const { text: adviceText } = await generateText({
             model: this.getModel(),
-            system: getPromptSafe(PROMPT_KEYS.EVENT_PROCESSOR),
+            system: await getPrompt(PROMPT_KEYS.EVENT_PROCESSOR),
             prompt: `Дай краткий полезный совет для события: "${task.input}"`,
             experimental_telemetry: {
               isEnabled: true,

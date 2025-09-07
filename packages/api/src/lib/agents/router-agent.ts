@@ -1,6 +1,7 @@
 import { generateObject, generateText } from "ai";
 import { z } from "zod";
-import { getPromptSafe, PROMPT_KEYS } from "@synoro/prompts";
+
+import { getPrompt, PROMPT_KEYS } from "@synoro/prompts";
 
 import type {
   AgentCapability,
@@ -199,7 +200,7 @@ export class RouterAgent extends AbstractAgent {
       console.log("⚡ Использована быстрая классификация");
       return result;
     }
-    const systemPrompt = getPromptSafe(PROMPT_KEYS.ROUTER_CLASSIFICATION);
+    const systemPrompt = await getPrompt(PROMPT_KEYS.ROUTER_CLASSIFICATION);
 
     const prompt = `Проанализируй это сообщение: "${task.input}"
 
@@ -238,7 +239,7 @@ export class RouterAgent extends AbstractAgent {
 
         const { text: fallbackClassification } = await generateText({
           model: this.getModel(),
-          system: getPromptSafe(PROMPT_KEYS.ROUTER_FALLBACK),
+          system: await getPrompt(PROMPT_KEYS.ROUTER_FALLBACK),
           prompt: `Классифицируй: "${task.input}"`,
           experimental_telemetry: {
             isEnabled: true,
@@ -300,7 +301,7 @@ export class RouterAgent extends AbstractAgent {
     task: AgentTask,
     _telemetry?: AgentTelemetry,
   ): Promise<RoutingDecision> {
-    const systemPrompt = getPromptSafe(PROMPT_KEYS.ROUTER_ROUTING);
+    const systemPrompt = await getPrompt(PROMPT_KEYS.ROUTER_ROUTING);
 
     const prompt = `Выбери агента для обработки сообщения: "${task.input}"
 

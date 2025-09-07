@@ -1,7 +1,7 @@
 import { generateObject } from "ai";
 import { z } from "zod";
 
-import { getPromptSafe, PROMPT_KEYS } from "@synoro/prompts";
+import { getPrompt, PROMPT_KEYS } from "@synoro/prompts";
 
 import type { AgentResult, AgentTask } from "./types";
 import { AbstractAgent } from "./base-agent";
@@ -53,7 +53,7 @@ export class ChatAssistantAgent extends AbstractAgent {
             .describe("Уверенность в классификации"),
           reasoning: z.string().describe("Обоснование классификации"),
         }),
-        system: getPromptSafe(PROMPT_KEYS.CHAT_ASSISTANT),
+        system: await getPrompt(PROMPT_KEYS.CHAT_ASSISTANT),
         prompt: `Проанализируй сообщение: "${task.input}"
 
 Определи, является ли это обычным общением для чата.`,
@@ -72,7 +72,7 @@ export class ChatAssistantAgent extends AbstractAgent {
   }
 
   async process(task: AgentTask): Promise<AgentResult<string>> {
-    const systemPrompt = getPromptSafe(PROMPT_KEYS.CHAT_ASSISTANT);
+    const systemPrompt = await getPrompt(PROMPT_KEYS.CHAT_ASSISTANT);
 
     try {
       const response = await this.generateResponse(
