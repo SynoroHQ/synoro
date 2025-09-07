@@ -3,6 +3,7 @@ import type { Context } from "grammy";
 import { apiClient, createApiClientWithHeaders } from "../api/client";
 import { runWithAnimation } from "../utils/animation-helpers";
 import { createErrorMessage } from "../utils/html-message-builder";
+import { deleteUserMessage } from "../utils/message-utils";
 import {
   formatForTelegram,
   OPTIMAL_TELEGRAM_FORMATTING,
@@ -54,6 +55,9 @@ export async function handleText(ctx: Context) {
 
           // Отправляем новый ответ
           await ctx.reply(formattedResponse.text, { parse_mode: "HTML" });
+
+          // Удаляем сообщение пользователя после успешного ответа
+          await deleteUserMessage(ctx, messageContext.messageId);
         } else {
           // Обрабатываем ошибку
           const errorMessage = createErrorMessage(

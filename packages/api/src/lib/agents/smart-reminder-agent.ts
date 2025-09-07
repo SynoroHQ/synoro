@@ -2,7 +2,6 @@ import { generateObject } from "ai";
 import { z } from "zod";
 
 import type {
-  AIContext,
   CreateFromTextRequest,
   Reminder,
   ReminderPriority,
@@ -333,10 +332,11 @@ export class SmartReminderAgent extends AbstractAgent {
     const currentTime = new Date().toISOString();
 
     try {
+      const prompt = await getPrompt(PROMPT_KEYS.SMART_REMINDER_EXTRACTION);
       const { object } = await generateObject({
         model: this.getModel(),
         schema: reminderExtractionSchema,
-        system: await getPrompt(PROMPT_KEYS.SMART_REMINDER_EXTRACTION)
+        system: prompt
           .replace("{currentTime}", currentTime)
           .replace("{timezone}", timezone),
         prompt: `Текст: "${text}"
@@ -346,7 +346,9 @@ export class SmartReminderAgent extends AbstractAgent {
       return object;
     } catch (error) {
       console.error("Ошибка извлечения информации:", error);
-      throw new Error("Не удалось извлечь информацию о напоминании");
+      throw new Error(
+        `Не удалось извлечь информацию о напоминании: ${error instanceof Error ? error.message : "Неизвестная ошибка"}`,
+      );
     }
   }
 
