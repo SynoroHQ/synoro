@@ -271,6 +271,7 @@
       "name": "@synoro/prompts",
       "version": "0.0.0",
       "dependencies": {
+        "@langfuse/client": "^4.0.0",
         "langfuse": "^3.38.5",
       },
       "devDependencies": {
@@ -895,6 +896,10 @@
     "@jsonhero/path": ["@jsonhero/path@1.0.21", "", {}, "sha512-gVUDj/92acpVoJwsVJ/RuWOaHyG4oFzn898WNGQItLCTQ+hOaVlEaImhwE1WqOTf+l3dGOUkbSiVKlb3q1hd1Q=="],
 
     "@juggle/resize-observer": ["@juggle/resize-observer@3.4.0", "", {}, "sha512-dfLbk+PwWvFzSxwk3n5ySL0hfBog779o8h68wK/7/APo/7cgyWp5jcXockbxdk5kFRkbeXWm4Fbi9FrdN381sA=="],
+
+    "@langfuse/client": ["@langfuse/client@4.0.0", "", { "dependencies": { "@langfuse/core": "^4.0.0", "mustache": "^4.2.0" }, "peerDependencies": { "@opentelemetry/api": "^1.9.0" } }, "sha512-DNH/MMuRO3Jf3P7Jt4btPEIO661ubdddCLR55BjXaVt0pJmVRq5fJ8+WIuD9XFPQ3MV4a8SExT6jUU7ro9Fl7A=="],
+
+    "@langfuse/core": ["@langfuse/core@4.0.0", "", {}, "sha512-YxyzyD0wi9lOsTeTtIdY99ggN1SEH1KNQ4sXZ/A/Z2klrLcbyhkXJaNc6sxLuzBtMBXMLMz8/o7haPTAKLY6qQ=="],
 
     "@levischuck/tiny-cbor": ["@levischuck/tiny-cbor@0.2.11", "", {}, "sha512-llBRm4dT4Z89aRsm6u2oEZ8tfwL/2l6BwpZ7JcyieouniDECM5AqNgr/y08zalEIvW3RSK4upYyybDcmjXqAow=="],
 

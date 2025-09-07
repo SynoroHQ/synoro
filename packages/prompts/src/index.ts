@@ -28,4 +28,4 @@ export { default as eventProcessorSmart } from "./prompts/event-processor-smart"
 export { default as qualityEvaluatorSmart } from "./prompts/quality-evaluator-smart";
 export { default as taskOrchestratorSmart } from "./prompts/task-orchestrator-smart";
 
-export { getPrompt, initializePromptService } from "./prompt-service";
+export { getPrompt, getPromptObject, createPrompt, initializePromptService } from "./prompt-service";

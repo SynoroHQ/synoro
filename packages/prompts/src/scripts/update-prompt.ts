@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-import { Langfuse } from "langfuse";
+import { LangfuseClient } from "@langfuse/client";
 
 import type { LangfuseClientLike } from "../core/types";
 import { createPromptByKeyInCloud } from "../publish/langfuse";
@@ -32,14 +32,17 @@ async function main() {
     process.exit(1);
   }
 
-  const lf = new Langfuse({
+  const lf = new LangfuseClient({
     secretKey,
     publicKey,
     baseUrl,
   });
 
   const client: LangfuseClientLike = {
-    createPrompt: (args) => lf.createPrompt(args as unknown as Parameters<Langfuse["createPrompt"]>[0]),
+    prompt: {
+      create: (args) => lf.prompt.create(args),
+      get: (name, options) => lf.prompt.get(name, options),
+    },
   };
 
   try {

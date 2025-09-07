@@ -10,14 +10,13 @@ export async function createPromptInCloud(
   model: string = def.defaultModel ?? DEFAULT_MODEL,
 ) {
   try {
-    const result = await langfuse.createPrompt({
+    return await langfuse.prompt.create({
       name: def.name,
-      type: def.type,
+      type: def.type as "text" | "chat",
       prompt: def.prompt,
       labels: def.labels,
       config: createModelConfig(model, def.defaultTemperature ?? 0.4),
     });
-    return result;
   } catch (error) {
     throw new Error(
       `Failed to create prompt '${def.key}' in Langfuse: ${error instanceof Error ? error.message : "Unknown error"}`,
