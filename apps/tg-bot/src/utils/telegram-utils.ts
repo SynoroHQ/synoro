@@ -104,7 +104,9 @@ export async function downloadTelegramFile(
     clearTimeout(timeout);
 
     if (!res.ok) {
-      throw new Error(`Ошибка скачивания файла: ${res.status} ${res.statusText}`);
+      throw new Error(
+        `Ошибка скачивания файла: ${res.status} ${res.statusText}`,
+      );
     }
 
     const arrayBuffer = await res.arrayBuffer();
