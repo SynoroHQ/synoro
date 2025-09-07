@@ -6,23 +6,26 @@ import { AbstractAgent } from "./base-agent";
 export class TelegramFormatterAgent extends AbstractAgent {
   name = "Telegram Formatter";
   description =
-    "Агент для форматирования ответов для Telegram с использованием AI и HTML";
+    "Агент для форматирования готовых ответов для Telegram с использованием HTML разметки. НЕ изменяет содержимое, только форматирует.";
   capabilities: AgentCapability[] = [
     {
       name: "Text Formatting",
-      description: "Форматирование текста для Telegram с использованием HTML",
+      description:
+        "Форматирование готового текста для Telegram с использованием HTML без изменения содержания",
       category: "formatting",
       confidence: 0.95,
     },
     {
       name: "Telegram Response",
-      description: "Создание структурированных ответов для Telegram",
+      description:
+        "Преобразование готовых ответов в структурированный формат для Telegram",
       category: "messaging",
       confidence: 0.9,
     },
     {
       name: "Content Enhancement",
-      description: "Улучшение читабельности контента с эмодзи и структурой",
+      description:
+        "Улучшение читабельности готового контента с эмодзи и структурой без изменения смысла",
       category: "content",
       confidence: 0.85,
     },
@@ -33,7 +36,7 @@ export class TelegramFormatterAgent extends AbstractAgent {
   }
 
   canHandle(task: AgentTask): Promise<boolean> {
-    // Агент может обрабатывать задачи форматирования и задачи для Telegram
+    // Агент может обрабатывать задачи форматирования готовых ответов для Telegram
     const isFormattingTask =
       task.type === "telegram-formatting" ||
       task.type === "formatting" ||
@@ -41,7 +44,7 @@ export class TelegramFormatterAgent extends AbstractAgent {
 
     const isTelegramChannel = task.context.channel === "telegram";
 
-    // Всегда участвуем для Telegram канала или задач форматирования
+    // Участвуем для Telegram канала или задач форматирования готовых ответов
     return Promise.resolve(isFormattingTask || isTelegramChannel);
   }
 
@@ -53,6 +56,10 @@ export class TelegramFormatterAgent extends AbstractAgent {
         task.input,
         systemPrompt,
         task,
+        {
+          useContextAnalysis: false,
+          useQualityAssessment: false,
+        },
       );
 
       return this.createSuccessResult(response, 0.9);
@@ -65,7 +72,7 @@ export class TelegramFormatterAgent extends AbstractAgent {
   }
 
   shouldLog(_task: AgentTask): Promise<boolean> {
-    // Логируем все взаимодействия с агентом форматирования
+    // Логируем все взаимодействия с агентом форматирования готовых ответов
     return Promise.resolve(true);
   }
 }
