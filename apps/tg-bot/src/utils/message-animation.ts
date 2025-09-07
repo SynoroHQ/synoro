@@ -22,6 +22,7 @@ export class MessageAnimation {
   private animationInterval: NodeJS.Timeout | null = null;
   private startTime: number = 0;
   private isActive: boolean = false;
+  private currentText: string = "";
 
   // Различные варианты анимации - естественные для пользователя
   public readonly animations = {
@@ -76,6 +77,7 @@ export class MessageAnimation {
       }
       const initialMessage = await ctx.reply(initialText);
       this.messageId = initialMessage.message_id;
+      this.currentText = initialText;
 
       // Запускаем анимацию
       let frameIndex = 0;
@@ -93,14 +95,25 @@ export class MessageAnimation {
         try {
           frameIndex = (frameIndex + 1) % this.animations[type].length;
           const frameText = this.animations[type][frameIndex];
-          if (frameText) {
+          if (frameText && frameText !== this.currentText) {
             await ctx.api.editMessageText(
               this.chatId,
               this.messageId,
               frameText,
             );
+            this.currentText = frameText;
           }
         } catch (error) {
+          // Игнорируем ошибку 400 "message is not modified" - это нормально для анимации
+          if (
+            error &&
+            typeof error === "object" &&
+            "error_code" in error &&
+            error.error_code === 400
+          ) {
+            // Это ошибка "message is not modified" - игнорируем
+            return;
+          }
           console.warn("Ошибка обновления анимации:", error);
           // Не останавливаем анимацию при ошибке редактирования
         }
@@ -139,6 +152,7 @@ export class MessageAnimation {
 
     this.messageId = null;
     this.chatId = null;
+    this.currentText = "";
   }
 
   /**

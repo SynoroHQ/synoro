@@ -20,6 +20,7 @@ export class ProcessingAnimation {
   private intervalId: NodeJS.Timeout | undefined;
   private currentStage = 0;
   private messageType: string;
+  private currentText: string = "";
 
   constructor(ctx: Context, messageType = "сообщение") {
     this.ctx = ctx;
@@ -31,13 +32,12 @@ export class ProcessingAnimation {
    */
   async start(): Promise<void> {
     try {
-      const processingMsg = await this.ctx.reply(
-        `⏳ Обрабатываем ваше ${this.messageType}...`,
-        {
-          parse_mode: "HTML",
-        },
-      );
+      const initialText = `⏳ Обрабатываем ваше ${this.messageType}...`;
+      const processingMsg = await this.ctx.reply(initialText, {
+        parse_mode: "HTML",
+      });
       this.messageId = processingMsg.message_id;
+      this.currentText = initialText;
 
       // Запускаем анимацию с интервалом 2 секунды
       this.intervalId = setInterval(() => {
@@ -59,16 +59,33 @@ export class ProcessingAnimation {
 
     if (!stage) return;
 
+    const newText = `${stage.emoji} ${stage.text}`;
+
+    // Проверяем, изменился ли текст
+    if (newText === this.currentText) {
+      return;
+    }
+
     try {
       await this.ctx.api.editMessageText(
         this.ctx.chat!.id,
         this.messageId,
-        `${stage.emoji} ${stage.text}`,
+        newText,
         {
           parse_mode: "HTML",
         },
       );
+      this.currentText = newText;
     } catch (error) {
+      // Игнорируем ошибку 400 "message is not modified"
+      if (
+        error &&
+        typeof error === "object" &&
+        "error_code" in error &&
+        error.error_code === 400
+      ) {
+        return;
+      }
       console.warn("Не удалось обновить анимацию:", error);
     }
   }
@@ -90,6 +107,8 @@ export class ProcessingAnimation {
       }
       this.messageId = undefined;
     }
+
+    this.currentText = "";
   }
 
   /**
@@ -125,6 +144,22 @@ export async function smoothDeleteMessage(
     // Удаляем сообщение
     await ctx.api.deleteMessage(ctx.chat!.id, messageId);
   } catch (error) {
+    // Игнорируем ошибку 400 "message is not modified"
+    if (
+      error &&
+      typeof error === "object" &&
+      "error_code" in error &&
+      error.error_code === 400
+    ) {
+      // Пытаемся удалить сообщение напрямую
+      try {
+        await ctx.api.deleteMessage(ctx.chat!.id, messageId);
+      } catch (deleteError) {
+        console.warn("Не удалось удалить сообщение:", deleteError);
+      }
+      return;
+    }
+
     console.warn("Не удалось плавно удалить сообщение:", error);
 
     // Fallback: пытаемся удалить напрямую
