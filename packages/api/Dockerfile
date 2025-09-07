@@ -28,7 +28,9 @@ RUN bun install
 COPY --from=builder /app/out/full/ .
 ENV CI=true
 ENV npm_lifecycle_event=build
-RUN bun turbo run build --filter=@synoro/api --filter=@synoro/db --filter=@synoro/auth --filter=@synoro/validators --filter=@synoro/lib --filter=@synoro/prompts --filter=@synoro/emails
+# Clean cache and build with force to ensure proper dependency order
+RUN bun turbo run clean --filter=@synoro/api --filter=@synoro/db --filter=@synoro/auth --filter=@synoro/validators --filter=@synoro/lib --filter=@synoro/prompts --filter=@synoro/emails
+RUN bun turbo run build --filter=@synoro/api --filter=@synoro/db --filter=@synoro/auth --filter=@synoro/validators --filter=@synoro/lib --filter=@synoro/prompts --filter=@synoro/emails --force
 
 FROM base AS runner
 WORKDIR /app
