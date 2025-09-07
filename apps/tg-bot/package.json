@@ -16,8 +16,8 @@
   "dependencies": {
     "@synoro/api": "workspace:*",
     "@t3-oss/env-core": "0.13.8",
-    "@trpc/client": "11.5.0",
-    "grammy": "^1.38.1",
+    "@trpc/client": "11.5.1",
+    "grammy": "^1.38.2",
     "superjson": "2.2.2",
     "zod": "4.1.5"
   },
