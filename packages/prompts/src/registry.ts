@@ -16,6 +16,10 @@ import router_routing from "./prompts/router-routing";
 import task_manager from "./prompts/task-manager";
 import task_orchestrator from "./prompts/task-orchestrator";
 import telegram_formatter from "./prompts/telegram-formatter";
+import smart_reminder from "./prompts/smart-reminder";
+import event_processor_smart from "./prompts/event-processor-smart";
+import quality_evaluator_smart from "./prompts/quality-evaluator-smart";
+import task_orchestrator_smart from "./prompts/task-orchestrator-smart";
 
 export const registry: Record<string, PromptDefinition> = {
   [assistant.key]: assistant,
@@ -35,4 +39,18 @@ export const registry: Record<string, PromptDefinition> = {
   [task_manager.key]: task_manager,
   [task_orchestrator.key]: task_orchestrator,
   [telegram_formatter.key]: telegram_formatter,
+  // Smart reminder prompts
+  [smart_reminder.contextAnalysis.key]: smart_reminder.contextAnalysis,
+  [smart_reminder.extraction.key]: smart_reminder.extraction,
+  [smart_reminder.suggestions.key]: smart_reminder.suggestions,
+  // Event processor smart prompts
+  [event_processor_smart.typeAnalysis.key]: event_processor_smart.typeAnalysis,
+  [event_processor_smart.extraction.key]: event_processor_smart.extraction,
+  // Quality evaluator smart prompts
+  [quality_evaluator_smart.assessment.key]: quality_evaluator_smart.assessment,
+  [quality_evaluator_smart.improvement.key]: quality_evaluator_smart.improvement,
+  // Task orchestrator smart prompts
+  [task_orchestrator_smart.complexityAnalysis.key]: task_orchestrator_smart.complexityAnalysis,
+  [task_orchestrator_smart.qualityEvaluation.key]: task_orchestrator_smart.qualityEvaluation,
+  [task_orchestrator_smart.summary.key]: task_orchestrator_smart.summary,
 };

@@ -15,6 +15,20 @@ export const PROMPT_KEYS = {
   ROUTER_FALLBACK: "router-fallback",
   BASE_AGENT_CONTEXT: "base-agent-context",
   BASE_AGENT_QUALITY: "base-agent-quality",
+  // Smart reminder agent prompts
+  SMART_REMINDER_CONTEXT_ANALYSIS: "smart-reminder-context-analysis",
+  SMART_REMINDER_EXTRACTION: "smart-reminder-extraction",
+  SMART_REMINDER_SUGGESTIONS: "smart-reminder-suggestions",
+  // Event processor smart prompts
+  EVENT_PROCESSOR_TYPE_ANALYSIS: "event-processor-type-analysis",
+  EVENT_PROCESSOR_EXTRACTION: "event-processor-extraction",
+  // Quality evaluator smart prompts
+  QUALITY_EVALUATOR_ASSESSMENT: "quality-evaluator-assessment",
+  QUALITY_EVALUATOR_IMPROVEMENT: "quality-evaluator-improvement",
+  // Task orchestrator smart prompts
+  TASK_ORCHESTRATOR_COMPLEXITY_ANALYSIS: "task-orchestrator-complexity-analysis",
+  TASK_ORCHESTRATOR_QUALITY_EVALUATION: "task-orchestrator-quality-evaluation",
+  TASK_ORCHESTRATOR_SUMMARY: "task-orchestrator-summary",
 } as const;
 
 export type PromptKey = (typeof PROMPT_KEYS)[keyof typeof PROMPT_KEYS];

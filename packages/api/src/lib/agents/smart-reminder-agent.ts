@@ -14,6 +14,7 @@ import type { AgentContext } from "./agent-context";
 import type { AgentCapability, AgentResult, AgentTask } from "./types";
 import { ReminderService } from "../services/reminder-service";
 import { AbstractAgent } from "./base-agent";
+import { getPromptSafe, PROMPT_KEYS } from "@synoro/prompts";
 
 /**
  * Схема для извлечения информации о напоминании из текста
@@ -287,22 +288,7 @@ export class SmartReminderAgent extends AbstractAgent {
       const { object } = await generateObject({
         model: this.getModel(),
         schema: contextAnalysisSchema,
-        system: `Ты - эксперт по анализу текста на предмет создания напоминаний.
-
-Определи, связан ли текст с напоминаниями, задачами, событиями или планами.
-
-Ключевые индикаторы напоминаний:
-- Временные выражения (завтра, через час, в 15:00, в понедельник)
-- Глаголы действия (напомни, сделать, встретиться, позвонить)
-- Планы и задачи (встреча, дедлайн, событие, задача)
-- Императивные конструкции (нужно, должен, необходимо)
-
-Примеры:
-✅ "Напомни мне завтра позвонить маме"
-✅ "Встреча с клиентом в 14:00"  
-✅ "Нужно сдать отчет до пятницы"
-❌ "Как дела?"
-❌ "Какая погода сегодня?"`,
+        system: getPromptSafe(PROMPT_KEYS.SMART_REMINDER_CONTEXT_ANALYSIS),
         prompt: `Анализируемый текст: "${text}"`,
       });
 
@@ -350,37 +336,9 @@ export class SmartReminderAgent extends AbstractAgent {
       const { object } = await generateObject({
         model: this.getModel(),
         schema: reminderExtractionSchema,
-        system: `Ты - эксперт по извлечению информации о напоминаниях из текста.
-
-ЗАДАЧА: Извлеки из текста всю информацию для создания напоминания.
-
-ПРАВИЛА ОБРАБОТКИ ВРЕМЕНИ:
-- Текущее время: ${currentTime}
-- Часовой пояс: ${timezone}
-- "завтра" = следующий день в 09:00
-- "сегодня" = сегодня в 18:00 (если время не указано)
-- "через час" = текущее время + 1 час
-- "в понедельник" = ближайший понедельник в 09:00
-- Всегда возвращай время в ISO формате с часовым поясом
-
-ТИПЫ НАПОМИНАНИЙ:
-- task: обычные задачи и дела
-- event: события и мероприятия
-- deadline: дедлайны и сроки
-- meeting: встречи и собрания
-- call: звонки
-- follow_up: напоминания о последующих действиях
-
-ПРИОРИТЕТЫ:
-- urgent: срочные дела (дедлайны, важные встречи)
-- high: важные задачи
-- medium: обычные дела (по умолчанию)
-- low: несрочные задачи
-
-ПРИМЕРЫ:
-"Напомни позвонить маме завтра" → title: "Позвонить маме", type: "call", priority: "medium"
-"Встреча с клиентом в 14:00" → title: "Встреча с клиентом", type: "meeting", priority: "high"
-"Сдать отчет до пятницы" → title: "Сдать отчет", type: "deadline", priority: "high"`,
+        system: getPromptSafe(PROMPT_KEYS.SMART_REMINDER_EXTRACTION)
+          .replace("{currentTime}", currentTime)
+          .replace("{timezone}", timezone),
         prompt: `Текст: "${text}"
 Контекст: ${JSON.stringify(context || {})}`,
       });
@@ -404,21 +362,7 @@ export class SmartReminderAgent extends AbstractAgent {
       const { object } = await generateObject({
         model: this.getModel(),
         schema: smartSuggestionsSchema,
-        system: `Ты - эксперт по созданию умных предложений для напоминаний.
-
-Проанализируй созданное напоминание и предложи улучшения:
-
-ТИПЫ ПРЕДЛОЖЕНИЙ:
-- reschedule: предложения по изменению времени
-- priority_change: предложения по изменению приоритета  
-- related_task: связанные задачи
-- context_update: дополнительная информация
-
-Учитывай:
-- Время дня и рабочие часы
-- Тип задачи и её контекст
-- Возможные связанные действия
-- Оптимальное планирование`,
+        system: getPromptSafe(PROMPT_KEYS.SMART_REMINDER_SUGGESTIONS),
         prompt: `Напоминание: ${JSON.stringify(reminder)}
 Исходный текст: "${originalText}"`,
       });

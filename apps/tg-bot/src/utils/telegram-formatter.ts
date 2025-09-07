@@ -90,11 +90,64 @@ export class TelegramFormatter {
     // 3. Проверяем длину строк
     formattedText = this.wrapLongLines(formattedText, opts.maxLineLength);
 
+    // Валидируем HTML если используется HTML режим
+    if (opts.useHTML && !this.validateHTMLTags(formattedText)) {
+      console.warn(
+        "HTML validation failed in TelegramFormatter, falling back to plain text",
+      );
+      formattedText = formattedText.replace(/<[^>]*>/g, ""); // Удаляем все HTML теги
+    }
+
     return {
       text: formattedText,
       parse_mode: opts.useHTML ? "HTML" : undefined,
       disable_web_page_preview: true,
     };
+  }
+
+  /**
+   * Валидирует HTML теги в тексте
+   */
+  private validateHTMLTags(text: string): boolean {
+    const tagStack: string[] = [];
+    const tagRegex = /<\/?([a-zA-Z][a-zA-Z0-9]*)[^>]*>/g;
+    let match;
+
+    while ((match = tagRegex.exec(text)) !== null) {
+      const fullTag = match[0];
+      const tagName = match[1].toLowerCase();
+
+      // Пропускаем самозакрывающиеся теги
+      if (fullTag.endsWith("/>")) {
+        continue;
+      }
+
+      if (fullTag.startsWith("</")) {
+        // Закрывающий тег
+        if (
+          tagStack.length === 0 ||
+          tagStack[tagStack.length - 1] !== tagName
+        ) {
+          console.warn(
+            `HTML validation failed: unmatched closing tag </${tagName}>`,
+          );
+          return false;
+        }
+        tagStack.pop();
+      } else {
+        // Открывающий тег
+        tagStack.push(tagName);
+      }
+    }
+
+    if (tagStack.length > 0) {
+      console.warn(
+        `HTML validation failed: unclosed tags: ${tagStack.join(", ")}`,
+      );
+      return false;
+    }
+
+    return true;
   }
 
   /**

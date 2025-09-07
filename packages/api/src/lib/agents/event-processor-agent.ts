@@ -1,7 +1,5 @@
-import { generateText, tool } from "ai";
+import { generateObject, generateText, tool } from "ai";
 import { z } from "zod";
-
-import { getPromptSafe, PROMPT_KEYS } from "@synoro/prompts";
 
 import type {
   AgentCapability,
@@ -11,6 +9,7 @@ import type {
 } from "./types";
 import { parseAIJsonResponseWithSchema } from "../utils/ai-response-parser";
 import { AbstractAgent } from "./base-agent";
+import { getPromptSafe, PROMPT_KEYS } from "@synoro/prompts";
 import {
   categorizationSchema,
   eventAnalysisSchema,
@@ -69,32 +68,7 @@ export class EventProcessorAgent extends AbstractAgent {
       // Используем AI для определения типа события
       const { text: eventAnalysisText } = await generateText({
         model: this.getModel(),
-        system: `Ты - эксперт по определению типов сообщений в системе Synoro AI.
-
-ТВОЯ ЗАДАЧА:
-Определи, является ли сообщение пользователя событием для логирования в системе.
-
-ТИПЫ СОБЫТИЙ:
-- purchase: покупки, трата денег, расходы на товары/услуги
-- task: задачи, дела, планы, todo-элементы
-- meeting: встречи, собрания, созвоны, назначенные события
-- note: заметки, записи, идеи, мысли для сохранения
-- expense: расходы без конкретного товара, общие траты
-- income: доходы, поступления, заработок, прибыль
-- maintenance: обслуживание/ремонт/ТО, регулярные сервисные работы
-- other: прочие события, не подходящие под другие категории
-- none: не является событием (вопрос, обычное общение, спам)
-
-ПРИЗНАКИ СОБЫТИЙ:
-- Содержит информацию о действиях пользователя
-- Включает детали, которые стоит запомнить
-- Может содержать суммы, даты, места
-- Описывает что произошло или планируется
-
-ПРАВИЛА:
-1. Если сообщение описывает действие/событие - это событие
-2. Если это вопрос или обычное общение - не событие
-3. Учитывай контекст и намерение пользователя`,
+        system: getPromptSafe(PROMPT_KEYS.EVENT_PROCESSOR),
         prompt: `Проанализируй сообщение: "${task.input}"
 
 Верни ответ в формате JSON:

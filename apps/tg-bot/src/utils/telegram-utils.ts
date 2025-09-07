@@ -169,6 +169,48 @@ export function isObviousSpam(text: string): boolean {
 }
 
 /**
+ * Валидирует HTML теги в тексте
+ */
+function validateHTMLTags(text: string): boolean {
+  const tagStack: string[] = [];
+  const tagRegex = /<\/?([a-zA-Z][a-zA-Z0-9]*)[^>]*>/g;
+  let match;
+
+  while ((match = tagRegex.exec(text)) !== null) {
+    const fullTag = match[0];
+    const tagName = match[1].toLowerCase();
+
+    // Пропускаем самозакрывающиеся теги
+    if (fullTag.endsWith("/>")) {
+      continue;
+    }
+
+    if (fullTag.startsWith("</")) {
+      // Закрывающий тег
+      if (tagStack.length === 0 || tagStack[tagStack.length - 1] !== tagName) {
+        console.warn(
+          `HTML validation failed: unmatched closing tag </${tagName}>`,
+        );
+        return false;
+      }
+      tagStack.pop();
+    } else {
+      // Открывающий тег
+      tagStack.push(tagName);
+    }
+  }
+
+  if (tagStack.length > 0) {
+    console.warn(
+      `HTML validation failed: unclosed tags: ${tagStack.join(", ")}`,
+    );
+    return false;
+  }
+
+  return true;
+}
+
+/**
  * Безопасно форматирует текст для отправки в Telegram
  * Использует HTML форматирование для максимальной совместимости
  */
@@ -185,17 +227,56 @@ export function formatTelegramText(
     // Применяем базовое HTML форматирование
     let formattedText = text;
 
-    // Заменяем Markdown заголовки на HTML (жирный текст)
-    formattedText = formattedText.replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>");
+    // Сначала форматируем код блоки (чтобы избежать конфликтов с другими тегами)
+    formattedText = formattedText.replace(/`([^`]+)`/g, "<code>$1</code>");
 
-    // Форматируем курсив (одиночные звездочки)
+    // Форматируем pre блоки (многострочный код)
     formattedText = formattedText.replace(
-      /(?<!\*)\*([^*]+)\*(?!\*)/g,
-      "<i>$1</i>",
+      /```([\s\S]*?)```/g,
+      "<pre><code>$1</code></pre>",
     );
 
-    // Форматируем код
-    formattedText = formattedText.replace(/`([^`]+)`/g, "<code>$1</code>");
+    // Заменяем Markdown заголовки на HTML (жирный текст) - только если не внутри code/pre
+    formattedText = formattedText.replace(
+      /\*\*([^*]+)\*\*/g,
+      (match, content) => {
+        // Проверяем, не находимся ли мы внутри code или pre тега
+        const beforeMatch = formattedText.substring(
+          0,
+          formattedText.indexOf(match),
+        );
+        const openCodeTags = (beforeMatch.match(/<code>/g) || []).length;
+        const closeCodeTags = (beforeMatch.match(/<\/code>/g) || []).length;
+        const openPreTags = (beforeMatch.match(/<pre>/g) || []).length;
+        const closePreTags = (beforeMatch.match(/<\/pre>/g) || []).length;
+
+        if (openCodeTags > closeCodeTags || openPreTags > closePreTags) {
+          return match; // Не форматируем, если внутри code/pre
+        }
+        return `<b>${content}</b>`;
+      },
+    );
+
+    // Форматируем курсив (одиночные звездочки) - только если не внутри code/pre
+    formattedText = formattedText.replace(
+      /(?<!\*)\*([^*]+)\*(?!\*)/g,
+      (match, content) => {
+        // Проверяем, не находимся ли мы внутри code или pre тега
+        const beforeMatch = formattedText.substring(
+          0,
+          formattedText.indexOf(match),
+        );
+        const openCodeTags = (beforeMatch.match(/<code>/g) || []).length;
+        const closeCodeTags = (beforeMatch.match(/<\/code>/g) || []).length;
+        const openPreTags = (beforeMatch.match(/<pre>/g) || []).length;
+        const closePreTags = (beforeMatch.match(/<\/pre>/g) || []).length;
+
+        if (openCodeTags > closeCodeTags || openPreTags > closePreTags) {
+          return match; // Не форматируем, если внутри code/pre
+        }
+        return `<i>${content}</i>`;
+      },
+    );
 
     // Экранируем HTML символы (но не теги)
     const parts = formattedText.split(/(<[^>]+>)/g);
@@ -210,6 +291,12 @@ export function formatTelegramText(
         return part.replace(/&/g, "&amp;");
       })
       .join("");
+
+    // Валидируем HTML перед возвратом
+    if (!validateHTMLTags(formattedText)) {
+      console.warn("HTML validation failed, falling back to plain text");
+      return { text: text.replace(/<[^>]*>/g, "") }; // Удаляем все HTML теги
+    }
 
     return {
       text: formattedText,

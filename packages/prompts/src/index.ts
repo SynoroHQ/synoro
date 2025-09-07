@@ -23,6 +23,10 @@ export { default as routerRouting } from "./prompts/router-routing";
 export { default as routerFallback } from "./prompts/router-fallback";
 export { default as baseAgentContext } from "./prompts/base-agent-context";
 export { default as baseAgentQuality } from "./prompts/base-agent-quality";
+export { default as smartReminder } from "./prompts/smart-reminder";
+export { default as eventProcessorSmart } from "./prompts/event-processor-smart";
+export { default as qualityEvaluatorSmart } from "./prompts/quality-evaluator-smart";
+export { default as taskOrchestratorSmart } from "./prompts/task-orchestrator-smart";
 
 export function getPrompt(key: string): string {
   return registry[key]?.prompt ?? "";
