@@ -232,9 +232,15 @@ export const parserTaskTemplate = `
 const parserTask: PromptDefinition = {
   key: "parser.task",
   name: "Advanced Event Parser Engine",
-  type: "parser",
-  prompt: parserTaskTemplate,
-  labels: ["production", "staging", "latest", "nlp-processing", "entity-extraction"],
+  type: "chat",
+  prompt: [{ role: "system", content: parserTaskTemplate }],
+  labels: [
+    "production",
+    "staging",
+    "latest",
+    "nlp-processing",
+    "entity-extraction",
+  ],
   defaultModel: "gpt-5",
   defaultTemperature: 0.1,
 };

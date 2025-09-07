@@ -336,9 +336,15 @@ export const messageClassifierTemplate = `
 const messageClassifier: PromptDefinition = {
   key: "message-classifier",
   name: "Advanced Message Classification Engine",
-  type: "classifier",
+  type: "text",
   prompt: messageClassifierTemplate,
-  labels: ["production", "staging", "latest", "nlp-processing", "intelligent-filtering"],
+  labels: [
+    "production",
+    "staging",
+    "latest",
+    "nlp-processing",
+    "intelligent-filtering",
+  ],
   defaultModel: "gpt-5-mini",
   defaultTemperature: 0.05,
 };

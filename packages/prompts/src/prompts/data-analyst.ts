@@ -587,7 +587,7 @@ Synoro Platform превращает каждое жизненное событ�
 const dataAnalyst: PromptDefinition = {
   key: "data-analyst",
   name: "Advanced Data Analyst Agent",
-  type: "analytical",
+  type: "text",
   prompt: dataAnalystTemplate,
   labels: ["production", "staging", "latest", "advanced-analytics"],
   defaultModel: "gpt-5",

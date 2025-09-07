@@ -214,7 +214,7 @@ export class TelegramFormatter {
    * Форматирует заголовки в HTML
    */
   private formatHeaders(text: string): string {
-    // Форматируем заголовки с # (Markdown стиль)
+    // Форматируем заголовки с # (конвертируем в HTML)
     const headerRegex = this.getRegex("^#{1,6}\\s+(.+)$", "gm");
     text = text.replace(headerRegex, (match, content) => {
       const level = match.match(/^#+/)?.[0].length || 1;

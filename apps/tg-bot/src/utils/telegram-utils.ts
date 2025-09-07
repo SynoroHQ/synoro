@@ -236,7 +236,7 @@ export function formatTelegramText(
       "<pre><code>$1</code></pre>",
     );
 
-    // Заменяем Markdown заголовки на HTML (жирный текст) - только если не внутри code/pre
+    // Заменяем **текст** на HTML (жирный текст) - только если не внутри code/pre
     formattedText = formattedText.replace(
       /\*\*([^*]+)\*\*/g,
       (match, content) => {

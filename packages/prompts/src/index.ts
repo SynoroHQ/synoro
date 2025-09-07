@@ -29,10 +29,20 @@ export { default as qualityEvaluatorSmart } from "./prompts/quality-evaluator-sm
 export { default as taskOrchestratorSmart } from "./prompts/task-orchestrator-smart";
 
 export function getPrompt(key: string): string {
-  return registry[key]?.prompt ?? "";
+  const def = registry[key];
+  if (!def) return "";
+  if (typeof def.prompt === "string") {
+    return def.prompt;
+  }
+  return def.prompt[0]?.content ?? "";
 }
 
 export function getPromptSafe(key?: string): string {
   const k = key ?? DEFAULT_PROMPT_KEY;
-  return registry[k]?.prompt ?? registry[DEFAULT_PROMPT_KEY]?.prompt ?? "";
+  const def = registry[k] ?? registry[DEFAULT_PROMPT_KEY];
+  if (!def) return "";
+  if (typeof def.prompt === "string") {
+    return def.prompt;
+  }
+  return def.prompt[0]?.content ?? "";
 }

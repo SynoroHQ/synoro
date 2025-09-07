@@ -108,8 +108,4 @@ const taskOrchestratorSummary: PromptDefinition = {
 - Практические рекомендации`,
 };
 
-export default {
-  complexityAnalysis: taskOrchestratorComplexityAnalysis,
-  qualityEvaluation: taskOrchestratorQualityEvaluation,
-  summary: taskOrchestratorSummary,
-};
+export default taskOrchestratorComplexityAnalysis;

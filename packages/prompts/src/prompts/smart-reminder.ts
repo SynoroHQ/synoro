@@ -19,7 +19,7 @@ const smartReminderContextAnalysis: PromptDefinition = {
 ✅ "Встреча с клиентом в 14:00"  
 ✅ "Нужно сдать отчет до пятницы"
 ❌ "Как дела?"
-❌ "Какая погода сегодня?"`
+❌ "Какая погода сегодня?"`,
 };
 
 const smartReminderExtraction: PromptDefinition = {
@@ -56,7 +56,7 @@ const smartReminderExtraction: PromptDefinition = {
 ПРИМЕРЫ:
 "Напомни позвонить маме завтра" → title: "Позвонить маме", type: "call", priority: "medium"
 "Встреча с клиентом в 14:00" → title: "Встреча с клиентом", type: "meeting", priority: "high"
-"Сдать отчет до пятницы" → title: "Сдать отчет", type: "deadline", priority: "high"`
+"Сдать отчет до пятницы" → title: "Сдать отчет", type: "deadline", priority: "high"`,
 };
 
 const smartReminderSuggestions: PromptDefinition = {
@@ -77,11 +77,7 @@ const smartReminderSuggestions: PromptDefinition = {
 - Время дня и рабочие часы
 - Тип задачи и её контекст
 - Возможные связанные действия
-- Оптимальное планирование`
+- Оптимальное планирование`,
 };
 
-export default {
-  contextAnalysis: smartReminderContextAnalysis,
-  extraction: smartReminderExtraction,
-  suggestions: smartReminderSuggestions,
-};
+export default smartReminderContextAnalysis;

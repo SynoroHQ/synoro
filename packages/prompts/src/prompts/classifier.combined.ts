@@ -341,7 +341,7 @@ Synoro Platform трансформирует хаотичные жизненны
 export const messageClassifier: PromptDefinition = {
   key: "message-classifier",
   name: "Message Classifier",
-  type: "classifier",
+  type: "text",
   prompt: messageClassifierTemplate,
   labels: ["production", "staging", "latest"],
   defaultModel: "gpt-5-mini",

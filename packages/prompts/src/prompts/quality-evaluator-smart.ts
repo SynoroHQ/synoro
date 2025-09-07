@@ -72,7 +72,4 @@ const qualityEvaluatorImprovement: PromptDefinition = {
 - Специфические детали задачи`,
 };
 
-export default {
-  assessment: qualityEvaluatorAssessment,
-  improvement: qualityEvaluatorImprovement,
-};
+export default qualityEvaluatorAssessment;

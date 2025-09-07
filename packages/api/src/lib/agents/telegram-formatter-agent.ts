@@ -6,12 +6,11 @@ import { AbstractAgent } from "./base-agent";
 export class TelegramFormatterAgent extends AbstractAgent {
   name = "Telegram Formatter";
   description =
-    "Агент для форматирования ответов для Telegram с использованием AI и Markdown";
+    "Агент для форматирования ответов для Telegram с использованием AI и HTML";
   capabilities: AgentCapability[] = [
     {
       name: "Text Formatting",
-      description:
-        "Форматирование текста для Telegram с использованием Markdown",
+      description: "Форматирование текста для Telegram с использованием HTML",
       category: "formatting",
       confidence: 0.95,
     },

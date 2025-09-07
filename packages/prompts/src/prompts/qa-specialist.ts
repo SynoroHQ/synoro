@@ -172,9 +172,15 @@ export const qaSpecialistTemplate = `
 const qaSpecialist: PromptDefinition = {
   key: "qa-specialist",
   name: "Expert QA Specialist & Technical Consultant",
-  type: "assistant",
+  type: "text",
   prompt: qaSpecialistTemplate,
-  labels: ["production", "staging", "latest", "expert-support", "technical-consulting"],
+  labels: [
+    "production",
+    "staging",
+    "latest",
+    "expert-support",
+    "technical-consulting",
+  ],
   defaultModel: "gpt-5",
   defaultTemperature: 0.3,
 };

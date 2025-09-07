@@ -1,10 +1,15 @@
 import type { AIModel } from "./models";
 
+export type PromptMessage = {
+  role: "system" | "user" | "assistant";
+  content: string;
+};
+
 export type PromptDefinition = {
   key: string; // unique registry key, e.g. "assistant"
   name: string; // cloud-friendly name, e.g. "assistant"
-  type: "text" | string;
-  prompt: string;
+  type: "text" | "chat" | string;
+  prompt: string | PromptMessage[];
   labels?: string[];
   // optional defaults for publishing
   defaultModel?: AIModel;
@@ -14,18 +19,23 @@ export type PromptDefinition = {
 export const DEFAULT_PROMPT_KEY = "assistant" as const;
 
 export function getPrompt(def: PromptDefinition): string {
-  return def.prompt;
+  if (typeof def.prompt === "string") {
+    return def.prompt;
+  }
+  // Для массива сообщений возвращаем содержимое первого сообщения
+  return def.prompt[0]?.content ?? "";
 }
 
 export function compilePrompt(
   def: PromptDefinition,
   vars?: Record<string, string>,
 ): string {
-  if (!vars) return def.prompt;
-  let output = def.prompt;
+  const promptText = getPrompt(def);
+  if (!vars) return promptText;
+  let output = promptText;
   for (const [k, v] of Object.entries(vars)) {
     // Экранируем специальные символы регулярных выражений
-    const escapedKey = k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const escapedKey = k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     const rx = new RegExp(`\\{\\{\\s*${escapedKey}\\s*\\}}`, "g");
     output = output.replace(rx, () => v);
   }
@@ -38,5 +48,9 @@ export function getPromptSafeFromRegistry(
 ): string {
   const k = key ?? DEFAULT_PROMPT_KEY;
   const def = registry[k] ?? registry[DEFAULT_PROMPT_KEY];
-  return def?.prompt ?? "";
+  if (!def) return "";
+  if (typeof def.prompt === "string") {
+    return def.prompt;
+  }
+  return def.prompt[0]?.content ?? "";
 }

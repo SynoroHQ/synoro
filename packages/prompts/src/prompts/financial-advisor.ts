@@ -379,9 +379,15 @@ export const financialAdvisorTemplate = `
 const financialAdvisor: PromptDefinition = {
   key: "financial-advisor",
   name: "Advanced Financial Advisor Agent",
-  type: "advisor",
+  type: "text",
   prompt: financialAdvisorTemplate,
-  labels: ["production", "staging", "latest", "financial-planning", "wealth-management"],
+  labels: [
+    "production",
+    "staging",
+    "latest",
+    "financial-planning",
+    "wealth-management",
+  ],
   defaultModel: "gpt-5",
   defaultTemperature: 0.3,
 };

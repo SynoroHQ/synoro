@@ -80,7 +80,4 @@ const eventProcessorExtraction: PromptDefinition = {
 "Заработал 5000$ на фрилансе" → title: "Доход с фриланса", amount: 5000, currency: "USD"`,
 };
 
-export default {
-  typeAnalysis: eventProcessorTypeAnalysis,
-  extraction: eventProcessorExtraction,
-};
+export default eventProcessorTypeAnalysis;
