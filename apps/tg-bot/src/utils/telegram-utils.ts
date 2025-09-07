@@ -77,7 +77,7 @@ export async function downloadTelegramFile(
   contentType: string;
 }> {
   const maxBytes = env.TG_AUDIO_MAX_BYTES ?? 8 * 1024 * 1024; // 8MB default
-  const fetchTimeoutMs = env.TG_FETCH_TIMEOUT_MS ?? 25_000; // 25s default
+  const fetchTimeoutMs = env.TG_FETCH_TIMEOUT_MS ?? 60_000; // 60s default for audio files
 
   const file = await ctx.api.getFile(fileId);
   if (!file.file_path) {
@@ -93,7 +93,6 @@ export async function downloadTelegramFile(
       )} МБ.`,
     );
   }
-
   const url = `https://api.telegram.org/file/bot${env.TELEGRAM_BOT_TOKEN}/${file.file_path}`;
 
   // Fetch with timeout
@@ -105,7 +104,7 @@ export async function downloadTelegramFile(
     clearTimeout(timeout);
 
     if (!res.ok) {
-      throw new Error(`Ошибка скачивания файла: ${res.status}`);
+      throw new Error(`Ошибка скачивания файла: ${res.status} ${res.statusText}`);
     }
 
     const arrayBuffer = await res.arrayBuffer();
@@ -126,7 +125,21 @@ export async function downloadTelegramFile(
 
     return { buffer, filename, contentType };
   } catch (error) {
+    console.error("Error downloading Telegram file:", error);
     clearTimeout(timeout);
+
+    // Более детальная обработка ошибок
+    if (error instanceof Error) {
+      if (error.name === "AbortError") {
+        throw new Error(
+          `Таймаут скачивания файла (${fetchTimeoutMs / 1000}с). Файл слишком большой или медленное соединение.`,
+        );
+      }
+      if (error.message.includes("fetch")) {
+        throw new Error(`Ошибка сети при скачивании: ${error.message}`);
+      }
+    }
+
     throw error;
   }
 }
@@ -178,7 +191,9 @@ function validateHTMLTags(text: string): boolean {
 
   while ((match = tagRegex.exec(text)) !== null) {
     const fullTag = match[0];
-    const tagName = match[1].toLowerCase();
+    const tagName = match[1]?.toLowerCase();
+
+    if (!tagName) continue;
 
     // Пропускаем самозакрывающиеся теги
     if (fullTag.endsWith("/>")) {
