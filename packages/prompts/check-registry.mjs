@@ -28,3 +28,4 @@ promptKeys.forEach(key => {
 console.log(`\nTotal PROMPT_KEYS: ${promptKeys.length}`);
 console.log(`Total registry keys: ${registryKeys.length}`);
 console.log(`Matching: ${promptKeys.filter(key => key in registry).length}`);
+

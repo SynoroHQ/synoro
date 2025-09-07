@@ -6,6 +6,18 @@
       "dependsOn": ["^build"],
       "outputs": [".cache/tsbuildinfo.json", ".next/**", "dist/**", "out/**"]
     },
+    "//packages/db#build": {
+      "dependsOn": ["//packages/validators#build"]
+    },
+    "//packages/config#build": {
+      "dependsOn": []
+    },
+    "//packages/validators#build": {
+      "dependsOn": ["//packages/config#build"]
+    },
+    "//packages/lib#build": {
+      "dependsOn": ["//packages/config#build"]
+    },
     "dev": {
       "dependsOn": [],
       "cache": false,
