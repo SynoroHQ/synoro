@@ -45,6 +45,7 @@ COPY --from=installer --chown=bunjs:nodejs /app/packages/api/package.json ./pack
 COPY --from=installer --chown=bunjs:nodejs /app/node_modules ./node_modules
 
 # Copy built workspace packages
+COPY --from=installer --chown=bunjs:nodejs /app/packages/config/dist ./node_modules/@synoro/config/dist
 COPY --from=installer --chown=bunjs:nodejs /app/packages/db/dist ./node_modules/@synoro/db/dist
 COPY --from=installer --chown=bunjs:nodejs /app/packages/auth/dist ./node_modules/@synoro/auth/dist
 COPY --from=installer --chown=bunjs:nodejs /app/packages/validators/dist ./node_modules/@synoro/validators/dist
@@ -53,6 +54,7 @@ COPY --from=installer --chown=bunjs:nodejs /app/packages/prompts/dist ./node_mod
 COPY --from=installer --chown=bunjs:nodejs /app/packages/emails/dist ./node_modules/@synoro/emails/dist
 
 # Copy package.json files for workspace packages
+COPY --from=installer --chown=bunjs:nodejs /app/packages/config/package.json ./node_modules/@synoro/config/package.json
 COPY --from=installer --chown=bunjs:nodejs /app/packages/db/package.json ./node_modules/@synoro/db/package.json
 COPY --from=installer --chown=bunjs:nodejs /app/packages/auth/package.json ./node_modules/@synoro/auth/package.json
 COPY --from=installer --chown=bunjs:nodejs /app/packages/validators/package.json ./node_modules/@synoro/validators/package.json
