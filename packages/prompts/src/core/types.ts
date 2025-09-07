@@ -12,4 +12,12 @@ export type LangfuseClientLike = {
     labels?: string[];
     config?: unknown;
   }) => Promise<unknown>;
+  getPrompt: (args: {
+    name: string;
+    version?: number;
+    label?: string;
+  }) => Promise<{
+    prompt: string | PromptMessage[];
+    version: number;
+  } | null>;
 };
