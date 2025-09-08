@@ -4,6 +4,7 @@ import { z } from "zod";
 import { getPrompt, PROMPT_KEYS } from "@synoro/prompts";
 
 import type { AgentCapability, AgentResult, AgentTask } from "./types";
+import { EventService } from "../services/event-service";
 import { parseAIJsonResponseWithSchema } from "../utils/ai-response-parser";
 import { AbstractAgent } from "./base-agent";
 import {
@@ -55,8 +56,11 @@ export class EventProcessorAgent extends AbstractAgent {
     },
   ];
 
+  private eventService: EventService;
+
   constructor() {
     super("gpt-5-nano"); // Temperature removed
+    this.eventService = new EventService();
   }
 
   async canHandle(task: AgentTask): Promise<boolean> {
@@ -237,6 +241,184 @@ export class EventProcessorAgent extends AbstractAgent {
   }
 
   /**
+   * Создает инструмент для сохранения события в базу данных
+   */
+  private getSaveEventTool(task: AgentTask) {
+    return tool({
+      description: "Сохранить событие в базу данных",
+      inputSchema: z.object({
+        type: z.enum(["expense", "task", "maintenance", "other"]),
+        title: z.string().optional(),
+        notes: z.string().optional(),
+        amount: z.number().optional(),
+        currency: z.string().optional(),
+        occurredAt: z.string().optional(), // ISO date string
+        priority: z.enum(["low", "medium", "high", "urgent"]).optional(),
+        tags: z.array(z.string()).optional(),
+        properties: z.record(z.string(), z.unknown()).optional(),
+      }),
+      execute: async (eventData) => {
+        try {
+          // Получаем householdId из контекста или используем дефолтный
+          const householdId =
+            (task.context?.householdId as string) ?? "default";
+          const userId = task.context?.userId;
+
+          const event = await this.eventService.createEvent({
+            householdId,
+            userId,
+            source: "telegram", // или другой источник из контекста
+            type: eventData.type,
+            title: eventData.title,
+            notes: eventData.notes,
+            amount: eventData.amount,
+            currency: eventData.currency ?? "RUB",
+            occurredAt: eventData.occurredAt
+              ? new Date(eventData.occurredAt)
+              : new Date(),
+            priority: eventData.priority ?? "medium",
+            tags: eventData.tags,
+            properties: eventData.properties,
+          });
+
+          return {
+            success: true,
+            eventId: event.id,
+            message: `Событие "${eventData.type}" успешно сохранено с ID: ${event.id}`,
+          };
+        } catch (error) {
+          console.error("Error saving event:", error);
+          return {
+            success: false,
+            error: "Не удалось сохранить событие",
+          };
+        }
+      },
+    });
+  }
+
+  /**
+   * Создает инструмент для получения событий из базы данных
+   */
+  private getGetEventsTool(task: AgentTask) {
+    return tool({
+      description: "Получить события из базы данных с фильтрацией",
+      inputSchema: z.object({
+        type: z.string().optional(),
+        status: z.string().optional(),
+        priority: z.string().optional(),
+        startDate: z.string().optional(), // ISO date string
+        endDate: z.string().optional(), // ISO date string
+        minAmount: z.number().optional(),
+        maxAmount: z.number().optional(),
+        currency: z.string().optional(),
+        tags: z.array(z.string()).optional(),
+        search: z.string().optional(),
+        limit: z.number().optional(),
+        offset: z.number().optional(),
+      }),
+      execute: async (filters) => {
+        try {
+          const householdId =
+            (task.context?.householdId as string) ?? "default";
+          const userId = task.context?.userId;
+
+          const events = await this.eventService.getEvents(
+            {
+              householdId,
+              userId,
+              type: filters.type,
+              status: filters.status,
+              priority: filters.priority,
+              startDate: filters.startDate
+                ? new Date(filters.startDate)
+                : undefined,
+              endDate: filters.endDate ? new Date(filters.endDate) : undefined,
+              minAmount: filters.minAmount,
+              maxAmount: filters.maxAmount,
+              currency: filters.currency,
+              tags: filters.tags,
+              search: filters.search,
+            },
+            {
+              limit: filters.limit ?? 10,
+              offset: filters.offset ?? 0,
+            },
+          );
+
+          return {
+            success: true,
+            events: events.map((event) => ({
+              id: event.id,
+              type: event.type,
+              title: event.title,
+              notes: event.notes,
+              amount: event.amount,
+              currency: event.currency,
+              occurredAt: event.occurredAt,
+              priority: event.priority,
+              status: event.status,
+              tags: event.tags.map((tag) => tag.name),
+              properties: event.properties.reduce(
+                (acc, prop) => {
+                  acc[prop.key] = prop.value;
+                  return acc;
+                },
+                {} as Record<string, unknown>,
+              ),
+            })),
+            total: events.length,
+          };
+        } catch (error) {
+          console.error("Error getting events:", error);
+          return {
+            success: false,
+            error: "Не удалось получить события",
+          };
+        }
+      },
+    });
+  }
+
+  /**
+   * Создает инструмент для получения статистики событий
+   */
+  private getEventStatsTool(task: AgentTask) {
+    return tool({
+      description: "Получить статистику событий",
+      inputSchema: z.object({
+        startDate: z.string().optional(), // ISO date string
+        endDate: z.string().optional(), // ISO date string
+        type: z.string().optional(),
+      }),
+      execute: async (filters) => {
+        try {
+          const householdId = task.context?.householdId || "default";
+
+          const stats = await this.eventService.getEventStats(householdId, {
+            startDate: filters.startDate
+              ? new Date(filters.startDate)
+              : undefined,
+            endDate: filters.endDate ? new Date(filters.endDate) : undefined,
+            type: filters.type ?? undefined,
+          });
+
+          return {
+            success: true,
+            stats,
+          };
+        } catch (error) {
+          console.error("Error getting event stats:", error);
+          return {
+            success: false,
+            error: "Не удалось получить статистику событий",
+          };
+        }
+      },
+    });
+  }
+
+  /**
    * Создает инструмент для извлечения финансовой информации
    */
   private getFinancialExtractionTool(task: AgentTask) {
@@ -346,6 +528,9 @@ export class EventProcessorAgent extends AbstractAgent {
         tools: {
           categorizeEvent: this.getCategorizationTool(task),
           extractFinancial: this.getFinancialExtractionTool(task),
+          saveEvent: this.getSaveEventTool(task),
+          getEvents: this.getGetEventsTool(task),
+          getEventStats: this.getEventStatsTool(task),
         },
         experimental_telemetry: {
           isEnabled: true,
@@ -400,14 +585,55 @@ export class EventProcessorAgent extends AbstractAgent {
         },
       };
 
+      // Автоматически сохраняем событие в базу данных
+      let savedEvent = null;
+      try {
+        const householdId = task.context?.householdId ?? "default";
+        const userId = task.context?.userId;
+
+        savedEvent = await this.eventService.createEvent({
+          householdId,
+          userId,
+          source: "telegram", // или другой источник из контекста
+          type: structuredEvent.data.type as
+            | "expense"
+            | "task"
+            | "maintenance"
+            | "other",
+          title: structuredEvent.data.description,
+          notes: structuredEvent.data.description,
+          amount: structuredEvent.data.amount ?? undefined,
+          currency: structuredEvent.data.currency ?? "RUB",
+          occurredAt: structuredEvent.data.date
+            ? new Date(structuredEvent.data.date)
+            : new Date(),
+          priority: "medium",
+          tags: structuredEvent.data.tags ?? undefined,
+          properties: {
+            confidence: structuredEvent.data.confidence,
+            reasoning: structuredEvent.data.reasoning,
+            location: structuredEvent.data.location,
+            category: structuredEvent.data.category,
+          },
+        });
+      } catch (error) {
+        console.warn("Failed to save event to database:", error);
+      }
+
       return this.createSuccessResult(
         {
           parsedEvent: structuredEvent.data,
           advice,
           structuredData: combinedData,
+          savedEvent: savedEvent
+            ? {
+                id: savedEvent.id,
+                message: `Событие сохранено в базу данных с ID: ${savedEvent.id}`,
+              }
+            : null,
         },
         structuredEvent.data.confidence,
-        `Parsed ${structuredEvent.data.type} event with confidence ${structuredEvent.data.confidence}`,
+        `Parsed ${structuredEvent.data.type} event with confidence ${structuredEvent.data.confidence}${savedEvent ? " and saved to database" : ""}`,
       );
     } catch (error) {
       console.error("Error in event processor agent:", error);
