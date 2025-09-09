@@ -17,6 +17,7 @@ import { QualityEvaluatorAgent } from "./quality-evaluator-agent";
 import { RouterAgent } from "./router-agent";
 import { TaskManagerAgent } from "./task-manager-agent";
 import { TaskOrchestratorAgent } from "./task-orchestrator-agent";
+import { conversationManager } from "./conversation-manager";
 import { TelegramFormatterAgent } from "./telegram-formatter-agent";
 
 // Интерфейс для параллельной обработки
@@ -449,7 +450,7 @@ export class AgentManager {
               processingTask,
               telemetry,
             );
-            agentsUsed.push(fallbackAgent.name + " (fallback)");
+            agentsUsed.push(`${fallbackAgent.name} (fallback)`);
           } else {
             throw new Error("Fallback agent not available");
           }
@@ -468,7 +469,7 @@ export class AgentManager {
       }
 
       let finalResponse = "";
-      let qualityScore = processingResult?.confidence ?? 0.7;
+      const qualityScore = processingResult?.confidence ?? 0.7;
 
       // Извлекаем ответ в зависимости от типа агента
       const extracted = this.extractStringResponse(processingResult?.data);
@@ -708,7 +709,7 @@ export class AgentManager {
         hitRate:
           this.performanceMetrics.totalRequests > 0
             ? this.performanceMetrics.cacheHits /
-              this.performanceMetrics.totalRequests
+            this.performanceMetrics.totalRequests
             : 0,
         memoryUsage: `${Math.round(this.resultCache.size * 0.001)} KB`, // Приблизительная оценка
       },
@@ -758,5 +759,121 @@ export class AgentManager {
     }
 
     console.log("⚙️ Параметры производительности обновлены:", config);
+  }
+
+  /**
+   * Обработать сообщение с поддержкой истории разговора
+   * @param message - Текст сообщения пользователя
+   * @param context - Контекст выполнения
+   * @param conversationId - ID существующего разговора (опционально)
+   * @returns Результат оркестрации с ID разговора
+   */
+  async processMessageWithConversation(
+    message: string,
+    context: AgentContext,
+    conversationId?: string
+  ): Promise<OrchestrationResult & { conversationId: string }> {
+    const startTime = Date.now();
+
+    // Создаем или получаем разговор
+    let currentConversationId = conversationId;
+    if (!currentConversationId) {
+      // Создаем новый разговор
+      const userId = (context.userId ?? context.metadata?.userId ?? "unknown");
+      const channel = (context.channel ?? context.metadata?.channel ?? "default");
+      currentConversationId = conversationManager.createConversation(userId, channel);
+    }
+
+    // Добавляем текущее сообщение пользователя в историю
+    const userMessage: MessageHistoryItem = {
+      id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      role: "user",
+      content: message,
+      timestamp: new Date(),
+      metadata: {
+        userId: context.userId ?? context.metadata?.userId,
+        channel: context.channel ?? context.metadata?.channel,
+      },
+    };
+
+    conversationManager.updateConversation(currentConversationId, userMessage);
+
+    // Получаем историю сообщений для агентов
+    const messageHistory = conversationManager.getMessagesForAgent(currentConversationId, 20);
+
+    console.log(`💬 Обрабатываем сообщение с историей (${messageHistory.length} сообщений) для разговора ${currentConversationId}`);
+
+    try {
+      // Обрабатываем сообщение с историей
+      const result = await this.processMessage(message, context, { messageHistory });
+
+      // Добавляем ответ агента в историю
+      if (result.finalResponse) {
+        const agentMessage: MessageHistoryItem = {
+          id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          role: "assistant",
+          content: result.finalResponse,
+          timestamp: new Date(),
+          metadata: {
+            agentsUsed: result.agentsUsed,
+            executionTime: Date.now() - startTime,
+            qualityScore: result.qualityScore,
+          },
+        };
+
+        conversationManager.updateConversation(currentConversationId, agentMessage);
+      }
+
+      // Возвращаем результат с ID разговора
+      return {
+        ...result,
+        conversationId: currentConversationId,
+      };
+    } catch (error) {
+      console.error(`❌ Ошибка при обработке сообщения с историей для разговора ${currentConversationId}:`, error);
+
+      // Добавляем информацию об ошибке в историю
+      const errorMessage: MessageHistoryItem = {
+        id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        role: "system",
+        content: `Ошибка обработки: ${error instanceof Error ? error.message : "Неизвестная ошибка"}`,
+        timestamp: new Date(),
+        metadata: {
+          error: true,
+          executionTime: Date.now() - startTime,
+        },
+      };
+
+      conversationManager.updateConversation(currentConversationId, errorMessage);
+
+      throw error;
+    }
+  }
+
+  /**
+   * Получить историю разговора
+   * @param conversationId - ID разговора
+   * @param maxMessages - Максимальное количество сообщений (по умолчанию 50)
+   * @returns Массив сообщений или null если разговор не найден
+   */
+  getConversationHistory(conversationId: string, maxMessages = 50): MessageHistoryItem[] | null {
+    const conversation = conversationManager.getConversation(conversationId);
+    if (!conversation) {
+      return null;
+    }
+
+    return conversationManager.getMessagesForAgent(conversationId, maxMessages);
+  }
+
+  /**
+   * Очистить историю разговора
+   * @param conversationId - ID разговора для очистки
+   */
+  clearConversationHistory(conversationId: string): void {
+    const conversation = conversationManager.getConversation(conversationId);
+    if (conversation) {
+      conversation.messages = [];
+      console.log(`🧹 Очищена история разговора ${conversationId}`);
+    }
   }
 }
