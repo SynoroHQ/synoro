@@ -74,7 +74,9 @@ export const messages = pgTable(
     content: jsonb("content").$type<Record<string, unknown>>().notNull(),
     model: text("model"),
     status: text("status").default("completed").notNull(),
-    parentId: text("parent_id"), // самоссылка, FK добавляется через миграцию для ссылочной целостности
+    parentId: text("parent_id").references(() => messages.id, {
+      onDelete: "set null",
+    }), // самоссылка для иерархии сообщений
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -91,8 +93,6 @@ export const messages = pgTable(
     ),
   ],
 );
-
-
 
 /**
  * Таблица связей пользователей с внешними провайдерами
@@ -125,5 +125,3 @@ export const identityLinks = pgTable(
     index("identity_link_provider_idx").on(table.provider),
   ],
 );
-
-

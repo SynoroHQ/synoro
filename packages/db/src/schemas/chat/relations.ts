@@ -2,11 +2,7 @@ import { relations } from "drizzle-orm";
 
 import { users } from "../auth/schema";
 import { files } from "../core/files";
-import {
-  conversations,
-  identityLinks,
-  messages,
-} from "./schema";
+import { conversations, identityLinks, messages } from "./schema";
 
 // Relations for conversation
 export const conversationRelations = relations(
@@ -35,10 +31,7 @@ export const messageRelations = relations(messages, ({ one, many }) => ({
   children: many(messages, {
     relationName: "messageThread",
   }),
-
 }));
-
-
 
 // Relations for identityLink
 export const identityLinkRelations = relations(identityLinks, ({ one }) => ({
@@ -48,8 +41,8 @@ export const identityLinkRelations = relations(identityLinks, ({ one }) => ({
   }),
 }));
 
-// Relations for user (from auth schema)
-export const userChatRelations = relations(users, ({ many }) => ({
-  conversations: many(conversations),
-  identityLinks: many(identityLinks),
-}));
+// Relations for user (from auth schema) - merged into main user relations
+// export const userChatRelations = relations(users, ({ many }) => ({
+//   conversations: many(conversations),
+//   identityLinks: many(identityLinks),
+// }));
