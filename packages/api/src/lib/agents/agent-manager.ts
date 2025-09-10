@@ -4,6 +4,7 @@ import { z } from "zod";
 import type { AgentContext } from "./agent-context";
 import type {
   AgentCapability,
+  AgentResult,
   AgentTask,
   AgentTelemetry,
   BaseAgent,
@@ -319,7 +320,7 @@ export class AgentManager {
 
       // 5. Обрабатываем задачу основным агентом с улучшенной обработкой ошибок
       console.log(`⚙️ Обработка с помощью ${targetAgent.name}...`);
-      let processingResult: any;
+      let processingResult: AgentResult<unknown>;
 
       try {
         processingResult = (await Promise.race([

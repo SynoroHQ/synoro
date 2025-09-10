@@ -1,8 +1,20 @@
-import { and, desc, eq, gte, lte } from "drizzle-orm";
+import { and, count, desc, eq, gte, lte, sql } from "drizzle-orm";
+import { z } from "zod";
 
-import type { EventLog } from "@synoro/db/schema";
 import { db } from "@synoro/db/client";
 import { eventLogs } from "@synoro/db/schema";
+
+// Определяем тип на основе схемы eventLogs
+export type EventLog = typeof eventLogs.$inferSelect;
+
+export const createEventLogDataSchema = z.object({
+  source: z.string().min(1, "Source is required and cannot be empty"),
+  chatId: z.string().min(1, "ChatId is required and cannot be empty"),
+  type: z.enum(["text", "audio", "image", "video", "file"]),
+  text: z.string().min(1).max(10000).optional(),
+  originalText: z.string().min(1).max(10000).optional(),
+  meta: z.record(z.string(), z.unknown()).nullable().optional(),
+});
 
 export interface CreateEventLogData {
   source: string;
@@ -30,40 +42,46 @@ export interface EventLogFilters {
   endDate?: Date;
 }
 
-export interface EventLogWithDetails extends EventLog {
-  id: string;
-  // Дополнительные поля при необходимости
-}
-
 export class EventLogService {
   /**
    * Создать новый лог события
    */
   async createEventLog(data: CreateEventLogData): Promise<EventLog> {
-    const [eventLog] = await db
-      .insert(eventLogs)
-      .values({
-        source: data.source,
-        chatId: data.chatId,
-        type: data.type,
-        text: data.text,
-        originalText: data.originalText,
-        meta: data.meta,
-        status: "pending",
-      })
-      .returning();
+    try {
+      const parsedData = createEventLogDataSchema.parse(data);
 
-    if (!eventLog) {
-      throw new Error("Не удалось создать лог события");
+      const [eventLog] = await db
+        .insert(eventLogs)
+        .values({
+          source: parsedData.source,
+          chatId: parsedData.chatId,
+          type: parsedData.type,
+          text: parsedData.text,
+          originalText: parsedData.originalText,
+          meta: parsedData.meta,
+          status: "pending",
+        })
+        .returning();
+
+      if (!eventLog) {
+        throw new Error("Не удалось создать лог события");
+      }
+
+      return eventLog;
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        throw new Error(
+          `Validation error: ${error.issues.map((e) => `${e.path.join(".")}: ${e.message}`).join(", ")}`,
+        );
+      }
+      throw error;
     }
-
-    return eventLog;
   }
 
   /**
    * Получить лог события по ID
    */
-  async getEventLogById(id: string): Promise<EventLogWithDetails | null> {
+  async getEventLogById(id: string): Promise<EventLog | null> {
     const [eventLog] = await db
       .select()
       .from(eventLogs)
@@ -84,7 +102,7 @@ export class EventLogService {
       orderBy?: "createdAt" | "processedAt";
       orderDirection?: "asc" | "desc";
     } = {},
-  ): Promise<EventLogWithDetails[]> {
+  ): Promise<EventLog[]> {
     const {
       limit = 50,
       offset = 0,
@@ -138,14 +156,43 @@ export class EventLogService {
    */
   async updateEventLogStatus(
     id: string,
-    status: "pending" | "processing" | "processed" | "failed",
-    processedAt?: Date,
+    newStatus: "pending" | "processing" | "processed" | "failed",
   ): Promise<EventLog | null> {
+    // Сначала загружаем текущий лог события
+    const currentEventLog = await this.getEventLogById(id);
+    if (!currentEventLog) {
+      return null;
+    }
+
+    const currentStatus = currentEventLog.status;
+
+    // Определяем финальные статусы
+    const finalStatuses = ["processed", "failed"] as const;
+    const isNewStatusFinal = finalStatuses.includes(newStatus as any);
+
+    // Валидация переходов статусов
+    const allowedTransitions: Record<string, string[]> = {
+      pending: ["processing", "processed", "failed"],
+      processing: ["processed", "failed"],
+      processed: [], // Нельзя переходить из processed
+      failed: [], // Нельзя переходить из failed
+    };
+
+    if (!allowedTransitions[currentStatus]?.includes(newStatus)) {
+      throw new Error(
+        `Invalid status transition from '${currentStatus}' to '${newStatus}'. ` +
+          `Allowed transitions from '${currentStatus}': ${allowedTransitions[currentStatus]?.join(", ") || "none"}`,
+      );
+    }
+
+    // Обновляем статус и processedAt
     const [eventLog] = await db
       .update(eventLogs)
       .set({
-        status,
-        processedAt: processedAt || new Date(),
+        status: newStatus,
+        processedAt: isNewStatusFinal
+          ? currentEventLog.processedAt || new Date()
+          : null,
       })
       .where(eq(eventLogs.id, id))
       .returning();
@@ -161,12 +208,16 @@ export class EventLogService {
     text: string,
     originalText?: string,
   ): Promise<EventLog | null> {
+    // Строим payload условно, чтобы undefined не перезаписывал существующее значение
+    const updatePayload: { text: string; originalText?: string } = { text };
+
+    if (originalText !== undefined) {
+      updatePayload.originalText = originalText;
+    }
+
     const [eventLog] = await db
       .update(eventLogs)
-      .set({
-        text,
-        originalText,
-      })
+      .set(updatePayload)
       .where(eq(eventLogs.id, id))
       .returning();
 
@@ -175,18 +226,49 @@ export class EventLogService {
 
   /**
    * Обновить метаданные лога события
+   * Атомарно сливает новые метаданные с существующими для предотвращения потери данных
    */
   async updateEventLogMeta(
     id: string,
     meta: Record<string, unknown>,
   ): Promise<EventLog | null> {
-    const [eventLog] = await db
-      .update(eventLogs)
-      .set({ meta })
-      .where(eq(eventLogs.id, id))
-      .returning();
+    try {
+      // Используем SQL JSON merge для атомарного слияния
+      const [eventLog] = await db
+        .update(eventLogs)
+        .set({
+          meta: sql`${eventLogs.meta} || ${sql.raw(`'${JSON.stringify(meta)}'::jsonb`)}`,
+        })
+        .where(eq(eventLogs.id, id))
+        .returning();
 
-    return eventLog || null;
+      return eventLog || null;
+    } catch (error) {
+      // Если SQL merge не поддерживается, используем двухэтапный подход
+      console.warn(
+        "SQL JSON merge not supported, falling back to client-side merge:",
+        error,
+      );
+
+      // Этап 1: Получаем текущие метаданные
+      const currentEventLog = await this.getEventLogById(id);
+      if (!currentEventLog) {
+        return null;
+      }
+
+      // Этап 2: Сливаем метаданные на клиенте
+      const currentMeta = currentEventLog.meta || {};
+      const mergedMeta = { ...currentMeta, ...meta };
+
+      // Этап 3: Обновляем с объединенными метаданными
+      const [eventLog] = await db
+        .update(eventLogs)
+        .set({ meta: mergedMeta })
+        .where(eq(eventLogs.id, id))
+        .returning();
+
+      return eventLog || null;
+    }
   }
 
   /**
@@ -195,11 +277,12 @@ export class EventLogService {
   async deleteEventLog(id: string): Promise<boolean> {
     const result = await db.delete(eventLogs).where(eq(eventLogs.id, id));
 
-    return result.rowCount > 0;
+    return (result.rowCount ?? 0) > 0;
   }
 
   /**
    * Получить статистику логов событий
+   * Использует SQL агрегатные запросы для эффективного подсчета статистики
    */
   async getEventLogStats(filters: EventLogFilters = {}): Promise<{
     total: number;
@@ -233,24 +316,65 @@ export class EventLogService {
       conditions.push(lte(eventLogs.createdAt, filters.endDate));
     }
 
-    const allLogs = await db
-      .select()
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
+    // Запрос 1: Общий счетчик
+    const [totalResult] = await db
+      .select({ total: count() })
       .from(eventLogs)
-      .where(conditions.length > 0 ? and(...conditions) : undefined);
+      .where(whereClause);
 
-    const stats = {
-      total: allLogs.length,
-      byStatus: {} as Record<string, number>,
-      byType: {} as Record<string, number>,
-      bySource: {} as Record<string, number>,
+    // Запрос 2: Группировка по статусу
+    const statusResults = await db
+      .select({
+        status: eventLogs.status,
+        count: count(),
+      })
+      .from(eventLogs)
+      .where(whereClause)
+      .groupBy(eventLogs.status);
+
+    // Запрос 3: Группировка по типу
+    const typeResults = await db
+      .select({
+        type: eventLogs.type,
+        count: count(),
+      })
+      .from(eventLogs)
+      .where(whereClause)
+      .groupBy(eventLogs.type);
+
+    // Запрос 4: Группировка по источнику
+    const sourceResults = await db
+      .select({
+        source: eventLogs.source,
+        count: count(),
+      })
+      .from(eventLogs)
+      .where(whereClause)
+      .groupBy(eventLogs.source);
+
+    // Преобразуем результаты в нужный формат
+    const byStatus: Record<string, number> = {};
+    statusResults.forEach((row) => {
+      byStatus[row.status] = row.count;
+    });
+
+    const byType: Record<string, number> = {};
+    typeResults.forEach((row) => {
+      byType[row.type] = row.count;
+    });
+
+    const bySource: Record<string, number> = {};
+    sourceResults.forEach((row) => {
+      bySource[row.source] = row.count;
+    });
+
+    return {
+      total: totalResult?.total ?? 0,
+      byStatus,
+      byType,
+      bySource,
     };
-
-    for (const log of allLogs) {
-      stats.byStatus[log.status] = (stats.byStatus[log.status] || 0) + 1;
-      stats.byType[log.type] = (stats.byType[log.type] || 0) + 1;
-      stats.bySource[log.source] = (stats.bySource[log.source] || 0) + 1;
-    }
-
-    return stats;
   }
 }
