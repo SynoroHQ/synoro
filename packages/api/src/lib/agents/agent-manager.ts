@@ -1,3 +1,6 @@
+import { randomUUID } from "crypto";
+import { z } from "zod";
+
 import type { AgentContext } from "./agent-context";
 import type {
   AgentCapability,
@@ -8,6 +11,7 @@ import type {
   OrchestrationResult,
 } from "./types";
 import { globalAgentRegistry } from "./agent-registry";
+import { conversationManager } from "./conversation-manager";
 import { DataAnalystAgent } from "./data-analyst-agent";
 import { EventProcessorAgent } from "./event-processor-agent";
 import { GeneralAssistantAgent } from "./general-assistant-agent";
@@ -17,7 +21,6 @@ import { QualityEvaluatorAgent } from "./quality-evaluator-agent";
 import { RouterAgent } from "./router-agent";
 import { TaskManagerAgent } from "./task-manager-agent";
 import { TaskOrchestratorAgent } from "./task-orchestrator-agent";
-import { conversationManager } from "./conversation-manager";
 import { TelegramFormatterAgent } from "./telegram-formatter-agent";
 
 // Интерфейс для параллельной обработки
@@ -709,7 +712,7 @@ export class AgentManager {
         hitRate:
           this.performanceMetrics.totalRequests > 0
             ? this.performanceMetrics.cacheHits /
-            this.performanceMetrics.totalRequests
+              this.performanceMetrics.totalRequests
             : 0,
         memoryUsage: `${Math.round(this.resultCache.size * 0.001)} KB`, // Приблизительная оценка
       },
@@ -771,46 +774,84 @@ export class AgentManager {
   async processMessageWithConversation(
     message: string,
     context: AgentContext,
-    conversationId?: string
+    conversationId?: string,
   ): Promise<OrchestrationResult & { conversationId: string }> {
+    // Схемы валидации
+    const MessageSchema = z.string().min(1).max(4000);
+    const AgentContextSchema = z.object({
+      userId: z.string().optional(),
+      channel: z.string().optional(),
+      metadata: z.record(z.unknown()).optional(),
+    });
+
+    // Валидация входных данных
+    const validatedMessage = MessageSchema.parse(message);
+    const validatedContext = AgentContextSchema.parse(context);
+
     const startTime = Date.now();
 
     // Создаем или получаем разговор
     let currentConversationId = conversationId;
-    if (!currentConversationId) {
+    if (
+      !currentConversationId ||
+      !conversationManager.getConversation(currentConversationId)
+    ) {
       // Создаем новый разговор
-      const userId = (context.userId ?? context.metadata?.userId ?? "unknown");
-      const channel = (context.channel ?? context.metadata?.channel ?? "default");
-      currentConversationId = conversationManager.createConversation(userId, channel);
+      const userId =
+        validatedContext.userId ??
+        validatedContext.metadata?.userId ??
+        "unknown";
+      const channel =
+        validatedContext.channel ??
+        validatedContext.metadata?.channel ??
+        "default";
+      currentConversationId = conversationManager.createConversation(
+        userId,
+        channel,
+      );
+      console.log(
+        `🆕 Создан новый разговор ${currentConversationId} для пользователя ${userId}`,
+      );
     }
 
     // Добавляем текущее сообщение пользователя в историю
     const userMessage: MessageHistoryItem = {
-      id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      id: `msg-${Date.now()}-${randomUUID()}`,
       role: "user",
-      content: message,
+      content: validatedMessage,
       timestamp: new Date(),
       metadata: {
-        userId: context.userId ?? context.metadata?.userId,
-        channel: context.channel ?? context.metadata?.channel,
+        userId: validatedContext.userId ?? validatedContext.metadata?.userId,
+        channel: validatedContext.channel ?? validatedContext.metadata?.channel,
       },
     };
 
     conversationManager.updateConversation(currentConversationId, userMessage);
 
     // Получаем историю сообщений для агентов
-    const messageHistory = conversationManager.getMessagesForAgent(currentConversationId, 20);
+    const messageHistory = conversationManager.getMessagesForAgent(
+      currentConversationId,
+      20,
+    );
 
-    console.log(`💬 Обрабатываем сообщение с историей (${messageHistory.length} сообщений) для разговора ${currentConversationId}`);
+    console.log(
+      `💬 Обрабатываем сообщение с историей (${messageHistory.length} сообщений) для разговора ${currentConversationId}`,
+    );
 
     try {
       // Обрабатываем сообщение с историей
-      const result = await this.processMessage(message, context, { messageHistory });
+      const result = await this.processMessage(
+        validatedMessage,
+        validatedContext,
+        {
+          messageHistory,
+        },
+      );
 
       // Добавляем ответ агента в историю
       if (result.finalResponse) {
         const agentMessage: MessageHistoryItem = {
-          id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          id: `msg-${Date.now()}-${randomUUID()}`,
           role: "assistant",
           content: result.finalResponse,
           timestamp: new Date(),
@@ -821,7 +862,10 @@ export class AgentManager {
           },
         };
 
-        conversationManager.updateConversation(currentConversationId, agentMessage);
+        conversationManager.updateConversation(
+          currentConversationId,
+          agentMessage,
+        );
       }
 
       // Возвращаем результат с ID разговора
@@ -830,11 +874,14 @@ export class AgentManager {
         conversationId: currentConversationId,
       };
     } catch (error) {
-      console.error(`❌ Ошибка при обработке сообщения с историей для разговора ${currentConversationId}:`, error);
+      console.error(
+        `❌ Ошибка при обработке сообщения с историей для разговора ${currentConversationId}:`,
+        error,
+      );
 
       // Добавляем информацию об ошибке в историю
       const errorMessage: MessageHistoryItem = {
-        id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        id: `msg-${Date.now()}-${randomUUID()}`,
         role: "system",
         content: `Ошибка обработки: ${error instanceof Error ? error.message : "Неизвестная ошибка"}`,
         timestamp: new Date(),
@@ -844,7 +891,10 @@ export class AgentManager {
         },
       };
 
-      conversationManager.updateConversation(currentConversationId, errorMessage);
+      conversationManager.updateConversation(
+        currentConversationId,
+        errorMessage,
+      );
 
       throw error;
     }
@@ -856,7 +906,10 @@ export class AgentManager {
    * @param maxMessages - Максимальное количество сообщений (по умолчанию 50)
    * @returns Массив сообщений или null если разговор не найден
    */
-  getConversationHistory(conversationId: string, maxMessages = 50): MessageHistoryItem[] | null {
+  getConversationHistory(
+    conversationId: string,
+    maxMessages = 50,
+  ): MessageHistoryItem[] | null {
     const conversation = conversationManager.getConversation(conversationId);
     if (!conversation) {
       return null;
@@ -870,10 +923,14 @@ export class AgentManager {
    * @param conversationId - ID разговора для очистки
    */
   clearConversationHistory(conversationId: string): void {
-    const conversation = conversationManager.getConversation(conversationId);
-    if (conversation) {
-      conversation.messages = [];
-      console.log(`🧹 Очищена история разговора ${conversationId}`);
-    }
+    conversationManager.clearConversation(conversationId);
+  }
+
+  /**
+   * Удалить разговор полностью
+   * @param conversationId - ID разговора для удаления
+   */
+  deleteConversation(conversationId: string): void {
+    conversationManager.deleteConversation(conversationId);
   }
 }
