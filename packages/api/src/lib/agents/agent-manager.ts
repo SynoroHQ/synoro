@@ -1,3 +1,6 @@
+import { randomUUID } from "crypto";
+import { z } from "zod";
+
 import type { AgentContext } from "./agent-context";
 import type {
   AgentCapability,
@@ -8,6 +11,7 @@ import type {
   OrchestrationResult,
 } from "./types";
 import { globalAgentRegistry } from "./agent-registry";
+import { conversationManager } from "./conversation-manager";
 import { DataAnalystAgent } from "./data-analyst-agent";
 import { EventProcessorAgent } from "./event-processor-agent";
 import { GeneralAssistantAgent } from "./general-assistant-agent";
@@ -449,7 +453,7 @@ export class AgentManager {
               processingTask,
               telemetry,
             );
-            agentsUsed.push(fallbackAgent.name + " (fallback)");
+            agentsUsed.push(`${fallbackAgent.name} (fallback)`);
           } else {
             throw new Error("Fallback agent not available");
           }
@@ -468,7 +472,7 @@ export class AgentManager {
       }
 
       let finalResponse = "";
-      let qualityScore = processingResult?.confidence ?? 0.7;
+      const qualityScore = processingResult?.confidence ?? 0.7;
 
       // Извлекаем ответ в зависимости от типа агента
       const extracted = this.extractStringResponse(processingResult?.data);
@@ -758,5 +762,175 @@ export class AgentManager {
     }
 
     console.log("⚙️ Параметры производительности обновлены:", config);
+  }
+
+  /**
+   * Обработать сообщение с поддержкой истории разговора
+   * @param message - Текст сообщения пользователя
+   * @param context - Контекст выполнения
+   * @param conversationId - ID существующего разговора (опционально)
+   * @returns Результат оркестрации с ID разговора
+   */
+  async processMessageWithConversation(
+    message: string,
+    context: AgentContext,
+    conversationId?: string,
+  ): Promise<OrchestrationResult & { conversationId: string }> {
+    // Схемы валидации
+    const MessageSchema = z.string().min(1).max(4000);
+    const AgentContextSchema = z.object({
+      userId: z.string().optional(),
+      channel: z.string().optional(),
+      metadata: z.record(z.unknown()).optional(),
+    });
+
+    // Валидация входных данных
+    const validatedMessage = MessageSchema.parse(message);
+    const validatedContext = AgentContextSchema.parse(context);
+
+    const startTime = Date.now();
+
+    // Создаем или получаем разговор
+    let currentConversationId = conversationId;
+    if (
+      !currentConversationId ||
+      !conversationManager.getConversation(currentConversationId)
+    ) {
+      // Создаем новый разговор
+      const userId =
+        validatedContext.userId ??
+        validatedContext.metadata?.userId ??
+        "unknown";
+      const channel =
+        validatedContext.channel ??
+        validatedContext.metadata?.channel ??
+        "default";
+      currentConversationId = conversationManager.createConversation(
+        userId,
+        channel,
+      );
+      console.log(
+        `🆕 Создан новый разговор ${currentConversationId} для пользователя ${userId}`,
+      );
+    }
+
+    // Добавляем текущее сообщение пользователя в историю
+    const userMessage: MessageHistoryItem = {
+      id: `msg-${Date.now()}-${randomUUID()}`,
+      role: "user",
+      content: validatedMessage,
+      timestamp: new Date(),
+      metadata: {
+        userId: validatedContext.userId ?? validatedContext.metadata?.userId,
+        channel: validatedContext.channel ?? validatedContext.metadata?.channel,
+      },
+    };
+
+    conversationManager.updateConversation(currentConversationId, userMessage);
+
+    // Получаем историю сообщений для агентов
+    const messageHistory = conversationManager.getMessagesForAgent(
+      currentConversationId,
+      20,
+    );
+
+    console.log(
+      `💬 Обрабатываем сообщение с историей (${messageHistory.length} сообщений) для разговора ${currentConversationId}`,
+    );
+
+    try {
+      // Обрабатываем сообщение с историей
+      const result = await this.processMessage(
+        validatedMessage,
+        validatedContext,
+        {
+          messageHistory,
+        },
+      );
+
+      // Добавляем ответ агента в историю
+      if (result.finalResponse) {
+        const agentMessage: MessageHistoryItem = {
+          id: `msg-${Date.now()}-${randomUUID()}`,
+          role: "assistant",
+          content: result.finalResponse,
+          timestamp: new Date(),
+          metadata: {
+            agentsUsed: result.agentsUsed,
+            executionTime: Date.now() - startTime,
+            qualityScore: result.qualityScore,
+          },
+        };
+
+        conversationManager.updateConversation(
+          currentConversationId,
+          agentMessage,
+        );
+      }
+
+      // Возвращаем результат с ID разговора
+      return {
+        ...result,
+        conversationId: currentConversationId,
+      };
+    } catch (error) {
+      console.error(
+        `❌ Ошибка при обработке сообщения с историей для разговора ${currentConversationId}:`,
+        error,
+      );
+
+      // Добавляем информацию об ошибке в историю
+      const errorMessage: MessageHistoryItem = {
+        id: `msg-${Date.now()}-${randomUUID()}`,
+        role: "system",
+        content: `Ошибка обработки: ${error instanceof Error ? error.message : "Неизвестная ошибка"}`,
+        timestamp: new Date(),
+        metadata: {
+          error: true,
+          executionTime: Date.now() - startTime,
+        },
+      };
+
+      conversationManager.updateConversation(
+        currentConversationId,
+        errorMessage,
+      );
+
+      throw error;
+    }
+  }
+
+  /**
+   * Получить историю разговора
+   * @param conversationId - ID разговора
+   * @param maxMessages - Максимальное количество сообщений (по умолчанию 50)
+   * @returns Массив сообщений или null если разговор не найден
+   */
+  getConversationHistory(
+    conversationId: string,
+    maxMessages = 50,
+  ): MessageHistoryItem[] | null {
+    const conversation = conversationManager.getConversation(conversationId);
+    if (!conversation) {
+      return null;
+    }
+
+    return conversationManager.getMessagesForAgent(conversationId, maxMessages);
+  }
+
+  /**
+   * Очистить историю разговора
+   * @param conversationId - ID разговора для очистки
+   */
+  clearConversationHistory(conversationId: string): void {
+    conversationManager.clearConversation(conversationId);
+  }
+
+  /**
+   * Удалить разговор полностью
+   * @param conversationId - ID разговора для удаления
+   */
+  deleteConversation(conversationId: string): void {
+    conversationManager.deleteConversation(conversationId);
   }
 }
