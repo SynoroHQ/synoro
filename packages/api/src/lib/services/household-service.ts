@@ -1,4 +1,5 @@
 import { eq } from "drizzle-orm";
+
 import { db } from "@synoro/db/client";
 import { households } from "@synoro/db/schema";
 
@@ -55,7 +56,7 @@ export class HouseholdService {
    */
   async getOrCreateDefaultHousehold() {
     const existing = await this.getHouseholdById("default");
-    
+
     if (existing) {
       return existing;
     }
@@ -68,8 +69,8 @@ export class HouseholdService {
         timezone: "Europe/Moscow",
         currency: "RUB",
         language: "ru",
-        features: ["events", "reminders"]
-      }
+        features: ["events", "reminders"],
+      },
     });
   }
 
