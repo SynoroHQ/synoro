@@ -201,21 +201,27 @@ export class TaskOrchestratorAgent extends AbstractAgent {
   private async createExecutionPlan(
     task: AgentTask,
   ): Promise<OrchestrationPlan> {
-    const { text } = await generateText({
-      model: this.getModel(),
-      system: await getPrompt(PROMPT_KEYS.TASK_ORCHESTRATOR),
-      prompt:
-        this.createPromptWithHistory(
-          `Создай план выполнения задачи: "${task.input}"
+    // Используем новую систему структурированного контекста
+    const optimizedPrompt = await this.createOptimizedPrompt(
+      `Создай план выполнения задачи: "${task.input}"
 
 Контекст: пользователь ${task.context?.userId || "anonymous"} в канале ${task.context?.channel || "unknown"}
 
 Определи этапы, их последовательность и ответственных агентов.
 
 Верни результат в формате JSON со следующей структурой:`,
-          task,
-          { includeSummary: true },
-        ) +
+      task,
+      {
+        useStructuredContext: true,
+        maxContextLength: 1200, // Больше контекста для оркестратора
+      },
+    );
+
+    const { text } = await generateText({
+      model: this.getModel(),
+      system: await getPrompt(PROMPT_KEYS.TASK_ORCHESTRATOR),
+      prompt:
+        optimizedPrompt +
         `
 {
   "steps": [

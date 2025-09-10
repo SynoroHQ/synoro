@@ -6,6 +6,7 @@ import { z } from "zod";
 
 import { getPrompt, PROMPT_KEYS } from "@synoro/prompts";
 
+import type { StructuredAgentContext } from "./context-manager";
 import type {
   AgentCapability,
   AgentResult,
@@ -13,6 +14,7 @@ import type {
   AgentTelemetry,
   BaseAgent,
 } from "./types";
+import { AgentContextManager } from "./context-manager";
 
 // Инициализация AI провайдеров
 const oai = openai;
@@ -62,9 +64,11 @@ export abstract class AbstractAgent implements BaseAgent {
   abstract capabilities: AgentCapability[];
 
   protected defaultModel: string;
+  protected contextManager: AgentContextManager;
 
   constructor(defaultModel = "gpt-5-mini") {
     this.defaultModel = defaultModel;
+    this.contextManager = new AgentContextManager();
   }
 
   /**
@@ -245,7 +249,7 @@ export abstract class AbstractAgent implements BaseAgent {
   }
 
   /**
-   * Улучшенная генерация ответа с анализом контекста
+   * Улучшенная генерация ответа с оптимизированным контекстом
    */
   protected async generateResponse(
     input: string,
@@ -254,28 +258,44 @@ export abstract class AbstractAgent implements BaseAgent {
     options: {
       useContextAnalysis?: boolean;
       useQualityAssessment?: boolean;
+      useStructuredContext?: boolean;
       maxRetries?: number;
+      maxContextLength?: number;
     } = {},
   ): Promise<string> {
     const {
       useContextAnalysis = true,
       useQualityAssessment = false,
+      useStructuredContext = true,
       maxRetries = 2,
+      maxContextLength = 1000,
     } = options;
 
-    let contextInfo = "";
-    if (useContextAnalysis) {
+    // Используем новую систему структурированного контекста
+    const enhancedSystem = useStructuredContext
+      ? await this.createOptimizedPrompt(system, task, {
+          useStructuredContext: true,
+          maxContextLength,
+        })
+      : await this.createOptimizedPrompt(system, task, {
+          useStructuredContext: false,
+          maxContextLength,
+        });
+
+    // Добавляем дополнительный анализ контекста если нужно
+    let additionalContextInfo = "";
+    if (useContextAnalysis && !useStructuredContext) {
       const analysis = await this.analyzeContext(task);
-      contextInfo = `\n\nАНАЛИЗ КОНТЕКСТА:\n- Намерение: ${analysis.userIntent}\n- Сложность: ${analysis.complexity}\n- Подход: ${analysis.suggestedApproach}\n- Ключевая информация: ${analysis.relevantInfo.join(", ")}`;
+      additionalContextInfo = `\n\nАНАЛИЗ КОНТЕКСТА:\n- Намерение: ${analysis.userIntent}\n- Сложность: ${analysis.complexity}\n- Подход: ${analysis.suggestedApproach}\n- Ключевая информация: ${analysis.relevantInfo.join(", ")}`;
     }
 
-    const enhancedSystem = system + contextInfo;
+    const finalSystem = enhancedSystem + additionalContextInfo;
 
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
         const { text } = await generateText({
           model: this.getModel(),
-          system: enhancedSystem,
+          system: finalSystem,
           prompt: input,
           experimental_telemetry: {
             isEnabled: true,
@@ -393,7 +413,70 @@ export abstract class AbstractAgent implements BaseAgent {
   }
 
   /**
-   * Создает расширенный промпт с учетом истории сообщений
+   * Создает структурированный контекст для агента
+   * @param task - Задача агента
+   * @returns Структурированный контекст
+   */
+  protected async createStructuredContext(
+    task: AgentTask,
+  ): Promise<StructuredAgentContext> {
+    return this.contextManager.createStructuredContext(
+      task,
+      this.name,
+      this.description,
+    );
+  }
+
+  /**
+   * Создает оптимизированный промпт с структурированным контекстом
+   * @param basePrompt - Базовый промпт
+   * @param task - Задача агента
+   * @param options - Опции форматирования
+   * @returns Оптимизированный промпт с контекстом
+   */
+  protected async createOptimizedPrompt(
+    basePrompt: string,
+    task: AgentTask,
+    options: {
+      useStructuredContext?: boolean;
+      maxContextLength?: number;
+      includeFullHistory?: boolean;
+    } = {},
+  ): Promise<string> {
+    const {
+      useStructuredContext = true,
+      maxContextLength = 1000,
+      includeFullHistory = false,
+    } = options;
+
+    if (useStructuredContext) {
+      const structuredContext = await this.createStructuredContext(task);
+
+      if (maxContextLength < 500) {
+        // Для агентов с ограниченным контекстом используем сжатую версию
+        const compressedContext = this.contextManager.createCompressedContext(
+          structuredContext,
+          maxContextLength,
+        );
+        return `${basePrompt}\n\n${compressedContext}`;
+      } else {
+        // Для агентов с большим контекстом используем полную структурированную версию
+        const contextPrompt =
+          this.contextManager.formatContextForPrompt(structuredContext);
+        return `${basePrompt}\n\n${contextPrompt}`;
+      }
+    } else {
+      // Fallback к старому методу для обратной совместимости
+      return this.createPromptWithHistory(basePrompt, task, {
+        includeFullHistory,
+        maxHistoryLength: maxContextLength,
+        includeSummary: true,
+      });
+    }
+  }
+
+  /**
+   * Создает расширенный промпт с учетом истории сообщений (legacy метод)
    * @param basePrompt - Базовый промпт
    * @param task - Задача агента
    * @param options - Опции форматирования
