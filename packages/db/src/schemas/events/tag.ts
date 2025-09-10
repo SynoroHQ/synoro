@@ -26,9 +26,7 @@ export const tags = pgTable(
     name: text("name").notNull(),
     description: text("description"),
     color: text("color"), // для UI цветовой кодировки тегов
-    parentId: text("parent_id").references(() => tags.id, {
-      onDelete: "set null",
-    }), // самоссылка для иерархии тегов
+    parentId: text("parent_id"), // самоссылка для иерархии тегов
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),

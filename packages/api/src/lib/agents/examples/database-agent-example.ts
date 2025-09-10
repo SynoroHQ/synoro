@@ -53,14 +53,11 @@ async function demonstrateDatabaseAgent() {
       console.log("✅ Агент может обработать запрос");
 
       try {
-        const result = await agent.process(
-          {
-            id: "example_task",
-            input: query,
-            context: exampleContext,
-          },
-          exampleContext,
-        );
+        const result = await agent.process({
+          id: "example_task",
+          input: query,
+          context: exampleContext,
+        });
 
         if (result.success) {
           console.log("📊 Результат:");

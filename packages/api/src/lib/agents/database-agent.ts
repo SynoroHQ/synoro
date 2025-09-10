@@ -1,3 +1,10 @@
+import type {
+  EventWithDetails,
+  ExpenseSummary,
+  SearchResult,
+  UserStats,
+} from "@synoro/prompts/tools/database-tools";
+
 import type { AgentContext } from "./agent-context";
 import type { AgentResult, AgentTask, AgentTelemetry } from "./types";
 import { AbstractAgent } from "./base-agent";
@@ -283,33 +290,36 @@ export class DatabaseAgent extends AbstractAgent {
     for (const { tool, result } of results) {
       switch (tool) {
         case "get_user_events":
-          response += this.formatEventsResponse(result as any[], "События");
+          response += this.formatEventsResponse(
+            result as EventWithDetails[],
+            "События",
+          );
           break;
 
         case "get_user_stats":
-          response += this.formatStatsResponse(result as any);
+          response += this.formatStatsResponse(result as UserStats);
           break;
 
         case "get_recent_events":
           response += this.formatEventsResponse(
-            result as any[],
+            result as EventWithDetails[],
             "Недавние события",
           );
           break;
 
         case "get_upcoming_tasks":
           response += this.formatEventsResponse(
-            result as any[],
+            result as EventWithDetails[],
             "Предстоящие задачи",
           );
           break;
 
         case "search_events":
-          response += this.formatSearchResponse(result as any);
+          response += this.formatSearchResponse(result as SearchResult);
           break;
 
         case "get_expense_summary":
-          response += this.formatExpenseResponse(result as any);
+          response += this.formatExpenseResponse(result as ExpenseSummary);
           break;
 
         default:
@@ -323,7 +333,10 @@ export class DatabaseAgent extends AbstractAgent {
   /**
    * Форматирует ответ со списком событий
    */
-  private formatEventsResponse(events: any[], title: string): string {
+  private formatEventsResponse(
+    events: EventWithDetails[],
+    title: string,
+  ): string {
     if (!events || events.length === 0) {
       return `${title}: События не найдены.\n\n`;
     }
@@ -345,8 +358,18 @@ export class DatabaseAgent extends AbstractAgent {
         response += `   - Заметки: ${event.notes}\n`;
       }
 
-      if (event.tags && event.tags.length > 0) {
-        response += `   - Теги: ${event.tags.map((tag: any) => tag.name).join(", ")}\n`;
+      if (event.tags && Array.isArray(event.tags) && event.tags.length > 0) {
+        const tagNames = event.tags
+          .filter(
+            (tag: any) =>
+              tag && typeof tag === "object" && tag.name !== undefined,
+          )
+          .map((tag: any) => String(tag.name || "unknown"))
+          .join(", ");
+
+        if (tagNames) {
+          response += `   - Теги: ${tagNames}\n`;
+        }
       }
 
       response += "\n";
@@ -356,14 +379,39 @@ export class DatabaseAgent extends AbstractAgent {
   }
 
   /**
+   * Безопасно форматирует число с двумя знаками после запятой
+   */
+  private safeFormatNumber(value: unknown, fallback: string = "N/A"): string {
+    if (typeof value === "number" && isFinite(value)) {
+      return value.toFixed(2);
+    }
+    return fallback;
+  }
+
+  /**
    * Форматирует ответ со статистикой
    */
-  private formatStatsResponse(stats: any): string {
+  private formatStatsResponse(stats: UserStats): string {
     let response = "## Статистика\n\n";
 
     response += `- **Всего событий**: ${stats.total}\n`;
-    response += `- **Общая сумма**: ${stats.totalAmount.toFixed(2)} ${stats.currency}\n`;
-    response += `- **Средняя сумма**: ${stats.averageAmount.toFixed(2)} ${stats.currency}\n\n`;
+
+    // Отображаем статистику по валютам
+    if (stats.byCurrency && Object.keys(stats.byCurrency).length > 0) {
+      response += "**По валютам:**\n";
+      Object.entries(stats.byCurrency).forEach(
+        ([currency, data]: [string, any]) => {
+          const totalAmount = this.safeFormatNumber(data?.totalAmount, "0.00");
+          const averageAmount = this.safeFormatNumber(
+            data?.averageAmount,
+            "0.00",
+          );
+          const count = typeof data?.count === "number" ? data.count : "N/A";
+          response += `- ${currency}: ${totalAmount} (среднее: ${averageAmount}, количество: ${count})\n`;
+        },
+      );
+      response += "\n";
+    }
 
     if (stats.byType && Object.keys(stats.byType).length > 0) {
       response += "**По типам:**\n";
@@ -387,7 +435,7 @@ export class DatabaseAgent extends AbstractAgent {
   /**
    * Форматирует ответ поиска
    */
-  private formatSearchResponse(searchResult: any): string {
+  private formatSearchResponse(searchResult: SearchResult): string {
     let response = `## Результаты поиска по запросу "${searchResult.query}"\n\n`;
     response += `Найдено: ${searchResult.total} событий\n\n`;
 
@@ -403,15 +451,21 @@ export class DatabaseAgent extends AbstractAgent {
   /**
    * Форматирует ответ по расходам
    */
-  private formatExpenseResponse(expense: any): string {
+  private formatExpenseResponse(expense: ExpenseSummary): string {
     let response = "## Анализ расходов\n\n";
 
-    response += `- **Общая сумма**: ${expense.totalAmount.toFixed(2)} ${expense.currency}\n\n`;
+    const totalAmount = this.safeFormatNumber(expense?.totalAmount, "0.00");
+    const currency = expense?.currency || "N/A";
+    response += `- **Общая сумма**: ${totalAmount} ${currency}\n\n`;
 
     if (expense.topCategories && expense.topCategories.length > 0) {
       response += "**Топ категории:**\n";
       expense.topCategories.forEach((category: any, index: number) => {
-        response += `${index + 1}. ${category.category}: ${category.amount.toFixed(2)} ${expense.currency} (${category.count} операций)\n`;
+        const amount = this.safeFormatNumber(category?.amount, "0.00");
+        const currency = expense?.currency || "N/A";
+        const count =
+          typeof category?.count === "number" ? category.count : "N/A";
+        response += `${index + 1}. ${category?.category || "N/A"}: ${amount} ${currency} (${count} операций)\n`;
       });
       response += "\n";
     }
