@@ -13,7 +13,7 @@ export async function createPromptInCloud(
   try {
     return await langfuse.prompt.create({
       name: def.name,
-      type: def.type === "chat" ? undefined : "text",
+      type: def.type === "chat" ? "chat" : "text",
       prompt: def.prompt,
       labels: def.labels,
       config: createModelConfig(model, 0.4),

@@ -8,7 +8,7 @@ export type PromptMessage = {
 export type PromptDefinition = {
   key: string; // unique registry key, e.g. "assistant"
   name: string; // cloud-friendly name, e.g. "assistant"
-  type: "text" | string;
+  type: "text" | "chat";
   prompt: string;
   labels?: string[];
   // optional defaults for publishing

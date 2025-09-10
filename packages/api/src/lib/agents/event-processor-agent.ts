@@ -193,6 +193,43 @@ export class EventProcessorAgent extends AbstractAgent {
   }
 
   /**
+   * Получает или создает домашнее хозяйство по умолчанию
+   * @param task - задача агента
+   * @returns ID домашнего хозяйства или null при ошибке
+   */
+  private async ensureHousehold(task: AgentTask): Promise<string | null> {
+    // Читаем householdId из контекста задачи
+    let householdId: string = (task.context?.householdId as string) || "";
+
+    if (!householdId) {
+      // Если не указан, создаем домашнее хозяйство по умолчанию
+      const defaultHousehold =
+        await this.householdService.getOrCreateDefaultHousehold();
+      if (!defaultHousehold) {
+        return null;
+      }
+      return defaultHousehold.id;
+    } else {
+      // Если указан, проверяем его существование
+      const householdExists =
+        await this.householdService.householdExists(householdId);
+      if (!householdExists) {
+        console.warn(
+          `Household with ID ${householdId} not found, using default household`,
+        );
+        // Fallback к созданию домашнего хозяйства по умолчанию
+        const defaultHousehold =
+          await this.householdService.getOrCreateDefaultHousehold();
+        if (!defaultHousehold) {
+          return null;
+        }
+        return defaultHousehold.id;
+      }
+      return householdId;
+    }
+  }
+
+  /**
    * Создает инструмент для категоризации событий
    */
   private getCategorizationTool(task: AgentTask) {
@@ -304,32 +341,9 @@ export class EventProcessorAgent extends AbstractAgent {
       }),
       execute: async (eventData) => {
         try {
-          // Получаем или создаем household по умолчанию, если не указан
-          let householdId: string = (task.context?.householdId as string) || "";
+          const householdId = await this.ensureHousehold(task);
           if (!householdId) {
-            const defaultHousehold =
-              await this.householdService.getOrCreateDefaultHousehold();
-            if (!defaultHousehold) {
-              return this.createErrorResult("Failed to get default household");
-            }
-            householdId = defaultHousehold.id;
-          } else {
-            // Проверяем существование указанного household
-            const householdExists =
-              await this.householdService.householdExists(householdId);
-            if (!householdExists) {
-              console.warn(
-                `Household with ID ${householdId} not found, using default household`,
-              );
-              const defaultHousehold =
-                await this.householdService.getOrCreateDefaultHousehold();
-              if (!defaultHousehold) {
-                return this.createErrorResult(
-                  "Failed to get default household",
-                );
-              }
-              householdId = defaultHousehold.id;
-            }
+            return this.createErrorResult("Failed to get default household");
           }
           const userId = task.context?.userId;
 
@@ -388,32 +402,9 @@ export class EventProcessorAgent extends AbstractAgent {
       }),
       execute: async (filters) => {
         try {
-          // Получаем или создаем household по умолчанию, если не указан
-          let householdId: string = (task.context?.householdId as string) || "";
+          const householdId = await this.ensureHousehold(task);
           if (!householdId) {
-            const defaultHousehold =
-              await this.householdService.getOrCreateDefaultHousehold();
-            if (!defaultHousehold) {
-              return this.createErrorResult("Failed to get default household");
-            }
-            householdId = defaultHousehold.id;
-          } else {
-            // Проверяем существование указанного household
-            const householdExists =
-              await this.householdService.householdExists(householdId);
-            if (!householdExists) {
-              console.warn(
-                `Household with ID ${householdId} not found, using default household`,
-              );
-              const defaultHousehold =
-                await this.householdService.getOrCreateDefaultHousehold();
-              if (!defaultHousehold) {
-                return this.createErrorResult(
-                  "Failed to get default household",
-                );
-              }
-              householdId = defaultHousehold.id;
-            }
+            return this.createErrorResult("Failed to get default household");
           }
           const userId = task.context?.userId;
 
@@ -487,32 +478,9 @@ export class EventProcessorAgent extends AbstractAgent {
       }),
       execute: async (filters) => {
         try {
-          // Получаем или создаем household по умолчанию, если не указан
-          let householdId: string = (task.context?.householdId as string) || "";
+          const householdId = await this.ensureHousehold(task);
           if (!householdId) {
-            const defaultHousehold =
-              await this.householdService.getOrCreateDefaultHousehold();
-            if (!defaultHousehold) {
-              return this.createErrorResult("Failed to get default household");
-            }
-            householdId = defaultHousehold.id;
-          } else {
-            // Проверяем существование указанного household
-            const householdExists =
-              await this.householdService.householdExists(householdId);
-            if (!householdExists) {
-              console.warn(
-                `Household with ID ${householdId} not found, using default household`,
-              );
-              const defaultHousehold =
-                await this.householdService.getOrCreateDefaultHousehold();
-              if (!defaultHousehold) {
-                return this.createErrorResult(
-                  "Failed to get default household",
-                );
-              }
-              householdId = defaultHousehold.id;
-            }
+            return this.createErrorResult("Failed to get default household");
           }
 
           const stats = await this.eventService.getEventStats(householdId, {
@@ -866,30 +834,9 @@ export class EventProcessorAgent extends AbstractAgent {
       // 3. Автоматически сохраняем событие в базу данных
       let savedEvent = null;
       try {
-        // Получаем или создаем household по умолчанию, если не указан
-        let householdId: string = (task.context?.householdId as string) || "";
+        const householdId = await this.ensureHousehold(task);
         if (!householdId) {
-          const defaultHousehold =
-            await this.householdService.getOrCreateDefaultHousehold();
-          if (!defaultHousehold) {
-            return this.createErrorResult("Failed to get default household");
-          }
-          householdId = defaultHousehold.id;
-        } else {
-          // Проверяем существование указанного household
-          const householdExists =
-            await this.householdService.householdExists(householdId);
-          if (!householdExists) {
-            console.warn(
-              `Household with ID ${householdId} not found, using default household`,
-            );
-            const defaultHousehold =
-              await this.householdService.getOrCreateDefaultHousehold();
-            if (!defaultHousehold) {
-              return this.createErrorResult("Failed to get default household");
-            }
-            householdId = defaultHousehold.id;
-          }
+          return this.createErrorResult("Failed to get default household");
         }
         const userId = task.context?.userId;
 
