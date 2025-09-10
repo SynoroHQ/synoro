@@ -8,8 +8,8 @@ export type PromptMessage = {
 export type PromptDefinition = {
   key: string; // unique registry key, e.g. "assistant"
   name: string; // cloud-friendly name, e.g. "assistant"
-  type: "text" | "chat" | string;
-  prompt: string | PromptMessage[];
+  type: "text" | string;
+  prompt: string;
   labels?: string[];
   // optional defaults for publishing
   defaultModel?: AIModel;
@@ -22,7 +22,7 @@ export function getPrompt(def: PromptDefinition): string {
     return def.prompt;
   }
   // Для массива сообщений возвращаем содержимое первого сообщения
-  return def.prompt[0]?.content ?? "";
+  return def.prompt[0] ?? "";
 }
 
 export function compilePrompt(
@@ -51,5 +51,5 @@ export function getPromptSafeFromRegistry(
   if (typeof def.prompt === "string") {
     return def.prompt;
   }
-  return def.prompt[0]?.content ?? "";
+  return def.prompt[0] ?? "";
 }

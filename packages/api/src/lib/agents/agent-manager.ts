@@ -169,6 +169,10 @@ export class AgentManager {
   private extractStringResponse(data: unknown): string | null {
     if (typeof data === "string") return data;
     if (this.isRecord(data)) {
+      // Для Event Processor Agent проверяем userResponse
+      const userResponse = data.userResponse;
+      if (typeof userResponse === "string") return userResponse;
+
       const maybeResponse = data.response;
       if (typeof maybeResponse === "string") return maybeResponse;
 

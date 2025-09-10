@@ -6,6 +6,7 @@ import { getPrompt, PROMPT_KEYS } from "@synoro/prompts";
 import type { AgentCapability, AgentResult, AgentTask } from "./types";
 import { EventLogService } from "../services/event-log-service";
 import { EventService } from "../services/event-service";
+import { HouseholdService } from "../services/household-service";
 import { parseAIJsonResponseWithSchema } from "../utils/ai-response-parser";
 import { AbstractAgent } from "./base-agent";
 import {
@@ -59,11 +60,13 @@ export class EventProcessorAgent extends AbstractAgent {
 
   private eventService: EventService;
   private eventLogService: EventLogService;
+  private householdService: HouseholdService;
 
   constructor() {
     super("gpt-5-nano");
     this.eventService = new EventService();
     this.eventLogService = new EventLogService();
+    this.householdService = new HouseholdService();
   }
 
   async canHandle(task: AgentTask): Promise<boolean> {
@@ -280,9 +283,25 @@ export class EventProcessorAgent extends AbstractAgent {
       }),
       execute: async (eventData) => {
         try {
-          // Получаем householdId из контекста или используем дефолтный
-          const householdId =
-            (task.context?.householdId as string) ?? "default";
+          // Получаем или создаем household по умолчанию, если не указан
+          let householdId: string = (task.context?.householdId as string) || "";
+          if (!householdId) {
+            const defaultHousehold =
+              await this.householdService.getOrCreateDefaultHousehold();
+            householdId = defaultHousehold.id;
+          } else {
+            // Проверяем существование указанного household
+            const householdExists =
+              await this.householdService.householdExists(householdId);
+            if (!householdExists) {
+              console.warn(
+                `Household with ID ${householdId} not found, using default household`,
+              );
+              const defaultHousehold =
+                await this.householdService.getOrCreateDefaultHousehold();
+              householdId = defaultHousehold.id;
+            }
+          }
           const userId = task.context?.userId;
 
           const event = await this.eventService.createEvent({
@@ -340,8 +359,25 @@ export class EventProcessorAgent extends AbstractAgent {
       }),
       execute: async (filters) => {
         try {
-          const householdId =
-            (task.context?.householdId as string) ?? "default";
+          // Получаем или создаем household по умолчанию, если не указан
+          let householdId: string = (task.context?.householdId as string) || "";
+          if (!householdId) {
+            const defaultHousehold =
+              await this.householdService.getOrCreateDefaultHousehold();
+            householdId = defaultHousehold.id;
+          } else {
+            // Проверяем существование указанного household
+            const householdExists =
+              await this.householdService.householdExists(householdId);
+            if (!householdExists) {
+              console.warn(
+                `Household with ID ${householdId} not found, using default household`,
+              );
+              const defaultHousehold =
+                await this.householdService.getOrCreateDefaultHousehold();
+              householdId = defaultHousehold.id;
+            }
+          }
           const userId = task.context?.userId;
 
           const events = await this.eventService.getEvents(
@@ -414,7 +450,25 @@ export class EventProcessorAgent extends AbstractAgent {
       }),
       execute: async (filters) => {
         try {
-          const householdId = String(task.context?.householdId ?? "default");
+          // Получаем или создаем household по умолчанию, если не указан
+          let householdId: string = (task.context?.householdId as string) || "";
+          if (!householdId) {
+            const defaultHousehold =
+              await this.householdService.getOrCreateDefaultHousehold();
+            householdId = defaultHousehold.id;
+          } else {
+            // Проверяем существование указанного household
+            const householdExists =
+              await this.householdService.householdExists(householdId);
+            if (!householdExists) {
+              console.warn(
+                `Household with ID ${householdId} not found, using default household`,
+              );
+              const defaultHousehold =
+                await this.householdService.getOrCreateDefaultHousehold();
+              householdId = defaultHousehold.id;
+            }
+          }
 
           const stats = await this.eventService.getEventStats(householdId, {
             startDate: filters.startDate
@@ -636,6 +690,47 @@ export class EventProcessorAgent extends AbstractAgent {
         }
       }
 
+      // Генерируем пользовательский ответ на основе структурированных данных
+      let userResponse = "";
+      try {
+        const { text: userResponseText } = await generateText({
+          model: this.getModel(),
+          system: await getPrompt(PROMPT_KEYS.EVENT_PROCESSOR),
+          prompt: `Создай пользовательский ответ для события на основе этих данных:
+          
+Тип: ${structuredEvent.data.type}
+Описание: ${structuredEvent.data.description}
+Сумма: ${structuredEvent.data.amount || "не указана"}
+Валюта: ${structuredEvent.data.currency || "RUB"}
+Категория: ${structuredEvent.data.category || "не указана"}
+Нужен совет: ${structuredEvent.data.needsAdvice ? "да" : "нет"}
+
+Совет: ${advice || "нет"}
+
+Создай готовый текст для пользователя в формате:
+- Для покупок: "Записал покупку [товар] за [сумма] [валюта]"
+- Для задач: "Записал задачу: [описание]"
+- Для встреч: "Записал встречу: [описание]"
+- Для заметок: "Записал заметку: [описание]"
+- Для расходов: "Записал расход: [сумма] [валюта] на [категория]"
+- Для доходов: "Записал доход: [сумма] [валюта] от [источник]"
+
+Добавь совет в конце, если он есть.`,
+          experimental_telemetry: {
+            isEnabled: true,
+            ...this.createTelemetry("generate-user-response", task),
+            metadata: {
+              operation: "generate-user-response",
+            },
+          },
+        });
+        userResponse = userResponseText;
+      } catch (error) {
+        console.warn("Failed to generate user response:", error);
+        // Fallback к простому ответу
+        userResponse = `Записал: ${structuredEvent.data.description}`;
+      }
+
       // Комбинируем структурированные данные
       const combinedData = {
         structured: structuredEvent.data,
@@ -649,7 +744,25 @@ export class EventProcessorAgent extends AbstractAgent {
       // 3. Автоматически сохраняем событие в базу данных
       let savedEvent = null;
       try {
-        const householdId = String(task.context?.householdId ?? "default");
+        // Получаем или создаем household по умолчанию, если не указан
+        let householdId: string = (task.context?.householdId as string) || "";
+        if (!householdId) {
+          const defaultHousehold =
+            await this.householdService.getOrCreateDefaultHousehold();
+          householdId = defaultHousehold.id;
+        } else {
+          // Проверяем существование указанного household
+          const householdExists =
+            await this.householdService.householdExists(householdId);
+          if (!householdExists) {
+            console.warn(
+              `Household with ID ${householdId} not found, using default household`,
+            );
+            const defaultHousehold =
+              await this.householdService.getOrCreateDefaultHousehold();
+            householdId = defaultHousehold.id;
+          }
+        }
         const userId = task.context?.userId;
 
         savedEvent = await this.eventService.createEvent({
@@ -726,6 +839,7 @@ export class EventProcessorAgent extends AbstractAgent {
           parsedEvent: structuredEvent.data,
           advice,
           structuredData: combinedData,
+          userResponse, // Добавляем пользовательский ответ
           savedEvent: savedEvent
             ? {
                 id: savedEvent.id,
@@ -734,7 +848,7 @@ export class EventProcessorAgent extends AbstractAgent {
             : null,
         },
         structuredEvent.data.confidence,
-        `Parsed ${structuredEvent.data.type} event with confidence ${structuredEvent.data.confidence}${savedEvent ? " and saved to database" : ""}`,
+        userResponse, // Используем пользовательский ответ как основной текст
       );
     } catch (error) {
       console.error("Error in event processor agent:", error);

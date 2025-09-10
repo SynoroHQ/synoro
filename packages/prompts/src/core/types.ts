@@ -4,10 +4,9 @@ export type PromptMessage = {
   content: string;
 };
 
-// Используем типы напрямую из @langfuse/client
 export type LangfuseClientLike = {
   prompt: {
-    create: (args: any) => Promise<any>;
+    create: (params: any) => Promise<any>;
     get: (name: string, options?: any) => Promise<any>;
   };
 };
