@@ -32,7 +32,7 @@ export class ChatAssistantAgent extends AbstractAgent {
       // Добавляем историю сообщений в промпт, если она есть
       const historyContext =
         task.messageHistory && task.messageHistory.length > 0
-          ? `\n\nИСТОРИЯ ДИАЛОГА:\n${this.formatMessageHistory(task, 1000)}`
+          ? `\n\nИСТОРИЯ ДИАЛОГА:\n${this.formatMessageHistory(task, 2000)}`
           : "";
 
       // Используем AI для определения типа сообщения для чата

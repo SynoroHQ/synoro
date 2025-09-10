@@ -71,7 +71,7 @@ export class EventProcessorAgent extends AbstractAgent {
       // Добавляем историю сообщений в промпт, если она есть
       const historyContext =
         task.messageHistory && task.messageHistory.length > 0
-          ? `\n\nИСТОРИЯ ДИАЛОГА:\n${this.formatMessageHistory(task, 1000)}`
+          ? `\n\nИСТОРИЯ ДИАЛОГА:\n${this.formatMessageHistory(task, 2000)}`
           : "";
 
       // Используем AI для определения типа события
@@ -183,7 +183,7 @@ export class EventProcessorAgent extends AbstractAgent {
           // Добавляем историю сообщений в промпт, если она есть
           const historyContext =
             task.messageHistory && task.messageHistory.length > 0
-              ? `\n\nИСТОРИЯ ДИАЛОГА:\n${this.formatMessageHistory(task, 1000)}`
+              ? `\n\nИСТОРИЯ ДИАЛОГА:\n${this.formatMessageHistory(task, 2000)}`
               : "";
 
           // Используем AI для категоризации событий
@@ -453,7 +453,7 @@ export class EventProcessorAgent extends AbstractAgent {
           // Добавляем историю сообщений в промпт, если она есть
           const historyContext =
             task.messageHistory && task.messageHistory.length > 0
-              ? `\n\nИСТОРИЯ ДИАЛОГА:\n${this.formatMessageHistory(task, 1000)}`
+              ? `\n\nИСТОРИЯ ДИАЛОГА:\n${this.formatMessageHistory(task, 2000)}`
               : "";
 
           // Используем AI для извлечения финансовой информации
@@ -564,7 +564,7 @@ export class EventProcessorAgent extends AbstractAgent {
 
 Извлеки всю доступную информацию и структурируй её в формате JSON согласно этой схеме:`,
             task,
-            { includeSummary: true },
+            { includeSummary: false, maxHistoryLength: 2000 },
           ) +
           `
 {
