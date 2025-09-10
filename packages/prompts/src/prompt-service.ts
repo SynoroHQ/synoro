@@ -1,15 +1,16 @@
-import type { LangfuseClientLike } from "./core/types";
+import { LangfuseClient } from "@langfuse/client";
+
 import { compilePrompt } from "./core/prompt";
 import { registry } from "./registry";
 
 // Глобальный клиент Langfuse
-let globalLangfuseClient: LangfuseClientLike | null = null;
+let globalLangfuseClient: LangfuseClient | null = null;
 
 /**
  * Инициализирует глобальный клиент Langfuse
  * @param client - клиент Langfuse
  */
-export function initializePromptService(client: LangfuseClientLike): void {
+export function initializePromptService(client: LangfuseClient): void {
   globalLangfuseClient = client;
 }
 
@@ -32,7 +33,7 @@ export async function getPrompt(
       if (def) {
         const cloudPrompt = await globalLangfuseClient.prompt.get(def.name, {
           label,
-          type: def.type as "text" | "chat",
+          type: "text",
         });
 
         if (cloudPrompt) {
@@ -44,19 +45,11 @@ export async function getPrompt(
           ) {
             if (variables && Object.keys(variables).length > 0) {
               const compiled = cloudPrompt.compile(variables);
-              if (typeof compiled === "string") {
-                return compiled;
-              } else if (Array.isArray(compiled)) {
-                return compiled[0]?.content ?? "";
-              }
+              return compiled;
             }
             // Если нет переменных, используем базовый промпт
             if ("prompt" in cloudPrompt) {
-              if (typeof cloudPrompt.prompt === "string") {
-                return cloudPrompt.prompt;
-              } else if (Array.isArray(cloudPrompt.prompt)) {
-                return cloudPrompt.prompt[0]?.content ?? "";
-              }
+              return cloudPrompt.prompt;
             }
           }
 
@@ -64,7 +57,7 @@ export async function getPrompt(
           if (typeof cloudPrompt === "string") {
             return cloudPrompt;
           } else if (Array.isArray(cloudPrompt)) {
-            return cloudPrompt[0]?.content ?? "";
+            return cloudPrompt[0] ?? "";
           } else if (
             cloudPrompt &&
             typeof cloudPrompt === "object" &&
@@ -73,7 +66,7 @@ export async function getPrompt(
             if (typeof cloudPrompt.prompt === "string") {
               return cloudPrompt.prompt;
             } else if (Array.isArray(cloudPrompt.prompt)) {
-              return cloudPrompt.prompt[0]?.content ?? "";
+              return cloudPrompt.prompt[0] ?? "";
             }
           }
         }
@@ -91,7 +84,7 @@ export async function getPrompt(
   if (typeof def.prompt === "string") {
     promptContent = def.prompt;
   } else {
-    promptContent = def.prompt[0]?.content ?? "";
+    promptContent = def.prompt[0] ?? "";
   }
 
   // Компилируем промпт с переменными если они предоставлены
@@ -120,7 +113,7 @@ export async function getPromptObject(
 
     return await globalLangfuseClient.prompt.get(def.name, {
       label,
-      type: def.type as "text" | "chat",
+      type: "text",
     });
   } catch (error) {
     console.warn(`Failed to get prompt object '${key}' from Langfuse:`, error);
@@ -152,7 +145,7 @@ export async function createPrompt(
   try {
     return await globalLangfuseClient.prompt.create({
       name: def.name,
-      type: def.type as "text" | "chat",
+      type: "text",
       prompt: def.prompt,
       labels,
       config: {
