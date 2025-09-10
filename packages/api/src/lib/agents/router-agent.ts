@@ -74,6 +74,7 @@ export class RouterAgent extends AbstractAgent {
     ["event", ["event-processor", "task-manager"]],
     ["chat", ["general-assistant", "qa-specialist"]],
     ["complex_task", ["task-orchestrator", "data-analyst", "qa-specialist"]],
+    ["database", ["database-agent"]],
     ["irrelevant", ["general-assistant"]],
   ]);
 
