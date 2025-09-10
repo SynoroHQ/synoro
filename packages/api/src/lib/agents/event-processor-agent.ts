@@ -557,15 +557,19 @@ export class EventProcessorAgent extends AbstractAgent {
         model: this.getModel(),
         system: await getPrompt(PROMPT_KEYS.EVENT_PROCESSOR),
         prompt:
-          this.createPromptWithHistory(
+          (await this.createOptimizedPrompt(
             `Проанализируй и распарси это событие: "${task.input}"
         
 Контекст: пользователь ${task.context?.userId || "anonymous"} в канале ${task.context?.channel || "unknown"}
 
 Извлеки всю доступную информацию и структурируй её в формате JSON согласно этой схеме:`,
             task,
-            { includeSummary: false, maxHistoryLength: 2000 },
-          ) +
+            {
+              useStructuredContext: true,
+              maxContextLength: 2000,
+              includeFullHistory: false,
+            },
+          )) +
           `
 {
   "type": "purchase|task|meeting|note|expense|income|maintenance|other",

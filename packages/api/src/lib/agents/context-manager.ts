@@ -1,4 +1,4 @@
-import type { AgentContext, MessageHistoryItem } from "./types";
+import type { AgentTask, MessageHistoryItem } from "./types";
 
 /**
  * Структурированный контекст для передачи между агентами
@@ -54,12 +54,12 @@ export class AgentContextManager {
   /**
    * Создает структурированный контекст из истории сообщений
    */
-  async createStructuredContext(
+  createStructuredContext(
     task: AgentTask,
     agentName: string,
     agentDescription: string,
-  ): Promise<StructuredAgentContext> {
-    const messageHistory = task.messageHistory || [];
+  ): StructuredAgentContext {
+    const messageHistory = task.messageHistory ?? [];
 
     // 1. Создаем инструкцию для агента
     const instruction = this.createAgentInstruction(
@@ -68,7 +68,7 @@ export class AgentContextManager {
     );
 
     // 2. Извлекаем краткий контекст
-    const contextSummary = await this.extractContextSummary(messageHistory);
+    const contextSummary = this.extractContextSummary(messageHistory);
 
     // 3. Получаем последние шаги
     const recentSteps = this.extractRecentSteps(messageHistory);
@@ -118,9 +118,9 @@ ${agentDescription}
   /**
    * Извлекает краткий контекст из истории сообщений
    */
-  private async extractContextSummary(
+  private extractContextSummary(
     messageHistory: MessageHistoryItem[],
-  ): Promise<StructuredAgentContext["contextSummary"]> {
+  ): StructuredAgentContext["contextSummary"] {
     if (messageHistory.length === 0) {
       return {
         conversationTopic: "Новый диалог",
@@ -133,7 +133,7 @@ ${agentDescription}
     // Анализируем последние сообщения для понимания контекста
     const recentMessages = messageHistory.slice(-5);
     const userMessages = recentMessages.filter((msg) => msg.role === "user");
-    const assistantMessages = recentMessages.filter(
+    const _assistantMessages = recentMessages.filter(
       (msg) => msg.role === "assistant",
     );
 
@@ -159,31 +159,87 @@ ${agentDescription}
 
   /**
    * Извлекает последние шаги диалога
+   * Обрабатывает непарные сообщения, группируя последовательные сообщения от одного роля
    */
   private extractRecentSteps(
     messageHistory: MessageHistoryItem[],
   ): StructuredAgentContext["recentSteps"] {
-    const recentMessages = messageHistory.slice(-this.maxRecentSteps * 2);
+    const recentMessages = messageHistory.slice(-this.maxRecentSteps * 3); // Увеличиваем буфер
     const steps: StructuredAgentContext["recentSteps"] = [];
 
-    for (let i = 0; i < recentMessages.length; i += 2) {
-      const userMessage = recentMessages[i];
-      const assistantMessage = recentMessages[i + 1];
+    let i = 0;
+    while (i < recentMessages.length && steps.length < this.maxRecentSteps) {
+      const currentMessage = recentMessages[i];
 
-      if (userMessage && userMessage.role === "user") {
+      if (!currentMessage) {
+        i++;
+        continue;
+      }
+
+      if (currentMessage.role === "user") {
+        // Группируем последовательные сообщения пользователя
+        const userMessages = [currentMessage];
+        let j = i + 1;
+
+        while (
+          j < recentMessages.length &&
+          recentMessages[j]?.role === "user"
+        ) {
+          const msg = recentMessages[j];
+          if (msg) {
+            userMessages.push(msg);
+          }
+          j++;
+        }
+
+        // Объединяем сообщения пользователя в один шаг
+        const combinedUserMessage = userMessages
+          .map((msg) => msg.content)
+          .join(" ");
+
+        // Ищем ответ ассистента (если есть)
+        let assistantResponse: string | undefined;
+        if (
+          j < recentMessages.length &&
+          recentMessages[j]?.role === "assistant"
+        ) {
+          // Группируем последовательные сообщения ассистента
+          const assistantMessages = [recentMessages[j]];
+          let k = j + 1;
+
+          while (
+            k < recentMessages.length &&
+            recentMessages[k]?.role === "assistant"
+          ) {
+            const msg = recentMessages[k];
+            if (msg) {
+              assistantMessages.push(msg);
+            }
+            k++;
+          }
+
+          assistantResponse = assistantMessages
+            .map((msg) => msg?.content ?? "")
+            .join(" ");
+
+          i = k; // Переходим к следующему сообщению пользователя
+        } else {
+          i = j; // Переходим к следующему сообщению
+        }
+
         steps.push({
-          userMessage: userMessage.content,
-          assistantResponse:
-            assistantMessage?.role === "assistant"
-              ? assistantMessage.content
-              : undefined,
-          timestamp: userMessage.timestamp,
-          stepType: this.classifyStepType(userMessage.content),
+          userMessage: combinedUserMessage,
+          assistantResponse,
+          timestamp: userMessages[0]?.timestamp ?? new Date(), // Используем время первого сообщения
+          stepType: this.classifyStepType(combinedUserMessage),
         });
+      } else {
+        // Пропускаем сообщения ассистента без предшествующего сообщения пользователя
+        i++;
       }
     }
 
-    return steps.slice(-this.maxRecentSteps);
+    return steps;
   }
 
   /**
@@ -211,22 +267,22 @@ ${agentDescription}
 
       // Извлекаем важные детали
       if (content.includes("имя") || content.includes("зовут")) {
-        const nameMatch = message.content.match(
-          /(?:меня зовут|имя|зовут)\s+([а-яё\s]+)/i,
+        const nameMatch = /(?:меня зовут|имя|зовут)\s+([а-яё\s]+)/i.exec(
+          message.content,
         );
-        if (nameMatch) keyInfo.push(`Имя: ${nameMatch[1].trim()}`);
+        if (nameMatch) keyInfo.push(`Имя: ${nameMatch[1]?.trim()}`);
       }
 
       if (content.includes("возраст") || content.includes("лет")) {
-        const ageMatch = message.content.match(/(\d+)\s*(?:лет|года)/i);
+        const ageMatch = /(\d+)\s*(?:лет|года)/i.exec(message.content);
         if (ageMatch) keyInfo.push(`Возраст: ${ageMatch[1]} лет`);
       }
 
       if (content.includes("работа") || content.includes("профессия")) {
-        const workMatch = message.content.match(
-          /(?:работаю|профессия|занимаюсь)\s+([а-яё\s]+)/i,
+        const workMatch = /(?:работаю|профессия|занимаюсь)\s+([а-яё\s]+)/i.exec(
+          message.content,
         );
-        if (workMatch) keyInfo.push(`Работа: ${workMatch[1].trim()}`);
+        if (workMatch) keyInfo.push(`Работа: ${workMatch[1]?.trim()}`);
       }
 
       if (content.includes("проблема") || content.includes("проблемы")) {
@@ -267,14 +323,17 @@ ${agentDescription}
           content.includes(keyword),
         ).length;
         if (matches > 0) {
-          topics.set(topic, (topics.get(topic) || 0) + matches);
+          topics.set(topic, (topics.get(topic) ?? 0) + matches);
         }
       }
     }
 
     if (topics.size === 0) return "Общее общение";
 
-    return Array.from(topics.entries()).sort(([, a], [, b]) => b - a)[0][0];
+    return (
+      Array.from(topics.entries()).sort(([, a], [, b]) => b - a)[0]?.[0] ??
+      "Общее общение"
+    );
   }
 
   /**
@@ -284,7 +343,11 @@ ${agentDescription}
     if (userMessages.length === 0) return "Неизвестно";
 
     const lastMessage =
-      userMessages[userMessages.length - 1].content.toLowerCase();
+      userMessages[userMessages.length - 1]?.content.toLowerCase();
+
+    if (!lastMessage) {
+      return "Неизвестно";
+    }
 
     if (lastMessage.includes("помоги") || lastMessage.includes("подскажи")) {
       return "Нужна помощь/совет";
@@ -357,18 +420,57 @@ ${agentDescription}
 
   /**
    * Классифицирует тип шага в диалоге
+   * Учитывает объединенные сообщения и их приоритет
    */
   private classifyStepType(content: string): string {
     const lowerContent = content.toLowerCase();
 
+    // Приоритетная классификация для более точного определения типа
     if (lowerContent.includes("?")) return "question";
-    if (lowerContent.includes("помоги") || lowerContent.includes("подскажи"))
+    if (
+      lowerContent.includes("помоги") ||
+      lowerContent.includes("подскажи") ||
+      lowerContent.includes("как сделать")
+    )
       return "help_request";
-    if (lowerContent.includes("спасибо")) return "gratitude";
-    if (lowerContent.includes("привет") || lowerContent.includes("здравствуй"))
+    if (lowerContent.includes("спасибо") || lowerContent.includes("благодарю"))
+      return "gratitude";
+    if (
+      lowerContent.includes("привет") ||
+      lowerContent.includes("здравствуй") ||
+      lowerContent.includes("добрый")
+    )
       return "greeting";
-    if (lowerContent.includes("пока") || lowerContent.includes("до свидания"))
+    if (
+      lowerContent.includes("пока") ||
+      lowerContent.includes("до свидания") ||
+      lowerContent.includes("увидимся")
+    )
       return "farewell";
+    if (
+      lowerContent.includes("проблема") ||
+      lowerContent.includes("ошибка") ||
+      lowerContent.includes("не работает")
+    )
+      return "problem_report";
+    if (
+      lowerContent.includes("хочу") ||
+      lowerContent.includes("нужно") ||
+      lowerContent.includes("требуется")
+    )
+      return "request";
+    if (
+      lowerContent.includes("да") ||
+      lowerContent.includes("согласен") ||
+      lowerContent.includes("хорошо")
+    )
+      return "agreement";
+    if (
+      lowerContent.includes("нет") ||
+      lowerContent.includes("не согласен") ||
+      lowerContent.includes("не подходит")
+    )
+      return "disagreement";
 
     return "statement";
   }
@@ -434,7 +536,7 @@ ${agentDescription}
    */
   createCompressedContext(
     context: StructuredAgentContext,
-    maxLength: number = 500,
+    maxLength = 500,
   ): string {
     const { instruction, contextSummary, currentTask } = context;
 
@@ -453,7 +555,71 @@ ${agentDescription}
 
     return compressed;
   }
+
+  /**
+   * Валидирует корректность извлечения шагов для различных сценариев
+   * Полезно для тестирования и отладки
+   */
+  validateStepExtraction(messageHistory: MessageHistoryItem[]): {
+    isValid: boolean;
+    issues: string[];
+    extractedSteps: number;
+    totalMessages: number;
+  } {
+    const issues: string[] = [];
+    const steps = this.extractRecentSteps(messageHistory);
+
+    // Проверяем, что все шаги имеют сообщения пользователя
+    const stepsWithoutUserMessage = steps.filter(
+      (step) => !step.userMessage || step.userMessage.trim() === "",
+    );
+    if (stepsWithoutUserMessage.length > 0) {
+      issues.push(
+        `Найдено ${stepsWithoutUserMessage.length} шагов без сообщения пользователя`,
+      );
+    }
+
+    // Проверяем, что временные метки корректны
+    const stepsWithInvalidTimestamp = steps.filter(
+      (step) => !step.timestamp || isNaN(step.timestamp.getTime()),
+    );
+    if (stepsWithInvalidTimestamp.length > 0) {
+      issues.push(
+        `Найдено ${stepsWithInvalidTimestamp.length} шагов с некорректной временной меткой`,
+      );
+    }
+
+    // Проверяем, что типы шагов определены
+    const stepsWithoutType = steps.filter(
+      (step) => !step.stepType || step.stepType === "",
+    );
+    if (stepsWithoutType.length > 0) {
+      issues.push(
+        `Найдено ${stepsWithoutType.length} шагов без определенного типа`,
+      );
+    }
+
+    // Проверяем, что не потеряли слишком много сообщений
+    const userMessages = messageHistory.filter((msg) => msg.role === "user");
+    const extractedUserMessages = steps.length;
+    const messageLossRatio =
+      userMessages.length > 0
+        ? (userMessages.length - extractedUserMessages) / userMessages.length
+        : 0;
+
+    if (messageLossRatio > 0.5) {
+      issues.push(
+        `Потеряно ${Math.round(messageLossRatio * 100)}% сообщений пользователя`,
+      );
+    }
+
+    return {
+      isValid: issues.length === 0,
+      issues,
+      extractedSteps: steps.length,
+      totalMessages: messageHistory.length,
+    };
+  }
 }
 
 // Экспортируем типы для использования в других модулях
-export type { StructuredAgentContext };
