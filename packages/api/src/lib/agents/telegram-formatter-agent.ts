@@ -6,7 +6,7 @@ import { AbstractAgent } from "./base-agent";
 export class TelegramFormatterAgent extends AbstractAgent {
   name = "Telegram Formatter";
   description =
-    "Агент для форматирования готовых ответов для Telegram с использованием HTML разметки. НЕ изменяет содержимое, только форматирует.";
+    "Агент для форматирования готовых ответов для Telegram с использованием HTML разметки. Только форматирует текст для узких окон без изменения содержимого.";
   capabilities: AgentCapability[] = [
     {
       name: "Text Formatting",
@@ -18,16 +18,9 @@ export class TelegramFormatterAgent extends AbstractAgent {
     {
       name: "Telegram Response",
       description:
-        "Преобразование готовых ответов в структурированный формат для Telegram",
+        "Преобразование готовых ответов в структурированный формат для узких окон Telegram",
       category: "messaging",
       confidence: 0.9,
-    },
-    {
-      name: "Content Enhancement",
-      description:
-        "Улучшение читабельности готового контента с эмодзи и структурой без изменения смысла",
-      category: "content",
-      confidence: 0.85,
     },
   ];
 
@@ -44,7 +37,7 @@ export class TelegramFormatterAgent extends AbstractAgent {
 
     const isTelegramChannel = task.context.channel === "telegram";
 
-    // Участвуем для Telegram канала или задач форматирования готовых ответов
+    // Участвуем для Telegram канала или задач форматирования
     return Promise.resolve(isFormattingTask || isTelegramChannel);
   }
 
@@ -59,6 +52,7 @@ export class TelegramFormatterAgent extends AbstractAgent {
         {
           useContextAnalysis: false,
           useQualityAssessment: false,
+          useStructuredContext: false,
         },
       );
 
@@ -72,7 +66,7 @@ export class TelegramFormatterAgent extends AbstractAgent {
   }
 
   shouldLog(_task: AgentTask): Promise<boolean> {
-    // Логируем все взаимодействия с агентом форматирования готовых ответов
+    // Логируем все взаимодействия с агентом форматирования
     return Promise.resolve(true);
   }
 }
