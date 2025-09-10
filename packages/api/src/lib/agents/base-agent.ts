@@ -12,7 +12,6 @@ import type {
   AgentTask,
   AgentTelemetry,
   BaseAgent,
-  MessageHistoryItem,
 } from "./types";
 
 // Инициализация AI провайдеров
@@ -64,7 +63,6 @@ export abstract class AbstractAgent implements BaseAgent {
 
   protected defaultModel: string;
   protected defaultTemperature: number;
-
 
   constructor(defaultModel = "gpt-5-mini") {
     this.defaultModel = defaultModel;
@@ -177,7 +175,6 @@ export abstract class AbstractAgent implements BaseAgent {
       current.confidence > best.confidence ? current : best,
     );
   }
-
 
   /**
    * Анализ контекста задачи для лучшего понимания
@@ -316,7 +313,6 @@ export abstract class AbstractAgent implements BaseAgent {
     throw new Error("Все попытки генерации ответа не удались");
   }
 
-
   /**
    * Создание хеша для входных данных (для кэширования)
    */
@@ -331,7 +327,6 @@ export abstract class AbstractAgent implements BaseAgent {
     return Math.abs(hash).toString(36);
   }
 
-
   /**
    * Форматирует историю сообщений для включения в промпт
    * @param task - Задача агента
@@ -340,7 +335,7 @@ export abstract class AbstractAgent implements BaseAgent {
    */
   protected formatMessageHistory(
     task: AgentTask,
-    maxHistoryLength: number = 1500,
+    maxHistoryLength = 1500,
   ): string {
     if (!task.messageHistory || task.messageHistory.length === 0) {
       return "";
@@ -379,10 +374,7 @@ export abstract class AbstractAgent implements BaseAgent {
    * @param maxMessages - Максимальное количество сообщений для сводки
    * @returns Краткая сводка истории
    */
-  protected getHistorySummary(
-    task: AgentTask,
-    maxMessages: number = 3,
-  ): string {
+  protected getHistorySummary(task: AgentTask, maxMessages = 3): string {
     if (!task.messageHistory || task.messageHistory.length === 0) {
       return "История диалога пуста";
     }

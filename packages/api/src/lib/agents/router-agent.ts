@@ -77,7 +77,6 @@ export class RouterAgent extends AbstractAgent {
     ["irrelevant", ["general-assistant"]],
   ]);
 
-
   constructor() {
     super("gpt-5-mini"); // Temperature removed
   }
@@ -131,8 +130,6 @@ export class RouterAgent extends AbstractAgent {
     return null;
   }
 
-
-
   /**
    * Классифицирует сообщение с оптимизацией производительности
    */
@@ -140,7 +137,6 @@ export class RouterAgent extends AbstractAgent {
     task: AgentTask,
     _telemetry?: AgentTelemetry,
   ): Promise<ClassificationResult> {
-
     // 1. Быстрая классификация по паттернам
     const quickResult = this.quickClassify(task.input);
     if (
