@@ -1,18 +1,19 @@
+import type { LangfuseClient } from "@langfuse/client";
+
 import type { PromptDefinition } from "../core/prompt";
-import type { LangfuseClientLike } from "../core/types";
 import { createModelConfig, DEFAULT_MODEL } from "../core/models";
 import assistant from "../prompts/assistant";
 import { registry } from "../registry";
 
 export async function createPromptInCloud(
   def: PromptDefinition,
-  langfuse: LangfuseClientLike,
+  langfuse: LangfuseClient,
   model: string = def.defaultModel ?? DEFAULT_MODEL,
 ) {
   try {
     return await langfuse.prompt.create({
       name: def.name,
-      type: def.type as "text" | "chat",
+      type: def.type === "chat" ? undefined : "text",
       prompt: def.prompt,
       labels: def.labels,
       config: createModelConfig(model, 0.4),
@@ -26,7 +27,7 @@ export async function createPromptInCloud(
 
 export async function createPromptByKeyInCloud(
   key: string,
-  langfuse: LangfuseClientLike,
+  langfuse: LangfuseClient,
   model?: string,
 ) {
   const def = registry[key];
@@ -41,7 +42,7 @@ export async function createPromptByKeyInCloud(
 }
 
 export async function createAssistantPromptInCloud(
-  langfuse: LangfuseClientLike,
+  langfuse: LangfuseClient,
   model: string = assistant.defaultModel ?? DEFAULT_MODEL,
 ) {
   return createPromptInCloud(assistant, langfuse, model);
