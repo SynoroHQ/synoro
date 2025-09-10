@@ -4,6 +4,7 @@ import { z } from "zod";
 import { getPrompt, PROMPT_KEYS } from "@synoro/prompts";
 
 import type { AgentCapability, AgentResult, AgentTask } from "./types";
+import { EventLogService } from "../services/event-log-service";
 import { EventService } from "../services/event-service";
 import { parseAIJsonResponseWithSchema } from "../utils/ai-response-parser";
 import { AbstractAgent } from "./base-agent";
@@ -57,10 +58,12 @@ export class EventProcessorAgent extends AbstractAgent {
   ];
 
   private eventService: EventService;
+  private eventLogService: EventLogService;
 
   constructor() {
-    super("gpt-5-nano"); // Temperature removed
+    super("gpt-5-nano");
     this.eventService = new EventService();
+    this.eventLogService = new EventLogService();
   }
 
   async canHandle(task: AgentTask): Promise<boolean> {
@@ -393,7 +396,7 @@ export class EventProcessorAgent extends AbstractAgent {
       }),
       execute: async (filters) => {
         try {
-          const householdId = task.context?.householdId || "default";
+          const householdId = String(task.context?.householdId ?? "default");
 
           const stats = await this.eventService.getEventStats(householdId, {
             startDate: filters.startDate
@@ -493,8 +496,39 @@ export class EventProcessorAgent extends AbstractAgent {
       structuredData: any;
     }>
   > {
+    let eventLogId: string | null = null;
+
     try {
-      // Структурированный парсинг с помощью AI
+      // 1. Создаем лог события пользователя для отслеживания процесса обработки
+      try {
+        const source = task.context?.channel || "unknown";
+        const chatId = task.context?.messageId || task.id;
+
+        const eventLog = await this.eventLogService.createEventLog({
+          source,
+          chatId,
+          type: "text",
+          text: task.input,
+          originalText: task.input,
+          meta: {
+            userId: task.context?.userId,
+            messageId: task.context?.messageId,
+            status: "processing",
+            userMessage: task.input, // Сохраняем оригинальное сообщение пользователя
+          },
+        });
+        eventLogId = eventLog.id;
+
+        // Обновляем статус на "processing"
+        await this.eventLogService.updateEventLogStatus(
+          eventLogId,
+          "processing",
+        );
+      } catch (error) {
+        console.warn("Failed to create event log:", error);
+      }
+
+      // 2. Структурированный парсинг с помощью AI
       const { text } = await generateText({
         model: this.getModel(),
         system: await getPrompt(PROMPT_KEYS.EVENT_PROCESSOR),
@@ -524,7 +558,6 @@ export class EventProcessorAgent extends AbstractAgent {
 }
 
 ВАЖНО: Верни только валидный JSON без дополнительного текста.`,
-        temperature: this.defaultTemperature,
         tools: {
           categorizeEvent: this.getCategorizationTool(task),
           extractFinancial: this.getFinancialExtractionTool(task),
@@ -585,10 +618,10 @@ export class EventProcessorAgent extends AbstractAgent {
         },
       };
 
-      // Автоматически сохраняем событие в базу данных
+      // 3. Автоматически сохраняем событие в базу данных
       let savedEvent = null;
       try {
-        const householdId = task.context?.householdId ?? "default";
+        const householdId = String(task.context?.householdId ?? "default");
         const userId = task.context?.userId;
 
         savedEvent = await this.eventService.createEvent({
@@ -616,8 +649,48 @@ export class EventProcessorAgent extends AbstractAgent {
             category: structuredEvent.data.category,
           },
         });
+
+        // Обновляем лог события пользователя с результатом
+        if (eventLogId) {
+          await this.eventLogService.updateEventLogText(
+            eventLogId,
+            `Пользователь сообщил: ${task.input} → Обработано как: ${structuredEvent.data.type} - ${structuredEvent.data.description}`,
+            task.input,
+          );
+          await this.eventLogService.updateEventLogMeta(eventLogId, {
+            userId: task.context?.userId,
+            messageId: task.context?.messageId,
+            savedEventId: savedEvent.id,
+            eventType: structuredEvent.data.type,
+            confidence: structuredEvent.data.confidence,
+            amount: structuredEvent.data.amount,
+            category: structuredEvent.data.category,
+            userMessage: task.input, // Сохраняем оригинальное сообщение пользователя
+            processedAt: new Date().toISOString(),
+          });
+        }
       } catch (error) {
         console.warn("Failed to save event to database:", error);
+
+        // Обновляем лог события пользователя с ошибкой
+        if (eventLogId) {
+          await this.eventLogService.updateEventLogStatus(eventLogId, "failed");
+          await this.eventLogService.updateEventLogMeta(eventLogId, {
+            userId: task.context?.userId,
+            messageId: task.context?.messageId,
+            userMessage: task.input, // Сохраняем оригинальное сообщение пользователя
+            error: error instanceof Error ? error.message : "Unknown error",
+            failedAt: new Date().toISOString(),
+          });
+        }
+      }
+
+      // 4. Обновляем статус лога на "processed" если все успешно
+      if (eventLogId && savedEvent) {
+        await this.eventLogService.updateEventLogStatus(
+          eventLogId,
+          "processed",
+        );
       }
 
       return this.createSuccessResult(
@@ -637,6 +710,23 @@ export class EventProcessorAgent extends AbstractAgent {
       );
     } catch (error) {
       console.error("Error in event processor agent:", error);
+
+      // Обновляем лог события пользователя с ошибкой
+      if (eventLogId) {
+        try {
+          await this.eventLogService.updateEventLogStatus(eventLogId, "failed");
+          await this.eventLogService.updateEventLogMeta(eventLogId, {
+            userId: task.context?.userId,
+            messageId: task.context?.messageId,
+            userMessage: task.input, // Сохраняем оригинальное сообщение пользователя
+            error: error instanceof Error ? error.message : "Unknown error",
+            failedAt: new Date().toISOString(),
+          });
+        } catch (logError) {
+          console.warn("Failed to update event log with error:", logError);
+        }
+      }
+
       return this.createErrorResult("Failed to process event");
     }
   }

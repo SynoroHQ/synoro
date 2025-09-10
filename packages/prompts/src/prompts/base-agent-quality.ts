@@ -29,7 +29,6 @@ const baseAgentQuality: PromptDefinition = {
   prompt: baseAgentQualityTemplate,
   labels: ["agent", "base", "quality", "assessment"],
   defaultModel: "gpt-5-mini",
-  defaultTemperature: 0.1,
 };
 
 export default baseAgentQuality;

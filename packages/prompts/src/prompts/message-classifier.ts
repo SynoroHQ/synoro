@@ -346,7 +346,6 @@ const messageClassifier: PromptDefinition = {
     "intelligent-filtering",
   ],
   defaultModel: "gpt-5-mini",
-  defaultTemperature: 0.05,
 };
 
 export default messageClassifier;

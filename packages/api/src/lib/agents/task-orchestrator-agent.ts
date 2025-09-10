@@ -233,7 +233,6 @@ export class TaskOrchestratorAgent extends AbstractAgent {
   "complexity": "medium|high",
   "reasoning": "объяснение логики планирования"
 }`,
-      temperature: this.defaultTemperature,
       experimental_output: {
         type: "object",
         responseFormat: {

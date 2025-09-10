@@ -44,22 +44,15 @@ export class TelegramFormatter {
     useColors: false, // Отключаем цвета для лучшей совместимости
   };
 
-  // Кэш для скомпилированных регулярных выражений
-  private regexCache = new Map<string, RegExp>();
-
   constructor(options?: Partial<TelegramFormattingOptions>) {
     this.defaultOptions = { ...this.defaultOptions, ...options };
   }
 
   /**
-   * Получает кэшированное регулярное выражение
+   * Создает регулярное выражение
    */
   private getRegex(pattern: string, flags?: string): RegExp {
-    const key = `${pattern}:${flags || ""}`;
-    if (!this.regexCache.has(key)) {
-      this.regexCache.set(key, new RegExp(pattern, flags));
-    }
-    return this.regexCache.get(key)!;
+    return new RegExp(pattern, flags);
   }
 
   /**

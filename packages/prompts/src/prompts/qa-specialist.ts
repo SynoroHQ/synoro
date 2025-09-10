@@ -182,7 +182,6 @@ const qaSpecialist: PromptDefinition = {
     "technical-consulting",
   ],
   defaultModel: "gpt-5",
-  defaultTemperature: 0.3,
 };
 
 export default qaSpecialist;

@@ -4,6 +4,7 @@ import { z } from "zod";
 import type { AgentContext } from "./agent-context";
 import type {
   AgentCapability,
+  AgentResult,
   AgentTask,
   AgentTelemetry,
   BaseAgent,
@@ -31,13 +32,6 @@ interface ParallelTask {
   priority: number;
 }
 
-// Интерфейс для кэша результатов
-interface CachedResult {
-  result: OrchestrationResult;
-  timestamp: number;
-  inputHash: string;
-}
-
 /**
  * Улучшенный менеджер агентов с оптимизацией производительности
  * Реализует паттерны orchestration, routing, параллельную обработку и интеллектуальное кэширование
@@ -45,11 +39,6 @@ interface CachedResult {
 export class AgentManager {
   private router: RouterAgent;
   private qualityEvaluator: QualityEvaluatorAgent;
-
-  // Система кэширования для повышения производительности
-  private resultCache = new Map<string, CachedResult>();
-  private cacheTimeout = 15 * 60 * 1000; // 15 минут
-  private maxCacheSize = 1000;
 
   // Очередь задач для параллельной обработки
   private taskQueue: ParallelTask[] = [];
@@ -59,7 +48,6 @@ export class AgentManager {
   // Метрики производительности
   private performanceMetrics = {
     totalRequests: 0,
-    cacheHits: 0,
     averageResponseTime: 0,
     errorRate: 0,
     parallelTasksProcessed: 0,
@@ -114,101 +102,13 @@ export class AgentManager {
   }
 
   /**
-   * Создание хэша для входных данных
-   */
-  private createInputHash(input: string, context: AgentContext): string {
-    const contextStr = JSON.stringify({
-      channel: context.channel,
-      userId: context.userId,
-      // Исключаем изменяющиеся поля
-    });
-    return `${input.slice(0, 100)}-${contextStr}`
-      .replace(/[^a-zA-Z0-9]/g, "")
-      .slice(0, 64);
-  }
-
-  /**
-   * Получение кэшированного результата
-   */
-  private getCachedResult(
-    input: string,
-    context: AgentContext,
-  ): OrchestrationResult | null {
-    const hash = this.createInputHash(input, context);
-    const cached = this.resultCache.get(hash);
-
-    if (cached && Date.now() - cached.timestamp < this.cacheTimeout) {
-      this.performanceMetrics.cacheHits++;
-      console.log("🚀 Использован кэшированный результат");
-      return cached.result;
-    }
-
-    if (cached) {
-      this.resultCache.delete(hash);
-    }
-
-    return null;
-  }
-
-  /**
-   * Сохранение результата в кэш
-   */
-  private setCachedResult(
-    input: string,
-    context: AgentContext,
-    result: OrchestrationResult,
-  ): void {
-    // Управление размером кэша
-    if (this.resultCache.size >= this.maxCacheSize) {
-      const oldestKey = this.resultCache.keys().next().value;
-      if (oldestKey) {
-        this.resultCache.delete(oldestKey);
-      }
-    }
-
-    const hash = this.createInputHash(input, context);
-    this.resultCache.set(hash, {
-      result,
-      timestamp: Date.now(),
-      inputHash: hash,
-    });
-  }
-
-  /**
    * Запуск фоновых задач для оптимизации
    */
   private startBackgroundTasks(): void {
-    // Очистка кэша каждые 5 минут
-    setInterval(
-      () => {
-        this.cleanupCache();
-      },
-      5 * 60 * 1000,
-    );
-
     // Обработка очереди задач
     setInterval(() => {
       void this.processTaskQueue();
     }, 100);
-  }
-
-  /**
-   * Очистка устаревшего кэша
-   */
-  private cleanupCache(): void {
-    const now = Date.now();
-    let cleaned = 0;
-
-    for (const [key, cached] of this.resultCache.entries()) {
-      if (now - cached.timestamp > this.cacheTimeout) {
-        this.resultCache.delete(key);
-        cleaned++;
-      }
-    }
-
-    if (cleaned > 0) {
-      console.log(`🧹 Очищено ${cleaned} устаревших записей кэша`);
-    }
   }
 
   /**
@@ -309,7 +209,6 @@ export class AgentManager {
       useQualityControl?: boolean;
       maxQualityIterations?: number;
       targetQuality?: number;
-      useCache?: boolean;
       enableParallelProcessing?: boolean;
       messageHistory?: MessageHistoryItem[];
     } = {},
@@ -323,18 +222,7 @@ export class AgentManager {
     this.performanceMetrics.totalRequests++;
 
     try {
-      // 1. Проверяем кэш (если включен)
-      if (options.useCache !== false) {
-        const cachedResult = this.getCachedResult(input, context);
-        if (cachedResult) {
-          // Обновляем время ответа в кэшированном результате
-          cachedResult.metadata.processingTime = Date.now() - startTime;
-          cachedResult.metadata.fromCache = true;
-          return cachedResult;
-        }
-      }
-
-      // 2. Создаем задачу для роутера
+      // 1. Создаем задачу для роутера
       const routingTask = this.createAgentTask(
         input,
         "routing",
@@ -343,7 +231,7 @@ export class AgentManager {
         options.messageHistory,
       );
 
-      // 3. Классифицируем и маршрутизируем сообщение
+      // 2. Классифицируем и маршрутизируем сообщение
       console.log("🤖 Запуск интеллектуальной маршрутизации...");
       const routingResult = await this.router.process(routingTask, telemetry);
       agentsUsed.push(this.router.name);
@@ -359,7 +247,7 @@ export class AgentManager {
       );
       console.log(`🎯 Routed to: ${routing.targetAgent}`);
 
-      // 5. Получаем целевого агента
+      // 3. Получаем целевого агента
       const targetAgent = this.getAgent(routing.targetAgent);
       if (!targetAgent) {
         throw new Error(`Target agent not found: ${routing.targetAgent}`);
@@ -389,7 +277,7 @@ export class AgentManager {
         });
       }
 
-      // 6. Проверяем, может ли агент обработать задачу
+      // 4. Проверяем, может ли агент обработать задачу
       const processingTask = this.createAgentTask(
         input,
         classification.messageType,
@@ -430,9 +318,9 @@ export class AgentManager {
         }
       }
 
-      // 7. Обрабатываем задачу основным агентом с улучшенной обработкой ошибок
+      // 5. Обрабатываем задачу основным агентом с улучшенной обработкой ошибок
       console.log(`⚙️ Обработка с помощью ${targetAgent.name}...`);
-      let processingResult: any;
+      let processingResult: AgentResult<unknown>;
 
       try {
         processingResult = (await Promise.race([
@@ -486,10 +374,10 @@ export class AgentManager {
         );
       }
 
-      // 8. Контроль качества отключен
+      // 6. Контроль качества отключен
       // Quality control is disabled for better performance
 
-      // 9. Формируем окончательный результат с расширенными метриками
+      // 7. Формируем окончательный результат с расширенными метриками
       const processingTime = Date.now() - startTime;
 
       const result: OrchestrationResult = {
@@ -507,7 +395,6 @@ export class AgentManager {
           qualityControlUsed: false, // Always disabled
           shouldLogEvent: classification.needsLogging,
           // Дополнительные метрики производительности
-          cacheUsed: false,
           parallelProcessingUsed: canUseParallel,
           responseTimeCategory:
             processingTime < 1000
@@ -522,7 +409,7 @@ export class AgentManager {
       // Обновляем метрики производительности
       this.updatePerformanceMetrics(processingTime, true);
 
-      // 10. Форматируем ответ для Telegram, если это Telegram канал
+      // 8. Форматируем ответ для Telegram, если это Telegram канал
       if (context.channel === "telegram" && finalResponse) {
         console.log("📱 Formatting response for Telegram...");
 
@@ -564,11 +451,6 @@ export class AgentManager {
       console.log(
         `🚀 Эффективность: ${(result.metadata.agentEfficiency as number)?.toFixed(2) ?? "N/A"} качество/сек`,
       );
-
-      // Сохраняем в кэш (если включен)
-      if (options.useCache !== false && qualityScore > 0.7) {
-        this.setCachedResult(input, context, result);
-      }
 
       return result;
     } catch (error) {
@@ -685,15 +567,9 @@ export class AgentManager {
     agentList: string[];
     performance: {
       totalRequests: number;
-      cacheHits: number;
       averageResponseTime: number;
       errorRate: number;
       parallelTasksProcessed: number;
-    };
-    cacheStats: {
-      size: number;
-      hitRate: number;
-      memoryUsage: string;
     };
     queueStats: {
       pendingTasks: number;
@@ -707,15 +583,6 @@ export class AgentManager {
       totalAgents: agents.size,
       agentList: Array.from(agents.keys()),
       performance: { ...this.performanceMetrics },
-      cacheStats: {
-        size: this.resultCache.size,
-        hitRate:
-          this.performanceMetrics.totalRequests > 0
-            ? this.performanceMetrics.cacheHits /
-              this.performanceMetrics.totalRequests
-            : 0,
-        memoryUsage: `${Math.round(this.resultCache.size * 0.001)} KB`, // Приблизительная оценка
-      },
       queueStats: {
         pendingTasks: this.taskQueue.length,
         processingTasks: this.processingTasks.size,
@@ -725,16 +592,14 @@ export class AgentManager {
   }
 
   /**
-   * Очистка всех кэшей и сброс метрик
+   * Очистка всех данных и сброс метрик
    */
   resetPerformanceData(): void {
-    this.resultCache.clear();
     this.taskQueue.length = 0;
     this.processingTasks.clear();
 
     this.performanceMetrics = {
       totalRequests: 0,
-      cacheHits: 0,
       averageResponseTime: 0,
       errorRate: 0,
       parallelTasksProcessed: 0,
@@ -746,17 +611,7 @@ export class AgentManager {
   /**
    * Настройка параметров производительности
    */
-  configurePerformance(config: {
-    maxCacheSize?: number;
-    cacheTimeout?: number;
-    maxConcurrentTasks?: number;
-  }): void {
-    if (config.maxCacheSize !== undefined) {
-      this.maxCacheSize = config.maxCacheSize;
-    }
-    if (config.cacheTimeout !== undefined) {
-      this.cacheTimeout = config.cacheTimeout;
-    }
+  configurePerformance(config: { maxConcurrentTasks?: number }): void {
     if (config.maxConcurrentTasks !== undefined) {
       this.maxConcurrentTasks = config.maxConcurrentTasks;
     }
@@ -781,7 +636,7 @@ export class AgentManager {
     const AgentContextSchema = z.object({
       userId: z.string().optional(),
       channel: z.string().optional(),
-      metadata: z.record(z.unknown()).optional(),
+      metadata: z.record(z.string(), z.unknown()).optional(),
     });
 
     // Валидация входных данных
@@ -799,11 +654,15 @@ export class AgentManager {
       // Создаем новый разговор
       const userId =
         validatedContext.userId ??
-        validatedContext.metadata?.userId ??
+        (typeof validatedContext.metadata?.userId === "string"
+          ? validatedContext.metadata.userId
+          : undefined) ??
         "unknown";
       const channel =
         validatedContext.channel ??
-        validatedContext.metadata?.channel ??
+        (typeof validatedContext.metadata?.channel === "string"
+          ? validatedContext.metadata.channel
+          : undefined) ??
         "default";
       currentConversationId = conversationManager.createConversation(
         userId,
@@ -821,8 +680,16 @@ export class AgentManager {
       content: validatedMessage,
       timestamp: new Date(),
       metadata: {
-        userId: validatedContext.userId ?? validatedContext.metadata?.userId,
-        channel: validatedContext.channel ?? validatedContext.metadata?.channel,
+        userId:
+          validatedContext.userId ??
+          (typeof validatedContext.metadata?.userId === "string"
+            ? validatedContext.metadata.userId
+            : undefined),
+        channel:
+          validatedContext.channel ??
+          (typeof validatedContext.metadata?.channel === "string"
+            ? validatedContext.metadata.channel
+            : undefined),
       },
     };
 

@@ -35,10 +35,7 @@ export const AgentUtils = {
    * Создание оптимизированной конфигурации для высокой нагрузки
    */
   createHighLoadConfig: () => ({
-    enableCache: true,
     enableParallelProcessing: true,
-    maxCacheSize: 5000,
-    cacheTimeout: 30 * 60 * 1000, // 30 минут
     maxConcurrentTasks: 10,
   }),
 
@@ -46,10 +43,7 @@ export const AgentUtils = {
    * Создание конфигурации для экономии ресурсов
    */
   createLowResourceConfig: () => ({
-    enableCache: false,
     enableParallelProcessing: false,
-    maxCacheSize: 100,
-    cacheTimeout: 5 * 60 * 1000, // 5 минут
     maxConcurrentTasks: 1,
   }),
 
@@ -57,10 +51,7 @@ export const AgentUtils = {
    * Создание сбалансированной конфигурации (по умолчанию)
    */
   createBalancedConfig: () => ({
-    enableCache: true,
     enableParallelProcessing: true,
-    maxCacheSize: 1000,
-    cacheTimeout: 15 * 60 * 1000, // 15 минут
     maxConcurrentTasks: 3,
   }),
 };

@@ -27,7 +27,6 @@ export const SendMessageInput = z
       .regex(/^[A-Za-z0-9:_-]+$/, "Разрешены символы A–Z, a–z, 0–9, :, _, -")
       .optional(),
     model: z.string().optional(),
-    temperature: z.number().min(0).max(2).default(0.7),
     metadata: z.record(z.string(), z.unknown()).optional(),
   })
   .superRefine((data, ctx) => {

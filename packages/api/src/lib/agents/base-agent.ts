@@ -12,7 +12,6 @@ import type {
   AgentTask,
   AgentTelemetry,
   BaseAgent,
-  MessageHistoryItem,
 } from "./types";
 
 // Инициализация AI провайдеров
@@ -63,14 +62,9 @@ export abstract class AbstractAgent implements BaseAgent {
   abstract capabilities: AgentCapability[];
 
   protected defaultModel: string;
-  protected defaultTemperature: number;
-
-  protected cache = new Map<string, { result: any; timestamp: number }>();
-  protected cacheTimeout = 5 * 60 * 1000; // 5 минут
 
   constructor(defaultModel = "gpt-5-mini") {
     this.defaultModel = defaultModel;
-    this.defaultTemperature = 0; // Temperature removed
   }
 
   /**
@@ -181,22 +175,6 @@ export abstract class AbstractAgent implements BaseAgent {
   }
 
   /**
-   * Кэширование результатов для повышения производительности
-   */
-  protected getCachedResult<T>(key: string): T | null {
-    const cached = this.cache.get(key);
-    if (cached && Date.now() - cached.timestamp < this.cacheTimeout) {
-      return cached.result as T;
-    }
-    this.cache.delete(key);
-    return null;
-  }
-
-  protected setCachedResult<T>(key: string, result: T): void {
-    this.cache.set(key, { result, timestamp: Date.now() });
-  }
-
-  /**
    * Анализ контекста задачи для лучшего понимания
    */
   protected async analyzeContext(task: AgentTask): Promise<{
@@ -206,10 +184,6 @@ export abstract class AbstractAgent implements BaseAgent {
     suggestedApproach: string;
     confidence: number;
   }> {
-    const cacheKey = `context-${task.id}`;
-    const cached = this.getCachedResult<any>(cacheKey);
-    if (cached) return cached;
-
     try {
       const { object } = await generateObject({
         model: this.getModel(),
@@ -222,7 +196,6 @@ export abstract class AbstractAgent implements BaseAgent {
         },
       });
 
-      this.setCachedResult(cacheKey, object);
       return object;
     } catch (error) {
       console.warn("Context analysis failed:", error);
@@ -339,13 +312,6 @@ export abstract class AbstractAgent implements BaseAgent {
   }
 
   /**
-   * Очистка кэша для освобождения памяти
-   */
-  protected clearCache(): void {
-    this.cache.clear();
-  }
-
-  /**
    * Создание хеша для входных данных (для кэширования)
    */
   protected createInputHash(input: string): string {
@@ -360,27 +326,6 @@ export abstract class AbstractAgent implements BaseAgent {
   }
 
   /**
-   * Получение статистики кэша
-   */
-  protected getCacheStats(): { size: number; hitRate: number } {
-    const now = Date.now();
-    let validEntries = 0;
-
-    for (const [key, entry] of this.cache.entries()) {
-      if (now - entry.timestamp < this.cacheTimeout) {
-        validEntries++;
-      } else {
-        this.cache.delete(key);
-      }
-    }
-
-    return {
-      size: validEntries,
-      hitRate: validEntries / Math.max(this.cache.size, 1),
-    };
-  }
-
-  /**
    * Форматирует историю сообщений для включения в промпт
    * @param task - Задача агента
    * @param maxHistoryLength - Максимальная длина истории в символах
@@ -388,7 +333,7 @@ export abstract class AbstractAgent implements BaseAgent {
    */
   protected formatMessageHistory(
     task: AgentTask,
-    maxHistoryLength: number = 1500,
+    maxHistoryLength = 1500,
   ): string {
     if (!task.messageHistory || task.messageHistory.length === 0) {
       return "";
@@ -427,10 +372,7 @@ export abstract class AbstractAgent implements BaseAgent {
    * @param maxMessages - Максимальное количество сообщений для сводки
    * @returns Краткая сводка истории
    */
-  protected getHistorySummary(
-    task: AgentTask,
-    maxMessages: number = 3,
-  ): string {
+  protected getHistorySummary(task: AgentTask, maxMessages = 3): string {
     if (!task.messageHistory || task.messageHistory.length === 0) {
       return "История диалога пуста";
     }
@@ -509,10 +451,6 @@ export abstract class AbstractAgent implements BaseAgent {
       };
     }
 
-    const cacheKey = `history-analysis-${this.createInputHash(JSON.stringify(task.messageHistory))}`;
-    const cached = this.getCachedResult<any>(cacheKey);
-    if (cached) return cached;
-
     try {
       const { object } = await generateObject({
         model: this.getModel(),
@@ -540,7 +478,6 @@ export abstract class AbstractAgent implements BaseAgent {
         },
       });
 
-      this.setCachedResult(cacheKey, object);
       return object;
     } catch (error) {
       console.warn("History analysis failed:", error);

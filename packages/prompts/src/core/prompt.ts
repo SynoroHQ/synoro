@@ -13,7 +13,6 @@ export type PromptDefinition = {
   labels?: string[];
   // optional defaults for publishing
   defaultModel?: AIModel;
-  defaultTemperature?: number;
 };
 
 export const DEFAULT_PROMPT_KEY = "assistant" as const;

@@ -242,7 +242,6 @@ const parserTask: PromptDefinition = {
     "entity-extraction",
   ],
   defaultModel: "gpt-5",
-  defaultTemperature: 0.1,
 };
 
 export default parserTask;

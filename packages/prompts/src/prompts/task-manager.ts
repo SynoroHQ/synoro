@@ -325,7 +325,6 @@ const taskManager: PromptDefinition = {
   prompt: taskManagerTemplate,
   labels: ["production", "staging", "latest"],
   defaultModel: "gpt-5-mini",
-  defaultTemperature: 0.6,
 };
 
 export default taskManager;
