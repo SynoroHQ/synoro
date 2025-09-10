@@ -119,10 +119,7 @@ export const reminders = pgTable(
 
     // Связи и метаданные
     chatId: text("chat_id"), // Связь с чатом, если напоминание создано из чата
-    parentReminderId: text("parent_reminder_id").references(
-      () => reminders.id,
-      { onDelete: "set null" },
-    ), // Для связанных напоминаний
+    parentReminderId: text("parent_reminder_id"), // Для связанных напоминаний
     tags: jsonb("tags").$type<ReminderTags>(),
 
     // Настройки уведомлений

@@ -1,4 +1,5 @@
 import { createId } from "@paralleldrive/cuid2";
+import { sql } from "drizzle-orm";
 import {
   check,
   foreignKey,
@@ -95,7 +96,7 @@ export const messages = pgTable(
     // Check constraint to prevent self-links
     check(
       "message_no_self_link",
-      table.parentId.isNull().or(table.parentId.neq(table.id)),
+      sql`${table.parentId} IS NULL OR ${table.parentId} != ${table.id}`,
     ),
 
     // Indexes
