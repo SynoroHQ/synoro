@@ -60,23 +60,6 @@ export async function getPrompt(
       }
     }
 
-    // Fallback: если нет метода compile, используем стандартную обработку
-    if (typeof cloudPrompt === "string") {
-      return cloudPrompt;
-    } else if (Array.isArray(cloudPrompt)) {
-      return cloudPrompt[0] ?? "";
-    } else if (
-      cloudPrompt &&
-      typeof cloudPrompt === "object" &&
-      "prompt" in cloudPrompt
-    ) {
-      if (typeof cloudPrompt.prompt === "string") {
-        return cloudPrompt.prompt;
-      } else if (Array.isArray(cloudPrompt.prompt)) {
-        return cloudPrompt.prompt[0] ?? "";
-      }
-    }
-
     throw new Error(`Invalid prompt format for '${key}'`);
   } catch (error) {
     console.error(`Failed to get prompt '${key}' from Langfuse:`, error);

@@ -1,3 +1,4 @@
+import { LangfuseClient } from "@langfuse/client";
 import { getNodeAutoInstrumentations } from "@opentelemetry/auto-instrumentations-node";
 import { resourceFromAttributes } from "@opentelemetry/resources";
 import { NodeSDK } from "@opentelemetry/sdk-node";
@@ -5,7 +6,6 @@ import {
   ATTR_SERVICE_NAME,
   ATTR_SERVICE_VERSION,
 } from "@opentelemetry/semantic-conventions";
-import { Langfuse } from "langfuse";
 import { LangfuseExporter } from "langfuse-vercel";
 
 import { initializePromptService } from "@synoro/prompts";
@@ -26,7 +26,7 @@ interface TracingConfig {
 interface TracingState {
   sdk: NodeSDK | null;
   isInitialized: boolean;
-  langfuseClient: Langfuse | null;
+  langfuseClient: LangfuseClient | null;
 }
 
 const state: TracingState = {
@@ -65,9 +65,9 @@ function validateLangfuseConfig(): {
  */
 function createLangfuseClient(
   config: NonNullable<TracingConfig["langfuseConfig"]>,
-): Langfuse {
+): LangfuseClient {
   try {
-    const client = new Langfuse({
+    const client = new LangfuseClient({
       secretKey: config.secretKey,
       publicKey: config.publicKey,
       baseUrl: config.baseUrl,
@@ -121,7 +121,7 @@ export async function startTracing(config: TracingConfig = {}): Promise<void> {
           traceExporter = new LangfuseExporter();
 
           // Initialize prompt service with Langfuse client
-          initializePromptService(state.langfuseClient as any);
+          initializePromptService(state.langfuseClient);
           console.log("✅ Langfuse integration enabled");
         } catch (error) {
           console.warn(
@@ -225,7 +225,7 @@ export async function stopTracing(): Promise<void> {
 /**
  * Gets the current Langfuse client instance
  */
-export function getLangfuseClient(): Langfuse | null {
+export function getLangfuseClient(): LangfuseClient | null {
   return state.langfuseClient;
 }
 

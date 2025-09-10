@@ -119,7 +119,10 @@ export const reminders = pgTable(
 
     // Связи и метаданные
     chatId: text("chat_id"), // Связь с чатом, если напоминание создано из чата
-    parentReminderId: text("parent_reminder_id"), // Для связанных напоминаний
+    parentReminderId: text("parent_reminder_id").references(
+      () => reminders.id,
+      { onDelete: "set null" },
+    ), // Для связанных напоминаний
     tags: jsonb("tags").$type<ReminderTags>(),
 
     // Настройки уведомлений
@@ -141,26 +144,26 @@ export const reminders = pgTable(
     // Составные индексы для сложных запросов (оптимизированы по порядку)
     // userId + status - для фильтрации по пользователю и статусу
     index("reminders_user_status_idx").on(table.userId, table.status),
-    
+
     // userId + type + status - для фильтрации по пользователю, типу и статусу
     index("reminders_user_type_status_idx").on(
-      table.userId, 
-      table.type, 
-      table.status
+      table.userId,
+      table.type,
+      table.status,
     ),
-    
+
     // userId + reminderTime + status - для поиска активных напоминаний по времени
     index("reminders_user_time_status_idx").on(
-      table.userId, 
-      table.reminderTime, 
-      table.status
+      table.userId,
+      table.reminderTime,
+      table.status,
     ),
-    
+
     // userId + priority + reminderTime - для сортировки по приоритету и времени
     index("reminders_user_priority_time_idx").on(
-      table.userId, 
-      table.priority, 
-      table.reminderTime
+      table.userId,
+      table.priority,
+      table.reminderTime,
     ),
 
     // Индексы с условиями для оптимизации
@@ -168,7 +171,7 @@ export const reminders = pgTable(
     index("reminders_active_time_idx")
       .on(table.reminderTime)
       .where(sql`${table.status} = 'active'`),
-    
+
     // Только незавершенные напоминания по пользователю
     index("reminders_user_pending_idx")
       .on(table.userId, table.reminderTime)
@@ -184,16 +187,17 @@ export const reminders = pgTable(
     index("reminders_recurrence_end_date_idx").on(table.recurrenceEndDate),
 
     // GIN индексы для JSON полей с использованием правильного синтаксиса
-    index("reminders_tags_gin_idx")
-      .using("gin", table.tags),
-    index("reminders_metadata_gin_idx")
-      .using("gin", table.metadata),
-    index("reminders_recurrence_pattern_gin_idx")
-      .using("gin", table.recurrencePattern),
-    index("reminders_ai_context_gin_idx")
-      .using("gin", table.aiContext),
-    index("reminders_smart_suggestions_gin_idx")
-      .using("gin", table.smartSuggestions),
+    index("reminders_tags_gin_idx").using("gin", table.tags),
+    index("reminders_metadata_gin_idx").using("gin", table.metadata),
+    index("reminders_recurrence_pattern_gin_idx").using(
+      "gin",
+      table.recurrencePattern,
+    ),
+    index("reminders_ai_context_gin_idx").using("gin", table.aiContext),
+    index("reminders_smart_suggestions_gin_idx").using(
+      "gin",
+      table.smartSuggestions,
+    ),
 
     // Индексы для временных полей
     index("reminders_created_at_idx").on(table.createdAt),
@@ -241,8 +245,8 @@ export const reminderExecutions = pgTable(
     ),
     // reminderId + executedAt - для сортировки по времени выполнения
     index("reminder_executions_reminder_executed_at_idx").on(
-      table.reminderId, 
-      table.executedAt
+      table.reminderId,
+      table.executedAt,
     ),
     // status + executedAt - для анализа по статусу и времени
     index("reminder_executions_status_executed_at_idx").on(
@@ -260,15 +264,14 @@ export const reminderExecutions = pgTable(
     index("reminder_executions_failed_idx")
       .on(table.executedAt, table.channel)
       .where(sql`${table.status} = 'failed'`),
-    
+
     // Только успешные выполнения для статистики
     index("reminder_executions_success_idx")
       .on(table.reminderId, table.executedAt)
       .where(sql`${table.status} = 'sent'`),
 
     // GIN индекс для метаданных
-    index("reminder_executions_metadata_gin_idx")
-      .using("gin", table.metadata),
+    index("reminder_executions_metadata_gin_idx").using("gin", table.metadata),
   ],
 );
 
@@ -303,15 +306,9 @@ export const reminderTemplates = pgTable(
 
     // Составные индексы для поиска
     // Публичные шаблоны по имени
-    index("reminder_templates_public_name_idx").on(
-      table.isPublic,
-      table.name,
-    ),
+    index("reminder_templates_public_name_idx").on(table.isPublic, table.name),
     // Пользовательские шаблоны по имени
-    index("reminder_templates_user_name_idx").on(
-      table.userId,
-      table.name,
-    ),
+    index("reminder_templates_user_name_idx").on(table.userId, table.name),
     // Популярные публичные шаблоны
     index("reminder_templates_popular_public_idx").on(
       table.isPublic,
@@ -320,9 +317,11 @@ export const reminderTemplates = pgTable(
 
     // Уникальные индексы
     // Уникальность имени шаблона для пользователя
-    uniqueIndex("reminder_templates_user_name_unique_idx")
-      .on(table.userId, table.name),
-    
+    uniqueIndex("reminder_templates_user_name_unique_idx").on(
+      table.userId,
+      table.name,
+    ),
+
     // Уникальность имени для публичных шаблонов
     uniqueIndex("reminder_templates_public_name_unique_idx")
       .on(table.name)
@@ -330,7 +329,7 @@ export const reminderTemplates = pgTable(
   ],
 );
 
-// Relations
+// Relations for reminders
 export const remindersRelations = relations(reminders, ({ one, many }) => ({
   user: one(users, {
     fields: [reminders.userId],
@@ -339,8 +338,11 @@ export const remindersRelations = relations(reminders, ({ one, many }) => ({
   parentReminder: one(reminders, {
     fields: [reminders.parentReminderId],
     references: [reminders.id],
+    relationName: "reminderHierarchy",
   }),
-  childReminders: many(reminders),
+  childReminders: many(reminders, {
+    relationName: "reminderHierarchy",
+  }),
   executions: many(reminderExecutions),
 }));
 

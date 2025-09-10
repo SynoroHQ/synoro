@@ -5,3 +5,4 @@ export * from "./auth/relations";
 export * from "./core/relations";
 export * from "./chat/relations";
 export * from "./events/relations";
+export * from "./reminders/schema";

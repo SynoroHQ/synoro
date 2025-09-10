@@ -1,12 +1,12 @@
 import { relations } from "drizzle-orm";
 
 import { users } from "../auth/schema";
+import { files } from "../core/files";
 import { households } from "../core/household";
 import { attachments } from "./attachment";
-import { eventProperties } from "./event-property";
 import { events } from "./event";
+import { eventProperties } from "./event-property";
 import { eventTags, tags } from "./tag";
-import { files } from "../core/files";
 
 // Relations for event
 export const eventRelations = relations(events, ({ one, many }) => ({
@@ -77,10 +77,10 @@ export const eventPropertyRelations = relations(eventProperties, ({ one }) => ({
   }),
 }));
 
-// Relations from other schemas
-export const userEventRelations = relations(users, ({ many }) => ({
-  events: many(events),
-}));
+// Relations from other schemas - merged into main user relations
+// export const userEventRelations = relations(users, ({ many }) => ({
+//   events: many(events),
+// }));
 
 export const householdEventRelations = relations(households, ({ many }) => ({
   events: many(events),

@@ -31,8 +31,8 @@ export const userProfileRelations = relations(userProfiles, ({ one }) => ({
   }),
 }));
 
-// Relations for user (extending from auth)
-export const userCoreRelations = relations(users, ({ one, many }) => ({
-  profile: one(userProfiles),
-  householdMemberships: many(householdMembers),
-}));
+// Relations for user (extending from auth) - merged into main user relations
+// export const userCoreRelations = relations(users, ({ one, many }) => ({
+//   profile: one(userProfiles),
+//   householdMemberships: many(householdMembers),
+// }));

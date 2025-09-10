@@ -14,6 +14,7 @@ import type {
 import { globalAgentRegistry } from "./agent-registry";
 import { conversationManager } from "./conversation-manager";
 import { DataAnalystAgent } from "./data-analyst-agent";
+import { DatabaseAgent } from "./database-agent";
 import { EventProcessorAgent } from "./event-processor-agent";
 import { GeneralAssistantAgent } from "./general-assistant-agent";
 import { QASpecialistAgent } from "./qa-specialist-agent";
@@ -76,6 +77,7 @@ export class AgentManager {
         new DataAnalystAgent(),
         new TaskManagerAgent(),
         new TelegramFormatterAgent(),
+        new DatabaseAgent(),
       ];
 
       agentInstances.forEach((agent) => {
