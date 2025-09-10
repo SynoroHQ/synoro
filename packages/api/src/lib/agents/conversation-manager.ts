@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+
 import type { MessageHistoryItem } from "./types";
 
 interface ConversationHistory {
@@ -40,7 +42,7 @@ export class SimpleConversationManager implements ConversationManager {
    * Создать новый разговор
    */
   createConversation(userId: string, channel: string): string {
-    const conversationId = `conv-${crypto.randomUUID()}`;
+    const conversationId = `conv-${randomUUID()}`;
 
     const conversation: ConversationHistory = {
       conversationId,
