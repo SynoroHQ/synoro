@@ -20,7 +20,6 @@ const routerFallback: PromptDefinition = {
     prompt: routerFallbackTemplate,
     labels: ["agent", "router", "fallback"],
     defaultModel: "gpt-5-mini",
-    defaultTemperature: 0.1,
 };
 
 export default routerFallback;

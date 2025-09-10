@@ -44,7 +44,6 @@ const routerClassification: PromptDefinition = {
     prompt: routerClassificationTemplate,
     labels: ["agent", "router", "classification"],
     defaultModel: "gpt-5-mini",
-    defaultTemperature: 0.1,
 };
 
 export default routerClassification;

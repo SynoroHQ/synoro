@@ -591,7 +591,6 @@ const dataAnalyst: PromptDefinition = {
   prompt: dataAnalystTemplate,
   labels: ["production", "staging", "latest", "advanced-analytics"],
   defaultModel: "gpt-5",
-  defaultTemperature: 0.3,
 };
 
 export default dataAnalyst;

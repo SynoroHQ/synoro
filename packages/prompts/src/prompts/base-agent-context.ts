@@ -28,7 +28,6 @@ const baseAgentContext: PromptDefinition = {
   prompt: baseAgentContextTemplate,
   labels: ["agent", "base", "context", "analysis"],
   defaultModel: "gpt-5-mini",
-  defaultTemperature: 0.2,
 };
 
 export default baseAgentContext;

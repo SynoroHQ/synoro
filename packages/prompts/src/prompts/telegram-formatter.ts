@@ -50,7 +50,6 @@ const telegramFormatter: PromptDefinition = {
   prompt: telegramFormatterTemplate,
   labels: ["production", "staging", "latest"],
   defaultModel: "gpt-5-nano",
-  defaultTemperature: 0.3,
 };
 
 export default telegramFormatter;

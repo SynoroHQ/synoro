@@ -157,7 +157,6 @@ export async function createPrompt(
       labels,
       config: {
         model: def.defaultModel,
-        temperature: def.defaultTemperature,
       },
     });
   } catch (error) {

@@ -61,7 +61,7 @@ export class EventProcessorAgent extends AbstractAgent {
   private eventLogService: EventLogService;
 
   constructor() {
-    super("gpt-5-nano"); // Temperature removed
+    super("gpt-5-nano");
     this.eventService = new EventService();
     this.eventLogService = new EventLogService();
   }
@@ -396,7 +396,7 @@ export class EventProcessorAgent extends AbstractAgent {
       }),
       execute: async (filters) => {
         try {
-          const householdId = task.context?.householdId || "default";
+          const householdId = String(task.context?.householdId ?? "default");
 
           const stats = await this.eventService.getEventStats(householdId, {
             startDate: filters.startDate
@@ -558,7 +558,6 @@ export class EventProcessorAgent extends AbstractAgent {
 }
 
 ВАЖНО: Верни только валидный JSON без дополнительного текста.`,
-        temperature: this.defaultTemperature,
         tools: {
           categorizeEvent: this.getCategorizationTool(task),
           extractFinancial: this.getFinancialExtractionTool(task),
@@ -622,7 +621,7 @@ export class EventProcessorAgent extends AbstractAgent {
       // 3. Автоматически сохраняем событие в базу данных
       let savedEvent = null;
       try {
-        const householdId = task.context?.householdId ?? "default";
+        const householdId = String(task.context?.householdId ?? "default");
         const userId = task.context?.userId;
 
         savedEvent = await this.eventService.createEvent({

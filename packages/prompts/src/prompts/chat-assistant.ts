@@ -301,7 +301,6 @@ const chatAssistant: PromptDefinition = {
   prompt: chatAssistantTemplate,
   labels: ["production", "staging", "latest"],
   defaultModel: "gpt-5-mini",
-  defaultTemperature: 0.7,
 };
 
 export default chatAssistant;

@@ -135,7 +135,6 @@ const eventProcessor: PromptDefinition = {
   prompt: eventProcessorTemplate,
   labels: ["production", "staging", "latest"],
   defaultModel: "gpt-5-nano",
-  defaultTemperature: 0.2,
 };
 
 export default eventProcessor;

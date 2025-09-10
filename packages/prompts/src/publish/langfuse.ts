@@ -15,7 +15,7 @@ export async function createPromptInCloud(
       type: def.type as "text" | "chat",
       prompt: def.prompt,
       labels: def.labels,
-      config: createModelConfig(model, def.defaultTemperature ?? 0.4),
+      config: createModelConfig(model, 0.4),
     });
   } catch (error) {
     throw new Error(

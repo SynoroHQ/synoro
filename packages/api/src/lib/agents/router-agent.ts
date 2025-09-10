@@ -78,7 +78,7 @@ export class RouterAgent extends AbstractAgent {
   ]);
 
   constructor() {
-    super("gpt-5-mini"); // Temperature removed
+    super("gpt-5-mini");
   }
 
   canHandle(_task: AgentTask): Promise<boolean> {
@@ -275,7 +275,6 @@ export class RouterAgent extends AbstractAgent {
         schema: routingDecisionSchema,
         system: systemPrompt,
         prompt,
-        temperature: this.defaultTemperature,
         experimental_telemetry: {
           isEnabled: true,
           ...this.createTelemetry("route", task),

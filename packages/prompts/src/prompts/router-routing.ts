@@ -34,7 +34,6 @@ const routerRouting: PromptDefinition = {
   prompt: routerRoutingTemplate,
   labels: ["agent", "router", "routing"],
   defaultModel: "gpt-5-mini",
-  defaultTemperature: 0.1,
 };
 
 export default routerRouting;

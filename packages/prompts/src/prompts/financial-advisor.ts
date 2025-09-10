@@ -389,7 +389,6 @@ const financialAdvisor: PromptDefinition = {
     "wealth-management",
   ],
   defaultModel: "gpt-5",
-  defaultTemperature: 0.3,
 };
 
 export default financialAdvisor;

@@ -62,11 +62,9 @@ export abstract class AbstractAgent implements BaseAgent {
   abstract capabilities: AgentCapability[];
 
   protected defaultModel: string;
-  protected defaultTemperature: number;
 
   constructor(defaultModel = "gpt-5-mini") {
     this.defaultModel = defaultModel;
-    this.defaultTemperature = 0; // Temperature removed
   }
 
   /**

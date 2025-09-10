@@ -224,7 +224,6 @@ const taskOrchestrator: PromptDefinition = {
   prompt: taskOrchestratorTemplate,
   labels: ["production", "staging", "latest"],
   defaultModel: "gpt-5-mini",
-  defaultTemperature: 0.3,
 };
 
 export default taskOrchestrator;

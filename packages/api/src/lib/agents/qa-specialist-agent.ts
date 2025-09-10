@@ -267,7 +267,6 @@ export class QASpecialistAgent extends AbstractAgent {
         model: this.getModel(),
         system: assistantPrompt,
         prompt: contextPrompt,
-        temperature: this.defaultTemperature,
         tools: {
           getSystemInfo: this.getSystemInfoTool(task),
         },

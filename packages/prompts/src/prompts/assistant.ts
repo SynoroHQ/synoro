@@ -136,7 +136,6 @@ const assistant: PromptDefinition = {
   prompt: assistantTemplate,
   labels: ["production", "staging", "latest"],
   defaultModel: "gpt-5-nano",
-  defaultTemperature: 0.4,
 };
 
 export default assistant;
