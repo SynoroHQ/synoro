@@ -274,14 +274,6 @@ export class SmartReminderAgent extends AbstractAgent {
     reasoning: string;
     suggestedAction: "create" | "update" | "delete" | "list" | "none";
   }> {
-    const cacheKey = `context-${this.createInputHash(text)}`;
-    const cached = this.getCachedResult<{
-      isReminderRelated: boolean;
-      confidence: number;
-      reasoning: string;
-      suggestedAction: "create" | "update" | "delete" | "list" | "none";
-    }>(cacheKey);
-    if (cached) return cached;
 
     try {
       const { object } = await generateObject({
@@ -291,7 +283,6 @@ export class SmartReminderAgent extends AbstractAgent {
         prompt: `Анализируемый текст: "${text}"`,
       });
 
-      this.setCachedResult(cacheKey, object);
       return object;
     } catch (error) {
       console.warn("Ошибка анализа контекста:", error);

@@ -77,12 +77,6 @@ export class RouterAgent extends AbstractAgent {
     ["irrelevant", ["general-assistant"]],
   ]);
 
-  // Кэш для классификаций похожих сообщений
-  private classificationCache = new Map<
-    string,
-    { result: ClassificationResult; timestamp: number }
-  >();
-  protected cacheTimeout = 10 * 60 * 1000; // 10 минут для классификаций
 
   constructor() {
     super("gpt-5-mini"); // Temperature removed
@@ -137,32 +131,7 @@ export class RouterAgent extends AbstractAgent {
     return null;
   }
 
-  /**
-   * Получение кэшированной классификации
-   */
-  private getCachedClassification(input: string): ClassificationResult | null {
-    // Создаем хэш для похожих сообщений
-    const hash = this.createInputHash(input);
-    const cached = this.classificationCache.get(hash);
 
-    if (cached && Date.now() - cached.timestamp < this.cacheTimeout) {
-      return cached.result;
-    }
-
-    this.classificationCache.delete(hash);
-    return null;
-  }
-
-  /**
-   * Сохранение классификации в кэш
-   */
-  private setCachedClassification(
-    input: string,
-    result: ClassificationResult,
-  ): void {
-    const hash = this.createInputHash(input);
-    this.classificationCache.set(hash, { result, timestamp: Date.now() });
-  }
 
   /**
    * Классифицирует сообщение с оптимизацией производительности
@@ -171,14 +140,8 @@ export class RouterAgent extends AbstractAgent {
     task: AgentTask,
     _telemetry?: AgentTelemetry,
   ): Promise<ClassificationResult> {
-    // 1. Проверяем кэш
-    const cached = this.getCachedClassification(task.input);
-    if (cached) {
-      console.log("🚀 Использована кэшированная классификация");
-      return cached;
-    }
 
-    // 2. Быстрая классификация по паттернам
+    // 1. Быстрая классификация по паттернам
     const quickResult = this.quickClassify(task.input);
     if (
       quickResult?.confidence &&
@@ -196,7 +159,6 @@ export class RouterAgent extends AbstractAgent {
         reasoning: "Быстрая классификация по паттернам",
       };
 
-      this.setCachedClassification(task.input, result);
       console.log("⚡ Использована быстрая классификация");
       return result;
     }
@@ -229,8 +191,6 @@ export class RouterAgent extends AbstractAgent {
         },
       });
 
-      // Сохраняем в кэш
-      this.setCachedClassification(task.input, object);
       console.log("🧠 Использована полная ИИ классификация");
       return object;
     } catch (error) {
