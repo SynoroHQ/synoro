@@ -68,11 +68,17 @@ export class EventProcessorAgent extends AbstractAgent {
 
   async canHandle(task: AgentTask): Promise<boolean> {
     try {
+      // Добавляем историю сообщений в промпт, если она есть
+      const historyContext =
+        task.messageHistory && task.messageHistory.length > 0
+          ? `\n\nИСТОРИЯ ДИАЛОГА:\n${this.formatMessageHistory(task, 2000)}`
+          : "";
+
       // Используем AI для определения типа события
       const { text: eventAnalysisText } = await generateText({
         model: this.getModel(),
         system: await getPrompt(PROMPT_KEYS.EVENT_PROCESSOR),
-        prompt: `Проанализируй сообщение: "${task.input}"
+        prompt: `Проанализируй сообщение: "${task.input}"${historyContext}
 
 Верни ответ в формате JSON:
 {
@@ -86,7 +92,13 @@ export class EventProcessorAgent extends AbstractAgent {
         experimental_telemetry: {
           isEnabled: true,
           ...this.createTelemetry("event-type-detection", task),
-          metadata: { inputLength: task.input.length },
+          metadata: {
+            inputLength: task.input.length,
+            hasHistory: Boolean(
+              task.messageHistory && task.messageHistory.length > 0,
+            ),
+            historyLength: task.messageHistory?.length || 0,
+          },
         },
       });
 
@@ -168,6 +180,12 @@ export class EventProcessorAgent extends AbstractAgent {
       }),
       execute: async ({ eventType, description }) => {
         try {
+          // Добавляем историю сообщений в промпт, если она есть
+          const historyContext =
+            task.messageHistory && task.messageHistory.length > 0
+              ? `\n\nИСТОРИЯ ДИАЛОГА:\n${this.formatMessageHistory(task, 2000)}`
+              : "";
+
           // Используем AI для категоризации событий
           const { text: categorizationText } = await generateText({
             model: this.getModel(),
@@ -203,7 +221,7 @@ export class EventProcessorAgent extends AbstractAgent {
             prompt: `Категоризируй событие:
 
 Тип события: ${eventType}
-Описание: "${description}"
+Описание: "${description}"${historyContext}
 
 Верни ответ в формате JSON:
 {
@@ -432,6 +450,12 @@ export class EventProcessorAgent extends AbstractAgent {
       }),
       execute: async ({ text }) => {
         try {
+          // Добавляем историю сообщений в промпт, если она есть
+          const historyContext =
+            task.messageHistory && task.messageHistory.length > 0
+              ? `\n\nИСТОРИЯ ДИАЛОГА:\n${this.formatMessageHistory(task, 2000)}`
+              : "";
+
           // Используем AI для извлечения финансовой информации
           const { text: financialText } = await generateText({
             model: this.getModel(),
@@ -449,7 +473,7 @@ export class EventProcessorAgent extends AbstractAgent {
 2. Определяй валюту по символам или словам
 3. Обрабатывай различные разделители (пробелы, запятые, точки)
 4. Если валюта не указана, используй RUB по умолчанию`,
-            prompt: `Извлеки финансовую информацию из текста: "${text}"
+            prompt: `Извлеки финансовую информацию из текста: "${text}"${historyContext}
 
 Верни ответ в формате JSON:
 {
@@ -533,15 +557,19 @@ export class EventProcessorAgent extends AbstractAgent {
         model: this.getModel(),
         system: await getPrompt(PROMPT_KEYS.EVENT_PROCESSOR),
         prompt:
-          this.createPromptWithHistory(
+          (await this.createOptimizedPrompt(
             `Проанализируй и распарси это событие: "${task.input}"
         
 Контекст: пользователь ${task.context?.userId || "anonymous"} в канале ${task.context?.channel || "unknown"}
 
 Извлеки всю доступную информацию и структурируй её в формате JSON согласно этой схеме:`,
             task,
-            { includeSummary: true },
-          ) +
+            {
+              useStructuredContext: true,
+              maxContextLength: 2000,
+              includeFullHistory: false,
+            },
+          )) +
           `
 {
   "type": "purchase|task|meeting|note|expense|income|maintenance|other",

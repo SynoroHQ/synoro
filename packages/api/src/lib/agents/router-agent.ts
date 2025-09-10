@@ -160,19 +160,21 @@ export class RouterAgent extends AbstractAgent {
     }
     const systemPrompt = await getPrompt(PROMPT_KEYS.ROUTER_CLASSIFICATION);
 
-    // Добавляем историю сообщений в промпт, если она есть
-    const historyContext =
-      task.messageHistory && task.messageHistory.length > 0
-        ? `\n\nИСТОРИЯ ДИАЛОГА:\n${this.formatMessageHistory(task, 1000)}`
-        : "";
+    // Используем новую систему структурированного контекста
+    const optimizedPrompt = await this.createOptimizedPrompt(
+      `Проанализируй это сообщение: "${task.input}"
 
-    const prompt = `Проанализируй это сообщение: "${task.input}"
-
-Контекст: канал ${task.context.channel ?? "unknown"}, пользователь ${task.context.userId ?? "anonymous"}${historyContext}
+Контекст: канал ${task.context?.channel ?? "unknown"}, пользователь ${task.context?.userId ?? "anonymous"}
 
 ВАЖНО: Если сообщение описывает событие (покупка, задача, встреча, заметка и т.д.) - ОБЯЗАТЕЛЬНО установи needsLogging: true. НЕ спрашивай пользователя о необходимости записи.
 
-Верни JSON с классификацией.`;
+Верни JSON с классификацией.`,
+      task,
+      {
+        useStructuredContext: true,
+        maxContextLength: 800, // Ограничиваем контекст для роутера
+      },
+    );
 
     // 3. Полная ИИ классификация
     try {
@@ -180,7 +182,7 @@ export class RouterAgent extends AbstractAgent {
         model: this.getModel(),
         schema: classificationSchema,
         system: systemPrompt,
-        prompt,
+        prompt: optimizedPrompt,
         experimental_telemetry: {
           isEnabled: true,
           ...this.createTelemetry("classify", task),
