@@ -274,7 +274,6 @@ export class SmartReminderAgent extends AbstractAgent {
     reasoning: string;
     suggestedAction: "create" | "update" | "delete" | "list" | "none";
   }> {
-
     try {
       const { object } = await generateObject({
         model: this.getModel(),

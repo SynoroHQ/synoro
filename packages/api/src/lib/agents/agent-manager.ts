@@ -31,7 +31,6 @@ interface ParallelTask {
   priority: number;
 }
 
-
 /**
  * Улучшенный менеджер агентов с оптимизацией производительности
  * Реализует паттерны orchestration, routing, параллельную обработку и интеллектуальное кэширование
@@ -39,7 +38,6 @@ interface ParallelTask {
 export class AgentManager {
   private router: RouterAgent;
   private qualityEvaluator: QualityEvaluatorAgent;
-
 
   // Очередь задач для параллельной обработки
   private taskQueue: ParallelTask[] = [];
@@ -102,9 +100,6 @@ export class AgentManager {
     return globalAgentRegistry.get(agentKey);
   }
 
-
-
-
   /**
    * Запуск фоновых задач для оптимизации
    */
@@ -114,7 +109,6 @@ export class AgentManager {
       void this.processTaskQueue();
     }, 100);
   }
-
 
   /**
    * Обработка очереди параллельных задач
@@ -227,7 +221,6 @@ export class AgentManager {
     this.performanceMetrics.totalRequests++;
 
     try {
-
       // 1. Создаем задачу для роутера
       const routingTask = this.createAgentTask(
         input,
@@ -458,7 +451,6 @@ export class AgentManager {
         `🚀 Эффективность: ${(result.metadata.agentEfficiency as number)?.toFixed(2) ?? "N/A"} качество/сек`,
       );
 
-
       return result;
     } catch (error) {
       console.error("❌ Ошибка в оркестрации агентов:", error);
@@ -618,9 +610,7 @@ export class AgentManager {
   /**
    * Настройка параметров производительности
    */
-  configurePerformance(config: {
-    maxConcurrentTasks?: number;
-  }): void {
+  configurePerformance(config: { maxConcurrentTasks?: number }): void {
     if (config.maxConcurrentTasks !== undefined) {
       this.maxConcurrentTasks = config.maxConcurrentTasks;
     }
@@ -663,11 +653,15 @@ export class AgentManager {
       // Создаем новый разговор
       const userId =
         validatedContext.userId ??
-        (typeof validatedContext.metadata?.userId === 'string' ? validatedContext.metadata.userId : undefined) ??
+        (typeof validatedContext.metadata?.userId === "string"
+          ? validatedContext.metadata.userId
+          : undefined) ??
         "unknown";
       const channel =
         validatedContext.channel ??
-        (typeof validatedContext.metadata?.channel === 'string' ? validatedContext.metadata.channel : undefined) ??
+        (typeof validatedContext.metadata?.channel === "string"
+          ? validatedContext.metadata.channel
+          : undefined) ??
         "default";
       currentConversationId = conversationManager.createConversation(
         userId,
@@ -684,10 +678,18 @@ export class AgentManager {
       role: "user",
       content: validatedMessage,
       timestamp: new Date(),
-        metadata: {
-          userId: validatedContext.userId ?? (typeof validatedContext.metadata?.userId === 'string' ? validatedContext.metadata.userId : undefined),
-          channel: validatedContext.channel ?? (typeof validatedContext.metadata?.channel === 'string' ? validatedContext.metadata.channel : undefined),
-        },
+      metadata: {
+        userId:
+          validatedContext.userId ??
+          (typeof validatedContext.metadata?.userId === "string"
+            ? validatedContext.metadata.userId
+            : undefined),
+        channel:
+          validatedContext.channel ??
+          (typeof validatedContext.metadata?.channel === "string"
+            ? validatedContext.metadata.channel
+            : undefined),
+      },
     };
 
     conversationManager.updateConversation(currentConversationId, userMessage);

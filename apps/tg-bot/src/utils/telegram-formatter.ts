@@ -44,7 +44,6 @@ export class TelegramFormatter {
     useColors: false, // Отключаем цвета для лучшей совместимости
   };
 
-
   constructor(options?: Partial<TelegramFormattingOptions>) {
     this.defaultOptions = { ...this.defaultOptions, ...options };
   }
