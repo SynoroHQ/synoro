@@ -48,6 +48,12 @@ export class QASpecialistAgent extends AbstractAgent {
 
   async canHandle(task: AgentTask): Promise<boolean> {
     try {
+      // Добавляем историю сообщений в промпт, если она есть
+      const historyContext =
+        task.messageHistory && task.messageHistory.length > 0
+          ? `\n\nИСТОРИЯ ДИАЛОГА:\n${this.formatMessageHistory(task, 1000)}`
+          : "";
+
       // Используем AI для определения типа сообщения
       const { object: messageAnalysis } = await generateObject({
         model: this.getModel(),
@@ -93,7 +99,7 @@ export class QASpecialistAgent extends AbstractAgent {
 1. Если сообщение содержит вопрос или просьбу - это вопрос
 2. Если это обычное общение без запроса - не вопрос
 3. Учитывай контекст и намерение пользователя`,
-        prompt: `Проанализируй сообщение: "${task.input}"
+        prompt: `Проанализируй сообщение: "${task.input}"${historyContext}
 
 Определи, является ли это вопросом или просьбой о помощи.`,
         experimental_telemetry: {

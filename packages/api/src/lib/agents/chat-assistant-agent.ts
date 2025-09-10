@@ -29,6 +29,12 @@ export class ChatAssistantAgent extends AbstractAgent {
 
   async canHandle(task: AgentTask): Promise<boolean> {
     try {
+      // Добавляем историю сообщений в промпт, если она есть
+      const historyContext =
+        task.messageHistory && task.messageHistory.length > 0
+          ? `\n\nИСТОРИЯ ДИАЛОГА:\n${this.formatMessageHistory(task, 1000)}`
+          : "";
+
       // Используем AI для определения типа сообщения для чата
       const { object: chatAnalysis } = await generateObject({
         model: this.getModel(),
@@ -54,13 +60,19 @@ export class ChatAssistantAgent extends AbstractAgent {
           reasoning: z.string().describe("Обоснование классификации"),
         }),
         system: await getPrompt(PROMPT_KEYS.CHAT_ASSISTANT),
-        prompt: `Проанализируй сообщение: "${task.input}"
+        prompt: `Проанализируй сообщение: "${task.input}"${historyContext}
 
 Определи, является ли это обычным общением для чата.`,
         experimental_telemetry: {
           isEnabled: true,
           ...this.createTelemetry("chat-message-detection", task),
-          metadata: { inputLength: task.input.length },
+          metadata: {
+            inputLength: task.input.length,
+            hasHistory: Boolean(
+              task.messageHistory && task.messageHistory.length > 0,
+            ),
+            historyLength: task.messageHistory?.length || 0,
+          },
         },
       });
 
