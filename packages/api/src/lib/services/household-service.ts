@@ -55,23 +55,26 @@ export class HouseholdService {
    * Получить или создать household по умолчанию
    */
   async getOrCreateDefaultHousehold() {
-    const existing = await this.getHouseholdById("default");
+    // Попытка вставки с игнорированием конфликта по ID
+    await db
+      .insert(households)
+      .values({
+        id: "default",
+        name: "Домашнее хозяйство по умолчанию",
+        description:
+          "Домашнее хозяйство по умолчанию для анонимных пользователей",
+        settings: {
+          timezone: "Europe/Moscow",
+          currency: "RUB",
+          language: "ru",
+          features: ["events", "reminders"],
+        },
+        status: "active",
+      })
+      .onConflictDoNothing({ target: households.id });
 
-    if (existing) {
-      return existing;
-    }
-
-    return await this.createHousehold({
-      id: "default",
-      name: "Default Household",
-      description: "Default household for anonymous users",
-      settings: {
-        timezone: "Europe/Moscow",
-        currency: "RUB",
-        language: "ru",
-        features: ["events", "reminders"],
-      },
-    });
+    // Получаем household после вставки (или существующий)
+    return await this.getHouseholdById("default");
   }
 
   /**

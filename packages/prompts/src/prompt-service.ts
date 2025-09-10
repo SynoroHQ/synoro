@@ -1,6 +1,5 @@
 import { LangfuseClient } from "@langfuse/client";
 
-import { compilePrompt } from "./core/prompt";
 import { registry } from "./registry";
 
 // Глобальный клиент Langfuse
@@ -15,7 +14,7 @@ export function initializePromptService(client: LangfuseClient): void {
 }
 
 /**
- * Получает промпт из Langfuse с fallback на локальный реестр
+ * Получает промпт из Langfuse
  * @param key - ключ промпта
  * @param label - метка для получения из Langfuse (по умолчанию "latest")
  * @param variables - переменные для компиляции промпта
@@ -26,73 +25,63 @@ export async function getPrompt(
   label: string = "latest",
   variables?: Record<string, string>,
 ): Promise<string> {
-  // Сначала пытаемся получить из Langfuse
-  if (globalLangfuseClient) {
-    try {
-      const def = registry[key];
-      if (def) {
-        const cloudPrompt = await globalLangfuseClient.prompt.get(def.name, {
-          label,
-          type: "text",
-        });
+  if (!globalLangfuseClient) {
+    throw new Error("Langfuse client not initialized");
+  }
 
-        if (cloudPrompt) {
-          // Используем метод compile если доступен
-          if (
-            typeof cloudPrompt === "object" &&
-            "compile" in cloudPrompt &&
-            typeof cloudPrompt.compile === "function"
-          ) {
-            if (variables && Object.keys(variables).length > 0) {
-              const compiled = cloudPrompt.compile(variables);
-              return compiled;
-            }
-            // Если нет переменных, используем базовый промпт
-            if ("prompt" in cloudPrompt) {
-              return cloudPrompt.prompt;
-            }
-          }
-
-          // Fallback: если нет метода compile, используем стандартную обработку
-          if (typeof cloudPrompt === "string") {
-            return cloudPrompt;
-          } else if (Array.isArray(cloudPrompt)) {
-            return cloudPrompt[0] ?? "";
-          } else if (
-            cloudPrompt &&
-            typeof cloudPrompt === "object" &&
-            "prompt" in cloudPrompt
-          ) {
-            if (typeof cloudPrompt.prompt === "string") {
-              return cloudPrompt.prompt;
-            } else if (Array.isArray(cloudPrompt.prompt)) {
-              return cloudPrompt.prompt[0] ?? "";
-            }
-          }
-        }
-      }
-    } catch (error) {
-      console.warn(`Failed to get prompt '${key}' from Langfuse:`, error);
+  try {
+    const def = registry[key];
+    if (!def) {
+      throw new Error(`Prompt definition not found for key: ${key}`);
     }
+
+    const cloudPrompt = await globalLangfuseClient.prompt.get(def.name, {
+      label,
+      type: "text",
+    });
+
+    if (!cloudPrompt) {
+      throw new Error(`Prompt '${key}' not found in Langfuse`);
+    }
+
+    // Используем метод compile если доступен
+    if (
+      typeof cloudPrompt === "object" &&
+      "compile" in cloudPrompt &&
+      typeof cloudPrompt.compile === "function"
+    ) {
+      if (variables && Object.keys(variables).length > 0) {
+        const compiled = cloudPrompt.compile(variables);
+        return compiled;
+      }
+      // Если нет переменных, используем базовый промпт
+      if ("prompt" in cloudPrompt) {
+        return cloudPrompt.prompt;
+      }
+    }
+
+    // Fallback: если нет метода compile, используем стандартную обработку
+    if (typeof cloudPrompt === "string") {
+      return cloudPrompt;
+    } else if (Array.isArray(cloudPrompt)) {
+      return cloudPrompt[0] ?? "";
+    } else if (
+      cloudPrompt &&
+      typeof cloudPrompt === "object" &&
+      "prompt" in cloudPrompt
+    ) {
+      if (typeof cloudPrompt.prompt === "string") {
+        return cloudPrompt.prompt;
+      } else if (Array.isArray(cloudPrompt.prompt)) {
+        return cloudPrompt.prompt[0] ?? "";
+      }
+    }
+
+    throw new Error(`Invalid prompt format for '${key}'`);
+  } catch (error) {
+    console.error(`Failed to get prompt '${key}' from Langfuse:`, error);
+    throw error;
   }
-
-  // Fallback на локальный реестр
-  const def = registry[key];
-  if (!def) return "";
-
-  let promptContent: string;
-  if (typeof def.prompt === "string") {
-    promptContent = def.prompt;
-  } else {
-    promptContent = def.prompt[0] ?? "";
-  }
-
-  // Компилируем промпт с переменными если они предоставлены
-  if (variables && Object.keys(variables).length > 0) {
-    return compilePrompt({ ...def, prompt: promptContent }, variables);
-  }
-
-  return promptContent;
 }
 
 /**

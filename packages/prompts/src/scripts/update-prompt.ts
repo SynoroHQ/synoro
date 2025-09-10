@@ -1,7 +1,6 @@
 #!/usr/bin/env bun
 import { LangfuseClient } from "@langfuse/client";
 
-import type { LangfuseClientLike } from "../core/types";
 import { createPromptByKeyInCloud } from "../publish/langfuse";
 import { registry } from "../registry";
 
@@ -32,18 +31,11 @@ async function main() {
     process.exit(1);
   }
 
-  const lf = new LangfuseClient({
+  const client = new LangfuseClient({
     secretKey,
     publicKey,
     baseUrl,
   });
-
-  const client: LangfuseClientLike = {
-    prompt: {
-      create: (args) => lf.prompt.create(args),
-      get: (name, options) => lf.prompt.get(name, options),
-    },
-  };
 
   try {
     console.log(
