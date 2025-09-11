@@ -3,7 +3,7 @@ import type {
   ExpenseSummary,
   SearchResult,
   UserStats,
-} from "@synoro/prompts/tools/database-tools";
+} from "@synoro/prompts";
 
 import type { AgentContext } from "./agent-context";
 import type { AgentResult, AgentTask, AgentTelemetry } from "./types";
@@ -381,7 +381,7 @@ export class DatabaseAgent extends AbstractAgent {
   /**
    * Безопасно форматирует число с двумя знаками после запятой
    */
-  private safeFormatNumber(value: unknown, fallback: string = "N/A"): string {
+  private safeFormatNumber(value: unknown, fallback = "N/A"): string {
     if (typeof value === "number" && isFinite(value)) {
       return value.toFixed(2);
     }
@@ -397,9 +397,9 @@ export class DatabaseAgent extends AbstractAgent {
     response += `- **Всего событий**: ${stats.total}\n`;
 
     // Отображаем статистику по валютам
-    if (stats.byCurrency && Object.keys(stats.byCurrency).length > 0) {
+    if (stats.currency && Object.keys(stats.currency).length > 0) {
       response += "**По валютам:**\n";
-      Object.entries(stats.byCurrency).forEach(
+      Object.entries(stats.currency).forEach(
         ([currency, data]: [string, any]) => {
           const totalAmount = this.safeFormatNumber(data?.totalAmount, "0.00");
           const averageAmount = this.safeFormatNumber(
@@ -478,7 +478,7 @@ export class DatabaseAgent extends AbstractAgent {
    */
   private extractDays(input: string): number | null {
     const match = /(\d+)\s*(дн|день|дней|days?)/i.exec(input);
-    return match ? parseInt(match[1] ?? "0") : null;
+    return match ? Number.parseInt(match[1] ?? "0", 10) : null;
   }
 
   /**

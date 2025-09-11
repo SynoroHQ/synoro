@@ -12,7 +12,7 @@ import type {
   SearchEventsInput,
   SearchResult,
   UserStats,
-} from "@synoro/prompts/tools/database-tools";
+} from "@synoro/validators";
 import {
   getEventByIdSchema,
   getExpenseSummarySchema,
@@ -21,7 +21,7 @@ import {
   getUserEventsSchema,
   getUserStatsSchema,
   searchEventsSchema,
-} from "@synoro/prompts/tools/database-tools";
+} from "@synoro/validators";
 
 import { DatabaseToolsService } from "../services/database-tools-service";
 
