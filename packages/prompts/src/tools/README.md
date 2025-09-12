@@ -165,9 +165,14 @@ interface UserStats {
   total: number;
   byType: Record<string, number>;
   byStatus: Record<string, number>;
-  totalAmount: number;
-  averageAmount: number;
-  currency: string;
+  byCurrency: Record<
+    string,
+    {
+      totalAmount: number;
+      averageAmount: number;
+      count: number;
+    }
+  >;
 }
 ```
 

@@ -12,7 +12,16 @@ import type {
   SearchEventsInput,
   SearchResult,
   UserStats,
-} from "@synoro/prompts/tools/database-tools";
+} from "@synoro/validators";
+import {
+  getEventByIdSchema,
+  getExpenseSummarySchema,
+  getRecentEventsSchema,
+  getUpcomingTasksSchema,
+  getUserEventsSchema,
+  getUserStatsSchema,
+  searchEventsSchema,
+} from "@synoro/validators";
 
 import { DatabaseToolsService } from "../services/database-tools-service";
 
@@ -36,30 +45,83 @@ export class DatabaseToolsHandler {
   ): Promise<unknown> {
     try {
       switch (toolName) {
-        case "get_user_events":
-          return await this.getUserEvents(parameters as GetUserEventsInput);
+        case "get_user_events": {
+          const validationResult = getUserEventsSchema.safeParse(parameters);
+          if (!validationResult.success) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: `Неверные параметры для get_user_events: ${validationResult.error.message}`,
+            });
+          }
+          return await this.getUserEvents(validationResult.data);
+        }
 
-        case "get_event_by_id":
-          return await this.getEventById(parameters as GetEventByIdInput);
+        case "get_event_by_id": {
+          const validationResult = getEventByIdSchema.safeParse(parameters);
+          if (!validationResult.success) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: `Неверные параметры для get_event_by_id: ${validationResult.error.message}`,
+            });
+          }
+          return await this.getEventById(validationResult.data);
+        }
 
-        case "get_user_stats":
-          return await this.getUserStats(parameters as GetUserStatsInput);
+        case "get_user_stats": {
+          const validationResult = getUserStatsSchema.safeParse(parameters);
+          if (!validationResult.success) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: `Неверные параметры для get_user_stats: ${validationResult.error.message}`,
+            });
+          }
+          return await this.getUserStats(validationResult.data);
+        }
 
-        case "search_events":
-          return await this.searchEvents(parameters as SearchEventsInput);
+        case "search_events": {
+          const validationResult = searchEventsSchema.safeParse(parameters);
+          if (!validationResult.success) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: `Неверные параметры для search_events: ${validationResult.error.message}`,
+            });
+          }
+          return await this.searchEvents(validationResult.data);
+        }
 
-        case "get_recent_events":
-          return await this.getRecentEvents(parameters as GetRecentEventsInput);
+        case "get_recent_events": {
+          const validationResult = getRecentEventsSchema.safeParse(parameters);
+          if (!validationResult.success) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: `Неверные параметры для get_recent_events: ${validationResult.error.message}`,
+            });
+          }
+          return await this.getRecentEvents(validationResult.data);
+        }
 
-        case "get_upcoming_tasks":
-          return await this.getUpcomingTasks(
-            parameters as GetUpcomingTasksInput,
-          );
+        case "get_upcoming_tasks": {
+          const validationResult = getUpcomingTasksSchema.safeParse(parameters);
+          if (!validationResult.success) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: `Неверные параметры для get_upcoming_tasks: ${validationResult.error.message}`,
+            });
+          }
+          return await this.getUpcomingTasks(validationResult.data);
+        }
 
-        case "get_expense_summary":
-          return await this.getExpenseSummary(
-            parameters as GetExpenseSummaryInput,
-          );
+        case "get_expense_summary": {
+          const validationResult =
+            getExpenseSummarySchema.safeParse(parameters);
+          if (!validationResult.success) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: `Неверные параметры для get_expense_summary: ${validationResult.error.message}`,
+            });
+          }
+          return await this.getExpenseSummary(validationResult.data);
+        }
 
         default:
           throw new TRPCError({
@@ -68,10 +130,16 @@ export class DatabaseToolsHandler {
           });
       }
     } catch (error) {
+      // Если это TRPCError с кодом BAD_REQUEST, перебрасываем без изменений
+      if (error instanceof TRPCError && error.code === "BAD_REQUEST") {
+        throw error;
+      }
+
+      // Для всех остальных ошибок логируем и создаем INTERNAL_SERVER_ERROR
       console.error(`Error executing tool ${toolName}:`, error);
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
-        message: `Ошибка при выполнении tool ${toolName}`,
+        message: `Ошибка при выполнении tool ${toolName}${error instanceof Error ? `: ${error.message}` : ""}`,
       });
     }
   }

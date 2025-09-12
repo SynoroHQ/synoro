@@ -1,5 +1,8 @@
 import { createId } from "@paralleldrive/cuid2";
+import { sql } from "drizzle-orm";
 import {
+  check,
+  foreignKey,
   index,
   jsonb,
   pgEnum,
@@ -74,14 +77,29 @@ export const messages = pgTable(
     content: jsonb("content").$type<Record<string, unknown>>().notNull(),
     model: text("model"),
     status: text("status").default("completed").notNull(),
-    parentId: text("parent_id").references(() => messages.id, {
-      onDelete: "set null",
-    }), // самоссылка для иерархии сообщений
+    parentId: text("parent_id"), // самоссылка для иерархии сообщений
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
   },
   (table) => [
+    // Composite foreign key: (parent_id, conversation_id) → (id, conversation_id)
+    foreignKey({
+      columns: [table.parentId, table.conversationId],
+      foreignColumns: [table.id, table.conversationId],
+      name: "message_parent_conversation_fk",
+    }).onDelete("set null"),
+
+    // Unique constraint on (id, conversation_id) for composite FK target
+    unique("message_id_conversation_unique").on(table.id, table.conversationId),
+
+    // Check constraint to prevent self-links
+    check(
+      "message_no_self_link",
+      sql`${table.parentId} IS NULL OR ${table.parentId} != ${table.id}`,
+    ),
+
+    // Indexes
     index("message_conversation_idx").on(table.conversationId),
     index("message_role_idx").on(table.role),
     index("message_status_idx").on(table.status),

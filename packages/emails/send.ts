@@ -24,7 +24,7 @@ export type EmailHtml = {
   from?: string;
 };
 
-const DEFAULT_FROM_EMAIL = "noreply@qco.me";
+const DEFAULT_FROM_EMAIL = "norepl@synoro.ru";
 
 export const sendEmail = async (email: Emails) => {
   const from = email.from || env.EMAIL_FROM || DEFAULT_FROM_EMAIL;

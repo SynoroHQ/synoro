@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { and, desc, eq, gte, lte, sql } from "drizzle-orm";
+import { and, count, desc, eq, gte, lte, sql } from "drizzle-orm";
 
 import type {
   EventWithDetails,
@@ -204,28 +204,46 @@ export class DatabaseToolsService {
       const total = eventsList.length;
       const byType: Record<string, number> = {};
       const byStatus: Record<string, number> = {};
-      let totalAmount = 0;
-      let amountCount = 0;
-      let currency = "RUB";
+      const byCurrency: Record<string, { totalAmount: number; count: number }> =
+        {};
 
       eventsList.forEach((event) => {
         byType[event.type] = (byType[event.type] || 0) + 1;
         byStatus[event.status] = (byStatus[event.status] || 0) + 1;
 
         if (event.amount) {
-          totalAmount += parseFloat(event.amount);
-          amountCount++;
-          currency = event.currency;
+          const amount = parseFloat(event.amount);
+          const currency = event.currency || "RUB";
+
+          if (!byCurrency[currency]) {
+            byCurrency[currency] = { totalAmount: 0, count: 0 };
+          }
+          byCurrency[currency].totalAmount += amount;
+          byCurrency[currency].count += 1;
         }
       });
+
+      // Вычисляем средние значения для каждой валюты
+      const byCurrencyWithAverage = Object.entries(byCurrency).reduce(
+        (acc, [currency, data]) => {
+          acc[currency] = {
+            totalAmount: data.totalAmount,
+            averageAmount: data.count > 0 ? data.totalAmount / data.count : 0,
+            count: data.count,
+          };
+          return acc;
+        },
+        {} as Record<
+          string,
+          { totalAmount: number; averageAmount: number; count: number }
+        >,
+      );
 
       return {
         total,
         byType,
         byStatus,
-        totalAmount,
-        averageAmount: amountCount > 0 ? totalAmount / amountCount : 0,
-        currency,
+        byCurrency: byCurrencyWithAverage,
       };
     } catch (error) {
       console.error("Error in getUserStats:", error);
@@ -256,6 +274,13 @@ export class DatabaseToolsService {
       conditions.push(
         sql`(${events.title} ILIKE ${`%${query}%`} OR ${events.notes} ILIKE ${`%${query}%`})`,
       );
+
+      // Получаем общее количество событий для пагинации
+      const totalCountResult = await db
+        .select({ count: count() })
+        .from(events)
+        .where(and(...conditions));
+      const totalCount = Number(totalCountResult[0]?.count) || 0;
 
       const eventsList = await db.query.events.findMany({
         where: and(...conditions),
@@ -292,7 +317,7 @@ export class DatabaseToolsService {
 
       return {
         events: formattedEvents,
-        total: formattedEvents.length,
+        total: totalCount,
         query,
       };
     } catch (error) {
@@ -469,6 +494,7 @@ export class DatabaseToolsService {
         columns: {
           amount: true,
           title: true,
+          type: true,
           occurredAt: true,
         },
       });
@@ -476,21 +502,23 @@ export class DatabaseToolsService {
       let totalAmount = 0;
       const byType: Record<string, { count: number; amount: number }> = {};
       const byPeriod: Record<string, { count: number; amount: number }> = {};
-      const categoryAmounts: Record<string, { amount: number; count: number }> =
-        {};
+      const eventTypeAmounts: Record<
+        string,
+        { amount: number; count: number }
+      > = {};
 
       eventsList.forEach((event) => {
         if (event.amount) {
           const amount = parseFloat(event.amount);
           totalAmount += amount;
 
-          // Группировка по типу (используем заголовок как категорию)
-          const category = event.title || "Без категории";
-          if (!byType[category]) {
-            byType[category] = { count: 0, amount: 0 };
+          // Группировка по типу события
+          const eventType = event.type || "other";
+          if (!byType[eventType]) {
+            byType[eventType] = { count: 0, amount: 0 };
           }
-          byType[category].count++;
-          byType[category].amount += amount;
+          byType[eventType].count++;
+          byType[eventType].amount += amount;
 
           // Группировка по периоду (месяц)
           const month = event.occurredAt.toISOString().substring(0, 7); // YYYY-MM
@@ -500,19 +528,19 @@ export class DatabaseToolsService {
           byPeriod[month].count++;
           byPeriod[month].amount += amount;
 
-          // Для топ категорий
-          if (!categoryAmounts[category]) {
-            categoryAmounts[category] = { amount: 0, count: 0 };
+          // Для топ типов событий
+          if (!eventTypeAmounts[eventType]) {
+            eventTypeAmounts[eventType] = { amount: 0, count: 0 };
           }
-          categoryAmounts[category].amount += amount;
-          categoryAmounts[category].count++;
+          eventTypeAmounts[eventType].amount += amount;
+          eventTypeAmounts[eventType].count++;
         }
       });
 
-      // Топ категории по сумме
-      const topCategories = Object.entries(categoryAmounts)
-        .map(([category, data]) => ({
-          category,
+      // Топ типы событий по сумме
+      const topCategories = Object.entries(eventTypeAmounts)
+        .map(([eventType, data]) => ({
+          category: eventType,
           amount: data.amount,
           count: data.count,
         }))
