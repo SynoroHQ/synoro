@@ -280,7 +280,7 @@ export class DatabaseToolsService {
         .select({ count: count() })
         .from(events)
         .where(and(...conditions));
-      const totalCount = totalCountResult[0]?.count || 0;
+      const totalCount = Number(totalCountResult[0]?.count) || 0;
 
       const eventsList = await db.query.events.findMany({
         where: and(...conditions),

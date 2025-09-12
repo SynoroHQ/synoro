@@ -397,9 +397,9 @@ export class DatabaseAgent extends AbstractAgent {
     response += `- **Всего событий**: ${stats.total}\n`;
 
     // Отображаем статистику по валютам
-    if (stats.currency && Object.keys(stats.currency).length > 0) {
+    if (stats.byCurrency && Object.keys(stats.byCurrency).length > 0) {
       response += "**По валютам:**\n";
-      Object.entries(stats.currency).forEach(
+      Object.entries(stats.byCurrency).forEach(
         ([currency, data]: [string, any]) => {
           const totalAmount = this.safeFormatNumber(data?.totalAmount, "0.00");
           const averageAmount = this.safeFormatNumber(
