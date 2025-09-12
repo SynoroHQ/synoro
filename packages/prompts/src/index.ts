@@ -26,9 +26,6 @@ export { default as eventProcessorSmart } from "./prompts/event-processor-smart"
 export { default as qualityEvaluatorSmart } from "./prompts/quality-evaluator-smart";
 export { default as taskOrchestratorSmart } from "./prompts/task-orchestrator-smart";
 
-// Database tools
-export * from "./tools/database-tools";
-
 export {
   getPrompt,
   getPromptObject,
