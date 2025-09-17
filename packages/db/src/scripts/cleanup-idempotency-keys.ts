@@ -1,3 +1,7 @@
+// Скрипт временно отключен - таблица processedIdempotencyKeys была удалена из схемы
+// TODO: Восстановить или удалить скрипт после уточнения необходимости
+
+/*
 import { lt } from "drizzle-orm";
 
 import { db } from "../client";
@@ -7,6 +11,7 @@ import { processedIdempotencyKeys } from "../schemas/chat/schema";
  * Скрипт для очистки старых ключей идемпотентности
  * Удаляет записи старше 24 часов для экономии места в БД
  */
+/*
 export async function cleanupIdempotencyKeys() {
   const cutoffTime = new Date();
   cutoffTime.setHours(cutoffTime.getHours() - 24);
@@ -37,3 +42,4 @@ if (require.main === module) {
       process.exit(1);
     });
 }
+*/

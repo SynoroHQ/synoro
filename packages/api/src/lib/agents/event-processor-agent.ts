@@ -199,7 +199,7 @@ export class EventProcessorAgent extends AbstractAgent {
    */
   private async ensureHousehold(task: AgentTask): Promise<string | null> {
     // Читаем householdId из контекста задачи
-    let householdId: string = (task.context?.householdId as string) || "";
+    const householdId: string = (task.context?.householdId as string) || "";
 
     if (!householdId) {
       // Если не указан, создаем домашнее хозяйство по умолчанию
@@ -402,6 +402,7 @@ export class EventProcessorAgent extends AbstractAgent {
       }),
       execute: async (filters) => {
         try {
+          console.log("getGetEventsTool", filters);
           const householdId = await this.ensureHousehold(task);
           if (!householdId) {
             return this.createErrorResult("Failed to get default household");
