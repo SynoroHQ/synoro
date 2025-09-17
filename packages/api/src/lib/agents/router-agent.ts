@@ -1,340 +1,130 @@
-import { generateObject, generateText } from "ai";
+import { generateObject } from "ai";
 import { z } from "zod";
-
-import { getPrompt, PROMPT_KEYS } from "@synoro/prompts";
 
 import type {
   AgentCapability,
   AgentResult,
   AgentTask,
-  AgentTelemetry,
-  ClassificationResult,
   RoutingDecision,
 } from "./types";
 import { AbstractAgent } from "./base-agent";
 
-// Схема для классификации сообщений
-const classificationSchema = z.object({
-  messageType: z.enum([
-    "question",
-    "event",
-    "chat",
-    "complex_task",
-    "irrelevant",
-  ]),
-  subtype: z.string().optional(),
-  confidence: z.number().min(0).max(1),
-  needsLogging: z.boolean(),
-  complexity: z.enum(["simple", "medium", "complex"]),
-  reasoning: z.string(),
-  suggestedAgents: z.array(z.string()),
-});
-
-// Схема для принятия решения о маршрутизации
-const routingDecisionSchema = z.object({
-  targetAgent: z.string(),
-  confidence: z.number().min(0).max(1),
-  reasoning: z.string(),
-  shouldParallel: z.boolean().optional(),
-  followUpAgents: z.array(z.string()).optional(),
-});
-
 /**
- * Агент-роутер, который классифицирует сообщения и направляет их к подходящим агентам
+ * Упрощенный роутер для маршрутизации запросов к трем основным агентам
  */
 export class RouterAgent extends AbstractAgent {
   name = "Message Router";
   description =
-    "Классифицирует сообщения и направляет их к подходящим специализированным агентам";
+    "AI-роутер для умного направления запросов к подходящим агентам";
 
   capabilities: AgentCapability[] = [
     {
-      name: "Message Classification",
-      description: "Классификация типа и сложности сообщения",
+      name: "AI Routing",
+      description: "Умная AI-маршрутизация запросов",
       category: "routing",
       confidence: 0.95,
     },
-    {
-      name: "Agent Selection",
-      description: "Выбор наиболее подходящего агента для обработки",
-      category: "routing",
-      confidence: 0.9,
-    },
-    {
-      name: "Task Orchestration",
-      description:
-        "Определение необходимости параллельной или последовательной обработки",
-      category: "routing",
-      confidence: 0.85,
-    },
   ];
 
-  private availableAgents = new Map<string, string[]>([
-    ["question", ["qa-specialist", "general-assistant", "data-analyst"]],
-    ["event", ["event-processor", "task-manager"]],
-    ["chat", ["general-assistant", "qa-specialist"]],
-    ["complex_task", ["task-orchestrator", "data-analyst", "qa-specialist"]],
-    ["database", ["database-agent"]],
-    ["irrelevant", ["general-assistant"]],
-  ]);
+  private availableAgents = {
+    eventProcessor: "event-processor",
+    eventAnalyzer: "event-analyzer",
+    generalAssistant: "general-assistant",
+  };
 
   constructor() {
     super("gpt-5-mini");
   }
 
   canHandle(_task: AgentTask): Promise<boolean> {
-    // Роутер может обработать любое сообщение
+    // Роутер обрабатывает все запросы для маршрутизации
     return Promise.resolve(true);
   }
 
   /**
-   * Быстрая предварительная классификация на основе ключевых слов
+   * Схема для AI классификации запросов
    */
-  private quickClassify(input: string): Partial<ClassificationResult> | null {
-    const lowerInput = input.toLowerCase().trim();
-
-    // Паттерны для быстрой классификации
-    const patterns: Record<string, RegExp[]> = {
-      event: [
-        /купил|потратил|заработал|получил|оплатил|продал/,
-        /встреча|задача|дело|напомни|запланировал/,
-        /поездка|ремонт|лечение|врач|больница/,
-        /сделал|выполнил|закончил|начал/,
-      ],
-      question: [
-        /что|как|где|когда|почему|зачем|какой|сколько/,
-        /можешь|умеешь|знаешь|расскажи|объясни/,
-        /помоги|подскажи|посоветуй|рекомендуй/,
-      ],
-      chat: [
-        /привет|здравствуй|добрый|пока|до свидания/,
-        /спасибо|благодарю|отлично|хорошо|понятно/,
-        /да|нет|ок|окей|ладно|согласен/,
-      ],
-      complex_task: [
-        /анализ|отчет|статистика|сравни|проанализируй/,
-        /план|стратегия|алгоритм|схема|структура/,
-      ],
-    };
-
-    for (const [type, typePatterns] of Object.entries(patterns)) {
-      if (typePatterns.some((pattern) => pattern.test(lowerInput))) {
-        return {
-          messageType: type as ClassificationResult["messageType"],
-          confidence: 0.8,
-          needsLogging: type === "event",
-          complexity: type === "complex_task" ? "complex" : "simple",
-        };
-      }
-    }
-
-    return null;
+  private getRoutingSchema() {
+    return z.object({
+      targetAgent: z.enum([
+        "event-processor",
+        "event-analyzer",
+        "general-assistant",
+      ]),
+      confidence: z.number().min(0).max(1),
+      reasoning: z.string(),
+      category: z.enum(["event_logging", "data_analysis", "general_chat"]),
+    });
   }
 
   /**
-   * Классифицирует сообщение с оптимизацией производительности
+   * AI-маршрутизация запросов
    */
-  async classifyMessage(
-    task: AgentTask,
-    _telemetry?: AgentTelemetry,
-  ): Promise<ClassificationResult> {
-    // 1. Быстрая классификация по паттернам
-    const quickResult = this.quickClassify(task.input);
-    if (
-      quickResult?.confidence &&
-      quickResult.confidence > 0.7 &&
-      quickResult.messageType
-    ) {
-      const result: ClassificationResult = {
-        messageType: quickResult.messageType,
-        confidence: quickResult.confidence,
-        needsLogging: quickResult.needsLogging ?? false,
-        complexity: quickResult.complexity ?? "simple",
-        suggestedAgents: this.availableAgents.get(quickResult.messageType) ?? [
-          "general-assistant",
-        ],
-        reasoning: "Быстрая классификация по паттернам",
+  private async aiRoute(input: string): Promise<{
+    targetAgent: string;
+    confidence: number;
+    reasoning: string;
+    category: string;
+  }> {
+    const systemPrompt = `Ты - эксперт по маршрутизации запросов в системе Synoro AI.
+
+ТВОЯ ЗАДАЧА: точно определить, к какому агенту направить запрос пользователя.
+
+ДОСТУПНЫЕ АГЕНТЫ:
+1. event-processor - для логирования событий (покупки, траты, задачи, встречи, ремонт, обслуживание)
+2. event-analyzer - для анализа данных и статистики (отчеты, графики, тренды, сравнения)
+3. general-assistant - для общих вопросов и разговора
+
+ПРАВИЛА КЛАССИФИКАЦИИ:
+- event-processor: запросы на сохранение, логирование, создание событий
+- event-analyzer: запросы на анализ, статистику, отчеты, получение данных
+- general-assistant: все остальные запросы (вопросы, разговор, помощь)
+
+Отвечай точно и обоснованно.`;
+
+    const { object } = await generateObject({
+      model: this.getModel(),
+      schema: this.getRoutingSchema(),
+      system: systemPrompt,
+      prompt: `Классифицируй запрос: "${input}"`,
+      experimental_telemetry: {
+        isEnabled: true,
+        ...this.createTelemetry("ai-routing", {
+          id: "routing-task",
+          input,
+          type: "routing",
+          context: {},
+          priority: 1,
+          createdAt: new Date(),
+        }),
+      },
+    });
+
+    return object;
+  }
+
+  async process(task: AgentTask): Promise<AgentResult<RoutingDecision>> {
+    try {
+      // Используем AI для маршрутизации
+      const aiResult = await this.aiRoute(task.input);
+
+      const routingDecision: RoutingDecision = {
+        targetAgent: aiResult.targetAgent,
+        confidence: aiResult.confidence,
+        reasoning: aiResult.reasoning,
+        shouldParallel: false,
+        followUpAgents: [],
       };
 
-      console.log("⚡ Использована быстрая классификация");
-      return result;
-    }
-    const systemPrompt = await getPrompt(PROMPT_KEYS.ROUTER_CLASSIFICATION);
-
-    // Используем новую систему структурированного контекста
-    const optimizedPrompt = await this.createOptimizedPrompt(
-      `Проанализируй это сообщение: "${task.input}"
-
-Контекст: канал ${task.context?.channel ?? "unknown"}, пользователь ${task.context?.userId ?? "anonymous"}
-
-ВАЖНО: Если сообщение описывает событие (покупка, задача, встреча, заметка и т.д.) - ОБЯЗАТЕЛЬНО установи needsLogging: true. НЕ спрашивай пользователя о необходимости записи.
-
-Верни JSON с классификацией.`,
-      task,
-      {
-        useStructuredContext: true,
-        maxContextLength: 800, // Ограничиваем контекст для роутера
-      },
-    );
-
-    // 3. Полная ИИ классификация
-    try {
-      const { object } = await generateObject({
-        model: this.getModel(),
-        schema: classificationSchema,
-        system: systemPrompt,
-        prompt: optimizedPrompt,
-        experimental_telemetry: {
-          isEnabled: true,
-          ...this.createTelemetry("classify", task),
-        },
-      });
-
-      console.log("🧠 Использована полная ИИ классификация");
-      return object;
+      return this.createSuccessResult(routingDecision, aiResult.confidence);
     } catch (error) {
-      console.error("Error in message classification:", error);
-
-      // Fallback классификация с помощью AI
-      try {
-        const telemetryData = this.createTelemetry(
-          "fallback-classification",
-          task,
-        );
-
-        const { text: fallbackClassification } = await generateText({
-          model: this.getModel(),
-          system: await getPrompt(PROMPT_KEYS.ROUTER_FALLBACK),
-          prompt: `Классифицируй: "${task.input}"`,
-          experimental_telemetry: {
-            isEnabled: true,
-            ...telemetryData,
-            metadata: { ...(telemetryData.metadata ?? {}), fallback: true },
-          },
-        });
-
-        const messageType = fallbackClassification.trim().toLowerCase();
-        const validTypes = [
-          "question",
-          "event",
-          "chat",
-          "complex_task",
-          "irrelevant",
-        ];
-        const validatedType = validTypes.includes(messageType)
-          ? messageType
-          : "chat";
-
-        // Автоматически определяем необходимость логирования для событий
-        const needsLogging = validatedType === "event";
-
-        return {
-          messageType: validatedType as
-            | "question"
-            | "event"
-            | "chat"
-            | "complex_task"
-            | "irrelevant",
-          confidence: 0.4,
-          needsLogging,
-          complexity: messageType === "complex_task" ? "complex" : "simple",
-          suggestedAgents:
-            messageType === "question"
-              ? ["qa-specialist"]
-              : messageType === "event"
-                ? ["event-processor"]
-                : ["general-assistant"],
-        };
-      } catch (fallbackError) {
-        console.error("Fallback classification also failed:", fallbackError);
-        return {
-          messageType: "chat",
-          confidence: 0.3,
-          needsLogging: false,
-          complexity: "simple",
-          suggestedAgents: ["qa-specialist"],
-        };
-      }
+      console.error("Error in RouterAgent:", error);
+      return this.createErrorResult("Ошибка AI маршрутизации");
     }
   }
 
-  /**
-   * Принимает решение о маршрутизации на основе классификации
-   */
-  async routeMessage(
-    classification: ClassificationResult,
-    task: AgentTask,
-    _telemetry?: AgentTelemetry,
-  ): Promise<RoutingDecision> {
-    const systemPrompt = await getPrompt(PROMPT_KEYS.ROUTER_ROUTING);
-
-    const prompt = `Выбери агента для обработки сообщения: "${task.input}"
-
-Учти классификацию и контекст. Верни JSON с решением о маршрутизации.`;
-
-    try {
-      const { object } = await generateObject({
-        model: this.getModel(),
-        schema: routingDecisionSchema,
-        system: systemPrompt,
-        prompt,
-        experimental_telemetry: {
-          isEnabled: true,
-          ...this.createTelemetry("route", task),
-          metadata: {
-            operation: "route",
-            classification: classification.messageType,
-            complexity: classification.complexity,
-          },
-        },
-      });
-
-      // Валидация выбранного агента
-      const availableForType =
-        this.availableAgents.get(classification.messageType) ?? [];
-      if (!availableForType.includes(object.targetAgent)) {
-        console.warn(
-          `Выбранный агент ${object.targetAgent} не подходит для типа ${classification.messageType}, используем fallback`,
-        );
-        object.targetAgent = availableForType[0] ?? "general-assistant";
-        object.confidence = Math.max(0.3, object.confidence - 0.2);
-        object.reasoning += " (с коррекцией выбора агента)";
-      }
-
-      return object;
-    } catch (error) {
-      console.error("Error in routing decision:", error);
-      throw new Error("Ошибка принятия решения о маршрутизации");
-    }
-  }
-
-  /**
-   * Основная обработка - классифицирует и маршрутизирует сообщение
-   */
-  async process(
-    task: AgentTask,
-    telemetry?: AgentTelemetry,
-  ): Promise<
-    AgentResult<{
-      classification: ClassificationResult;
-      routing: RoutingDecision;
-    }>
-  > {
-    try {
-      // Классифицируем сообщение
-      const classification = await this.classifyMessage(task, telemetry);
-
-      // Принимаем решение о маршрутизации
-      const routing = await this.routeMessage(classification, task, telemetry);
-
-      return this.createSuccessResult(
-        { classification, routing },
-        Math.min(classification.confidence, routing.confidence),
-        `Classified as ${classification.messageType} (${classification.complexity}), routed to ${routing.targetAgent}`,
-      );
-    } catch (error) {
-      console.error("Error in router agent processing:", error);
-      return this.createErrorResult("Failed to classify and route message");
-    }
+  shouldLog(_task: AgentTask): Promise<boolean> {
+    // Роутер логирует все решения о маршрутизации
+    return Promise.resolve(true);
   }
 }
