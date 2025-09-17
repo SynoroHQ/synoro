@@ -25,6 +25,10 @@ export { default as smartReminder } from "./prompts/smart-reminder";
 export { default as eventProcessorSmart } from "./prompts/event-processor-smart";
 export { default as qualityEvaluatorSmart } from "./prompts/quality-evaluator-smart";
 export { default as taskOrchestratorSmart } from "./prompts/task-orchestrator-smart";
+export { eventProcessorAgent } from "./prompts/event-processor-agent";
+export { eventAnalyzerAgent } from "./prompts/event-analyzer-agent";
+export { generalAssistantAgent } from "./prompts/general-assistant-agent";
+export { routerAgent } from "./prompts/router-agent";
 
 export {
   getPrompt,

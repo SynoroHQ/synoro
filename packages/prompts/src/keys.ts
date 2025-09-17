@@ -26,9 +26,15 @@ export const PROMPT_KEYS = {
   QUALITY_EVALUATOR_ASSESSMENT: "quality-evaluator-assessment",
   QUALITY_EVALUATOR_IMPROVEMENT: "quality-evaluator-improvement",
   // Task orchestrator smart prompts
-  TASK_ORCHESTRATOR_COMPLEXITY_ANALYSIS: "task-orchestrator-complexity-analysis",
+  TASK_ORCHESTRATOR_COMPLEXITY_ANALYSIS:
+    "task-orchestrator-complexity-analysis",
   TASK_ORCHESTRATOR_QUALITY_EVALUATION: "task-orchestrator-quality-evaluation",
   TASK_ORCHESTRATOR_SUMMARY: "task-orchestrator-summary",
+  // Agent prompts
+  EVENT_PROCESSOR_AGENT: "event-processor-agent",
+  EVENT_ANALYZER_AGENT: "event-analyzer-agent",
+  GENERAL_ASSISTANT_AGENT: "general-assistant-agent",
+  ROUTER_AGENT: "router-agent",
 } as const;
 
 export type PromptKey = (typeof PROMPT_KEYS)[keyof typeof PROMPT_KEYS];
