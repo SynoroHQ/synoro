@@ -2,7 +2,6 @@ import { createId } from "@paralleldrive/cuid2";
 import { sql } from "drizzle-orm";
 import {
   check,
-  foreignKey,
   index,
   jsonb,
   pgEnum,
@@ -83,16 +82,6 @@ export const messages = pgTable(
       .defaultNow(),
   },
   (table) => [
-    // Composite foreign key: (parent_id, conversation_id) → (id, conversation_id)
-    foreignKey({
-      columns: [table.parentId, table.conversationId],
-      foreignColumns: [table.id, table.conversationId],
-      name: "message_parent_conversation_fk",
-    }).onDelete("set null"),
-
-    // Unique constraint on (id, conversation_id) for composite FK target
-    unique("message_id_conversation_unique").on(table.id, table.conversationId),
-
     // Check constraint to prevent self-links
     check(
       "message_no_self_link",
