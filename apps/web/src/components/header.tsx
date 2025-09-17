@@ -30,13 +30,6 @@ export default function Header() {
             <span className="from-primary to-accent absolute -bottom-1 left-0 h-0.5 w-0 bg-gradient-to-r transition-all duration-300 group-hover:w-full" />
           </a>
           <a
-            href="#pricing"
-            className="hover:text-primary group relative text-gray-700 transition-colors duration-300"
-          >
-            {t("pricing")}
-            <span className="from-primary to-accent absolute -bottom-1 left-0 h-0.5 w-0 bg-gradient-to-r transition-all duration-300 group-hover:w-full" />
-          </a>
-          <a
             href="#for-whom"
             className="hover:text-primary group relative text-gray-700 transition-colors duration-300"
           >
