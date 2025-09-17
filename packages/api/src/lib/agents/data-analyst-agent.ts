@@ -69,7 +69,8 @@ export class DataAnalystAgent extends AbstractAgent {
       return requestAnalysis.isAnalyticsRequest;
     } catch (error) {
       console.error("Error in AI analytics request detection:", error);
-      throw new Error("Ошибка определения типа аналитического запроса");
+      // При ошибке классификации возвращаем false вместо исключения
+      return false;
     }
   }
 

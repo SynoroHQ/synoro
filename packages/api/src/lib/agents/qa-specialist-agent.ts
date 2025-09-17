@@ -198,7 +198,8 @@ export class QASpecialistAgent extends AbstractAgent {
       return classification.subtype;
     } catch (error) {
       console.error("Error in AI question classification:", error);
-      throw new Error("Ошибка классификации вопроса");
+      // При ошибке классификации возвращаем false вместо исключения
+      return "general";
     }
   }
 

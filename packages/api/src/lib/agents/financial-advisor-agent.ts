@@ -72,7 +72,8 @@ export class FinancialAdvisorAgent extends AbstractAgent {
       return financialAnalysis.isFinancialRequest;
     } catch (error) {
       console.error("Error in AI financial request detection:", error);
-      throw new Error("Ошибка определения типа финансового запроса");
+      // При ошибке классификации возвращаем false вместо исключения
+      return false;
     }
   }
 

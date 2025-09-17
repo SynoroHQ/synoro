@@ -68,7 +68,8 @@ export class TaskManagerAgent extends AbstractAgent {
       return taskAnalysis.isTaskManagementRequest;
     } catch (error) {
       console.error("Error in AI task management detection:", error);
-      throw new Error("Ошибка определения типа запроса по управлению задачами");
+      // При ошибке классификации возвращаем false вместо исключения
+      return false;
     }
   }
 

@@ -83,7 +83,8 @@ export class ChatAssistantAgent extends AbstractAgent {
       return chatAnalysis.isChatMessage;
     } catch (error) {
       console.error("Error in AI chat message detection:", error);
-      throw new Error("Ошибка определения типа сообщения для чата");
+      // При ошибке классификации возвращаем false вместо исключения
+      return false;
     }
   }
 
