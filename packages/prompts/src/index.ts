@@ -9,12 +9,10 @@ export * from "./core/types";
 export * from "./publish/langfuse";
 export { default as baseAgentContext } from "./prompts/base-agent-context";
 export { default as baseAgentQuality } from "./prompts/base-agent-quality";
-export { default as smartReminder } from "./prompts/smart-reminder";
 export { eventProcessorAgent } from "./prompts/event-processor-agent";
 export { eventAnalyzerAgent } from "./prompts/event-analyzer-agent";
 export { generalAssistantAgent } from "./prompts/general-assistant-agent";
 export { routerAgent } from "./prompts/router-agent";
-export { telegramBotAgent } from "./prompts/telegram-bot-agent";
 
 export {
   getPrompt,

@@ -1,5 +1,7 @@
 import { generateText } from "ai";
 
+import { getPrompt, PROMPT_KEYS } from "@synoro/prompts";
+
 import type { AgentCapability, AgentResult, AgentTask } from "./types";
 import { AbstractAgent } from "./base-agent";
 
