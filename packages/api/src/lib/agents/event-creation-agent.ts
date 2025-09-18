@@ -136,11 +136,14 @@ export class EventCreationAgent extends AbstractAgent {
       // Создаем лог события
       await this.createEventLog(task, event, extractedInfo);
 
+      // Если событие успешно записано, не запрашиваем подтверждение
+      const needsConfirmation = false;
+
       return this.createSuccessResult(
         {
           event,
           confidence: extractedInfo.confidence,
-          needsConfirmation: extractedInfo.needsConfirmation,
+          needsConfirmation,
         },
         extractedInfo.confidence,
         `Создано событие "${event.title}" типа ${event.type}`,
