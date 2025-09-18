@@ -19,7 +19,7 @@
     "@trpc/client": "11.5.1",
     "grammy": "^1.38.2",
     "superjson": "2.2.2",
-    "zod": "4.1.8"
+    "zod": "4.1.9"
   },
   "devDependencies": {
     "@synoro/eslint-config": "workspace:*",

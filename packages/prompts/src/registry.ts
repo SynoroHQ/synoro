@@ -5,8 +5,8 @@ import event_analyzer_agent from "./prompts/event-analyzer-agent";
 import event_processor_agent from "./prompts/event-processor-agent";
 import general_assistant_agent from "./prompts/general-assistant-agent";
 import router_agent from "./prompts/router-agent";
-import smart_reminder_context_analysis from "./prompts/smart-reminder";
-import { smart_reminder_extraction, smart_reminder_suggestions } from "./prompts/smart-reminder";
+import smart_reminder from "./prompts/smart-reminder";
+import telegram_bot_agent from "./prompts/telegram-bot-agent";
 
 export const registry: Record<string, PromptDefinition> = {
   [base_agent_context.key]: base_agent_context,
@@ -15,7 +15,6 @@ export const registry: Record<string, PromptDefinition> = {
   [event_processor_agent.key]: event_processor_agent,
   [general_assistant_agent.key]: general_assistant_agent,
   [router_agent.key]: router_agent,
-  [smart_reminder_context_analysis.key]: smart_reminder_context_analysis,
-  [smart_reminder_extraction.key]: smart_reminder_extraction,
-  [smart_reminder_suggestions.key]: smart_reminder_suggestions,
+  [smart_reminder.key]: smart_reminder,
+  [telegram_bot_agent.key]: telegram_bot_agent,
 };

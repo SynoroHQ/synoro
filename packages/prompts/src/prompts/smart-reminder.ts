@@ -4,7 +4,7 @@ const smartReminderContextAnalysis: PromptDefinition = {
   key: "smart-reminder-context-analysis",
   name: "smart-reminder-context-analysis",
   type: "text",
-  prompt: `Ты - эксперт по анализу текста на предмет создания напоминаний.
+  prompt: `Ты - эксперт по анализу текста на предмет создания напоминаний для Telegram.
 
 Определи, связан ли текст с напоминаниями, задачами, событиями или планами.
 
@@ -19,14 +19,18 @@ const smartReminderContextAnalysis: PromptDefinition = {
 ✅ "Встреча с клиентом в 14:00"  
 ✅ "Нужно сдать отчет до пятницы"
 ❌ "Как дела?"
-❌ "Какая погода сегодня?"`,
+❌ "Какая погода сегодня?"
+
+ФОРМАТ ОТВЕТА:
+- Отвечай кратко: "ДА" или "НЕТ"
+- Если ДА, укажи тип напоминания в скобках: "ДА (task)", "ДА (event)", "ДА (deadline)"`,
 };
 
 const smartReminderExtraction: PromptDefinition = {
   key: "smart-reminder-extraction",
   name: "smart-reminder-extraction",
   type: "text",
-  prompt: `Ты - эксперт по извлечению информации о напоминаниях из текста.
+  prompt: `Ты - эксперт по извлечению информации о напоминаниях из текста для Telegram.
 
 ЗАДАЧА: Извлеки из текста всю информацию для создания напоминания.
 
@@ -53,17 +57,21 @@ const smartReminderExtraction: PromptDefinition = {
 - medium: обычные дела (по умолчанию)
 - low: несрочные задачи
 
+ФОРМАТ ОТВЕТА:
+- Отвечай кратко в формате JSON
+- Используй только необходимые поля: title, type, priority, scheduledAt
+
 ПРИМЕРЫ:
-"Напомни позвонить маме завтра" → title: "Позвонить маме", type: "call", priority: "medium"
-"Встреча с клиентом в 14:00" → title: "Встреча с клиентом", type: "meeting", priority: "high"
-"Сдать отчет до пятницы" → title: "Сдать отчет", type: "deadline", priority: "high"`,
+"Напомни позвонить маме завтра" → {"title": "Позвонить маме", "type": "call", "priority": "medium"}
+"Встреча с клиентом в 14:00" → {"title": "Встреча с клиентом", "type": "meeting", "priority": "high"}
+"Сдать отчет до пятницы" → {"title": "Сдать отчет", "type": "deadline", "priority": "high"}`,
 };
 
 const smartReminderSuggestions: PromptDefinition = {
   key: "smart-reminder-suggestions",
   name: "smart-reminder-suggestions",
   type: "text",
-  prompt: `Ты - эксперт по созданию умных предложений для напоминаний.
+  prompt: `Ты - эксперт по созданию умных предложений для напоминаний в Telegram.
 
 Проанализируй созданное напоминание и предложи улучшения:
 
@@ -77,7 +85,13 @@ const smartReminderSuggestions: PromptDefinition = {
 - Время дня и рабочие часы
 - Тип задачи и её контекст
 - Возможные связанные действия
-- Оптимальное планирование`,
+- Оптимальное планирование
+
+ФОРМАТ ОТВЕТА:
+- Отвечай кратко (максимум 2-3 предложения)
+- Используй HTML-теги: <b>жирный</b>, <i>курсив</i>
+- Структурируй предложения списками с эмодзи
+- Выделяй ключевые рекомендации жирным шрифтом`,
 };
 
 export default smartReminderContextAnalysis;

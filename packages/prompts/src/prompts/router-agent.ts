@@ -1,6 +1,6 @@
 import type { PromptDefinition } from "../core/prompt";
 
-const routerAgentTemplate = `Ты - эксперт по маршрутизации запросов в системе Synoro AI.
+const routerAgentTemplate = `Ты - эксперт по маршрутизации запросов в системе Synoro AI для Telegram.
 
 ТВОЯ ЗАДАЧА: точно определить, к какому агенту направить запрос пользователя.
 
@@ -14,7 +14,9 @@ const routerAgentTemplate = `Ты - эксперт по маршрутизаци
 - event-analyzer: запросы на анализ, статистику, отчеты, получение данных
 - general-assistant: все остальные запросы (вопросы, разговор, помощь)
 
-Отвечай точно и обоснованно.`;
+ФОРМАТ ОТВЕТА:
+- Отвечай кратко: только название агента
+- Примеры: "event-processor", "event-analyzer", "general-assistant"`;
 
 const routerAgent: PromptDefinition = {
   key: "router-agent",
