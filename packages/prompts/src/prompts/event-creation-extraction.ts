@@ -18,8 +18,8 @@ const eventCreationExtractionTemplate = `Ты - эксперт по извлеч
 - low: не спешит, когда будет время
 
 ВРЕМЕННЫЕ УКАЗАНИЯ:
-- Текущее время: {currentTime}
-- Часовой пояс: {timezone}
+- Текущее время: {{currentTime}}
+- Часовой пояс: {{timezone}}
 - Интерпретируй относительные временные указания ("завтра", "через неделю", "вчера") относительно текущего времени
 - Если время не указано, используй текущее время
 
@@ -46,7 +46,7 @@ const eventCreationExtractionTemplate = `Ты - эксперт по извлеч
   "priority": "medium",
   "amount": 500,
   "currency": "RUB",
-  "occurredAt": "{currentTime}",
+  "occurredAt": "{{currentTime}}",
   "tags": ["продукты", "пятерочка"],
   "confidence": 0.9,
   "needsConfirmation": false
@@ -60,7 +60,7 @@ const eventCreationExtractionTemplate = `Ты - эксперт по извлеч
   "priority": "high",
   "amount": null,
   "currency": "RUB",
-  "occurredAt": "завтра относительно {currentTime}",
+  "occurredAt": "завтра относительно {{currentTime}}",
   "tags": ["ремонт", "сантехника", "ванная"],
   "confidence": 0.8,
   "needsConfirmation": true
@@ -72,7 +72,7 @@ const eventCreationExtractionTemplate = `Ты - эксперт по извлеч
 - Для expense всегда указывай amount и currency
 - Для task и maintenance обычно needsConfirmation = true
 - Используй релевантные теги для категоризации
-- Интерпретируй время относительно {currentTime} и {timezone}
+- Интерпретируй время относительно {{currentTime}} и {{timezone}}
 
 Отвечай ТОЛЬКО валидным JSON без дополнительного текста.`;
 

@@ -8,6 +8,20 @@ import { EventLogService } from "../services/event-log-service";
 import { EventService } from "../services/event-service";
 import { AbstractAgent } from "./base-agent";
 
+// Интерфейс для извлеченной информации о событии
+interface ExtractedEventInfo {
+  type: "expense" | "task" | "maintenance" | "other";
+  title: string;
+  description?: string;
+  amount?: number;
+  currency?: string;
+  occurredAt: string | number | Date;
+  confidence: number;
+  priority: "low" | "medium" | "high" | "urgent";
+  properties?: Record<string, unknown>;
+  tags?: string[];
+}
+
 // Схема для извлечения информации о событии из текста
 const eventExtractionSchema = z.object({
   title: z.string().describe("Заголовок события"),
@@ -199,13 +213,40 @@ export class EventCreationAgent extends AbstractAgent {
   /**
    * Создает событие в базе данных
    */
-  private async createEvent(extractedInfo: any, task: AgentTask): Promise<any> {
+  private async createEvent(
+    extractedInfo: ExtractedEventInfo,
+    task: AgentTask,
+  ): Promise<any> {
     const householdId = task.context?.householdId;
     const userId = task.context?.userId;
 
     if (!householdId) {
       throw new Error("Не указан householdId");
     }
+
+    // Валидация и нормализация даты occurredAt
+    let occurredAt: Date;
+    try {
+      const parsedDate = new Date(extractedInfo.occurredAt);
+
+      // Проверяем, что дата валидна
+      if (
+        !isFinite(parsedDate.getTime()) ||
+        Number.isNaN(parsedDate.getTime())
+      ) {
+        throw new Error("Invalid date");
+      }
+
+      occurredAt = parsedDate;
+    } catch (error) {
+      console.warn(
+        `Не удалось распарсить дату occurredAt: ${extractedInfo.occurredAt}, используем task.createdAt как fallback`,
+      );
+      occurredAt = task.createdAt;
+    }
+
+    // Безопасный расчет processing_time
+    const processingTime = Date.now() - task.createdAt.getTime();
 
     const eventData = {
       householdId,
@@ -216,7 +257,7 @@ export class EventCreationAgent extends AbstractAgent {
       notes: extractedInfo.description,
       amount: extractedInfo.amount,
       currency: extractedInfo.currency,
-      occurredAt: new Date(extractedInfo.occurredAt),
+      occurredAt,
       priority: extractedInfo.priority,
       status: "active" as const,
       data: {
@@ -229,7 +270,7 @@ export class EventCreationAgent extends AbstractAgent {
       },
       properties: {
         agent_confidence: extractedInfo.confidence,
-        processing_time: Date.now() - task.createdAt.getTime(),
+        processing_time: processingTime,
         ...extractedInfo.properties,
       },
       tags: extractedInfo.tags,
