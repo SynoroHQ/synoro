@@ -1,3 +1,6 @@
+import type { MessageHistoryItem } from "@synoro/db";
+import { getConversationHistory } from "@synoro/db";
+
 import type { AgentResult, AgentTask, BaseAgent } from "./types";
 import { EventAnalyzerAgent } from "./event-analyzer-agent";
 import { EventCreationAgent } from "./event-creation-agent";
@@ -53,7 +56,23 @@ export class AgentManager {
     context?: any,
   ): Promise<AgentResult<string>> {
     try {
-      // Создаем задачу для агента
+      // Получаем историю диалога если есть контекст пользователя
+      let messageHistory: MessageHistoryItem[] = [];
+      if (context?.userId && context?.channel && context?.db) {
+        try {
+          messageHistory = await getConversationHistory({
+            db: context.db,
+            userId: context.userId,
+            channel: context.channel,
+            limit: 10, // Берем последние 10 сообщений для контекста
+            conversationId: context.conversationId,
+          });
+        } catch (error) {
+          console.warn("Failed to fetch conversation history:", error);
+        }
+      }
+
+      // Создаем задачу для агента с историей
       const task: AgentTask = {
         id: `task-${Date.now()}`,
         input,
@@ -61,6 +80,7 @@ export class AgentManager {
         context: context || {},
         priority: 1,
         createdAt: new Date(),
+        messageHistory,
       };
 
       // Определяем подходящего агента через роутер

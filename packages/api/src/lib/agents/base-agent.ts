@@ -449,6 +449,13 @@ export abstract class AbstractAgent implements BaseAgent {
       includeFullHistory = false,
     } = options;
 
+    // Сначала заменяем плейсхолдеры в базовом промпте
+    const processedPrompt = this.createPromptWithHistory(basePrompt, task, {
+      includeFullHistory,
+      maxHistoryLength: maxContextLength,
+      includeSummary: true,
+    });
+
     if (useStructuredContext) {
       const structuredContext = await this.createStructuredContext(task);
 
@@ -458,20 +465,16 @@ export abstract class AbstractAgent implements BaseAgent {
           structuredContext,
           maxContextLength,
         );
-        return `${basePrompt}\n\n${compressedContext}`;
+        return `${processedPrompt}\n\n${compressedContext}`;
       } else {
         // Для агентов с большим контекстом используем полную структурированную версию
         const contextPrompt =
           this.contextManager.formatContextForPrompt(structuredContext);
-        return `${basePrompt}\n\n${contextPrompt}`;
+        return `${processedPrompt}\n\n${contextPrompt}`;
       }
     } else {
       // Fallback к старому методу для обратной совместимости
-      return this.createPromptWithHistory(basePrompt, task, {
-        includeFullHistory,
-        maxHistoryLength: maxContextLength,
-        includeSummary: true,
-      });
+      return processedPrompt;
     }
   }
 
@@ -502,14 +505,15 @@ export abstract class AbstractAgent implements BaseAgent {
     if (task.messageHistory && task.messageHistory.length > 0) {
       if (includeFullHistory) {
         const fullHistory = this.formatMessageHistory(task, maxHistoryLength);
-        historySection = `\n\nИСТОРИЯ ДИАЛОГА:\n${fullHistory}`;
+        historySection = fullHistory;
       } else if (includeSummary) {
         const summary = this.getHistorySummary(task);
-        historySection = `\n\nКОНТЕКСТ ДИАЛОГА:\n${summary}`;
+        historySection = summary;
       }
     }
 
-    return basePrompt + historySection;
+    // Заменяем плейсхолдер {messageHistory} в промпте
+    return basePrompt.replace("{messageHistory}", historySection);
   }
 
   /**

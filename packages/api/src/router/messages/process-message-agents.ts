@@ -54,6 +54,8 @@ async function processMessageWithAgents({
         channel,
         messageId,
         householdId: metadata?.householdId,
+        db: ctx.db, // Передаем базу данных для получения истории
+        conversationId: metadata?.conversationId,
         ...metadata,
       },
       priority: 1,

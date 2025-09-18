@@ -163,13 +163,18 @@ export class EventCreationAgent extends AbstractAgent {
     const currentTime = new Date().toISOString();
 
     try {
-      const prompt = await getPrompt(PROMPT_KEYS.EVENT_CREATION_EXTRACTION);
+      const prompt = await getPrompt(
+        PROMPT_KEYS.EVENT_CREATION_EXTRACTION,
+        "latest",
+        {
+          currentTime,
+          timezone,
+        },
+      );
       const { object } = await generateObject({
         model: this.getModel(),
         schema: eventExtractionSchema,
-        system: prompt
-          .replace("{currentTime}", currentTime)
-          .replace("{timezone}", timezone),
+        system: prompt,
         prompt: this.createPromptWithHistory(
           `Текст: "${task.input}"
 Контекст: ${JSON.stringify(task.context || {})}`,
