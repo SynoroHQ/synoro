@@ -12,8 +12,3 @@ export { GeneralAssistantAgent } from "./general-assistant-agent";
 
 // Экспорт менеджера агентов
 export { AgentManager } from "./agent-manager";
-
-// Функция создания упрощенной агентной системы
-export function createSimpleAgentSystem() {
-  return new AgentManager();
-}
