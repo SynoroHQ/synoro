@@ -32,7 +32,7 @@ const routerAgent: PromptDefinition = {
   type: "text",
   prompt: routerAgentTemplate,
   labels: ["production", "staging", "latest"],
-  defaultModel: "gpt-5-mini",
+  defaultModel: "gpt-5",
 };
 
 export { routerAgent };

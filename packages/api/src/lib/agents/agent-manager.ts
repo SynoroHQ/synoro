@@ -1,5 +1,6 @@
 import type { AgentResult, AgentTask, BaseAgent } from "./types";
 import { EventAnalyzerAgent } from "./event-analyzer-agent";
+import { EventCreationAgent } from "./event-creation-agent";
 import { EventProcessorAgent } from "./event-processor-agent";
 import { GeneralAssistantAgent } from "./general-assistant-agent";
 import { RouterAgent } from "./router-agent";
@@ -17,7 +18,7 @@ export class AgentManager {
   }
 
   /**
-   * Инициализация трех основных агентов
+   * Инициализация четырех основных агентов
    */
   private initializeAgents() {
     this.agents = new Map();
@@ -25,14 +26,16 @@ export class AgentManager {
     // Создаем экземпляры агентов
     const eventProcessor = new EventProcessorAgent();
     const eventAnalyzer = new EventAnalyzerAgent();
+    const eventCreation = new EventCreationAgent();
     const generalAssistant = new GeneralAssistantAgent();
 
     // Регистрируем агентов
     this.agents.set("event-processor", eventProcessor);
     this.agents.set("event-analyzer", eventAnalyzer);
+    this.agents.set("event-creation", eventCreation);
     this.agents.set("general-assistant", generalAssistant);
 
-    console.log("Initialized 3 core agents:", Array.from(this.agents.keys()));
+    console.log("Initialized 4 core agents:", Array.from(this.agents.keys()));
   }
 
   /**

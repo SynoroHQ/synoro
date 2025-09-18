@@ -28,7 +28,7 @@ function getActiveProvider() {
   return process.env.AI_PROVIDER === "moonshot" ? moonshotAI : oai;
 }
 
-function getModelName(defaultModel = "gpt-5-mini"): string {
+function getModelName(defaultModel = "gpt-5"): string {
   if (process.env.AI_PROVIDER === "moonshot") {
     return process.env.MOONSHOT_ADVICE_MODEL ?? "moonshot-v1-32k";
   }
@@ -66,7 +66,7 @@ export abstract class AbstractAgent implements BaseAgent {
   protected defaultModel: string;
   protected contextManager: AgentContextManager;
 
-  constructor(defaultModel = "gpt-5-mini") {
+  constructor(defaultModel = "gpt-5") {
     this.defaultModel = defaultModel;
     this.contextManager = new AgentContextManager();
   }

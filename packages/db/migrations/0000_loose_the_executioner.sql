@@ -57,6 +57,7 @@ CREATE TABLE "users" (
 	"email" text NOT NULL,
 	"email_verified" boolean DEFAULT false NOT NULL,
 	"image" text,
+	"username" text,
 	"role" "user_role" DEFAULT 'user' NOT NULL,
 	"status" "user_status" DEFAULT 'active' NOT NULL,
 	"last_login_at" timestamp with time zone,
@@ -258,7 +259,8 @@ CREATE TABLE "messages" (
 	"model" text,
 	"status" text DEFAULT 'completed' NOT NULL,
 	"parent_id" text,
-	"created_at" timestamp with time zone DEFAULT now() NOT NULL
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "message_no_self_link" CHECK ("messages"."parent_id" IS NULL OR "messages"."parent_id" != "messages"."id")
 );
 --> statement-breakpoint
 CREATE TABLE "reminder_executions" (
@@ -341,6 +343,7 @@ CREATE INDEX "session_user_idx" ON "sessions" USING btree ("user_id");--> statem
 CREATE INDEX "session_expires_idx" ON "sessions" USING btree ("expires_at");--> statement-breakpoint
 CREATE INDEX "session_active_idx" ON "sessions" USING btree ("is_active");--> statement-breakpoint
 CREATE INDEX "user_email_idx" ON "users" USING btree ("email");--> statement-breakpoint
+CREATE INDEX "user_username_idx" ON "users" USING btree ("username");--> statement-breakpoint
 CREATE INDEX "user_role_idx" ON "users" USING btree ("role");--> statement-breakpoint
 CREATE INDEX "user_status_idx" ON "users" USING btree ("status");--> statement-breakpoint
 CREATE INDEX "user_created_at_idx" ON "users" USING btree ("created_at");--> statement-breakpoint

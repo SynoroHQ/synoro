@@ -62,7 +62,7 @@ const generalAssistantAgent: PromptDefinition = {
   type: "text",
   prompt: generalAssistantAgentTemplate,
   labels: ["production", "staging", "latest"],
-  defaultModel: "gpt-5-mini",
+  defaultModel: "gpt-5",
 };
 
 export { generalAssistantAgent };

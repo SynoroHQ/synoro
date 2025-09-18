@@ -34,7 +34,7 @@ const baseAgentContext: PromptDefinition = {
   type: "text",
   prompt: baseAgentContextTemplate,
   labels: ["agent", "base", "context", "analysis"],
-  defaultModel: "gpt-5-mini",
+  defaultModel: "gpt-5",
 };
 
 export default baseAgentContext;
