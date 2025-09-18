@@ -2,7 +2,6 @@ import type { LangfuseClient } from "@langfuse/client";
 
 import type { PromptDefinition } from "../core/prompt";
 import { createModelConfig, DEFAULT_MODEL } from "../core/models";
-import assistant from "../prompts/assistant";
 import { registry } from "../registry";
 
 export async function createPromptInCloud(
@@ -41,9 +40,3 @@ export async function createPromptByKeyInCloud(
   );
 }
 
-export async function createAssistantPromptInCloud(
-  langfuse: LangfuseClient,
-  model: string = assistant.defaultModel ?? DEFAULT_MODEL,
-) {
-  return createPromptInCloud(assistant, langfuse, model);
-}
