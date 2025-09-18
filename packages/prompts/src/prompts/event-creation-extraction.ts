@@ -12,10 +12,10 @@ const eventCreationExtractionTemplate = `Ты - эксперт по извлеч
 - other: встречи, события, все остальное
 
 ПРИОРИТЕТЫ:
-- urgent: срочно, немедленно, критично
-- high: важно, приоритетно, нужно сделать
-- medium: обычная важность, стандартно
-- low: не спешит, когда будет время
+- срочно: срочно, немедленно, критично
+- важно: важно, приоритетно, нужно сделать
+- обычно: обычная важность, стандартно
+- неспешно: не спешит, когда будет время
 
 ВРЕМЕННЫЕ УКАЗАНИЯ:
 - Текущее время: {{currentTime}}
@@ -43,7 +43,7 @@ const eventCreationExtractionTemplate = `Ты - эксперт по извлеч
   "title": "Покупка продуктов в Пятерочке",
   "description": "Покупка продуктов в магазине Пятерочка",
   "type": "expense",
-  "priority": "medium",
+  "priority": "обычно",
   "amount": 500,
   "currency": "RUB",
   "occurredAt": "{{currentTime}}",
@@ -57,7 +57,7 @@ const eventCreationExtractionTemplate = `Ты - эксперт по извлеч
   "title": "Починить кран в ванной",
   "description": "Ремонт крана в ванной комнате",
   "type": "maintenance",
-  "priority": "high",
+  "priority": "важно",
   "amount": null,
   "currency": "RUB",
   "occurredAt": "завтра относительно {{currentTime}}",
@@ -69,8 +69,8 @@ const eventCreationExtractionTemplate = `Ты - эксперт по извлеч
 ПРАВИЛА:
 - Будь точным в извлечении информации
 - Если информация неоднозначна, указывай более низкую уверенность
-- Для expense всегда указывай amount и currency
-- Для task и maintenance обычно needsConfirmation = true
+- Для расходов всегда указывай сумму и валюту
+- Для задач и ремонта обычно требуется подтверждение = true
 - Используй релевантные теги для категоризации
 - Интерпретируй время относительно {{currentTime}} и {{timezone}}
 
