@@ -1,3 +1,4 @@
+import { createId } from "@paralleldrive/cuid2";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -8,6 +9,7 @@ import {
 
 import type { AgentTask } from "../../lib/agents/types";
 import { AgentManager } from "../../lib/agents/agent-manager";
+import { saveMessageToConversation } from "../../lib/context-manager";
 import { enhancedBotProcedure, protectedProcedure } from "../../trpc";
 
 // Схема для агентных опций
@@ -66,6 +68,29 @@ async function processMessageWithAgents({
     const result = await agentManager.processRequest(text, task.context);
 
     const processingTime = Date.now() - startTime;
+
+    // Сохраняем сообщения в базу данных для истории
+    try {
+      if (metadata?.conversationId) {
+        // Сохраняем пользовательское сообщение
+        await saveMessageToConversation(ctx, metadata.conversationId, "user", {
+          text,
+        });
+
+        // Сохраняем ответ ассистента
+        if (result.success && result.data) {
+          await saveMessageToConversation(
+            ctx,
+            metadata.conversationId,
+            "assistant",
+            { text: result.data },
+          );
+        }
+      }
+    } catch (error) {
+      console.error("Failed to save messages to conversation:", error);
+      // Не прерываем выполнение, только логируем ошибку
+    }
 
     return {
       success: result.success,

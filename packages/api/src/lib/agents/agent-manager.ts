@@ -60,6 +60,12 @@ export class AgentManager {
       let messageHistory: MessageHistoryItem[] = [];
       if (context?.userId && context?.channel && context?.db) {
         try {
+          console.log("Fetching conversation history for:", {
+            userId: context.userId,
+            channel: context.channel,
+            conversationId: context.conversationId,
+          });
+
           messageHistory = await getConversationHistory({
             db: context.db,
             userId: context.userId,
@@ -67,9 +73,23 @@ export class AgentManager {
             limit: 10, // Берем последние 10 сообщений для контекста
             conversationId: context.conversationId,
           });
+
+          console.log("Retrieved message history:", {
+            count: messageHistory.length,
+            messages: messageHistory.map((m) => ({
+              role: m.role,
+              content: m.content.substring(0, 50) + "...",
+            })),
+          });
         } catch (error) {
           console.warn("Failed to fetch conversation history:", error);
         }
+      } else {
+        console.log("No context for message history:", {
+          hasUserId: !!context?.userId,
+          hasChannel: !!context?.channel,
+          hasDb: !!context?.db,
+        });
       }
 
       // Создаем задачу для агента с историей

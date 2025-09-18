@@ -34,6 +34,13 @@ export async function getConversationHistory({
   conversationId?: string;
 }): Promise<MessageHistoryItem[]> {
   try {
+    console.log("getConversationHistory called with:", {
+      userId,
+      channel,
+      limit,
+      conversationId,
+    });
+
     let query = db
       .select({
         id: messages.id,
@@ -65,6 +72,7 @@ export async function getConversationHistory({
     }
 
     const rows = await query;
+    console.log("Found messages in database:", rows.length);
 
     // Преобразуем в MessageHistoryItem и разворачиваем порядок (старые сначала)
     const history: MessageHistoryItem[] = rows.reverse().map((row: any) => ({
