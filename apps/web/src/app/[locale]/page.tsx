@@ -1,15 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import FAQ from "@/src/components/faq";
 import Features from "@/src/components/features";
 import Footer from "@/src/components/footer";
 import Header from "@/src/components/header";
 import Hero from "@/src/components/hero";
 import HowItWorks from "@/src/components/how-it-works";
-import Pricing from "@/src/components/pricing";
 import TelegramCTA from "@/src/components/telegram-cta";
-import WhoBenefits from "@/src/components/who-benefits";
 
 export default function HomePage() {
   const [isVisible, setIsVisible] = useState(false);
@@ -84,10 +81,6 @@ export default function HomePage() {
       <Features />
 
       <HowItWorks />
-
-      <WhoBenefits />
-
-      <FAQ />
 
       <Footer />
     </div>

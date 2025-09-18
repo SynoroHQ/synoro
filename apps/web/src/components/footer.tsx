@@ -91,14 +91,6 @@ export default function Footer() {
                 </li>
                 <li>
                   <a
-                    href="#pricing"
-                    className="inline-block text-sm text-gray-400 transition-all duration-300 hover:translate-x-1 hover:text-white sm:text-base"
-                  >
-                    {t("pricing")}
-                  </a>
-                </li>
-                <li>
-                  <a
                     href="#about"
                     className="inline-block text-sm text-gray-400 transition-all duration-300 hover:translate-x-1 hover:text-white sm:text-base"
                   >

@@ -1,7 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CheckCircle, MessageSquare, Mic, Play, Sparkles } from "lucide-react";
+import {
+  BarChart3,
+  CheckCircle,
+  FileText,
+  MessageSquare,
+  Mic,
+  Play,
+  Sparkles,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Badge, Button } from "@synoro/ui";
@@ -19,10 +27,7 @@ export default function Hero() {
       { step: 2, delay: 3000 }, // Show user message
       { step: 3, delay: 4000 }, // Show typing indicator
       { step: 4, delay: 6000 }, // Show bot response
-      { step: 5, delay: 8000 }, // Show suggestion
-      { step: 6, delay: 10000 }, // Show second user message
-      { step: 7, delay: 11000 }, // Show second typing
-      { step: 8, delay: 13000 }, // Show second bot response
+      { step: 5, delay: 8000 }, // Show analytics
     ];
 
     const timeouts: NodeJS.Timeout[] = [];
@@ -34,19 +39,12 @@ export default function Hero() {
         if (step === 2) setIsRecording(false);
 
         // Отмечаем завершение анимации на последнем шаге
-        if (step === 8) {
+        if (step === 5) {
           setAnimationComplete(true);
         }
       }, delay);
       timeouts.push(timeout);
     });
-
-    // Убираем сброс цикла - теперь сообщения остаются видимыми
-    // const resetTimeout = setTimeout(() => {
-    //   setCurrentStep(0);
-    //   setIsRecording(false);
-    // }, 15000);
-    // timeouts.push(resetTimeout);
 
     return () => timeouts.forEach(clearTimeout);
   }, []);
@@ -209,72 +207,38 @@ export default function Hero() {
                 </div>
               )}
 
-              {/* Smart Suggestion */}
+              {/* Analytics Dashboard */}
               {(currentStep >= 5 || animationComplete) && (
                 <div
                   className="animate-slide-in-left flex justify-start"
                   style={{ animationDelay: "0.5s" }}
                 >
                   <div className="bg-accent/10 border-accent/20 animate-glow-pulse max-w-[85%] rounded-2xl rounded-tl-md border px-3 py-2 sm:max-w-[80%] sm:px-4 sm:py-3">
-                    <p className="text-accent text-xs sm:text-sm">
-                      {t("aiSuggestion")}
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {/* User Message 2 */}
-              {(currentStep >= 6 || animationComplete) && (
-                <div
-                  className="animate-slide-in-right flex justify-end"
-                  style={{ animationDelay: "0.3s" }}
-                >
-                  <div className="bg-primary text-primary-foreground animate-message-pop max-w-[80%] rounded-2xl rounded-tr-md px-4 py-3">
-                    <p className="text-sm">{t("userMessage2")}</p>
-                    <div className="mt-1 flex items-center justify-end gap-1">
-                      <span className="text-xs opacity-70">14:35</span>
-                      <CheckCircle className="animate-check-mark h-3 w-3 opacity-70" />
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Typing Indicator 2 */}
-              {(currentStep === 7 || animationComplete) && (
-                <div className="animate-slide-in-left flex justify-start">
-                  <div className="bg-muted max-w-[80%] rounded-2xl rounded-tl-md px-4 py-3">
-                    <div className="flex items-center gap-1">
-                      <span className="text-muted-foreground text-sm">
-                        {t("scheduling")}
+                    <div className="mb-2 flex items-center gap-2">
+                      <BarChart3 className="text-accent h-4 w-4" />
+                      <span className="text-accent text-xs font-medium sm:text-sm">
+                        {t("analyticsTitle")}
                       </span>
-                      <div className="ml-2 flex gap-1">
-                        <div
-                          className="bg-primary animate-typing-dot h-1.5 w-1.5 rounded-full"
-                          style={{ animationDelay: "0ms" }}
-                        />
-                        <div
-                          className="bg-primary animate-typing-dot h-1.5 w-1.5 rounded-full"
-                          style={{ animationDelay: "200ms" }}
-                        />
-                        <div
-                          className="bg-primary animate-typing-dot h-1.5 w-1.5 rounded-full"
-                          style={{ animationDelay: "400ms" }}
-                        />
+                    </div>
+                    <div className="space-y-1 text-xs">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">
+                          Записей за месяц:
+                        </span>
+                        <span className="font-medium">47</span>
                       </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Bot Response 2 */}
-              {(currentStep >= 8 || animationComplete) && (
-                <div className="animate-slide-in-left flex justify-start">
-                  <div className="bg-muted animate-message-pop max-w-[80%] rounded-2xl rounded-tl-md px-4 py-3">
-                    <p className="text-sm">{t("aiResponse2")}</p>
-                    <div className="mt-1 flex items-center justify-start gap-1">
-                      <span className="text-muted-foreground text-xs">
-                        14:36
-                      </span>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">
+                          Категорий:
+                        </span>
+                        <span className="font-medium">8</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">
+                          Время экономии:
+                        </span>
+                        <span className="font-medium text-green-600">12ч</span>
+                      </div>
                     </div>
                   </div>
                 </div>

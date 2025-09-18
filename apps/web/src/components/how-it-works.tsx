@@ -3,7 +3,7 @@
 import type { LucideIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { BarChart3, MessageSquare, Zap } from "lucide-react";
+import { BarChart3, Database, FileText, Zap } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Badge } from "@synoro/ui";
@@ -30,21 +30,21 @@ export default function HowItWorks() {
       title: t("step1.title"),
       description: t("step1.description"),
       points: toStringArray(t.raw("step1.points")),
-      Icon: MessageSquare,
+      Icon: FileText,
       image: "/how-step1-chat.svg",
     },
     {
       title: t("step2.title"),
       description: t("step2.description"),
       points: toStringArray(t.raw("step2.points")),
-      Icon: Zap,
+      Icon: BarChart3,
       image: "/how-step2-automation.svg",
     },
     {
       title: t("step3.title"),
       description: t("step3.description"),
       points: toStringArray(t.raw("step3.points")),
-      Icon: BarChart3,
+      Icon: Database,
       image: "/how-step3-analytics.svg",
     },
   ];

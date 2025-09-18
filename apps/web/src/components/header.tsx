@@ -74,13 +74,6 @@ export default function Header() {
               {t("features")}
             </a>
             <a
-              href="#pricing"
-              className="hover:text-primary hover:bg-primary/5 block rounded-lg px-3 py-2 text-gray-700 transition-all duration-300"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              {t("pricing")}
-            </a>
-            <a
               href="#for-whom"
               className="hover:text-primary hover:bg-primary/5 block rounded-lg px-3 py-2 text-gray-700 transition-all duration-300"
               onClick={() => setIsMobileMenuOpen(false)}

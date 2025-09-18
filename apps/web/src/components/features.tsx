@@ -1,7 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Brain, MessageSquare, Sparkles, Target, Zap } from "lucide-react";
+import {
+  BarChart3,
+  Database,
+  FileText,
+  MessageSquare,
+  Sparkles,
+  TrendingUp,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Badge } from "@synoro/ui";
@@ -75,71 +82,71 @@ export default function Features() {
         </div>
 
         <div className="grid gap-8 lg:grid-cols-3">
-          {/* AI-Powered Intelligence */}
+          {/* Smart Logging */}
           <div
             className="group flex items-start gap-4 text-left transition-transform duration-150 will-change-transform hover:-translate-y-1"
             style={getItemStyle(0)}
           >
             <div className="mt-1">
-              <Brain className="text-primary h-6 w-6 transition-transform duration-150 group-hover:scale-110" />
+              <FileText className="text-primary h-6 w-6 transition-transform duration-150 group-hover:scale-110" />
             </div>
             <div>
               <h3 className="text-xl font-semibold tracking-tight">
-                {t("aiIntelligence.title")}
+                {t("smartLogging.title")}
               </h3>
               <p className="text-muted-foreground mt-2 text-sm leading-relaxed sm:text-base">
-                {t("aiIntelligence.description")}
+                {t("smartLogging.description")}
               </p>
               <ul className="mt-3 list-disc space-y-1 pl-5 text-sm">
-                <li>{t("aiIntelligence.features.smartLogging")}</li>
-                <li>{t("aiIntelligence.features.automaticClassification")}</li>
-                <li>{t("aiIntelligence.features.voiceRecognition")}</li>
+                <li>{t("smartLogging.features.voiceText")}</li>
+                <li>{t("smartLogging.features.automaticClassification")}</li>
+                <li>{t("smartLogging.features.timeTracking")}</li>
               </ul>
             </div>
           </div>
 
-          {/* Smart Planning & Analytics */}
+          {/* Data Analysis */}
           <div
             className="group flex items-start gap-4 text-left transition-transform duration-150 will-change-transform hover:-translate-y-1"
             style={getItemStyle(1)}
           >
             <div className="mt-1">
-              <Target className="text-primary h-6 w-6 transition-transform duration-150 group-hover:scale-110" />
+              <BarChart3 className="text-primary h-6 w-6 transition-transform duration-150 group-hover:scale-110" />
             </div>
             <div>
               <h3 className="text-xl font-semibold tracking-tight">
-                {t("smartPlanning.title")}
+                {t("dataAnalysis.title")}
               </h3>
               <p className="text-muted-foreground mt-2 text-sm leading-relaxed sm:text-base">
-                {t("smartPlanning.description")}
+                {t("dataAnalysis.description")}
               </p>
               <ul className="mt-3 list-disc space-y-1 pl-5 text-sm">
-                <li>{t("smartPlanning.features.weatherIntegration")}</li>
-                <li>{t("smartPlanning.features.smartReminders")}</li>
-                <li>{t("smartPlanning.features.savingsStrategy")}</li>
+                <li>{t("dataAnalysis.features.patternRecognition")}</li>
+                <li>{t("dataAnalysis.features.trendAnalysis")}</li>
+                <li>{t("dataAnalysis.features.insights")}</li>
               </ul>
             </div>
           </div>
 
-          {/* Productivity & Security */}
+          {/* Data Storage */}
           <div
             className="group flex items-start gap-4 text-left transition-transform duration-150 will-change-transform hover:-translate-y-1"
             style={getItemStyle(2)}
           >
             <div className="mt-1">
-              <Zap className="text-primary h-6 w-6 transition-transform duration-150 group-hover:scale-110" />
+              <Database className="text-primary h-6 w-6 transition-transform duration-150 group-hover:scale-110" />
             </div>
             <div>
               <h3 className="text-xl font-semibold tracking-tight">
-                {t("productivity.title")}
+                {t("dataStorage.title")}
               </h3>
               <p className="text-muted-foreground mt-2 text-sm leading-relaxed sm:text-base">
-                {t("productivity.description")}
+                {t("dataStorage.description")}
               </p>
               <ul className="mt-3 list-disc space-y-1 pl-5 text-sm">
-                <li>{t("productivity.features.gamification")}</li>
-                <li>{t("productivity.features.advancedAnalytics")}</li>
-                <li>{t("productivity.features.enterpriseSecurity")}</li>
+                <li>{t("dataStorage.features.secureStorage")}</li>
+                <li>{t("dataStorage.features.dataExport")}</li>
+                <li>{t("dataStorage.features.history")}</li>
               </ul>
             </div>
           </div>
