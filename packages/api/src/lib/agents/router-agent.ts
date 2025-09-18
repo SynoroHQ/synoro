@@ -1,6 +1,8 @@
 import { generateObject } from "ai";
 import { z } from "zod";
 
+import { getPrompt, PROMPT_KEYS } from "@synoro/prompts";
+
 import type {
   AgentCapability,
   AgentResult,
@@ -66,21 +68,8 @@ export class RouterAgent extends AbstractAgent {
     reasoning: string;
     category: string;
   }> {
-    const systemPrompt = `Ты - эксперт по маршрутизации запросов в системе Synoro AI.
-
-ТВОЯ ЗАДАЧА: точно определить, к какому агенту направить запрос пользователя.
-
-ДОСТУПНЫЕ АГЕНТЫ:
-1. event-processor - для логирования событий (покупки, траты, задачи, встречи, ремонт, обслуживание)
-2. event-analyzer - для анализа данных и статистики (отчеты, графики, тренды, сравнения)
-3. general-assistant - для общих вопросов и разговора
-
-ПРАВИЛА КЛАССИФИКАЦИИ:
-- event-processor: запросы на сохранение, логирование, создание событий
-- event-analyzer: запросы на анализ, статистику, отчеты, получение данных
-- general-assistant: все остальные запросы (вопросы, разговор, помощь)
-
-Отвечай точно и обоснованно.`;
+    // Получаем промпт из Langfuse облака
+    const systemPrompt = await getPrompt(PROMPT_KEYS.ROUTER_AGENT, "latest");
 
     const { object } = await generateObject({
       model: this.getModel(),
