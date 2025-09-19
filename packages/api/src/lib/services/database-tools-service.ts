@@ -405,7 +405,7 @@ export class DatabaseToolsService {
 
       const conditions = [
         eq(events.householdId, householdId),
-        eq(events.type, "task"),
+        eq(events.type, "work"),
         eq(events.status, "active"),
         lte(events.occurredAt, endDate),
         gte(events.occurredAt, new Date()),
@@ -473,7 +473,7 @@ export class DatabaseToolsService {
 
       const conditions = [
         eq(events.householdId, householdId),
-        eq(events.type, "expense"),
+        eq(events.type, "purchase"),
         eq(events.currency, currency),
       ];
 

@@ -2,6 +2,7 @@ import { generateObject } from "ai";
 import { z } from "zod";
 
 import { getPrompt, PROMPT_KEYS } from "@synoro/prompts";
+import { EventCategory } from "@synoro/validators";
 
 import type { AgentCapability, AgentResult, AgentTask } from "./types";
 import { EventLogService } from "../services/event-log-service";
@@ -21,7 +22,7 @@ interface Event {
   householdId: string;
   userId: string | null;
   source: "telegram" | "web" | "mobile" | "api";
-  type: "expense" | "task" | "maintenance" | "other";
+  type: z.infer<typeof EventCategory>;
   status: "active" | "archived" | "deleted";
   priority: "low" | "medium" | "high" | "urgent";
   occurredAt: Date;
@@ -36,7 +37,7 @@ interface Event {
 
 // Интерфейс для извлеченной информации о событии
 interface ExtractedInfo {
-  type: "expense" | "task" | "maintenance" | "other";
+  type: z.infer<typeof EventCategory>;
   title: string;
   description?: string;
   amount?: number;
@@ -52,9 +53,7 @@ interface ExtractedInfo {
 const eventExtractionSchema = z.object({
   title: z.string().describe("Заголовок события"),
   description: z.string().optional().describe("Описание события"),
-  type: z
-    .enum(["expense", "task", "maintenance", "other"])
-    .describe("Тип события"),
+  type: EventCategory.describe("Тип события"),
   priority: z
     .string()
     .transform((val) => mapRussianPriorityToCanonical(val))

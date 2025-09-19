@@ -1,14 +1,16 @@
 import { and, desc, eq, gte, lte, sql } from "drizzle-orm";
+import { z } from "zod";
 
 import type { Event, EventProperty, Tag } from "@synoro/db/schema";
 import { db } from "@synoro/db/client";
 import { eventProperties, events, eventTags, tags } from "@synoro/db/schema";
+import { EventCategory } from "@synoro/validators";
 
 export interface CreateEventData {
   householdId: string;
   userId?: string;
   source: "telegram" | "web" | "mobile" | "api";
-  type: "expense" | "task" | "maintenance" | "other";
+  type: z.infer<typeof EventCategory>;
   title?: string;
   notes?: string;
   amount?: number;
@@ -41,7 +43,7 @@ export interface EventWithDetails {
   householdId: string;
   userId: string | null;
   source: "telegram" | "web" | "mobile" | "api";
-  type: "expense" | "task" | "maintenance" | "other";
+  type: z.infer<typeof EventCategory>;
   status: "active" | "archived" | "deleted";
   priority: "low" | "medium" | "high" | "urgent";
   occurredAt: Date;
@@ -153,10 +155,7 @@ export class EventService {
 
     if (filters.type) {
       conditions.push(
-        eq(
-          events.type,
-          filters.type as "expense" | "task" | "maintenance" | "other",
-        ),
+        eq(events.type, filters.type as z.infer<typeof EventCategory>),
       );
     }
 
@@ -308,10 +307,7 @@ export class EventService {
 
     if (filters.type) {
       conditions.push(
-        eq(
-          events.type,
-          filters.type as "expense" | "task" | "maintenance" | "other",
-        ),
+        eq(events.type, filters.type as z.infer<typeof EventCategory>),
       );
     }
 
