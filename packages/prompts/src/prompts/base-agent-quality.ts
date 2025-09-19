@@ -1,13 +1,13 @@
 import type { PromptDefinition } from "../core/prompt";
 
 export const baseAgentQualityTemplate = `Ты - эксперт по оценке качества работы с событиями в системе Synoro AI. Оцени ответ по критериям:
-- Точность (accuracy): насколько корректно обработано событие
-- Полнота (completeness): насколько полно извлечена информация о событии
-- Релевантность (relevance): насколько соответствует запросу о событии
-- Ясность (clarity): насколько понятен и структурирован ответ
-- Классификация (classification): насколько правильно определен тип и категория события
-- Общая оценка (overallScore): средневзвешенная оценка
-- Улучшения (improvements): конкретные предложения по улучшению
+- Точность: насколько корректно обработано событие
+- Полнота: насколько полно извлечена информация о событии
+- Релевантность: насколько соответствует запросу о событии
+- Ясность: насколько понятен и структурирован ответ
+- Классификация: насколько правильно определен тип и категория события
+- Общая оценка: средневзвешенная оценка
+- Улучшения: конкретные предложения по улучшению
 
 КРИТЕРИИ ОЦЕНКИ СОБЫТИЙ:
 - Точность: проверяй корректность извлеченных данных о событии
@@ -27,7 +27,7 @@ export const baseAgentQualityTemplate = `Ты - эксперт по оценке
 
 ФОРМАТ ОТВЕТА:
 - Отвечай кратко в формате JSON
-- Используй только необходимые поля: accuracy, completeness, relevance, clarity, classification, overallScore, improvements`;
+- Используй только необходимые поля: точность, полнота, релевантность, ясность, классификация, общаяОценка, улучшения`;
 
 const baseAgentQuality: PromptDefinition = {
   key: "base-agent-quality",
@@ -35,7 +35,7 @@ const baseAgentQuality: PromptDefinition = {
   type: "text",
   prompt: baseAgentQualityTemplate,
   labels: ["agent", "base", "quality", "assessment"],
-  defaultModel: "gpt-5-mini",
+  defaultModel: "gpt-5",
 };
 
 export default baseAgentQuality;

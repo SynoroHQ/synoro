@@ -1,5 +1,5 @@
 {
-  "id": "5e803208-0e5f-4611-9d25-f33c27c87e15",
+  "id": "f3edd7e9-64f7-4907-9461-2cb3bf78e1ce",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -345,6 +345,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "username": {
+          "name": "username",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "role": {
           "name": "role",
           "type": "user_role",
@@ -388,6 +394,21 @@
           "columns": [
             {
               "expression": "email",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "user_username_idx": {
+          "name": "user_username_idx",
+          "columns": [
+            {
+              "expression": "username",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -2967,7 +2988,12 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
-      "checkConstraints": {},
+      "checkConstraints": {
+        "message_no_self_link": {
+          "name": "message_no_self_link",
+          "value": "\"messages\".\"parent_id\" IS NULL OR \"messages\".\"parent_id\" != \"messages\".\"id\""
+        }
+      },
       "isRLSEnabled": false
     },
     "public.reminder_executions": {

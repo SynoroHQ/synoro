@@ -1,3 +1,0 @@
-ALTER TABLE "tags" ADD CONSTRAINT "tags_parent_id_tags_id_fk" FOREIGN KEY ("parent_id") REFERENCES "public"."tags"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "messages" ADD CONSTRAINT "messages_parent_id_messages_id_fk" FOREIGN KEY ("parent_id") REFERENCES "public"."messages"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "reminders" ADD CONSTRAINT "reminders_parent_reminder_id_reminders_id_fk" FOREIGN KEY ("parent_reminder_id") REFERENCES "public"."reminders"("id") ON DELETE set null ON UPDATE no action;

@@ -31,7 +31,7 @@ export class GeneralAssistantAgent extends AbstractAgent {
   ];
 
   constructor() {
-    super("gpt-5-mini");
+    super("gpt-5");
   }
 
   async canHandle(task: AgentTask): Promise<boolean> {

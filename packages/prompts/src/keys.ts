@@ -10,6 +10,8 @@ export const PROMPT_KEYS = {
   EVENT_ANALYZER_AGENT: "event-analyzer-agent",
   GENERAL_ASSISTANT_AGENT: "general-assistant-agent",
   ROUTER_AGENT: "router-agent",
+  // Event creation prompts
+  EVENT_CREATION_EXTRACTION: "event-creation-extraction",
 } as const;
 
 export type PromptKey = (typeof PROMPT_KEYS)[keyof typeof PROMPT_KEYS];

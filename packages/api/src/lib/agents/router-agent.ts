@@ -31,11 +31,12 @@ export class RouterAgent extends AbstractAgent {
   private availableAgents = {
     eventProcessor: "event-processor",
     eventAnalyzer: "event-analyzer",
+    eventCreation: "event-creation",
     generalAssistant: "general-assistant",
   };
 
   constructor() {
-    super("gpt-5-mini");
+    super("gpt-5");
   }
 
   canHandle(_task: AgentTask): Promise<boolean> {
@@ -51,11 +52,17 @@ export class RouterAgent extends AbstractAgent {
       targetAgent: z.enum([
         "event-processor",
         "event-analyzer",
+        "event-creation",
         "general-assistant",
       ]),
       confidence: z.number().min(0).max(1),
       reasoning: z.string(),
-      category: z.enum(["event_logging", "data_analysis", "general_chat"]),
+      category: z.enum([
+        "event_logging",
+        "data_analysis",
+        "event_creation",
+        "general_chat",
+      ]),
     });
   }
 

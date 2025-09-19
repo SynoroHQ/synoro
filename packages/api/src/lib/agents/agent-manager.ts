@@ -1,5 +1,9 @@
+import type { MessageHistoryItem } from "@synoro/db";
+import { getConversationHistory } from "@synoro/db";
+
 import type { AgentResult, AgentTask, BaseAgent } from "./types";
 import { EventAnalyzerAgent } from "./event-analyzer-agent";
+import { EventCreationAgent } from "./event-creation-agent";
 import { EventProcessorAgent } from "./event-processor-agent";
 import { GeneralAssistantAgent } from "./general-assistant-agent";
 import { RouterAgent } from "./router-agent";
@@ -17,7 +21,7 @@ export class AgentManager {
   }
 
   /**
-   * Инициализация трех основных агентов
+   * Инициализация четырех основных агентов
    */
   private initializeAgents() {
     this.agents = new Map();
@@ -25,14 +29,16 @@ export class AgentManager {
     // Создаем экземпляры агентов
     const eventProcessor = new EventProcessorAgent();
     const eventAnalyzer = new EventAnalyzerAgent();
+    const eventCreation = new EventCreationAgent();
     const generalAssistant = new GeneralAssistantAgent();
 
     // Регистрируем агентов
     this.agents.set("event-processor", eventProcessor);
     this.agents.set("event-analyzer", eventAnalyzer);
+    this.agents.set("event-creation", eventCreation);
     this.agents.set("general-assistant", generalAssistant);
 
-    console.log("Initialized 3 core agents:", Array.from(this.agents.keys()));
+    console.log("Initialized 4 core agents:", Array.from(this.agents.keys()));
   }
 
   /**
@@ -50,7 +56,43 @@ export class AgentManager {
     context?: any,
   ): Promise<AgentResult<string>> {
     try {
-      // Создаем задачу для агента
+      // Получаем историю диалога если есть контекст пользователя
+      let messageHistory: MessageHistoryItem[] = [];
+      if (context?.userId && context?.channel && context?.db) {
+        try {
+          console.log("Fetching conversation history for:", {
+            userId: context.userId,
+            channel: context.channel,
+            conversationId: context.conversationId,
+          });
+
+          messageHistory = await getConversationHistory({
+            db: context.db,
+            userId: context.userId,
+            channel: context.channel,
+            limit: 10, // Берем последние 10 сообщений для контекста
+            conversationId: context.conversationId,
+          });
+
+          console.log("Retrieved message history:", {
+            count: messageHistory.length,
+            messages: messageHistory.map((m) => ({
+              role: m.role,
+              content: m.content.substring(0, 50) + "...",
+            })),
+          });
+        } catch (error) {
+          console.warn("Failed to fetch conversation history:", error);
+        }
+      } else {
+        console.log("No context for message history:", {
+          hasUserId: !!context?.userId,
+          hasChannel: !!context?.channel,
+          hasDb: !!context?.db,
+        });
+      }
+
+      // Создаем задачу для агента с историей
       const task: AgentTask = {
         id: `task-${Date.now()}`,
         input,
@@ -58,6 +100,7 @@ export class AgentManager {
         context: context || {},
         priority: 1,
         createdAt: new Date(),
+        messageHistory,
       };
 
       // Определяем подходящего агента через роутер
