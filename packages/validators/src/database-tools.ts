@@ -16,7 +16,21 @@ export const getUserEventsSchema = z.object({
     .describe("Максимальное количество событий"),
   offset: z.number().optional().default(0).describe("Смещение для пагинации"),
   type: z
-    .enum(["expense", "task", "maintenance", "other"])
+    .enum([
+      "purchase",
+      "maintenance",
+      "health",
+      "work",
+      "personal",
+      "transport",
+      "home",
+      "finance",
+      "education",
+      "entertainment",
+      "travel",
+      "food",
+      "other",
+    ])
     .optional()
     .describe("Тип события"),
   status: z
@@ -58,7 +72,21 @@ export const getUserStatsSchema = z.object({
     .optional()
     .describe("Конечная дата в формате ISO (YYYY-MM-DD)"),
   type: z
-    .enum(["expense", "task", "maintenance", "other"])
+    .enum([
+      "purchase",
+      "maintenance",
+      "health",
+      "work",
+      "personal",
+      "transport",
+      "home",
+      "finance",
+      "education",
+      "entertainment",
+      "travel",
+      "food",
+      "other",
+    ])
     .optional()
     .describe("Тип события для фильтрации"),
 });
@@ -73,7 +101,21 @@ export const searchEventsSchema = z.object({
     .default(10)
     .describe("Максимальное количество результатов"),
   type: z
-    .enum(["expense", "task", "maintenance", "other"])
+    .enum([
+      "purchase",
+      "maintenance",
+      "health",
+      "work",
+      "personal",
+      "transport",
+      "home",
+      "finance",
+      "education",
+      "entertainment",
+      "travel",
+      "food",
+      "other",
+    ])
     .optional()
     .describe("Тип события"),
 });
@@ -129,9 +171,18 @@ export type GetExpenseSummaryInput = z.infer<typeof getExpenseSummarySchema>;
 
 // Константы для типов событий
 export const EVENT_TYPES = {
-  EXPENSE: "expense",
-  TASK: "task",
+  PURCHASE: "purchase",
   MAINTENANCE: "maintenance",
+  HEALTH: "health",
+  WORK: "work",
+  PERSONAL: "personal",
+  TRANSPORT: "transport",
+  HOME: "home",
+  FINANCE: "finance",
+  EDUCATION: "education",
+  ENTERTAINMENT: "entertainment",
+  TRAVEL: "travel",
+  FOOD: "food",
   OTHER: "other",
 } as const;
 

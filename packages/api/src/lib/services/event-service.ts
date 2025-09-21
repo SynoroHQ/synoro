@@ -8,7 +8,20 @@ export interface CreateEventData {
   householdId: string;
   userId?: string;
   source: "telegram" | "web" | "mobile" | "api";
-  type: "expense" | "task" | "maintenance" | "other";
+  type:
+    | "purchase"
+    | "maintenance"
+    | "health"
+    | "work"
+    | "personal"
+    | "transport"
+    | "home"
+    | "finance"
+    | "education"
+    | "entertainment"
+    | "travel"
+    | "food"
+    | "other";
   title?: string;
   notes?: string;
   amount?: number;
@@ -41,7 +54,20 @@ export interface EventWithDetails {
   householdId: string;
   userId: string | null;
   source: "telegram" | "web" | "mobile" | "api";
-  type: "expense" | "task" | "maintenance" | "other";
+  type:
+    | "purchase"
+    | "maintenance"
+    | "health"
+    | "work"
+    | "personal"
+    | "transport"
+    | "home"
+    | "finance"
+    | "education"
+    | "entertainment"
+    | "travel"
+    | "food"
+    | "other";
   status: "active" | "archived" | "deleted";
   priority: "low" | "medium" | "high" | "urgent";
   occurredAt: Date;
@@ -155,7 +181,20 @@ export class EventService {
       conditions.push(
         eq(
           events.type,
-          filters.type as "expense" | "task" | "maintenance" | "other",
+          filters.type as
+            | "purchase"
+            | "maintenance"
+            | "health"
+            | "work"
+            | "personal"
+            | "transport"
+            | "home"
+            | "finance"
+            | "education"
+            | "entertainment"
+            | "travel"
+            | "food"
+            | "other",
         ),
       );
     }
@@ -310,7 +349,20 @@ export class EventService {
       conditions.push(
         eq(
           events.type,
-          filters.type as "expense" | "task" | "maintenance" | "other",
+          filters.type as
+            | "purchase"
+            | "maintenance"
+            | "health"
+            | "work"
+            | "personal"
+            | "transport"
+            | "home"
+            | "finance"
+            | "education"
+            | "entertainment"
+            | "travel"
+            | "food"
+            | "other",
         ),
       );
     }

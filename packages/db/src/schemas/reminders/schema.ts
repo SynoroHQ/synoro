@@ -16,7 +16,7 @@ import { users } from "../auth/schema";
 
 // Enum для типов напоминаний
 export const reminderTypeEnum = pgEnum("reminder_type", [
-  "task",
+  "work",
   "event",
   "deadline",
   "meeting",
@@ -93,7 +93,7 @@ export const reminders = pgTable(
     // Основная информация
     title: text("title").notNull(),
     description: text("description"),
-    type: reminderTypeEnum("type").notNull().default("task"),
+    type: reminderTypeEnum("type").notNull().default("work"),
     priority: reminderPriorityEnum("priority").notNull().default("medium"),
     status: reminderStatusEnum("status").notNull().default("pending"),
 

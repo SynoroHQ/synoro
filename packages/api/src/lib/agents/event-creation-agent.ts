@@ -8,19 +8,20 @@ import { EventLogService } from "../services/event-log-service";
 import { EventService } from "../services/event-service";
 import { AbstractAgent } from "./base-agent";
 
-// Интерфейс для извлеченной информации о событии
-interface ExtractedEventInfo {
-  type: "expense" | "task" | "maintenance" | "other";
+// Тип для извлеченной информации о событии
+type EventInfo = {
   title: string;
   description?: string;
-  amount?: number;
-  currency?: string;
-  occurredAt: string | number | Date;
-  confidence: number;
+  type: "expense" | "task" | "maintenance" | "other";
   priority: "low" | "medium" | "high" | "urgent";
-  properties?: Record<string, unknown>;
+  amount?: number;
+  currency: string;
+  occurredAt: string;
   tags?: string[];
-}
+  properties?: Record<string, unknown>;
+  confidence: number;
+  needsConfirmation: boolean;
+};
 
 // Схема для извлечения информации о событии из текста
 const eventExtractionSchema = z.object({
@@ -163,19 +164,7 @@ export class EventCreationAgent extends AbstractAgent {
   /**
    * Извлекает информацию о событии из текста
    */
-  private async extractEventInfo(task: AgentTask): Promise<{
-    title: string;
-    description?: string;
-    type: "expense" | "task" | "maintenance" | "other";
-    priority: "low" | "medium" | "high" | "urgent";
-    amount?: number;
-    currency: string;
-    occurredAt: string;
-    tags?: string[];
-    properties?: Record<string, unknown>;
-    confidence: number;
-    needsConfirmation: boolean;
-  }> {
+  private async extractEventInfo(task: AgentTask): Promise<EventInfo> {
     const timezone = task.context?.timezone || "Europe/Moscow";
     const currentTime = new Date().toISOString();
 
@@ -217,7 +206,7 @@ export class EventCreationAgent extends AbstractAgent {
    * Создает событие в базе данных
    */
   private async createEvent(
-    extractedInfo: ExtractedEventInfo,
+    extractedInfo: EventInfo,
     task: AgentTask,
   ): Promise<any> {
     const householdId = task.context?.householdId;
@@ -288,7 +277,7 @@ export class EventCreationAgent extends AbstractAgent {
   private async createEventLog(
     task: AgentTask,
     event: any,
-    extractedInfo: any,
+    extractedInfo: EventInfo,
   ): Promise<void> {
     try {
       await this.eventLogService.createEventLog({

@@ -14,7 +14,7 @@ export const dateSchema = z.date();
 
 // Enum схемы
 export const reminderTypeSchema = z.enum([
-  "task",
+  "work",
   "event",
   "deadline",
   "meeting",

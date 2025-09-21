@@ -14,7 +14,7 @@
 - `householdId` (string) - ID домохозяйства
 - `limit` (number, optional) - Максимальное количество событий (по умолчанию 10)
 - `offset` (number, optional) - Смещение для пагинации (по умолчанию 0)
-- `type` (string, optional) - Тип события: "expense", "task", "maintenance", "other"
+- `type` (string, optional) - Тип события: "purchase", "maintenance", "health", "work", "personal", "transport", "home", "finance", "education", "entertainment", "travel", "food", "other"
 - `status` (string, optional) - Статус события: "active", "archived", "deleted"
 - `priority` (string, optional) - Приоритет: "low", "medium", "high", "urgent"
 - `startDate` (string, optional) - Начальная дата в формате ISO (YYYY-MM-DD)
@@ -134,7 +134,20 @@ interface EventWithDetails {
   householdId: string;
   userId: string | null;
   source: "telegram" | "web" | "mobile" | "api";
-  type: "expense" | "task" | "maintenance" | "other";
+  type:
+    | "purchase"
+    | "maintenance"
+    | "health"
+    | "work"
+    | "personal"
+    | "transport"
+    | "home"
+    | "finance"
+    | "education"
+    | "entertainment"
+    | "travel"
+    | "food"
+    | "other";
   status: "active" | "archived" | "deleted";
   priority: "low" | "medium" | "high" | "urgent";
   occurredAt: string;
@@ -231,7 +244,7 @@ const expenses = await handler.executeTool("search_events", {
   householdId: "household123",
   userId: "user456",
   query: "продукты",
-  type: "expense",
+  type: "purchase",
   limit: 10,
 });
 ```

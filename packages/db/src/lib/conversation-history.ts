@@ -50,25 +50,22 @@ export async function getConversationHistory({
         conversationId: messages.conversationId,
       })
       .from(messages)
-      .innerJoin(conversations, eq(conversations.id, messages.conversationId))
-      .where(
-        and(
-          eq(conversations.ownerUserId, userId),
-          eq(conversations.channel, channel as "telegram" | "web" | "mobile"),
-        ),
-      )
       .orderBy(desc(messages.createdAt))
       .limit(limit);
 
-    // Если указан конкретный диалог, фильтруем по нему
+    // Если указан конкретный диалог, используем только фильтр по conversationId
     if (conversationId) {
-      query = query.where(
-        and(
-          eq(conversations.ownerUserId, userId),
-          eq(conversations.channel, channel as "telegram" | "web" | "mobile"),
-          eq(messages.conversationId, conversationId),
-        ),
-      );
+      query = query.where(eq(messages.conversationId, conversationId));
+    } else {
+      // Если conversationId не указан, используем фильтры по conversations и добавляем join
+      query = query
+        .innerJoin(conversations, eq(conversations.id, messages.conversationId))
+        .where(
+          and(
+            eq(conversations.ownerUserId, userId),
+            eq(conversations.channel, channel as "telegram" | "web" | "mobile"),
+          ),
+        );
     }
 
     const rows = await query;

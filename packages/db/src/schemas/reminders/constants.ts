@@ -6,7 +6,7 @@
 export const REMINDER_DEFAULTS = {
   PRIORITY: "medium" as const,
   STATUS: "pending" as const,
-  TYPE: "task" as const,
+  TYPE: "work" as const,
   RECURRENCE: "none" as const,
   AI_GENERATED: false,
   NOTIFICATION_SENT: false,
@@ -69,7 +69,7 @@ export const REMINDER_PRIORITIES = {
  * Типы напоминаний
  */
 export const REMINDER_TYPES = {
-  TASK: "task",
+  WORK: "work",
   EVENT: "event",
   DEADLINE: "deadline",
   MEETING: "meeting",

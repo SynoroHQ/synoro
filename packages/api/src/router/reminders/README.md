@@ -221,7 +221,7 @@ export type ReminderFilters = {
 
 ```typescript
 export type ReminderType =
-  | "task"
+  | "work"
   | "event"
   | "deadline"
   | "meeting"
