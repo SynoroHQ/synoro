@@ -1,6 +1,10 @@
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, isNotNull, sql } from "drizzle-orm";
 
+import type { Database } from "../types";
 import { conversations, messages } from "../schemas/chat/schema";
+
+// Тип для каналов
+type Channel = "telegram" | "web" | "mobile";
 
 // Определяем тип локально, чтобы избежать циклических зависимостей
 export interface MessageHistoryItem {
@@ -27,9 +31,9 @@ export async function getConversationHistory({
   limit = 20,
   conversationId,
 }: {
-  db: any;
+  db: Database;
   userId: string;
-  channel: string;
+  channel: Channel;
   limit?: number;
   conversationId?: string;
 }): Promise<MessageHistoryItem[]> {
@@ -41,7 +45,18 @@ export async function getConversationHistory({
       conversationId,
     });
 
-    let query = db
+    // Создаем массив условий для фильтрации
+    const conditions = [
+      eq(conversations.ownerUserId, userId),
+      eq(conversations.channel, channel),
+    ];
+
+    // Если указан конкретный диалог, добавляем условие фильтрации по нему
+    if (conversationId) {
+      conditions.push(eq(messages.conversationId, conversationId));
+    }
+
+    const query = db
       .select({
         id: messages.id,
         role: messages.role,
@@ -97,9 +112,9 @@ export async function getActiveConversation({
   userId,
   channel,
 }: {
-  db: any;
+  db: Database;
   userId: string;
-  channel: string;
+  channel: Channel;
 }): Promise<string | null> {
   try {
     const result = await db
@@ -108,14 +123,15 @@ export async function getActiveConversation({
       .where(
         and(
           eq(conversations.ownerUserId, userId),
-          eq(conversations.channel, channel as "telegram" | "web" | "mobile"),
+          eq(conversations.channel, channel),
           eq(conversations.status, "active"),
+          isNotNull(conversations.lastMessageAt),
         ),
       )
-      .orderBy(desc(conversations.lastMessageAt))
+      .orderBy(sql`${conversations.lastMessageAt} DESC NULLS LAST`)
       .limit(1);
 
-    return result.length > 0 ? result[0].id : null;
+    return result.length > 0 ? (result[0]?.id ?? null) : null;
   } catch (error) {
     console.error("Error fetching active conversation:", error);
     return null;

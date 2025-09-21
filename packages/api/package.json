@@ -6,8 +6,8 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "source": "./src/index.ts",
-      "default": "./src/index.ts"
+      "default": "./dist/index.js",
+      "source": "./src/index.ts"
     }
   },
   "main": "./dist/index.js",

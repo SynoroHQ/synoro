@@ -1,8 +1,10 @@
 import { and, desc, eq, gte, lte, sql } from "drizzle-orm";
+import { z } from "zod";
 
 import type { Event, EventProperty, Tag } from "@synoro/db/schema";
 import { db } from "@synoro/db/client";
 import { eventProperties, events, eventTags, tags } from "@synoro/db/schema";
+import { EventCategory } from "@synoro/validators";
 
 export interface CreateEventData {
   householdId: string;

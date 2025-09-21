@@ -169,7 +169,7 @@ export type GetRecentEventsInput = z.infer<typeof getRecentEventsSchema>;
 export type GetUpcomingTasksInput = z.infer<typeof getUpcomingTasksSchema>;
 export type GetExpenseSummaryInput = z.infer<typeof getExpenseSummarySchema>;
 
-// Константы для типов событий
+// Константы для типов событий (устаревшие - используйте EventCategory из events.ts)
 export const EVENT_TYPES = {
   PURCHASE: "purchase",
   MAINTENANCE: "maintenance",
