@@ -7,11 +7,11 @@ import { EventCategory } from "@synoro/validators";
 import type { AgentCapability, AgentResult, AgentTask } from "./types";
 import { EventLogService } from "../services/event-log-service";
 import { EventService } from "../services/event-service";
-import { mapRussianPriorityToCanonical } from "../utils/priority-mapper";
+import { mapPriority } from "../utils/priority-mapper";
 import { AbstractAgent } from "./base-agent";
 
 // Тип для извлеченной информации о событии
-type EventInfo = {
+interface EventInfo {
   title: string;
   description?: string;
   type: "expense" | "task" | "maintenance" | "other";
@@ -23,7 +23,7 @@ type EventInfo = {
   properties?: Record<string, unknown>;
   confidence: number;
   needsConfirmation: boolean;
-};
+}
 
 // Схема для извлечения информации о событии из текста
 const eventExtractionSchema = z.object({
@@ -32,7 +32,7 @@ const eventExtractionSchema = z.object({
   type: EventCategory.describe("Тип события"),
   priority: z
     .string()
-    .transform((val) => mapRussianPriorityToCanonical(val))
+    .transform((val) => mapPriority(val))
     .describe("Приоритет события"),
   amount: z.number().optional().describe("Сумма (для расходов)"),
   currency: z.string().default("RUB").describe("Валюта"),
@@ -210,11 +210,7 @@ export class EventCreationAgent extends AbstractAgent {
    * Создает событие в базе данных
    */
   private async createEvent(
-<<<<<<< HEAD
     extractedInfo: EventInfo,
-=======
-    extractedInfo: ExtractedInfo,
->>>>>>> 01c482c5899e16e1935ee91e188f91cfa7138fc0
     task: AgentTask,
   ): Promise<Event> {
     const householdId = task.context?.householdId;
@@ -284,13 +280,8 @@ export class EventCreationAgent extends AbstractAgent {
    */
   private async createEventLog(
     task: AgentTask,
-<<<<<<< HEAD
-    event: any,
-    extractedInfo: EventInfo,
-=======
     event: Event,
-    extractedInfo: ExtractedInfo,
->>>>>>> 01c482c5899e16e1935ee91e188f91cfa7138fc0
+    extractedInfo: EventInfo,
   ): Promise<void> {
     try {
       // Используем nullish coalescing для опциональных полей

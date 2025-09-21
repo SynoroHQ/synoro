@@ -56,34 +56,42 @@ export async function getConversationHistory({
       conditions.push(eq(messages.conversationId, conversationId));
     }
 
-    const query = db
-      .select({
-        id: messages.id,
-        role: messages.role,
-        content: messages.content,
-        createdAt: messages.createdAt,
-        conversationId: messages.conversationId,
-      })
-      .from(messages)
-      .orderBy(desc(messages.createdAt))
-      .limit(limit);
-
     // Если указан конкретный диалог, используем только фильтр по conversationId
+    let rows;
     if (conversationId) {
-      query = query.where(eq(messages.conversationId, conversationId));
+      rows = await db
+        .select({
+          id: messages.id,
+          role: messages.role,
+          content: messages.content,
+          createdAt: messages.createdAt,
+          conversationId: messages.conversationId,
+        })
+        .from(messages)
+        .where(eq(messages.conversationId, conversationId))
+        .orderBy(desc(messages.createdAt))
+        .limit(limit);
     } else {
       // Если conversationId не указан, используем фильтры по conversations и добавляем join
-      query = query
+      rows = await db
+        .select({
+          id: messages.id,
+          role: messages.role,
+          content: messages.content,
+          createdAt: messages.createdAt,
+          conversationId: messages.conversationId,
+        })
+        .from(messages)
         .innerJoin(conversations, eq(conversations.id, messages.conversationId))
         .where(
           and(
             eq(conversations.ownerUserId, userId),
             eq(conversations.channel, channel as "telegram" | "web" | "mobile"),
           ),
-        );
+        )
+        .orderBy(desc(messages.createdAt))
+        .limit(limit);
     }
-
-    const rows = await query;
     console.log("Found messages in database:", rows.length);
 
     // Преобразуем в MessageHistoryItem и разворачиваем порядок (старые сначала)
