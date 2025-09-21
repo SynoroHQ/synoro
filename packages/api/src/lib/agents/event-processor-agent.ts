@@ -175,7 +175,20 @@ export class EventProcessorAgent extends AbstractAgent {
    */
   private determineEventType(
     task: AgentTask,
-  ): "expense" | "task" | "maintenance" | "other" {
+  ):
+    | "purchase"
+    | "maintenance"
+    | "health"
+    | "work"
+    | "personal"
+    | "transport"
+    | "home"
+    | "finance"
+    | "education"
+    | "entertainment"
+    | "travel"
+    | "food"
+    | "other" {
     const input = task.input.toLowerCase();
 
     if (
@@ -184,15 +197,17 @@ export class EventProcessorAgent extends AbstractAgent {
       input.includes("покупк") ||
       input.includes("деньг")
     ) {
-      return "expense";
+      return "purchase";
     }
 
     if (
       input.includes("задач") ||
       input.includes("дела") ||
-      input.includes("напомин")
+      input.includes("напомин") ||
+      input.includes("работа") ||
+      input.includes("проект")
     ) {
-      return "task";
+      return "work";
     }
 
     if (
@@ -201,6 +216,85 @@ export class EventProcessorAgent extends AbstractAgent {
       input.includes("обслуж")
     ) {
       return "maintenance";
+    }
+
+    if (
+      input.includes("здоров") ||
+      input.includes("врач") ||
+      input.includes("лекарств") ||
+      input.includes("больниц")
+    ) {
+      return "health";
+    }
+
+    if (
+      input.includes("еда") ||
+      input.includes("ресторан") ||
+      input.includes("кафе") ||
+      input.includes("продукт")
+    ) {
+      return "food";
+    }
+
+    if (
+      input.includes("машин") ||
+      input.includes("транспорт") ||
+      input.includes("бензин") ||
+      input.includes("такси")
+    ) {
+      return "transport";
+    }
+
+    if (
+      input.includes("дом") ||
+      input.includes("квартир") ||
+      input.includes("жилье")
+    ) {
+      return "home";
+    }
+
+    if (
+      input.includes("финанс") ||
+      input.includes("банк") ||
+      input.includes("кредит") ||
+      input.includes("инвест")
+    ) {
+      return "finance";
+    }
+
+    if (
+      input.includes("учеба") ||
+      input.includes("образован") ||
+      input.includes("курс") ||
+      input.includes("книг")
+    ) {
+      return "education";
+    }
+
+    if (
+      input.includes("развлечен") ||
+      input.includes("кино") ||
+      input.includes("театр") ||
+      input.includes("игр")
+    ) {
+      return "entertainment";
+    }
+
+    if (
+      input.includes("путешеств") ||
+      input.includes("отпуск") ||
+      input.includes("отель") ||
+      input.includes("билет")
+    ) {
+      return "travel";
+    }
+
+    if (
+      input.includes("личн") ||
+      input.includes("семья") ||
+      input.includes("друз")
+    ) {
+      return "personal";
     }
 
     return "other";

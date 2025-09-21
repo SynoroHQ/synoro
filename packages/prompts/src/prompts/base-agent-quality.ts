@@ -27,7 +27,7 @@ export const baseAgentQualityTemplate = `Ты - эксперт по оценке
 
 ФОРМАТ ОТВЕТА:
 - Отвечай кратко в формате JSON
-- Используй только необходимые поля: точность, полнота, релевантность, ясность, классификация, общаяОценка, улучшения`;
+- Используй только необходимые поля: accuracy, completeness, relevance, clarity, overallScore, improvements`;
 
 const baseAgentQuality: PromptDefinition = {
   key: "base-agent-quality",

@@ -2,21 +2,48 @@ import { generateObject } from "ai";
 import { z } from "zod";
 
 import { getPrompt, PROMPT_KEYS } from "@synoro/prompts";
+import { EventCategory } from "@synoro/validators";
 
 import type { AgentCapability, AgentResult, AgentTask } from "./types";
 import { EventLogService } from "../services/event-log-service";
 import { EventService } from "../services/event-service";
+import { mapRussianPriorityToCanonical } from "../utils/priority-mapper";
 import { AbstractAgent } from "./base-agent";
 
+// Константы для локализованных сообщений
+const EVENT_LOG_MESSAGES = {
+  eventCreated: (title: string) => `Event created: ${title}`,
+  eventCreatedRu: (title: string) => `Создано событие: ${title}`,
+} as const;
+
+// Интерфейс для созданного события (возвращается из EventService)
+interface Event {
+  id: string;
+  householdId: string;
+  userId: string | null;
+  source: "telegram" | "web" | "mobile" | "api";
+  type: z.infer<typeof EventCategory>;
+  status: "active" | "archived" | "deleted";
+  priority: "low" | "medium" | "high" | "urgent";
+  occurredAt: Date;
+  ingestedAt: Date;
+  updatedAt: Date;
+  title: string | null;
+  notes: string | null;
+  amount: string | null; // decimal в БД возвращается как string
+  currency: string;
+  data: Record<string, unknown> | null;
+}
+
 // Интерфейс для извлеченной информации о событии
-interface ExtractedEventInfo {
-  type: "expense" | "task" | "maintenance" | "other";
+interface ExtractedInfo {
+  type: z.infer<typeof EventCategory>;
   title: string;
   description?: string;
   amount?: number;
   currency?: string;
   occurredAt: string | number | Date;
-  confidence: number;
+  confidence?: number;
   priority: "low" | "medium" | "high" | "urgent";
   properties?: Record<string, unknown>;
   tags?: string[];
@@ -26,11 +53,10 @@ interface ExtractedEventInfo {
 const eventExtractionSchema = z.object({
   title: z.string().describe("Заголовок события"),
   description: z.string().optional().describe("Описание события"),
-  type: z
-    .enum(["expense", "task", "maintenance", "other"])
-    .describe("Тип события"),
+  type: EventCategory.describe("Тип события"),
   priority: z
-    .enum(["low", "medium", "high", "urgent"])
+    .string()
+    .transform((val) => mapRussianPriorityToCanonical(val))
     .describe("Приоритет события"),
   amount: z.number().optional().describe("Сумма (для расходов)"),
   currency: z.string().default("RUB").describe("Валюта"),
@@ -45,6 +71,9 @@ const eventExtractionSchema = z.object({
     .boolean()
     .describe("Требует ли подтверждения от пользователя"),
 });
+
+// Экспортируем тип, выведенный из схемы
+export type EventInfo = z.infer<typeof eventExtractionSchema>;
 
 /**
  * Специализированный агент для создания событий из естественного языка
@@ -163,19 +192,7 @@ export class EventCreationAgent extends AbstractAgent {
   /**
    * Извлекает информацию о событии из текста
    */
-  private async extractEventInfo(task: AgentTask): Promise<{
-    title: string;
-    description?: string;
-    type: "expense" | "task" | "maintenance" | "other";
-    priority: "low" | "medium" | "high" | "urgent";
-    amount?: number;
-    currency: string;
-    occurredAt: string;
-    tags?: string[];
-    properties?: Record<string, unknown>;
-    confidence: number;
-    needsConfirmation: boolean;
-  }> {
+  private async extractEventInfo(task: AgentTask): Promise<EventInfo> {
     const timezone = task.context?.timezone || "Europe/Moscow";
     const currentTime = new Date().toISOString();
 
@@ -217,9 +234,9 @@ export class EventCreationAgent extends AbstractAgent {
    * Создает событие в базе данных
    */
   private async createEvent(
-    extractedInfo: ExtractedEventInfo,
+    extractedInfo: ExtractedInfo,
     task: AgentTask,
-  ): Promise<any> {
+  ): Promise<Event> {
     const householdId = task.context?.householdId;
     const userId = task.context?.userId;
 
@@ -287,15 +304,19 @@ export class EventCreationAgent extends AbstractAgent {
    */
   private async createEventLog(
     task: AgentTask,
-    event: any,
-    extractedInfo: any,
+    event: Event,
+    extractedInfo: ExtractedInfo,
   ): Promise<void> {
     try {
+      // Используем nullish coalescing для опциональных полей
+      const eventTitle = event.title ?? "Untitled Event";
+      const extractedConfidence = extractedInfo.confidence ?? 0;
+
       await this.eventLogService.createEventLog({
         source: "event-creation-agent",
-        chatId: task.context?.channel || "unknown",
+        chatId: task.context?.channel ?? "unknown",
         type: "text",
-        text: `Создано событие: ${event.title}`,
+        text: EVENT_LOG_MESSAGES.eventCreatedRu(eventTitle),
         originalText: task.input,
         meta: {
           messageId: task.context?.messageId,
@@ -304,7 +325,7 @@ export class EventCreationAgent extends AbstractAgent {
           eventId: event.id,
           agentName: this.name,
           householdId: task.context?.householdId,
-          extractedConfidence: extractedInfo.confidence,
+          extractedConfidence,
         },
       });
     } catch (error) {
