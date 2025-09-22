@@ -210,7 +210,7 @@ export async function removeProcessingMessage(
 
 /**
  * Удаляет сообщение пользователя с обработкой ошибок
- * Используется для очистки чата после получения ответа от бота
+ * @deprecated Функция больше не используется - сообщения пользователя не удаляются
  */
 export async function deleteUserMessage(
   ctx: Context,
