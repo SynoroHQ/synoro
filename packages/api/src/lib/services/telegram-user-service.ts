@@ -28,8 +28,6 @@ export class TelegramUserService {
     telegramUsername?: string,
   ): Promise<TelegramUserContext> {
     try {
-      console.log("telegramUserId", telegramUserId);
-      console.log("telegramUsername", telegramUsername);
       // 1. Ищем существующего пользователя по telegramUserId в email
       const existingUser = await db
         .select()
@@ -66,7 +64,6 @@ export class TelegramUserService {
             status: "active",
           })
           .returning();
-        console.log("newUser", newUser);
         if (!newUser) {
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",

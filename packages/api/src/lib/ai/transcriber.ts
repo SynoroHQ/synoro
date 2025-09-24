@@ -42,13 +42,6 @@ export async function transcribe(
       throw new Error("OpenAI API key is not configured");
     }
 
-    console.log("Transcribing audio:", {
-      filename,
-      bufferSize: audioBuffer.length,
-      functionId: telemetry?.functionId,
-      metadata: telemetry?.metadata,
-    });
-
     // Инициализируем OpenAI клиент
     const openai = new OpenAI({
       apiKey: env.OPENAI_API_KEY,

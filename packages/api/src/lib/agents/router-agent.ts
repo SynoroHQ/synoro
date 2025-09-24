@@ -39,6 +39,107 @@ export class RouterAgent extends AbstractAgent {
     super("gpt-5");
   }
 
+  private normalizeAgentKey(value: string): string {
+    const normalized = value
+      .trim()
+      .toLowerCase()
+      .replace(/[_\s]+/g, "-")
+      .replace(/ё/g, "е");
+
+    const mapping: Record<string, string> = {
+      "event-processor": "event-processor",
+      processor: "event-processor",
+      "eventprocessor": "event-processor",
+      "обработчик-событий": "event-processor",
+      "обработка-событий": "event-processor",
+      "анализатор-событий": "event-analyzer",
+      "анализ-событий": "event-analyzer",
+      "event-analyzer": "event-analyzer",
+      analyzer: "event-analyzer",
+      "eventanalyzer": "event-analyzer",
+      "создание-событий": "event-creation",
+      "создатель-событий": "event-creation",
+      "event-creation": "event-creation",
+      creation: "event-creation",
+      "eventcreation": "event-creation",
+      "general-assistant": "general-assistant",
+      assistant: "general-assistant",
+      "generalassistant": "general-assistant",
+      "общий-помощник": "general-assistant",
+      "универсальный-помощник": "general-assistant",
+      "помощник": "general-assistant",
+    };
+
+    if (mapping[normalized]) {
+      return mapping[normalized];
+    }
+
+    if (normalized.includes("анализ")) {
+      return "event-analyzer";
+    }
+
+    if (normalized.includes("обработ")) {
+      return "event-processor";
+    }
+
+    if (normalized.includes("созд") || normalized.includes("планир")) {
+      return "event-creation";
+    }
+
+    if (normalized.includes("assist") || normalized.includes("помощ")) {
+      return "general-assistant";
+    }
+
+    return normalized;
+  }
+
+  private normalizeCategory(value: string): string {
+    const normalized = value
+      .trim()
+      .toLowerCase()
+      .replace(/[_\s]+/g, "-")
+      .replace(/ё/g, "е");
+
+    const mapping: Record<string, string> = {
+      "event-logging": "event_logging",
+      "event_logging": "event_logging",
+      "логирование-событий": "event_logging",
+      "logging": "event_logging",
+      "data-analysis": "data_analysis",
+      "data_analysis": "data_analysis",
+      "анализ-данных": "data_analysis",
+      "event-creation": "event_creation",
+      "event_creation": "event_creation",
+      "создание-событий": "event_creation",
+      "general-chat": "general_chat",
+      "general_chat": "general_chat",
+      "общий-чат": "general_chat",
+      "чат": "general_chat",
+    };
+
+    if (mapping[normalized]) {
+      return mapping[normalized];
+    }
+
+    if (normalized.includes("лог")) {
+      return "event_logging";
+    }
+
+    if (normalized.includes("анализ")) {
+      return "data_analysis";
+    }
+
+    if (normalized.includes("созд") || normalized.includes("планир")) {
+      return "event_creation";
+    }
+
+    if (normalized.includes("чат") || normalized.includes("общ")) {
+      return "general_chat";
+    }
+
+    return normalized;
+  }
+
   canHandle(_task: AgentTask): Promise<boolean> {
     // Роутер обрабатывает все запросы для маршрутизации
     return Promise.resolve(true);
@@ -49,20 +150,30 @@ export class RouterAgent extends AbstractAgent {
    */
   private getRoutingSchema() {
     return z.object({
-      targetAgent: z.enum([
-        "event-processor",
-        "event-analyzer",
-        "event-creation",
-        "general-assistant",
-      ]),
+      targetAgent: z
+        .string()
+        .transform((value) => this.normalizeAgentKey(value))
+        .pipe(
+          z.enum([
+            "event-processor",
+            "event-analyzer",
+            "event-creation",
+            "general-assistant",
+          ]),
+        ),
       confidence: z.number().min(0).max(1),
       reasoning: z.string(),
-      category: z.enum([
-        "event_logging",
-        "data_analysis",
-        "event_creation",
-        "general_chat",
-      ]),
+      category: z
+        .string()
+        .transform((value) => this.normalizeCategory(value))
+        .pipe(
+          z.enum([
+            "event_logging",
+            "data_analysis",
+            "event_creation",
+            "general_chat",
+          ]),
+        ),
     });
   }
 
