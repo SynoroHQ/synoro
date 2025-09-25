@@ -16,18 +16,18 @@
   "dependencies": {
     "@synoro/api": "workspace:*",
     "@t3-oss/env-core": "0.13.8",
-    "@trpc/client": "11.5.1",
+    "@trpc/client": "11.6.0",
     "grammy": "^1.38.2",
     "superjson": "2.2.2",
-    "zod": "4.1.9"
+    "zod": "4.1.11"
   },
   "devDependencies": {
     "@synoro/eslint-config": "workspace:*",
     "@synoro/prettier-config": "workspace:*",
     "@synoro/tsconfig": "workspace:*",
-    "@types/node": "24.3.0",
+    "@types/node": "24.5.2",
     "dotenv-cli": "10.0.0",
-    "eslint": "9.35.0",
+    "eslint": "9.36.0",
     "prettier": "3.6.2",
     "tsup": "8.5.0",
     "typescript": "5.9.2"

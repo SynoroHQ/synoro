@@ -27,7 +27,7 @@
     "with-env": "dotenv -e ../../.env --"
   },
   "dependencies": {
-    "@ai-sdk/openai": "^2.0.34",
+    "@ai-sdk/openai": "^2.0.35",
     "@ai-sdk/openai-compatible": "^1.0.18",
     "@hono/trpc-server": "^0.4.0",
     "@opentelemetry/auto-instrumentations-node": "^0.64.1",
@@ -40,23 +40,23 @@
     "@synoro/prompts": "workspace:*",
     "@synoro/validators": "workspace:*",
     "@t3-oss/env-core": "0.13.8",
-    "@trpc/server": "^11.5.1",
-    "ai": "5.0.51",
+    "@trpc/server": "^11.6.0",
+    "ai": "5.0.52",
     "date-fns": "4.1.0",
     "langfuse": "^3.38.5",
     "langfuse-vercel": "^3.38.5",
     "multer": "^2.0.2",
-    "nanoid": "^5.1.5",
-    "openai": "^5.21.0",
+    "nanoid": "^5.1.6",
+    "openai": "^5.23.0",
     "superjson": "2.2.2",
-    "zod": "4.1.9"
+    "zod": "4.1.11"
   },
   "devDependencies": {
     "@synoro/eslint-config": "workspace:*",
     "@synoro/prettier-config": "workspace:*",
     "@synoro/tests": "workspace:*",
     "@synoro/tsconfig": "workspace:*",
-    "eslint": "9.35.0",
+    "eslint": "9.36.0",
     "prettier": "3.6.2",
     "tsup": "8.5.0",
     "typescript": "5.9.2",
