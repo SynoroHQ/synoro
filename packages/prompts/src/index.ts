@@ -14,6 +14,8 @@ export { eventAnalyzerAgent } from "./prompts/event-analyzer-agent";
 export { default as eventCreationExtraction } from "./prompts/event-creation-extraction";
 export { generalAssistantAgent } from "./prompts/general-assistant-agent";
 export { routerAgent } from "./prompts/router-agent";
+export { agentCoordinator } from "./prompts/agent-coordinator";
+export { promptValidator } from "./prompts/prompt-validator";
 
 export {
   getPrompt,

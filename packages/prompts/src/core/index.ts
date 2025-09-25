@@ -5,6 +5,10 @@
  * with proper separation of concerns, error handling, monitoring, and testing.
  */
 
+// Prompt constants and templates
+export * from "./constants";
+export * from "./templates";
+
 // Core interfaces and base classes
 export type {
   AgentContext,

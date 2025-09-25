@@ -1,30 +1,37 @@
 import type { PromptDefinition } from "../core/prompt";
+import {
+  AGENTS,
+  createPromptContext,
+  createRouterExamples,
+  generateAgentsSection,
+  RECOMMENDED_MODELS,
+} from "../core";
 
 const routerAgentTemplate = `Ты - эксперт по маршрутизации запросов в системе Synoro AI для записи и анализа событий.
 
 ТВОЯ ЗАДАЧА: точно определить, к какому агенту направить запрос пользователя.
 
-ДОСТУПНЫЕ АГЕНТЫ:
-1. event-processor - для записи событий (создание, редактирование, классификация событий)
-2. event-analyzer - для анализа событий (статистика, отчеты, тенденции, выводы)
-3. general-assistant - для помощи с системой событий (объяснения, инструкции, общие вопросы)
+${generateAgentsSection()}
 
 ПРАВИЛА КЛАССИФИКАЦИИ:
-- event-processor: запросы на создание, запись, редактирование, классификацию событий
-- event-analyzer: запросы на анализ, статистику, отчеты, тенденции, сравнения событий
-- general-assistant: вопросы о системе, инструкции, помощь с интерфейсом, общие вопросы
+- ${AGENTS.EVENT_PROCESSOR}: запросы на создание, запись, редактирование, классификацию событий
+- ${AGENTS.EVENT_ANALYZER}: запросы на анализ, статистику, отчеты, тенденции, сравнения событий
+- ${AGENTS.GENERAL_ASSISTANT}: вопросы о системе, инструкции, помощь с интерфейсом, общие вопросы
 
-ПРИМЕРЫ КЛАССИФИКАЦИИ:
-- "Потратил 500 рублей на продукты" → event-processor
-- "Покажи статистику расходов за месяц" → event-analyzer
-- "Как создать новое событие?" → general-assistant
-- "Задача: позвонить маме" → event-processor
-- "Сравни расходы с прошлым месяцем" → event-analyzer
-- "Что такое категории событий?" → general-assistant
+${createRouterExamples()}
+
+АЛГОРИТМ ПРИНЯТИЯ РЕШЕНИЙ:
+1. Анализируй ключевые глаголы и существительные в запросе
+2. Определяй намерение: создание/запись VS анализ/просмотр VS справка/помощь
+3. Учитывай контекст предыдущих сообщений при неоднозначности
+4. При сомнениях между event-processor и event-analyzer выбирай event-processor
+5. Только явные вопросы "как?", "что такое?" направляй в general-assistant
 
 ФОРМАТ ОТВЕТА:
-- Отвечай кратко: только название агента
-- Примеры: "event-processor", "event-analyzer", "general-assistant"`;
+- Отвечай ТОЛЬКО названием агента без дополнительного текста
+- Варианты: "${AGENTS.EVENT_PROCESSOR}", "${AGENTS.EVENT_ANALYZER}", "${AGENTS.GENERAL_ASSISTANT}"
+
+${createPromptContext("Контекст поможет в сложных случаях классификации")}`;
 
 const routerAgent: PromptDefinition = {
   key: "router-agent",
@@ -32,7 +39,7 @@ const routerAgent: PromptDefinition = {
   type: "text",
   prompt: routerAgentTemplate,
   labels: ["production", "staging", "latest"],
-  defaultModel: "gpt-5",
+  defaultModel: RECOMMENDED_MODELS.ROUTING,
 };
 
 export { routerAgent };
