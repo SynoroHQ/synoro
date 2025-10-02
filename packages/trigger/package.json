@@ -9,15 +9,15 @@
     "@synoro/eslint-config": "workspace:*",
     "@synoro/prettier-config": "workspace:*",
     "@synoro/tsconfig": "workspace:*",
-    "@trigger.dev/build": "4.0.2",
-    "eslint": "9.35.0",
+    "@trigger.dev/build": "4.0.4",
+    "eslint": "9.36.0",
     "prettier": "3.6.2",
-    "trigger.dev": "^4.0.2",
+    "trigger.dev": "^4.0.4",
     "tsup": "8.5.0",
     "typescript": "5.9.2"
   },
   "dependencies": {
     "@synoro/db": "workspace:*",
-    "@trigger.dev/sdk": "^4.0.2"
+    "@trigger.dev/sdk": "^4.0.4"
   }
 }
