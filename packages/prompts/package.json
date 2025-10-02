@@ -27,7 +27,9 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false",
     "with-env": "dotenv -e ../../.env --",
-    "update-prompt": "bun run with-env -- bun src/scripts/update-prompt.ts"
+    "update-prompt": "bun run with-env -- bun src/scripts/update-prompt.ts",
+    "test:performance": "bun src/scripts/test-performance.ts",
+    "benchmark": "bun run test:performance"
   },
   "devDependencies": {
     "@synoro/eslint-config": "workspace:*",

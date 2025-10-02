@@ -1,0 +1,46 @@
+{
+  "router-agent": {
+    "key": "router-agent",
+    "name": "Fast Router Agent",
+    "model": "gpt-4o-mini",
+    "temperature": 0.1,
+    "maxTokens": 50,
+    "timeout": 5000,
+    "enabled": true,
+    "stream": false,
+    "cache": true
+  },
+  "event-processor-agent": {
+    "key": "event-processor-agent",
+    "name": "Fast Event Processor",
+    "model": "gpt-4o-mini",
+    "temperature": 0.3,
+    "maxTokens": 500,
+    "timeout": 10000,
+    "enabled": true,
+    "stream": true,
+    "cache": true
+  },
+  "event-analyzer-agent": {
+    "key": "event-analyzer-agent",
+    "name": "Fast Event Analyzer",
+    "model": "gpt-4o",
+    "temperature": 0.2,
+    "maxTokens": 800,
+    "timeout": 15000,
+    "enabled": true,
+    "stream": true,
+    "cache": true
+  },
+  "general-assistant-agent": {
+    "key": "general-assistant-agent",
+    "name": "Fast General Assistant",
+    "model": "gpt-4o-mini",
+    "temperature": 0.4,
+    "maxTokens": 400,
+    "timeout": 8000,
+    "enabled": true,
+    "stream": true,
+    "cache": true
+  }
+}

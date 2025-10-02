@@ -141,13 +141,13 @@ export const QUALITY_PRINCIPLES = `
 - Практичность: применимость для реального использования
 - Естественность: человеческое, не роботическое общение`.trim();
 
-// Модели для разных задач
+// Оптимизированные модели для максимальной скорости
 export const RECOMMENDED_MODELS = {
-  ROUTING: "gpt-5", // Быстрая и точная классификация
-  PROCESSING: "gpt-5-nano", // Обработка событий с балансом скорости/качества
-  ANALYSIS: "gpt-5-nano", // Анализ данных
-  EXTRACTION: "gpt-4o-mini", // Точное извлечение структурированных данных
-  GENERAL: "gpt-5", // Общение и помощь
+  ROUTING: "gpt-4o-mini", // Максимально быстрая классификация
+  PROCESSING: "gpt-4o-mini", // Быстрая обработка событий
+  ANALYSIS: "gpt-4o", // Качественный анализ данных
+  EXTRACTION: "gpt-4o-mini", // Быстрое извлечение данных
+  GENERAL: "gpt-4o-mini", // Быстрые ответы на вопросы
 } as const;
 
 export type EventType = (typeof EVENT_TYPES)[keyof typeof EVENT_TYPES];

@@ -126,6 +126,36 @@ export type {
   WorkflowStepResult,
 } from "./agent-testing";
 
+// Performance optimization modules
+export { AgentCache, globalCache, CacheMiddleware } from "./agent-cache";
+
+export {
+  AgentOptimizer,
+  globalOptimizer,
+  OptimizationMiddleware,
+  DEFAULT_OPTIMIZATION_CONFIG,
+} from "./agent-optimizer";
+
+export {
+  FastRouter,
+  globalFastRouter,
+  FastRoutingMiddleware,
+} from "./fast-router";
+
+export type {
+  CacheEntry,
+  CacheStats,
+  OptimizationConfig,
+  RoutingRule,
+} from "./agent-cache";
+
+export type { PerformanceReport } from "../tools/performance-monitor";
+
+export {
+  performanceMonitor,
+  PerformanceTrackingMiddleware,
+} from "../tools/performance-monitor";
+
 // Utility functions for common setup patterns
 export async function createDefaultAgentSystem() {
   const { registry: promptRegistry } = await import("../registry");
@@ -141,6 +171,11 @@ export async function createDefaultAgentSystem() {
   const { globalErrorHandler } = await import("./agent-error-handling");
   const { globalPerformanceMonitor } = await import("./agent-monitoring");
   const { createAgentFactory } = await import("./agent-factory");
+
+  // Import optimization modules
+  const { CacheMiddleware } = await import("./agent-cache");
+  const { OptimizationMiddleware } = await import("./agent-optimizer");
+  const { FastRoutingMiddleware } = await import("./fast-router");
 
   // Create factory
   const factory = createAgentFactory(promptRegistry);
@@ -161,9 +196,11 @@ export async function createDefaultAgentSystem() {
     }
   }
 
-  // Setup default middleware
+  // Setup optimized middleware stack
+  globalMiddlewareManager.use(new FastRoutingMiddleware()); // Быстрый роутинг
+  globalMiddlewareManager.use(new CacheMiddleware()); // Кэширование
+  globalMiddlewareManager.use(new OptimizationMiddleware()); // Оптимизация
   globalMiddlewareManager.use(new ValidationMiddleware());
-  globalMiddlewareManager.use(new LoggingMiddleware());
   globalMiddlewareManager.use(new PerformanceMiddleware());
   globalMiddlewareManager.use(new RateLimitMiddleware());
 
