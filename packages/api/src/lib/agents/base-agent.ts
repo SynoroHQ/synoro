@@ -6,6 +6,7 @@ import { z } from "zod";
 
 import { getPrompt, PROMPT_KEYS } from "@synoro/prompts";
 
+import type { PromptContextOptions } from "../services/prompt-context-service";
 import type { StructuredAgentContext } from "./context-manager";
 import type {
   AgentCapability,
@@ -14,6 +15,7 @@ import type {
   AgentTelemetry,
   BaseAgent,
 } from "./types";
+import { PromptContextService } from "../services/prompt-context-service";
 import { AgentContextManager } from "./context-manager";
 
 // Инициализация AI провайдеров
@@ -65,10 +67,12 @@ export abstract class AbstractAgent implements BaseAgent {
 
   protected defaultModel: string;
   protected contextManager: AgentContextManager;
+  protected promptContextService: PromptContextService;
 
   constructor(defaultModel = "gpt-5") {
     this.defaultModel = defaultModel;
     this.contextManager = new AgentContextManager();
+    this.promptContextService = new PromptContextService();
   }
 
   /**
@@ -449,12 +453,58 @@ export abstract class AbstractAgent implements BaseAgent {
       includeFullHistory = false,
     } = options;
 
-    // Сначала заменяем плейсхолдеры в базовом промпте
-    const processedPrompt = this.createPromptWithHistory(basePrompt, task, {
-      includeFullHistory,
-      maxHistoryLength: maxContextLength,
-      includeSummary: true,
-    });
+    // Feature flag для включения нового PromptContextService
+    const USE_PROMPT_CONTEXT_SERVICE =
+      process.env.USE_PROMPT_CONTEXT_SERVICE === "true";
+
+    let processedPrompt: string;
+
+    if (USE_PROMPT_CONTEXT_SERVICE) {
+      // Новая логика с PromptContextService
+      try {
+        const promptContextOptions: PromptContextOptions = {
+          maxHistoryLength: maxContextLength,
+          maxHistoryMessages: includeFullHistory ? 50 : 10,
+          includeSystemMessages: false,
+          maxHistoryTokens: Math.floor(maxContextLength / 3), // ~1/3 контекста на историю
+        };
+
+        const processed = this.promptContextService.processPrompt(
+          basePrompt,
+          task,
+          promptContextOptions,
+        );
+
+        // Логируем метаданные для отладки
+        if (process.env.DEBUG_PROMPTS === "true") {
+          console.log("Prompt processing metadata:", {
+            agentName: this.name,
+            taskId: task.id,
+            ...processed.metadata,
+          });
+        }
+
+        processedPrompt = processed.prompt;
+      } catch (error) {
+        console.error(
+          "Failed to process prompt with PromptContextService, falling back to legacy method:",
+          error,
+        );
+        // Fallback к старому методу при ошибке
+        processedPrompt = this.createPromptWithHistory(basePrompt, task, {
+          includeFullHistory,
+          maxHistoryLength: maxContextLength,
+          includeSummary: true,
+        });
+      }
+    } else {
+      // Старая логика (fallback) для обратной совместимости
+      processedPrompt = this.createPromptWithHistory(basePrompt, task, {
+        includeFullHistory,
+        maxHistoryLength: maxContextLength,
+        includeSummary: true,
+      });
+    }
 
     if (useStructuredContext) {
       const structuredContext = await this.createStructuredContext(task);
