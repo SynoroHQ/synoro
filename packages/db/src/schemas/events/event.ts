@@ -77,6 +77,7 @@ export const events = pgTable(
       .notNull()
       .defaultNow()
       .$onUpdate(() => new Date()),
+    deletedAt: timestamp("deleted_at", { withTimezone: true }),
     title: text("title"),
     notes: text("notes"),
     // Добавим поле для денежных значений с проверкой на неотрицательность
@@ -103,5 +104,6 @@ export const events = pgTable(
     index("event_priority_idx").on(table.priority),
     index("event_amount_idx").on(table.amount),
     index("event_source_idx").on(table.source),
+    index("event_deleted_at_idx").on(table.deletedAt),
   ],
 );

@@ -51,6 +51,7 @@ export const conversations = pgTable(
       .defaultNow()
       .$onUpdate(() => new Date()),
     lastMessageAt: t.timestamp("last_message_at", { withTimezone: true }),
+    deletedAt: t.timestamp("deleted_at", { withTimezone: true }),
   }),
   (table) => [
     // Индекс для пользователей
@@ -58,6 +59,7 @@ export const conversations = pgTable(
     index("conversation_channel_idx").on(table.channel),
     index("conversation_status_idx").on(table.status),
     index("conversation_last_message_idx").on(table.lastMessageAt),
+    index("conversation_deleted_at_idx").on(table.deletedAt),
   ],
 );
 
