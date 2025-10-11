@@ -7,6 +7,7 @@ import { EventCategory } from "@synoro/validators";
 import type { AgentCapability, AgentResult, AgentTask } from "./types";
 import { EventLogService } from "../services/event-log-service";
 import { EventService } from "../services/event-service";
+import { safeParseDate } from "../utils/date-helpers";
 import { mapRussianPriorityToCanonical } from "../utils/priority-mapper";
 import { AbstractAgent } from "./base-agent";
 
@@ -244,26 +245,8 @@ export class EventCreationAgent extends AbstractAgent {
       throw new Error("Не указан householdId");
     }
 
-    // Валидация и нормализация даты occurredAt
-    let occurredAt: Date;
-    try {
-      const parsedDate = new Date(extractedInfo.occurredAt);
-
-      // Проверяем, что дата валидна
-      if (
-        !isFinite(parsedDate.getTime()) ||
-        Number.isNaN(parsedDate.getTime())
-      ) {
-        throw new Error("Invalid date");
-      }
-
-      occurredAt = parsedDate;
-    } catch (error) {
-      console.warn(
-        `Не удалось распарсить дату occurredAt: ${extractedInfo.occurredAt}, используем task.createdAt как fallback`,
-      );
-      occurredAt = task.createdAt;
-    }
+    // Валидация и нормализация даты occurredAt с использованием безопасной утилиты
+    const occurredAt = safeParseDate(extractedInfo.occurredAt, task.createdAt);
 
     // Безопасный расчет processing_time
     const processingTime = Date.now() - task.createdAt.getTime();

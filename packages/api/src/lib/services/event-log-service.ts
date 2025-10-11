@@ -4,6 +4,9 @@ import { z } from "zod";
 import { db } from "@synoro/db/client";
 import { eventLogs } from "@synoro/db/schema";
 
+import { safeParseDate } from "../utils/date-helpers";
+import { sanitizeMetadata, sanitizeText } from "../utils/text-sanitizer";
+
 // Определяем тип на основе схемы eventLogs
 export type EventLog = typeof eventLogs.$inferSelect;
 
@@ -48,7 +51,17 @@ export class EventLogService {
    */
   async createEventLog(data: CreateEventLogData): Promise<EventLog> {
     try {
-      const parsedData = createEventLogDataSchema.parse(data);
+      // Санитизация данных перед валидацией
+      const sanitizedData = {
+        ...data,
+        text: data.text ? sanitizeText(data.text, 10000) : undefined,
+        originalText: data.originalText
+          ? sanitizeText(data.originalText, 10000)
+          : undefined,
+        meta: sanitizeMetadata(data.meta),
+      };
+
+      const parsedData = createEventLogDataSchema.parse(sanitizedData);
 
       const [eventLog] = await db
         .insert(eventLogs)
