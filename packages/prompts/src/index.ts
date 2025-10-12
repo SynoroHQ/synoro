@@ -23,3 +23,5 @@ export {
   createPrompt,
   initializePromptService,
 } from "./prompt-service";
+
+export * from "./tools/database-tools";

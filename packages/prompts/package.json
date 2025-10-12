@@ -7,6 +7,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./tools/database-tools": {
+      "types": "./dist/tools/database-tools.d.ts",
+      "default": "./dist/tools/database-tools.js"
     }
   },
   "main": "./dist/index.js",

@@ -1,6 +1,7 @@
 export * from "./household";
 export * from "./household-member";
 export * from "./user-profile";
+export * from "./asset";
 export * from "./files";
 export * from "./file-relations";
 export * from "./file-relations-relations";

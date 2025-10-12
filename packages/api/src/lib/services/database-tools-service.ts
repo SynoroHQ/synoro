@@ -13,9 +13,40 @@ import type {
   SearchEventsInput,
   SearchResult,
   UserStats,
-} from "@synoro/prompts/tools/database-tools";
+} from "@synoro/prompts";
 import { db } from "@synoro/db/client";
 import { eventProperties, events, eventTags, tags } from "@synoro/db/schema";
+
+/**
+ * Форматирует событие для возврата клиенту
+ */
+function formatEvent(event: any): EventWithDetails {
+  return {
+    ...event,
+    occurredAt: event.occurredAt.toISOString(),
+    ingestedAt: event.ingestedAt.toISOString(),
+    updatedAt: event.updatedAt.toISOString(),
+    properties:
+      event.properties?.map((prop: any) => ({
+        key: prop.key,
+        value: prop.value,
+      })) || [],
+    tags:
+      event.tags?.map((et: any) => ({
+        id: et.tag.id,
+        name: et.tag.name,
+        description: et.tag.description,
+        color: et.tag.color,
+      })) || [],
+    assets:
+      event.eventAssets?.map((ea: any) => ({
+        id: ea.asset.id,
+        name: ea.asset.name,
+        type: ea.asset.type,
+        status: ea.asset.status,
+      })) || [],
+  };
+}
 
 /**
  * Сервис для обработки database tools мультиагентов
@@ -59,11 +90,23 @@ export class DatabaseToolsService {
       }
 
       if (startDate) {
-        conditions.push(gte(events.occurredAt, new Date(startDate)));
+        const startDateObj = new Date(startDate);
+        console.log("🔍 Фильтр startDate:", {
+          original: startDate,
+          parsed: startDateObj.toISOString(),
+          local: startDateObj.toLocaleString("ru-RU"),
+        });
+        conditions.push(gte(events.occurredAt, startDateObj));
       }
 
       if (endDate) {
-        conditions.push(lte(events.occurredAt, new Date(endDate)));
+        const endDateObj = new Date(endDate);
+        console.log("🔍 Фильтр endDate:", {
+          original: endDate,
+          parsed: endDateObj.toISOString(),
+          local: endDateObj.toLocaleString("ru-RU"),
+        });
+        conditions.push(lte(events.occurredAt, endDateObj));
       }
 
       if (search) {
@@ -81,30 +124,18 @@ export class DatabaseToolsService {
               tag: true,
             },
           },
+          eventAssets: {
+            with: {
+              asset: true,
+            },
+          },
         },
         orderBy: [desc(events.occurredAt)],
         limit,
         offset,
       });
 
-      return eventsList.map((event) => ({
-        ...event,
-        occurredAt: event.occurredAt.toISOString(),
-        ingestedAt: event.ingestedAt.toISOString(),
-        updatedAt: event.updatedAt.toISOString(),
-        properties:
-          event.properties?.map((prop) => ({
-            key: prop.key,
-            value: prop.value,
-          })) || [],
-        tags:
-          event.tags?.map((et) => ({
-            id: et.tag.id,
-            name: et.tag.name,
-            description: et.tag.description,
-            color: et.tag.color,
-          })) || [],
-      }));
+      return eventsList.map(formatEvent);
     } catch (error) {
       console.error("Error in getUserEvents:", error);
       throw new TRPCError({
@@ -132,6 +163,11 @@ export class DatabaseToolsService {
               tag: true,
             },
           },
+          eventAssets: {
+            with: {
+              asset: true,
+            },
+          },
         },
       });
 
@@ -139,24 +175,7 @@ export class DatabaseToolsService {
         return null;
       }
 
-      return {
-        ...event,
-        occurredAt: event.occurredAt.toISOString(),
-        ingestedAt: event.ingestedAt.toISOString(),
-        updatedAt: event.updatedAt.toISOString(),
-        properties:
-          event.properties?.map((prop) => ({
-            key: prop.key,
-            value: prop.value,
-          })) || [],
-        tags:
-          event.tags?.map((et) => ({
-            id: et.tag.id,
-            name: et.tag.name,
-            description: et.tag.description,
-            color: et.tag.color,
-          })) || [],
-      };
+      return formatEvent(event);
     } catch (error) {
       console.error("Error in getEventById:", error);
       throw new TRPCError({
@@ -291,29 +310,17 @@ export class DatabaseToolsService {
               tag: true,
             },
           },
+          eventAssets: {
+            with: {
+              asset: true,
+            },
+          },
         },
         orderBy: [desc(events.occurredAt)],
         limit,
       });
 
-      const formattedEvents = eventsList.map((event) => ({
-        ...event,
-        occurredAt: event.occurredAt.toISOString(),
-        ingestedAt: event.ingestedAt.toISOString(),
-        updatedAt: event.updatedAt.toISOString(),
-        properties:
-          event.properties?.map((prop) => ({
-            key: prop.key,
-            value: prop.value,
-          })) || [],
-        tags:
-          event.tags?.map((et) => ({
-            id: et.tag.id,
-            name: et.tag.name,
-            description: et.tag.description,
-            color: et.tag.color,
-          })) || [],
-      }));
+      const formattedEvents = eventsList.map(formatEvent);
 
       return {
         events: formattedEvents,
@@ -359,29 +366,17 @@ export class DatabaseToolsService {
               tag: true,
             },
           },
+          eventAssets: {
+            with: {
+              asset: true,
+            },
+          },
         },
         orderBy: [desc(events.occurredAt)],
         limit,
       });
 
-      return eventsList.map((event) => ({
-        ...event,
-        occurredAt: event.occurredAt.toISOString(),
-        ingestedAt: event.ingestedAt.toISOString(),
-        updatedAt: event.updatedAt.toISOString(),
-        properties:
-          event.properties?.map((prop) => ({
-            key: prop.key,
-            value: prop.value,
-          })) || [],
-        tags:
-          event.tags?.map((et) => ({
-            id: et.tag.id,
-            name: et.tag.name,
-            description: et.tag.description,
-            color: et.tag.color,
-          })) || [],
-      }));
+      return eventsList.map(formatEvent);
     } catch (error) {
       console.error("Error in getRecentEvents:", error);
       throw new TRPCError({
@@ -424,29 +419,17 @@ export class DatabaseToolsService {
               tag: true,
             },
           },
+          eventAssets: {
+            with: {
+              asset: true,
+            },
+          },
         },
         orderBy: [events.occurredAt],
         limit,
       });
 
-      return eventsList.map((event) => ({
-        ...event,
-        occurredAt: event.occurredAt.toISOString(),
-        ingestedAt: event.ingestedAt.toISOString(),
-        updatedAt: event.updatedAt.toISOString(),
-        properties:
-          event.properties?.map((prop) => ({
-            key: prop.key,
-            value: prop.value,
-          })) || [],
-        tags:
-          event.tags?.map((et) => ({
-            id: et.tag.id,
-            name: et.tag.name,
-            description: et.tag.description,
-            color: et.tag.color,
-          })) || [],
-      }));
+      return eventsList.map(formatEvent);
     } catch (error) {
       console.error("Error in getUpcomingTasks:", error);
       throw new TRPCError({

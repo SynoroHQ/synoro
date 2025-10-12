@@ -1,10 +1,10 @@
-import { and, desc, eq, gte, lte, sql } from "drizzle-orm";
-import { z } from "zod";
+import type { z } from "zod";
+import { and, eq, gte, lte, sql } from "drizzle-orm";
 
 import type { Event, EventProperty, Tag } from "@synoro/db/schema";
+import type { EventCategory } from "@synoro/validators";
 import { db } from "@synoro/db/client";
 import { eventProperties, events, eventTags, tags } from "@synoro/db/schema";
-import { EventCategory } from "@synoro/validators";
 
 export interface CreateEventData {
   householdId: string;
@@ -56,6 +56,12 @@ export interface EventWithDetails {
   data: Record<string, unknown> | null;
   properties: EventProperty[];
   tags: Tag[];
+  assets?: {
+    id: string;
+    name: string;
+    type: string;
+    status: string;
+  }[];
 }
 
 export class EventService {

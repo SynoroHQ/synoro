@@ -1,11 +1,23 @@
 import { relations } from "drizzle-orm";
 
 import { users } from "../auth/schema";
+import { eventAssets } from "../events/event-asset";
 import { householdMembers, households, userProfiles } from "./";
+import { assets } from "./asset";
 
 // Relations for household
 export const householdRelations = relations(households, ({ many }) => ({
   members: many(householdMembers),
+  assets: many(assets),
+}));
+
+// Relations for asset
+export const assetRelations = relations(assets, ({ one, many }) => ({
+  household: one(households, {
+    fields: [assets.householdId],
+    references: [households.id],
+  }),
+  eventAssets: many(eventAssets),
 }));
 
 // Relations for householdMember

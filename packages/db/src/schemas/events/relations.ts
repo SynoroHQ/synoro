@@ -1,10 +1,12 @@
 import { relations } from "drizzle-orm";
 
 import { users } from "../auth/schema";
+import { assets } from "../core/asset";
 import { files } from "../core/files";
 import { households } from "../core/household";
 import { attachments } from "./attachment";
 import { events } from "./event";
+import { eventAssets } from "./event-asset";
 import { eventProperties } from "./event-property";
 import { eventTags, tags } from "./tag";
 
@@ -21,6 +23,19 @@ export const eventRelations = relations(events, ({ one, many }) => ({
   attachments: many(attachments),
   properties: many(eventProperties),
   eventTags: many(eventTags),
+  eventAssets: many(eventAssets),
+}));
+
+// Relations for eventAsset
+export const eventAssetRelations = relations(eventAssets, ({ one }) => ({
+  event: one(events, {
+    fields: [eventAssets.eventId],
+    references: [events.id],
+  }),
+  asset: one(assets, {
+    fields: [eventAssets.assetId],
+    references: [assets.id],
+  }),
 }));
 
 // Relations for attachment
