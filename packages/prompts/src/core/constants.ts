@@ -118,7 +118,10 @@ export const CONTEXT_VARIABLES = `
 - Часовой пояс: {{timezone}}
 
 ИСТОРИЯ ДИАЛОГА:
-{{messageHistory}}`.trim();
+{{messageHistory}}
+
+СОБЫТИЯ ПОЛЬЗОВАТЕЛЯ:
+{{eventContext}}`.trim();
 
 // Общие принципы ответов для Telegram
 export const TELEGRAM_RESPONSE_GUIDELINES = `

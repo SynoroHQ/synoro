@@ -175,6 +175,146 @@ export const CONTEXT_VARIABLES = `
 {{messageHistory}}`.trim();
 ```
 
+### 4. Интеграция DatabaseToolsService в агенты
+
+Обновить агенты для доступа к событиям из базы данных.
+
+```typescript
+// packages/api/src/lib/agents/general-assistant-agent.ts
+export class GeneralAssistantAgent extends AbstractAgent {
+  private databaseService: DatabaseToolsService;
+
+  constructor() {
+    super("gpt-5");
+    this.databaseService = new DatabaseToolsService();
+  }
+
+  async process(task: AgentTask): Promise<AgentResult<string>> {
+    // Проверяем, запрашивает ли пользователь события
+    const needsEventData = this.detectEventRequest(task.input);
+
+    let eventContext = "";
+    if (needsEventData && task.context.householdId) {
+      const events = await this.databaseService.getUserEvents({
+        userId: task.context.userId,
+        householdId: task.context.householdId,
+        limit: 20,
+        startDate: needsEventData.startDate,
+        endDate: needsEventData.endDate,
+        type: needsEventData.type,
+      });
+
+      eventContext = this.formatEventsForPrompt(events);
+    }
+
+    // Добавляем контекст событий в промпт
+    const systemPrompt = await getPrompt(
+      PROMPT_KEYS.GENERAL_ASSISTANT_AGENT,
+      "latest",
+      {
+        userId: task.context?.userId || "Неизвестен",
+        householdId: task.context?.householdId || "Неизвестно",
+        currentTime: new Date().toLocaleString("ru-RU"),
+        eventContext: eventContext || "События не запрашивались",
+      },
+    );
+
+    // ... остальная логика
+  }
+
+  /**
+   * Определяет, запрашивает ли пользователь информацию о событиях
+   */
+  private detectEventRequest(input: string): {
+    needsEvents: boolean;
+    startDate?: string;
+    endDate?: string;
+    type?: string;
+  } | null {
+    const inputLower = input.toLowerCase();
+
+    const eventKeywords = [
+      "событи",
+      "дела",
+      "задач",
+      "что я делал",
+      "покажи",
+      "расход",
+      "трат",
+      "покупк",
+      "список",
+    ];
+
+    const needsEvents = eventKeywords.some((keyword) =>
+      inputLower.includes(keyword),
+    );
+
+    if (!needsEvents) return null;
+
+    // Определяем период
+    let startDate: string | undefined;
+    let endDate = new Date().toISOString();
+
+    if (inputLower.includes("вчера")) {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      yesterday.setHours(0, 0, 0, 0);
+      startDate = yesterday.toISOString();
+
+      const endOfYesterday = new Date(yesterday);
+      endOfYesterday.setHours(23, 59, 59, 999);
+      endDate = endOfYesterday.toISOString();
+    } else if (inputLower.includes("сегодня")) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      startDate = today.toISOString();
+    } else if (inputLower.includes("неделю") || inputLower.includes("7 дней")) {
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      startDate = weekAgo.toISOString();
+    } else if (inputLower.includes("месяц") || inputLower.includes("30 дней")) {
+      const monthAgo = new Date();
+      monthAgo.setDate(monthAgo.getDate() - 30);
+      startDate = monthAgo.toISOString();
+    } else {
+      // По умолчанию - последние 7 дней
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      startDate = weekAgo.toISOString();
+    }
+
+    return {
+      needsEvents: true,
+      startDate,
+      endDate,
+    };
+  }
+
+  /**
+   * Форматирует события для включения в промпт
+   */
+  private formatEventsForPrompt(events: EventWithDetails[]): string {
+    if (events.length === 0) {
+      return "События не найдены";
+    }
+
+    const formatted = events
+      .map((event) => {
+        const date = new Date(event.occurredAt).toLocaleString("ru-RU");
+        const tags = event.tags?.map((t) => t.name).join(", ") || "";
+        const amount = event.amount
+          ? ` (${event.amount} ${event.currency})`
+          : "";
+
+        return `- [${date}] ${event.title}${amount}${tags ? ` #${tags}` : ""}${event.notes ? `\n  ${event.notes}` : ""}`;
+      })
+      .join("\n");
+
+    return `СОБЫТИЯ ПОЛЬЗОВАТЕЛЯ:\n${formatted}`;
+  }
+}
+```
+
 ## Data Models
 
 ### ProcessedPrompt
