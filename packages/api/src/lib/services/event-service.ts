@@ -1,10 +1,13 @@
 import type { z } from "zod";
 import { and, eq, gte, lte, sql } from "drizzle-orm";
 
-import type { Event, EventProperty, Tag } from "@synoro/db/schema";
 import type { EventCategory } from "@synoro/validators";
 import { db } from "@synoro/db/client";
 import { eventProperties, events, eventTags, tags } from "@synoro/db/schema";
+
+type Event = typeof events.$inferSelect;
+type EventProperty = typeof eventProperties.$inferSelect;
+type Tag = typeof tags.$inferSelect;
 
 export interface CreateEventData {
   householdId: string;
@@ -79,10 +82,10 @@ export class EventService {
         title: data.title,
         notes: data.notes,
         amount: data.amount ? data.amount.toString() : null,
-        currency: data.currency || "RUB",
+        currency: data.currency ?? "RUB",
         occurredAt: data.occurredAt,
-        priority: data.priority || "medium",
-        status: data.status || "active",
+        priority: data.priority ?? "medium",
+        status: data.status ?? "active",
         data: data.data,
       })
       .returning();
@@ -129,8 +132,8 @@ export class EventService {
 
     return {
       ...event,
-      properties: event.properties || [],
-      tags: event.tags?.map((et) => et.tag) || [],
+      properties: event.properties ?? [],
+      tags: event.tags?.map((et) => et.tag) ?? [],
     };
   }
 
@@ -166,11 +169,18 @@ export class EventService {
     }
 
     if (filters.status) {
-      conditions.push(eq(events.status, filters.status as any));
+      conditions.push(
+        eq(events.status, filters.status as "active" | "archived" | "deleted"),
+      );
     }
 
     if (filters.priority) {
-      conditions.push(eq(events.priority, filters.priority as any));
+      conditions.push(
+        eq(
+          events.priority,
+          filters.priority as "low" | "medium" | "high" | "urgent",
+        ),
+      );
     }
 
     if (filters.startDate) {
@@ -333,8 +343,8 @@ export class EventService {
     let amountCount = 0;
 
     eventsList.forEach((event) => {
-      byType[event.type] = (byType[event.type] || 0) + 1;
-      byStatus[event.status] = (byStatus[event.status] || 0) + 1;
+      byType[event.type] = (byType[event.type] ?? 0) + 1;
+      byStatus[event.status] = (byStatus[event.status] ?? 0) + 1;
 
       if (event.amount) {
         totalAmount += parseFloat(event.amount);
@@ -361,7 +371,7 @@ export class EventService {
     const propertyEntries = Object.entries(properties).map(([key, value]) => ({
       eventId,
       key,
-      value: value as any,
+      value: value as string | number | boolean | null,
     }));
 
     await db.insert(eventProperties).values(propertyEntries);

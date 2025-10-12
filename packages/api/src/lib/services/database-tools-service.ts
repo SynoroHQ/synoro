@@ -15,36 +15,59 @@ import type {
   UserStats,
 } from "@synoro/prompts";
 import { db } from "@synoro/db/client";
-import { eventProperties, events, eventTags, tags } from "@synoro/db/schema";
+import { events } from "@synoro/db/schema";
+
+type DbEvent = typeof events.$inferSelect;
+
+interface DbEventWithRelations extends DbEvent {
+  properties?: { key: string; value: unknown }[];
+  tags?: {
+    tag: {
+      id: string;
+      name: string;
+      description: string | null;
+      color: string | null;
+    };
+  }[];
+  eventAssets?: {
+    asset: {
+      id: string;
+      name: string;
+      type: string;
+      status: string;
+    };
+  }[];
+}
 
 /**
  * Форматирует событие для возврата клиенту
  */
-function formatEvent(event: any): EventWithDetails {
+function formatEvent(event: DbEventWithRelations): EventWithDetails {
   return {
     ...event,
     occurredAt: event.occurredAt.toISOString(),
     ingestedAt: event.ingestedAt.toISOString(),
     updatedAt: event.updatedAt.toISOString(),
+    deletedAt: event.deletedAt?.toISOString() ?? null,
     properties:
-      event.properties?.map((prop: any) => ({
+      event.properties?.map((prop) => ({
         key: prop.key,
         value: prop.value,
-      })) || [],
+      })) ?? [],
     tags:
-      event.tags?.map((et: any) => ({
+      event.tags?.map((et) => ({
         id: et.tag.id,
         name: et.tag.name,
         description: et.tag.description,
         color: et.tag.color,
-      })) || [],
+      })) ?? [],
     assets:
-      event.eventAssets?.map((ea: any) => ({
+      event.eventAssets?.map((ea) => ({
         id: ea.asset.id,
         name: ea.asset.name,
         type: ea.asset.type,
         status: ea.asset.status,
-      })) || [],
+      })) ?? [],
   };
 }
 
@@ -78,15 +101,15 @@ export class DatabaseToolsService {
       }
 
       if (type) {
-        conditions.push(eq(events.type, type));
+        conditions.push(sql`${events.type} = ${type}`);
       }
 
       if (status) {
-        conditions.push(eq(events.status, status));
+        conditions.push(sql`${events.status} = ${status}`);
       }
 
       if (priority) {
-        conditions.push(eq(events.priority, priority));
+        conditions.push(sql`${events.priority} = ${priority}`);
       }
 
       if (startDate) {
@@ -199,7 +222,7 @@ export class DatabaseToolsService {
       }
 
       if (type) {
-        conditions.push(eq(events.type, type));
+        conditions.push(sql`${events.type} = ${type}`);
       }
 
       if (startDate) {
@@ -226,21 +249,26 @@ export class DatabaseToolsService {
       const byCurrency: Record<string, { totalAmount: number; count: number }> =
         {};
 
-      eventsList.forEach((event) => {
-        byType[event.type] = (byType[event.type] || 0) + 1;
-        byStatus[event.status] = (byStatus[event.status] || 0) + 1;
+      eventsList.forEach(
+        (event: {
+          type: string;
+          status: string;
+          amount: string | null;
+          currency: string;
+        }) => {
+          byType[event.type] = (byType[event.type] ?? 0) + 1;
+          byStatus[event.status] = (byStatus[event.status] ?? 0) + 1;
 
-        if (event.amount) {
-          const amount = parseFloat(event.amount);
-          const currency = event.currency || "RUB";
+          if (event.amount) {
+            const amount = parseFloat(event.amount);
+            const currency = event.currency ?? "RUB";
 
-          if (!byCurrency[currency]) {
-            byCurrency[currency] = { totalAmount: 0, count: 0 };
+            byCurrency[currency] ??= { totalAmount: 0, count: 0 };
+            byCurrency[currency].totalAmount += amount;
+            byCurrency[currency].count += 1;
           }
-          byCurrency[currency].totalAmount += amount;
-          byCurrency[currency].count += 1;
-        }
-      });
+        },
+      );
 
       // Вычисляем средние значения для каждой валюты
       const byCurrencyWithAverage = Object.entries(byCurrency).reduce(
@@ -287,7 +315,7 @@ export class DatabaseToolsService {
       }
 
       if (type) {
-        conditions.push(eq(events.type, type));
+        conditions.push(sql`${events.type} = ${type}`);
       }
 
       conditions.push(
@@ -490,35 +518,31 @@ export class DatabaseToolsService {
         { amount: number; count: number }
       > = {};
 
-      eventsList.forEach((event) => {
-        if (event.amount) {
-          const amount = parseFloat(event.amount);
-          totalAmount += amount;
+      eventsList.forEach(
+        (event: { amount: string | null; type: string; occurredAt: Date }) => {
+          if (event.amount) {
+            const amount = parseFloat(event.amount);
+            totalAmount += amount;
 
-          // Группировка по типу события
-          const eventType = event.type || "other";
-          if (!byType[eventType]) {
-            byType[eventType] = { count: 0, amount: 0 };
-          }
-          byType[eventType].count++;
-          byType[eventType].amount += amount;
+            // Группировка по типу события
+            const eventType = event.type ?? "other";
+            byType[eventType] ??= { count: 0, amount: 0 };
+            byType[eventType].count++;
+            byType[eventType].amount += amount;
 
-          // Группировка по периоду (месяц)
-          const month = event.occurredAt.toISOString().substring(0, 7); // YYYY-MM
-          if (!byPeriod[month]) {
-            byPeriod[month] = { count: 0, amount: 0 };
-          }
-          byPeriod[month].count++;
-          byPeriod[month].amount += amount;
+            // Группировка по периоду (месяц)
+            const month = event.occurredAt.toISOString().substring(0, 7); // YYYY-MM
+            byPeriod[month] ??= { count: 0, amount: 0 };
+            byPeriod[month].count++;
+            byPeriod[month].amount += amount;
 
-          // Для топ типов событий
-          if (!eventTypeAmounts[eventType]) {
-            eventTypeAmounts[eventType] = { amount: 0, count: 0 };
+            // Для топ типов событий
+            eventTypeAmounts[eventType] ??= { amount: 0, count: 0 };
+            eventTypeAmounts[eventType].amount += amount;
+            eventTypeAmounts[eventType].count++;
           }
-          eventTypeAmounts[eventType].amount += amount;
-          eventTypeAmounts[eventType].count++;
-        }
-      });
+        },
+      );
 
       // Топ типы событий по сумме
       const topCategories = Object.entries(eventTypeAmounts)
