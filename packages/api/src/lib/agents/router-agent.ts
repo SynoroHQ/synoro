@@ -10,6 +10,7 @@ import type {
   RoutingDecision,
 } from "./types";
 import { AbstractAgent } from "./base-agent";
+import { preparePromptVariables } from "./prompt-variables-helper";
 
 /**
  * Упрощенный роутер для маршрутизации запросов к трем основным агентам
@@ -49,25 +50,25 @@ export class RouterAgent extends AbstractAgent {
     const mapping: Record<string, string> = {
       "event-processor": "event-processor",
       processor: "event-processor",
-      "eventprocessor": "event-processor",
+      eventprocessor: "event-processor",
       "обработчик-событий": "event-processor",
       "обработка-событий": "event-processor",
       "анализатор-событий": "event-analyzer",
       "анализ-событий": "event-analyzer",
       "event-analyzer": "event-analyzer",
       analyzer: "event-analyzer",
-      "eventanalyzer": "event-analyzer",
+      eventanalyzer: "event-analyzer",
       "создание-событий": "event-creation",
       "создатель-событий": "event-creation",
       "event-creation": "event-creation",
       creation: "event-creation",
-      "eventcreation": "event-creation",
+      eventcreation: "event-creation",
       "general-assistant": "general-assistant",
       assistant: "general-assistant",
-      "generalassistant": "general-assistant",
+      generalassistant: "general-assistant",
       "общий-помощник": "general-assistant",
       "универсальный-помощник": "general-assistant",
-      "помощник": "general-assistant",
+      помощник: "general-assistant",
     };
 
     if (mapping[normalized]) {
@@ -102,19 +103,19 @@ export class RouterAgent extends AbstractAgent {
 
     const mapping: Record<string, string> = {
       "event-logging": "event_logging",
-      "event_logging": "event_logging",
+      event_logging: "event_logging",
       "логирование-событий": "event_logging",
-      "logging": "event_logging",
+      logging: "event_logging",
       "data-analysis": "data_analysis",
-      "data_analysis": "data_analysis",
+      data_analysis: "data_analysis",
       "анализ-данных": "data_analysis",
       "event-creation": "event_creation",
-      "event_creation": "event_creation",
+      event_creation: "event_creation",
       "создание-событий": "event_creation",
       "general-chat": "general_chat",
-      "general_chat": "general_chat",
+      general_chat: "general_chat",
       "общий-чат": "general_chat",
-      "чат": "general_chat",
+      чат: "general_chat",
     };
 
     if (mapping[normalized]) {
@@ -180,14 +181,24 @@ export class RouterAgent extends AbstractAgent {
   /**
    * AI-маршрутизация запросов
    */
-  private async aiRoute(input: string): Promise<{
+  private async aiRoute(
+    input: string,
+    task: AgentTask,
+  ): Promise<{
     targetAgent: string;
     confidence: number;
     reasoning: string;
     category: string;
   }> {
-    // Получаем промпт из Langfuse облака
-    const systemPrompt = await getPrompt(PROMPT_KEYS.ROUTER_AGENT, "latest");
+    // Подготавливаем переменные для промпта
+    const variables = preparePromptVariables(task);
+
+    // Получаем промпт из Langfuse облака и компилируем с переменными
+    const systemPrompt = await getPrompt(
+      PROMPT_KEYS.ROUTER_AGENT,
+      "latest",
+      variables,
+    );
 
     const { object } = await generateObject({
       model: this.getModel(),
@@ -196,14 +207,7 @@ export class RouterAgent extends AbstractAgent {
       prompt: `Классифицируй запрос: "${input}"`,
       experimental_telemetry: {
         isEnabled: true,
-        ...this.createTelemetry("ai-routing", {
-          id: "routing-task",
-          input,
-          type: "routing",
-          context: {},
-          priority: 1,
-          createdAt: new Date(),
-        }),
+        ...this.createTelemetry("ai-routing", task),
       },
     });
 
@@ -212,8 +216,7 @@ export class RouterAgent extends AbstractAgent {
 
   async process(task: AgentTask): Promise<AgentResult<RoutingDecision>> {
     try {
-      // Используем AI для маршрутизации
-      const aiResult = await this.aiRoute(task.input);
+      const aiResult = await this.aiRoute(task.input, task);
 
       const routingDecision: RoutingDecision = {
         targetAgent: aiResult.targetAgent,

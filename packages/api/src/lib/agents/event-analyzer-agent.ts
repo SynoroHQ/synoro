@@ -5,6 +5,7 @@ import { getPrompt, PROMPT_KEYS } from "@synoro/prompts";
 import type { AgentCapability, AgentResult, AgentTask } from "./types";
 import { DatabaseToolsService } from "../services/database-tools-service";
 import { AbstractAgent } from "./base-agent";
+import { preparePromptVariables } from "./prompt-variables-helper";
 
 /**
  * Агент для анализа событий и предоставления статистики
@@ -45,40 +46,21 @@ export class EventAnalyzerAgent extends AbstractAgent {
       // Получаем данные из базы для анализа
       const eventData = await this.getEventDataForAnalysis(task);
 
-      // Получаем промпт из Langfuse облака (без переменных)
-      const basePrompt = await getPrompt(
+      // Подготавливаем переменные с eventData
+      const variables = preparePromptVariables(task, {
+        eventContext: JSON.stringify(eventData, null, 2),
+      });
+
+      // Получаем промпт из Langfuse и компилируем с переменными
+      const systemPrompt = await getPrompt(
         PROMPT_KEYS.EVENT_ANALYZER_AGENT,
         "latest",
+        variables,
       );
-
-      // Добавляем eventData в контекст задачи для обработки
-      const taskWithEventData = {
-        ...task,
-        context: {
-          ...task.context,
-          eventContext: JSON.stringify(eventData, null, 2),
-        },
-      };
-
-      // Process prompt with PromptContextService to replace all placeholders
-      const processed = this.promptContextService.processPrompt(
-        basePrompt,
-        taskWithEventData,
-        {
-          maxHistoryLength: 1500,
-          maxHistoryMessages: 10,
-          includeSystemMessages: false,
-          maxHistoryTokens: 500,
-        },
-      );
-
-      if (process.env.DEBUG_PROMPTS === "true") {
-        console.log("EventAnalyzerAgent prompt metadata:", processed.metadata);
-      }
 
       const { text: response } = await generateText({
         model: this.getModel(),
-        system: processed.prompt,
+        system: systemPrompt,
         prompt: task.input,
         experimental_telemetry: {
           isEnabled: true,

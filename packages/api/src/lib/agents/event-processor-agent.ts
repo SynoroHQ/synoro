@@ -8,6 +8,7 @@ import { DatabaseToolsService } from "../services/database-tools-service";
 import { EventLogService } from "../services/event-log-service";
 import { EventService } from "../services/event-service";
 import { AbstractAgent } from "./base-agent";
+import { preparePromptVariables } from "./prompt-variables-helper";
 
 /**
  * Упрощенный агент для обработки и логирования событий
@@ -72,40 +73,21 @@ export class EventProcessorAgent extends AbstractAgent {
         }
       }
 
-      // Получаем промпт из Langfuse облака (без переменных)
-      const basePrompt = await getPrompt(
+      // Подготавливаем переменные с eventContext
+      const variables = preparePromptVariables(task, {
+        eventContext: eventContext || "События не запрашивались",
+      });
+
+      // Получаем промпт из Langfuse и компилируем с переменными
+      const systemPrompt = await getPrompt(
         PROMPT_KEYS.EVENT_PROCESSOR_AGENT,
         "latest",
+        variables,
       );
-
-      // Добавляем eventContext в контекст задачи для обработки
-      const taskWithEventContext = {
-        ...task,
-        context: {
-          ...task.context,
-          eventContext: eventContext || "События не запрашивались",
-        },
-      };
-
-      // Process prompt with PromptContextService to replace all placeholders
-      const processed = this.promptContextService.processPrompt(
-        basePrompt,
-        taskWithEventContext,
-        {
-          maxHistoryLength: 1500,
-          maxHistoryMessages: 10,
-          includeSystemMessages: false,
-          maxHistoryTokens: 500,
-        },
-      );
-
-      if (process.env.DEBUG_PROMPTS === "true") {
-        console.log("EventProcessorAgent prompt metadata:", processed.metadata);
-      }
 
       const { text: response } = await generateText({
         model: this.getModel(),
-        system: processed.prompt,
+        system: systemPrompt,
         prompt: task.input,
         experimental_telemetry: {
           isEnabled: true,

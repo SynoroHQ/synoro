@@ -4,6 +4,7 @@ import { getPrompt, PROMPT_KEYS } from "@synoro/prompts";
 
 import type { AgentCapability, AgentResult, AgentTask } from "./types";
 import { AbstractAgent } from "./base-agent";
+import { preparePromptVariables } from "./prompt-variables-helper";
 
 export class GeneralAssistantAgent extends AbstractAgent {
   name = "General Assistant";
@@ -40,34 +41,19 @@ export class GeneralAssistantAgent extends AbstractAgent {
 
   async process(task: AgentTask): Promise<AgentResult<string>> {
     try {
-      // Get prompt from Langfuse cloud (without variables if USE_PROMPT_CONTEXT_SERVICE is enabled)
-      const basePrompt = await getPrompt(
+      // Подготавливаем все переменные для промпта
+      const variables = preparePromptVariables(task);
+
+      // Получаем промпт из Langfuse и компилируем с переменными
+      const systemPrompt = await getPrompt(
         PROMPT_KEYS.GENERAL_ASSISTANT_AGENT,
         "latest",
+        variables,
       );
-
-      // Process prompt with PromptContextService to replace all placeholders
-      const processed = this.promptContextService.processPrompt(
-        basePrompt,
-        task,
-        {
-          maxHistoryLength: 1500,
-          maxHistoryMessages: 10,
-          includeSystemMessages: false,
-          maxHistoryTokens: 500,
-        },
-      );
-
-      if (process.env.DEBUG_PROMPTS === "true") {
-        console.log(
-          "GeneralAssistantAgent prompt metadata:",
-          processed.metadata,
-        );
-      }
 
       const { text } = await generateText({
         model: this.getModel(),
-        system: processed.prompt,
+        system: systemPrompt,
         prompt: task.input,
         experimental_telemetry: {
           isEnabled: true,
