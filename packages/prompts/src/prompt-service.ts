@@ -44,17 +44,26 @@ export async function getPrompt(
       throw new Error(`Prompt '${key}' not found in Langfuse`);
     }
 
-    // Используем метод compile если доступен
+    // Если USE_PROMPT_CONTEXT_SERVICE включен, НЕ используем compile
+    // Вместо этого возвращаем промпт с плейсхолдерами для обработки в PromptContextService
+    const usePromptContextService =
+      process.env.USE_PROMPT_CONTEXT_SERVICE === "true";
+
     if (
       typeof cloudPrompt === "object" &&
       "compile" in cloudPrompt &&
       typeof cloudPrompt.compile === "function"
     ) {
-      if (variables && Object.keys(variables).length > 0) {
+      // Если переменные переданы И PromptContextService выключен, используем compile
+      if (
+        variables &&
+        Object.keys(variables).length > 0 &&
+        !usePromptContextService
+      ) {
         const compiled = cloudPrompt.compile(variables);
         return compiled;
       }
-      // Если нет переменных, используем базовый промпт
+      // Иначе возвращаем промпт с плейсхолдерами
       if ("prompt" in cloudPrompt) {
         return cloudPrompt.prompt;
       }

@@ -46,6 +46,7 @@ const DEFAULT_VALUES = {
   currentTime: () => new Date().toISOString(),
   timezone: "UTC",
   messageHistory: "История диалога пуста",
+  eventContext: "События пользователя не загружены",
 };
 
 /**
@@ -277,6 +278,17 @@ export class PromptContextService {
         householdId,
       );
       replaced.push("householdId");
+    }
+
+    // Заменяем eventContext
+    if (processedPrompt.includes("{{eventContext}}")) {
+      const eventContext =
+        context.eventContext ?? "События пользователя не загружены";
+      processedPrompt = processedPrompt.replace(
+        /\{\{eventContext\}\}/g,
+        eventContext,
+      );
+      replaced.push("eventContext");
     }
 
     return { prompt: processedPrompt, replaced };

@@ -40,20 +40,34 @@ export class GeneralAssistantAgent extends AbstractAgent {
 
   async process(task: AgentTask): Promise<AgentResult<string>> {
     try {
-      // Get prompt from Langfuse cloud
-      const systemPrompt = await getPrompt(
+      // Get prompt from Langfuse cloud (without variables if USE_PROMPT_CONTEXT_SERVICE is enabled)
+      const basePrompt = await getPrompt(
         PROMPT_KEYS.GENERAL_ASSISTANT_AGENT,
         "latest",
+      );
+
+      // Process prompt with PromptContextService to replace all placeholders
+      const processed = this.promptContextService.processPrompt(
+        basePrompt,
+        task,
         {
-          userId: task.context.userId ?? "Unknown",
-          householdId: task.context.householdId ?? "Unknown",
-          currentTime: new Date().toISOString(),
+          maxHistoryLength: 1500,
+          maxHistoryMessages: 10,
+          includeSystemMessages: false,
+          maxHistoryTokens: 500,
         },
       );
 
+      if (process.env.DEBUG_PROMPTS === "true") {
+        console.log(
+          "GeneralAssistantAgent prompt metadata:",
+          processed.metadata,
+        );
+      }
+
       const { text } = await generateText({
         model: this.getModel(),
-        system: systemPrompt,
+        system: processed.prompt,
         prompt: task.input,
         experimental_telemetry: {
           isEnabled: true,

@@ -45,21 +45,40 @@ export class EventAnalyzerAgent extends AbstractAgent {
       // Получаем данные из базы для анализа
       const eventData = await this.getEventDataForAnalysis(task);
 
-      // Получаем промпт из Langfuse облака
-      const systemPrompt = await getPrompt(
+      // Получаем промпт из Langfuse облака (без переменных)
+      const basePrompt = await getPrompt(
         PROMPT_KEYS.EVENT_ANALYZER_AGENT,
         "latest",
+      );
+
+      // Добавляем eventData в контекст задачи для обработки
+      const taskWithEventData = {
+        ...task,
+        context: {
+          ...task.context,
+          eventContext: JSON.stringify(eventData, null, 2),
+        },
+      };
+
+      // Process prompt with PromptContextService to replace all placeholders
+      const processed = this.promptContextService.processPrompt(
+        basePrompt,
+        taskWithEventData,
         {
-          userId: task.context.userId ?? "Неизвестен",
-          householdId: task.context.householdId ?? "Неизвестно",
-          currentTime: new Date().toLocaleString("ru-RU"),
-          eventData: JSON.stringify(eventData, null, 2),
+          maxHistoryLength: 1500,
+          maxHistoryMessages: 10,
+          includeSystemMessages: false,
+          maxHistoryTokens: 500,
         },
       );
 
+      if (process.env.DEBUG_PROMPTS === "true") {
+        console.log("EventAnalyzerAgent prompt metadata:", processed.metadata);
+      }
+
       const { text: response } = await generateText({
         model: this.getModel(),
-        system: systemPrompt,
+        system: processed.prompt,
         prompt: task.input,
         experimental_telemetry: {
           isEnabled: true,

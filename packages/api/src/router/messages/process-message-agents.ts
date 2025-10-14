@@ -56,6 +56,7 @@ async function processMessageWithAgents({
         channel,
         messageId,
         householdId: metadata?.householdId,
+        timezone: metadata?.timezone || "Europe/Moscow", // Добавляем timezone
         db: ctx.db, // Передаем базу данных для получения истории
         conversationId: metadata?.conversationId,
         ...metadata,
