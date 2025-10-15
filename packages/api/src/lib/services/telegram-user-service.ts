@@ -9,6 +9,7 @@ export interface TelegramUserContext {
   telegramUserId: string;
   telegramUsername?: string;
   conversationId: string;
+  householdId: string;
 }
 
 /**
@@ -87,11 +88,24 @@ export class TelegramUserService {
         });
       }
 
+      // 3. Получаем или создаем household по умолчанию
+      const { HouseholdService } = await import("./household-service");
+      const householdService = new HouseholdService();
+      const household = await householdService.getOrCreateDefaultHousehold();
+
+      if (!household) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Не удалось создать или найти household",
+        });
+      }
+
       return {
         userId,
         telegramUserId,
         telegramUsername,
         conversationId: conversation.id,
+        householdId: household.id,
       };
     } catch (error) {
       console.error("Error in getUserContext:", error);

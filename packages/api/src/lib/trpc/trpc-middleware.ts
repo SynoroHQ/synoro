@@ -171,6 +171,8 @@ export const createEnhancedBotAuthMiddleware = (t: TRPCInstance) =>
       telegramUserId = ctx.headers.get("x-telegram-user-id") || undefined;
       telegramUsername = ctx.headers.get("x-telegram-username") || undefined;
     }
+    let householdId: string | undefined;
+
     if (telegramUserId) {
       try {
         // Import TelegramUserService dynamically to avoid circular dependencies
@@ -183,6 +185,7 @@ export const createEnhancedBotAuthMiddleware = (t: TRPCInstance) =>
         );
         userId = userContext.userId;
         conversationId = userContext.conversationId;
+        householdId = userContext.householdId;
       } catch (error) {
         console.error(
           `Failed to get or create user context for ${telegramUserId}:`,
@@ -203,6 +206,7 @@ export const createEnhancedBotAuthMiddleware = (t: TRPCInstance) =>
         telegramUsername,
         userId: userId!, // userId is guaranteed to be non-null after our logic
         conversationId,
+        householdId,
       },
     });
   });

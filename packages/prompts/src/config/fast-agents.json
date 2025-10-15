@@ -2,7 +2,7 @@
   "router-agent": {
     "key": "router-agent",
     "name": "Fast Router Agent",
-    "model": "gpt-4o-mini",
+    "model": "gpt-5-nano",
     "temperature": 0.1,
     "maxTokens": 50,
     "timeout": 5000,
@@ -13,7 +13,7 @@
   "event-processor-agent": {
     "key": "event-processor-agent",
     "name": "Fast Event Processor",
-    "model": "gpt-4o-mini",
+    "model": "gpt-5-nano",
     "temperature": 0.3,
     "maxTokens": 500,
     "timeout": 10000,
@@ -24,7 +24,7 @@
   "event-analyzer-agent": {
     "key": "event-analyzer-agent",
     "name": "Fast Event Analyzer",
-    "model": "gpt-4o",
+    "model": "gpt-5",
     "temperature": 0.2,
     "maxTokens": 800,
     "timeout": 15000,
@@ -35,7 +35,7 @@
   "general-assistant-agent": {
     "key": "general-assistant-agent",
     "name": "Fast General Assistant",
-    "model": "gpt-4o-mini",
+    "model": "gpt-5-nano",
     "temperature": 0.4,
     "maxTokens": 400,
     "timeout": 8000,

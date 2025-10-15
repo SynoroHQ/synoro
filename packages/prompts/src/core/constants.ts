@@ -146,11 +146,11 @@ export const QUALITY_PRINCIPLES = `
 
 // Оптимизированные модели для максимальной скорости
 export const RECOMMENDED_MODELS = {
-  ROUTING: "gpt-4o-mini", // Максимально быстрая классификация
-  PROCESSING: "gpt-4o-mini", // Быстрая обработка событий
-  ANALYSIS: "gpt-4o", // Качественный анализ данных
-  EXTRACTION: "gpt-4o-mini", // Быстрое извлечение данных
-  GENERAL: "gpt-4o-mini", // Быстрые ответы на вопросы
+  ROUTING: "gpt-5-nano", // Максимально быстрая классификация
+  PROCESSING: "gpt-5-nano", // Быстрая обработка событий
+  ANALYSIS: "gpt-5", // Качественный анализ данных
+  EXTRACTION: "gpt-5-nano", // Быстрое извлечение данных
+  GENERAL: "gpt-5-nano", // Быстрые ответы на вопросы
 } as const;
 
 export type EventType = (typeof EVENT_TYPES)[keyof typeof EVENT_TYPES];

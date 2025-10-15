@@ -227,6 +227,7 @@ export const processMessageAgentsRouter = {
           ...input.metadata,
           telegramUserId: ctx.telegramUserId,
           conversationId: ctx.conversationId,
+          householdId: ctx.householdId || input.metadata?.householdId,
         },
         options: input.agentOptions,
       });
