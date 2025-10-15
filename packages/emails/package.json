@@ -27,12 +27,12 @@
     "react-email": "4.2.11",
     "resend": "^6.1.0",
     "sharp": "^0.34.4",
-    "tailwindcss": "4.1.13",
+    "tailwindcss": "4.1.14",
     "tailwindcss-animate": "1.0.7"
   },
   "devDependencies": {
     "@react-email/preview-server": "4.2.11",
-    "@types/node": "24.5.2",
+    "@types/node": "24.7.2",
     "@types/nodemailer": "^7.0.1",
     "@types/react": "19.2.2",
     "@types/react-dom": "19.2.1",

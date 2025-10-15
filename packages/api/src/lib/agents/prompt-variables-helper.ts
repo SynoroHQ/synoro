@@ -8,21 +8,20 @@ function formatMessageHistory(task: AgentTask): string {
     return "История диалога пуста";
   }
 
-  const formattedMessages = task.messageHistory.map((msg) => {
+  // Фильтруем только сообщения пользователя
+  const userMessages = task.messageHistory.filter((msg) => msg.role === "user");
+
+  if (userMessages.length === 0) {
+    return "История диалога пуста";
+  }
+
+  const formattedMessages = userMessages.map((msg) => {
     const timestamp = msg.timestamp.toLocaleString("ru-RU", {
       hour: "2-digit",
       minute: "2-digit",
     });
 
-    const roleMap: Record<typeof msg.role, string> = {
-      user: "Пользователь",
-      assistant: "Ассистент",
-      system: "Система",
-      tool: "Инструмент",
-    };
-
-    const role = roleMap[msg.role];
-    return `[${timestamp}] ${role}: ${msg.content}`;
+    return `[${timestamp}] Пользователь: ${msg.content}`;
   });
 
   return formattedMessages.join("\n");
